@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SkillStream — Payments</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0E0F13;--surface:#16181F;--card:#1C1F2A;--border:#2A2D3A;
+  --accent:#6C63FF;--live:#FF4D6D;--group:#00C9A7;--soon:#FFB830;
+  --text:#E8E9F0;--muted:#6B6F82;--pill:#23263A;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:54px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--text);text-decoration:none}
+.logo span{color:var(--accent)}
+.nav-links{display:flex;gap:6px}
+.nav-link{color:var(--muted);font-size:13px;text-decoration:none;padding:6px 12px;border-radius:7px;transition:all .2s}
+.nav-link:hover{background:var(--pill);color:var(--text)}
+.nav-link.active{background:var(--pill);color:var(--text)}
+.btn-primary{background:var(--accent);border:none;color:#fff;border-radius:8px;padding:7px 16px;cursor:pointer;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;transition:opacity .2s}
+.btn-primary:hover{opacity:.85}
+
+/* PAGE */
+.page{max-width:1060px;margin:0 auto;padding:32px 28px 60px}
+.page-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:4px}
+.page-sub{color:var(--muted);font-size:14px;margin-bottom:28px}
+
+/* HERO CARDS */
+.hero-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+.hero-card{border-radius:14px;padding:22px;position:relative;overflow:hidden}
+.hero-card.earnings{background:linear-gradient(135deg,#1a1040,#2d1b69)}
+.hero-card.spent{background:linear-gradient(135deg,#0d2b2b,#0e4a3d)}
+.hero-card.pending{background:linear-gradient(135deg,#1a1008,#3a2508)}
+.hero-card-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:10px}
+.hero-card-val{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#fff;margin-bottom:4px}
+.hero-card-sub{font-size:12px;color:rgba(255,255,255,.5)}
+.hero-card-badge{position:absolute;top:16px;right:16px;font-size:22px}
+.hero-card-trend{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.1);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:#fff;margin-top:8px}
+.trend-up{color:#4ade80}
+.trend-down{color:#f87171}
+
+/* LAYOUT */
+.pay-layout{display:flex;gap:22px;align-items:flex-start}
+.pay-main{flex:1;min-width:0}
+.pay-aside{width:260px;flex-shrink:0}
+
+/* TABS */
+.pay-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
+.ptab{padding:10px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .2s}
+.ptab.active{color:var(--text);border-bottom-color:var(--accent)}
+
+/* PANELS */
+.ppanel{display:none}
+.ppanel.active{display:block}
+
+/* CHART AREA */
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px;margin-bottom:18px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.chart-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700}
+.chart-filter{display:flex;gap:4px}
+.cf-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.cf-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(to top,var(--accent),#A78BFA);transition:height .3s;cursor:pointer;position:relative}
+.bar:hover::after{content:attr(data-val);position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.bar.income{background:linear-gradient(to top,var(--group),#00e5b8)}
+.bar-lbl{font-size:10px;color:var(--muted)}
+
+/* TRANSACTION LIST */
+.tx-list{display:flex;flex-direction:column;gap:8px}
+.tx-item{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:13px 16px;display:flex;align-items:center;gap:13px}
+.tx-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.tx-icon.in{background:rgba(0,201,167,.12)}
+.tx-icon.out{background:rgba(108,99,255,.12)}
+.tx-icon.pend{background:rgba(255,184,48,.12)}
+.tx-icon.refund{background:rgba(255,77,109,.12)}
+.tx-info{flex:1;min-width:0}
+.tx-name{font-size:13px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-meta{font-size:11px;color:var(--muted)}
+.tx-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.tx-amount{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.tx-amount.pos{color:var(--group)}
+.tx-amount.neg{color:var(--text)}
+.tx-amount.pend{color:var(--soon)}
+.tx-amount.refund{color:var(--live)}
+.tx-date{font-size:11px;color:var(--muted)}
+.tx-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em}
+.tx-status.completed{background:rgba(0,201,167,.12);color:var(--group)}
+.tx-status.pending{background:rgba(255,184,48,.12);color:var(--soon)}
+.tx-status.refunded{background:rgba(255,77,109,.12);color:var(--live)}
+
+/* PRICING PANEL */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.price-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative}
+.price-card.featured{border-color:var(--accent);background:rgba(108,99,255,.06)}
+.price-card-badge{position:absolute;top:-1px;right:14px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:0 0 8px 8px;letter-spacing:.05em}
+.price-card-type{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.price-card-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:2px}
+.price-card-sub{font-size:11px;color:var(--muted);margin-bottom:12px}
+.price-card-features{display:flex;flex-direction:column;gap:5px}
+.pcf{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.pcf::before{content:'✓';color:var(--group);font-weight:700}
+.set-price-btn{width:100%;background:var(--pill);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s;margin-top:10px}
+.set-price-btn:hover{border-color:var(--accent);background:rgba(108,99,255,.1)}
+
+/* PAYOUT PANEL */
+.payout-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px;margin-bottom:14px}
+.payout-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:14px}
+.payout-balance{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--group);margin-bottom:4px}
+.payout-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.payout-btn{background:var(--group);border:none;color:#000;border-radius:10px;padding:11px 20px;font-size:13px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:opacity .2s;margin-right:8px}
+.payout-btn:hover{opacity:.85}
+.payout-method{display:flex;align-items:center;gap:10px;background:var(--pill);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .2s}
+.payout-method:hover{border-color:var(--accent)}
+.pm-icon{font-size:20px;width:36px;text-align:center}
+.pm-info{flex:1}
+.pm-name{font-size:13px;font-weight:600}
+.pm-detail{font-size:11px;color:var(--muted)}
+.pm-badge{background:var(--group);color:#000;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.pm-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center}
+.pm-radio.selected{border-color:var(--accent)}
+.pm-radio.selected::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--accent);display:block}
+
+/* ASIDE */
+.aside-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+.aside-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.fee-row{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)}
+.fee-row:last-child{border-bottom:none;font-weight:700;color:var(--text)}
+.fee-label{color:var(--muted)}
+.fee-val{font-weight:600}
+.fee-val.green{color:var(--group)}
+.progress-wrap{background:var(--border);border-radius:4px;height:6px;margin:8px 0}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),#A78BFA)}
+.insight-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.insight-row:last-child{border-bottom:none}
+.insight-icon{font-size:18px}
+.insight-text{font-size:12px;color:var(--muted);line-height:1.4}
+.insight-text strong{color:var(--text)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--group);color:#000;border-radius:30px;padding:10px 22px;font-size:13px;font-weight:700;transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:500;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:760px){
+  .hero-cards{grid-template-columns:1fr}
+  .pay-aside{display:none}
+  .pricing-grid{grid-template-columns:1fr}
+  .page{padding:20px 16px 40px}
+  nav{padding:0 16px}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="skillstream.html" class="logo">Skill<span>Stream</span></a>
+  <div class="nav-links">
+    <a href="skillstream.html" class="nav-link">Browse</a>
+    <a href="skillstream-dashboard.html" class="nav-link">My Sessions</a>
+    <a href="skillstream-profile.html" class="nav-link">Profile</a>
+    <a href="skillstream-payments.html" class="nav-link active">Payments</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-primary" onclick="showToast('Withdrawal initiated!')">Withdraw earnings</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-title">Payments</div>
+  <div class="page-sub">Track earnings, spending, and payouts in one place</div>
+
+  <!-- HERO CARDS -->
+  <div class="hero-cards">
+    <div class="hero-card earnings">
+      <div class="hero-card-badge">💰</div>
+      <div class="hero-card-label">Total earned</div>
+      <div class="hero-card-val">$312</div>
+      <div class="hero-card-sub">From 6 sessions this month</div>
+      <div class="hero-card-trend"><span class="trend-up">↑ 34%</span> vs last month</div>
+    </div>
+    <div class="hero-card spent">
+      <div class="hero-card-badge">🎓</div>
+      <div class="hero-card-label">Total spent</div>
+      <div class="hero-card-val">$38</div>
+      <div class="hero-card-sub">Across 4 paid sessions</div>
+      <div class="hero-card-trend"><span class="trend-down">↑ 12%</span> vs last month</div>
+    </div>
+    <div class="hero-card pending">
+      <div class="hero-card-badge">⏳</div>
+      <div class="hero-card-label">Pending payout</div>
+      <div class="hero-card-val">$186</div>
+      <div class="hero-card-sub">Available Thu, Jun 19</div>
+      <div class="hero-card-trend" style="background:rgba(255,184,48,.2);color:var(--soon)">Processing</div>
+    </div>
+  </div>
+
+  <div class="pay-layout">
+    <div class="pay-main">
+
+      <div class="pay-tabs">
+        <button class="ptab active" onclick="switchTab('history',this)">Transaction history</button>
+        <button class="ptab" onclick="switchTab('pricing',this)">My pricing</button>
+        <button class="ptab" onclick="switchTab('payouts',this)">Payout settings</button>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="ppanel active" id="ppanel-history">
+        <div class="chart-wrap">
+          <div class="chart-header">
+            <div class="chart-title">Earnings & spending</div>
+            <div class="chart-filter">
+              <button class="cf-btn active" onclick="setCF(this)">7d</button>
+              <button class="cf-btn" onclick="setCF(this)">1m</button>
+              <button class="cf-btn" onclick="setCF(this)">3m</button>
+            </div>
+          </div>
+          <div class="bar-chart" id="barChart"></div>
+          <div style="display:flex;gap:14px;margin-top:10px;font-size:11px;color:var(--muted)">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:linear-gradient(var(--accent),#A78BFA);display:inline-block"></span>Earnings</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--group);display:inline-block"></span>Spending</span>
+          </div>
+        </div>
+
+        <div class="tx-list">
+          <div class="tx-item">
+            <div class="tx-icon in">💰</div>
+            <div class="tx-info">
+              <div class="tx-name">Jollof Rice Masterclass — 14 students</div>
+              <div class="tx-meta">Teaching · 🍳 Cooking · Today</div>
+            </div>
+            <div class="tx-right">
+              <div class="tx-amount pos">+$98</div>
+              <div class="tx-date">Today</div>
+              <div class="tx-status pending">Pending</div>
+            </div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon out">🎹</div>
+            <div class="tx-info">
+              <div class="tx-name">Piano Chord Progressions</div>
+              <div class="tx-meta">Learning · 🎵 Music · Aria Torres</div>
+            </div>
+            <div class="tx-right">
+              <div class="tx-amount neg">−$20</div>
+              <div class="tx-date">Mon</div>
+              <div class="tx-status completed">Paid</div>
+            </div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon in">💰</div>
+            <div class="tx-info">
+              <div class="tx-name">Arabic Calligraphy — 7 students</div>
+              <div class="tx-meta">Teaching · 🎨 Art & Design · Sat</div>
+            </div>
+            <div class="tx-right">
+              <div class="tx-amount pos">+$35</div>
+              <div class="tx-date">Sat</div>
+              <div class="tx-status completed">Paid</div>
+            </div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon out">🌍</div>
+            <div class="tx-info">
+              <div class="tx-name">Spanish Conversation — Intermediate</div>
+              <div class="tx-meta">Learning · 🗣 Language · Carlos Vega</div>
+            </div>
+            <div class="tx-right">
+              <div class="tx-amount neg">−$5</div>
+              <div class="tx-date">Last Thu</div>
+              <div class="tx-status completed">Paid</div>
+            </div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon in">💰</div>
+            <div class="tx-info">
+              <div class="tx-name">French for Travelers — 9 students</div>
+              <div class="tx-meta">Teaching · 🗣 Language · Last Wed</div>
+            </div>
+            <div class="tx-right">
+              <div class="tx-amount pos">+$63</div>
+              <div class="tx-date">Last Wed</div>
+              <div class="tx-status completed">Paid</div>
+            </div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon out">💻</div>
+            <div class="tx-info">
+              <div class="tx-name">Intro to Figma Components</div>
+              <div class="tx-meta">Learning · 🎨 Art · Jin Wong</div>
+            </div>
+            <div class="tx-right">
+              <div class="tx-amount neg">−$8</div>
+              <div class="tx-date">Last Mon</div>
+              <div class="tx-status completed">Paid</div>
+            </div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon refund">🔄</div>
+            <div class="tx-info">
+              <div class="tx-name">HIIT Training — Full Body</div>
+              <div class="tx-meta">Refund · Session cancelled by host</div>
+            </div>
+            <div class="tx-right">
+              <div class="tx-amount refund">+$0</div>
+              <div class="tx-date">Last Tue</div>
+              <div class="tx-status refunded">Refunded</div>
+            </div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-icon in">💰</div>
+            <div class="tx-info">
+              <div class="tx-name">Payout to M-Pesa ****4521</div>
+              <div class="tx-meta">Withdrawal · Processed in 1 day</div>
+            </div>
+            <div class="tx-right">
+              <div class="tx-amount" style="color:var(--muted)">−$116</div>
+              <div class="tx-date">Jun 10</div>
+              <div class="tx-status completed">Sent</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRICING -->
+      <div class="ppanel" id="ppanel-pricing">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Set what you charge per session. You can price each session differently when creating it — these are your defaults.</div>
+        <div class="pricing-grid">
+          <div class="price-card">
+            <div class="price-card-type">Group session</div>
+            <div class="price-card-val">Free</div>
+            <div class="price-card-sub">Default for group sessions</div>
+            <div class="price-card-features">
+              <div class="pcf">Unlimited participants</div>
+              <div class="pcf">Chat & whiteboard</div>
+              <div class="pcf">Session recording</div>
+            </div>
+            <button class="set-price-btn" onclick="showToast('Pricing updated!')">Set price per session</button>
+          </div>
+          <div class="price-card featured">
+            <div class="price-card-badge">Popular</div>
+            <div class="price-card-type">1-on-1 session</div>
+            <div class="price-card-val">$15<span style="font-size:14px;font-weight:400;color:var(--muted)">/30 min</span></div>
+            <div class="price-card-sub">Your current default</div>
+            <div class="price-card-features">
+              <div class="pcf">Private session</div>
+              <div class="pcf">Shared whiteboard</div>
+              <div class="pcf">File sharing</div>
+              <div class="pcf">Session notes</div>
+            </div>
+            <button class="set-price-btn" onclick="showToast('Pricing updated!')">Edit pricing</button>
+          </div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px">Platform fee breakdown</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px">SkillStream takes a 15% platform fee from each paid session. Here's how $10 breaks down:</div>
+          <div class="fee-row"><span class="fee-label">Session price (student pays)</span><span class="fee-val">$10.00</span></div>
+          <div class="fee-row"><span class="fee-label">SkillStream fee (15%)</span><span class="fee-val" style="color:var(--live)">−$1.50</span></div>
+          <div class="fee-row"><span class="fee-label">Payment processing (~2.9%)</span><span class="fee-val" style="color:var(--live)">−$0.29</span></div>
+          <div class="fee-row"><span class="fee-label">You receive</span><span class="fee-val green">$8.21</span></div>
+        </div>
+      </div>
+
+      <!-- PAYOUTS -->
+      <div class="ppanel" id="ppanel-payouts">
+        <div class="payout-card">
+          <div class="payout-title">Available to withdraw</div>
+          <div class="payout-balance">$126</div>
+          <div class="payout-sub">$186 more becomes available Thursday</div>
+          <button class="payout-btn" onclick="showToast('$126 withdrawal initiated!')">Withdraw $126</button>
+          <button style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:10px 16px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'" onclick="showToast('Auto-payout enabled!')">Auto-payout weekly</button>
+        </div>
+
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px">Payout methods</div>
+        <div class="payout-method" onclick="selectMethod(this)">
+          <div class="pm-icon">📱</div>
+          <div class="pm-info">
+            <div class="pm-name">M-Pesa</div>
+            <div class="pm-detail">+254 7** **** 4521 · Kenya</div>
+          </div>
+          <span class="pm-badge">Default</span>
+          <div class="pm-radio selected"></div>
+        </div>
+        <div class="payout-method" onclick="selectMethod(this)">
+          <div class="pm-icon">🏦</div>
+          <div class="pm-info">
+            <div class="pm-name">Bank transfer</div>
+            <div class="pm-detail">Account ending ****8834 · 1–3 business days</div>
+          </div>
+          <div class="pm-radio"></div>
+        </div>
+        <div class="payout-method" onclick="selectMethod(this)">
+          <div class="pm-icon">💳</div>
+          <div class="pm-info">
+            <div class="pm-name">Payoneer</div>
+            <div class="pm-detail">amara@email.com · Global</div>
+          </div>
+          <div class="pm-radio"></div>
+        </div>
+        <button style="width:100%;background:none;border:1px dashed var(--border);color:var(--muted);border-radius:10px;padding:11px;font-size:13px;cursor:pointer;margin-top:8px;font-family:'Inter',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'" onclick="showToast('Add payout method…')">+ Add payout method</button>
+      </div>
+
+    </div>
+
+    <!-- ASIDE -->
+    <div class="pay-aside">
+      <div class="aside-card">
+        <div class="aside-title">Earnings goal</div>
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:2px">$312 <span style="font-size:14px;color:var(--muted);font-weight:400">/ $500</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Monthly goal · 62% reached</div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:62%"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">$188 more to hit your goal 🎯</div>
+      </div>
+
+      <div class="aside-card">
+        <div class="aside-title">Top earning sessions</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+            <span style="font-size:16px">🍲</span>
+            <div style="flex:1;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Jollof Rice Masterclass</div><div style="color:var(--muted)">14 students</div></div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--group);flex-shrink:0">$98</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+            <span style="font-size:16px">🌍</span>
+            <div style="flex:1;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">French for Travelers</div><div style="color:var(--muted)">9 students</div></div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--group);flex-shrink:0">$63</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+            <span style="font-size:16px">✍️</span>
+            <div style="flex:1;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Arabic Calligraphy</div><div style="color:var(--muted)">7 students</div></div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--group);flex-shrink:0">$35</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="aside-card">
+        <div class="aside-title">Insights</div>
+        <div class="insight-row">
+          <div class="insight-icon">📈</div>
+          <div class="insight-text">Your earnings are up <strong>34%</strong> vs last month. Group sessions are your strongest earner.</div>
+        </div>
+        <div class="insight-row">
+          <div class="insight-icon">🕐</div>
+          <div class="insight-text">Sessions at <strong>5–7 PM</strong> fill fastest. Consider scheduling more in that window.</div>
+        </div>
+        <div class="insight-row">
+          <div class="insight-icon">⭐</div>
+          <div class="insight-text">Your average rating is <strong>4.9</strong>. Students who rate you 5★ tend to rebook within 2 weeks.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// BAR CHART
+const earningsData=[
+  {lbl:'Mon',earn:0,spend:20},
+  {lbl:'Tue',earn:35,spend:0},
+  {lbl:'Wed',earn:63,spend:8},
+  {lbl:'Thu',earn:0,spend:5},
+  {lbl:'Fri',earn:0,spend:0},
+  {lbl:'Sat',earn:116,spend:0},
+  {lbl:'Today',earn:98,spend:0},
+];
+const maxVal=Math.max(...earningsData.map(d=>Math.max(d.earn,d.spend)));
+function buildChart(){
+  const el=document.getElementById('barChart');
+  el.innerHTML=earningsData.map(d=>`
+    <div class="bar-group">
+      ${d.earn>0?`<div class="bar" style="height:${(d.earn/maxVal)*90}px" data-val="$${d.earn}" title="Earned $${d.earn}"></div>`:`<div style="height:${0}px"></div>`}
+      ${d.spend>0?`<div class="bar income" style="height:${(d.spend/maxVal)*90}px" data-val="-$${d.spend}" title="Spent $${d.spend}"></div>`:`<div style="height:0px"></div>`}
+      <div class="bar-lbl">${d.lbl}</div>
+    </div>`).join('');
+}
+buildChart();
+
+function setCF(btn){
+  document.querySelectorAll('.cf-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function switchTab(name,el){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.ppanel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('ppanel-'+name).classList.add('active');
+}
+
+function selectMethod(el){
+  document.querySelectorAll('.pm-radio').forEach(r=>{r.classList.remove('selected');r.style.borderColor='';});
+  el.querySelector('.pm-radio').classList.add('selected');
+  showToast('Payout method updated');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
