@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SkillStream — Learn Live</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0E0F13;
+    --surface:  #16181F;
+    --card:     #1C1F2A;
+    --border:   #2A2D3A;
+    --accent:   #6C63FF;
+    --live:     #FF4D6D;
+    --soon:     #FFB830;
+    --group:    #00C9A7;
+    --solo:     #5B8FF9;
+    --text:     #E8E9F0;
+    --muted:    #6B6F82;
+    --pill-bg:  #23263A;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 58px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(14,15,19,0.92);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-ghost {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); border-radius: 8px;
+    padding: 7px 14px; cursor: pointer; font-family: 'Inter', sans-serif;
+    font-size: 13px; transition: border-color .2s, color .2s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--text); }
+  .btn-primary {
+    background: var(--accent); border: none; color: #fff;
+    border-radius: 8px; padding: 8px 16px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+    transition: opacity .2s;
+  }
+  .btn-primary:hover { opacity: .85; }
+
+  /* HERO BAR */
+  .hero-bar {
+    padding: 36px 28px 24px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .hero-bar h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(26px, 4vw, 42px);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .hero-bar h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--accent), #A78BFA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-bar p { color: var(--muted); font-size: 15px; margin-bottom: 22px; }
+
+  /* SEARCH */
+  .search-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .search-wrap {
+    position: relative; flex: 1; min-width: 220px;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 14px 10px 38px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap input::placeholder { color: var(--muted); }
+  .search-icon {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 15px; pointer-events: none;
+  }
+  select.filter-select {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); border-radius: 10px; padding: 10px 14px;
+    font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer;
+    outline: none; appearance: none; min-width: 120px;
+  }
+  select.filter-select:focus { border-color: var(--accent); }
+
+  /* MAIN LAYOUT */
+  .layout {
+    display: flex;
+    max-width: 1280px;
+    margin: 0 auto;
+    gap: 24px;
+    padding: 0 28px 60px;
+  }
+
+  /* SIDEBAR CATEGORIES */
+  .sidebar {
+    width: 210px;
+    flex-shrink: 0;
+  }
+  .sidebar h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .cat-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .cat-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 9px; cursor: pointer;
+    transition: background .15s;
+    font-size: 13px; font-weight: 500;
+    color: var(--muted);
+    border: none; background: none; text-align: left; width: 100%;
+  }
+  .cat-item:hover { background: var(--pill-bg); color: var(--text); }
+  .cat-item.active { background: var(--pill-bg); color: var(--text); }
+  .cat-item .cat-icon { font-size: 16px; width: 22px; text-align: center; }
+  .cat-count {
+    margin-left: auto; font-size: 11px; color: var(--muted);
+    background: var(--border); border-radius: 20px; padding: 1px 7px;
+  }
+  .cat-item.active .cat-count { background: var(--accent); color: #fff; }
+
+  .sidebar-divider {
+    border: none; border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+  .create-session-btn {
+    width: 100%; background: var(--accent);
+    border: none; color: #fff; border-radius: 10px;
+    padding: 11px 14px; font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: opacity .2s;
+  }
+  .create-session-btn:hover { opacity: .85; }
+
+  /* CONTENT AREA */
+  .content { flex: 1; min-width: 0; }
+
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--live);
+    box-shadow: 0 0 0 3px rgba(255,77,109,.25);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(255,77,109,.25); }
+    50% { box-shadow: 0 0 0 6px rgba(255,77,109,.08); }
+  }
+  .see-all { font-size: 12px; color: var(--accent); cursor: pointer; text-decoration: none; font-weight: 500; }
+  .see-all:hover { text-decoration: underline; }
+
+  /* SESSION CARDS GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .session-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+    position: relative;
+  }
+  .session-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  .card-thumb {
+    width: 100%; height: 140px;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--pill-bg) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 42px;
+    position: relative;
+  }
+  .card-thumb.c1 { background: linear-gradient(135deg,#1a1040,#2d1b69); }
+  .card-thumb.c2 { background: linear-gradient(135deg,#0d2b2b,#0e5c4e); }
+  .card-thumb.c3 { background: linear-gradient(135deg,#1f1020,#5c1e6b); }
+  .card-thumb.c4 { background: linear-gradient(135deg,#101828,#0e3a6e); }
+  .card-thumb.c5 { background: linear-gradient(135deg,#1a1008,#5c3a0e); }
+  .card-thumb.c6 { background: linear-gradient(135deg,#0a1f14,#0e5c32); }
+
+  .status-badge {
+    position: absolute; top: 10px; left: 10px;
+    border-radius: 20px; padding: 3px 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .status-badge.live {
+    background: var(--live); color: #fff;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .status-badge.live::before {
+    content: ''; width: 6px; height: 6px;
+    border-radius: 50%; background: #fff;
+    animation: pulse 1.4s infinite;
+  }
+  .status-badge.soon { background: var(--soon); color: #000; }
+  .status-badge.scheduled { background: var(--pill-bg); color: var(--muted); border: 1px solid var(--border); }
+
+  .type-badge {
+    position: absolute; top: 10px; right: 10px;
+    border-radius: 20px; padding: 3px 9px;
+    font-size: 11px; font-weight: 600;
+  }
+  .type-badge.group { background: rgba(0,201,167,.15); color: var(--group); }
+  .type-badge.solo  { background: rgba(91,143,249,.15); color: var(--solo); }
+
+  .participants-bar {
+    position: absolute; bottom: 10px; left: 10px;
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: rgba(255,255,255,.65);
+  }
+  .avatars { display: flex; }
+  .avatars span {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid var(--card);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; margin-left: -5px; background: var(--pill-bg);
+  }
+  .avatars span:first-child { margin-left: 0; }
+
+  .card-body { padding: 14px 16px 16px; }
+  .card-cat {
+    font-size: 10px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 4px;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    line-height: 1.3; margin-bottom: 6px; color: var(--text);
+  }
+  .card-host {
+    font-size: 12px; color: var(--muted); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .host-avatar {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); display: inline-flex;
+    align-items: center; justify-content: center;
+    font-size: 9px; color: #fff; font-weight: 700; flex-shrink: 0;
+  }
+  .card-meta {
+    display: flex; gap: 10px; align-items: center;
+    font-size: 11px; color: var(--muted);
+    padding-top: 10px; border-top: 1px solid var(--border);
+    justify-content: space-between;
+  }
+  .card-time { display: flex; align-items: center; gap: 4px; }
+  .card-slots { display: flex; align-items: center; gap: 4px; }
+  .join-btn {
+    padding: 7px 14px; border-radius: 8px; border: none;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Syne', sans-serif; transition: opacity .2s;
+  }
+  .join-btn.live-join { background: var(--live); color: #fff; }
+  .join-btn.live-join:hover { opacity: .85; }
+  .join-btn.soon-join { background: var(--soon); color: #000; }
+  .join-btn.soon-join:hover { opacity: .85; }
+  .join-btn.sched-join { background: var(--pill-bg); color: var(--text); border: 1px solid var(--border); }
+  .join-btn.sched-join:hover { border-color: var(--accent); }
+
+  /* MODAL OVERLAY */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
+    z-index: 200; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; width: 100%; max-width: 480px;
+    padding: 28px; position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    background: var(--pill-bg); border: none; color: var(--muted);
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+  }
+  .modal h2 {
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .modal p { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); border-radius: 9px; padding: 10px 13px;
+    font-family: 'Inter', sans-serif; font-size: 13px; outline: none;
+    transition: border-color .2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--accent);
+  }
+  .form-group textarea { resize: vertical; min-height: 70px; }
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+  .type-toggle { display: flex; gap: 8px; }
+  .type-btn {
+    flex: 1; padding: 9px; border-radius: 9px; border: 1px solid var(--border);
+    background: none; color: var(--muted); cursor: pointer; font-size: 13px;
+    font-family: 'Inter', sans-serif; transition: all .15s;
+  }
+  .type-btn.selected { border-color: var(--accent); background: rgba(108,99,255,.12); color: var(--text); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; cursor: pointer; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; border: none; transition: opacity .2s; }
+  .btn-cancel { background: var(--pill-bg); color: var(--muted); }
+  .btn-create { background: var(--accent); color: #fff; }
+  .btn-create:hover, .btn-cancel:hover { opacity: .8; }
+
+  /* JOIN CONFIRM */
+  .join-modal-content { text-align: center; }
+  .join-session-emoji { font-size: 56px; margin-bottom: 10px; }
+  .join-modal-content h2 { margin-bottom: 4px; }
+  .join-modal-content .join-meta {
+    display: flex; gap: 12px; justify-content: center;
+    margin: 16px 0; flex-wrap: wrap;
+  }
+  .join-pill {
+    background: var(--pill-bg); border-radius: 20px;
+    padding: 5px 12px; font-size: 12px; color: var(--muted);
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--group); color: #000; border-radius: 30px;
+    padding: 11px 22px; font-size: 13px; font-weight: 700;
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+    z-index: 500; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 720px) {
+    .sidebar { display: none; }
+    .layout { padding: 0 16px 40px; }
+    .hero-bar { padding: 24px 16px 16px; }
+    nav { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Skill<span>Stream</span></div>
+  <div class="nav-actions">
+    <button class="btn-ghost">Sign in</button>
+    <button class="btn-primary" onclick="openCreate()">+ Teach a skill</button>
+  </div>
+</nav>
+
+<!-- HERO BAR -->
+<div class="hero-bar">
+  <h1>Learn anything, <em>live</em></h1>
+  <p>Join a live session or teach what you know — in groups or one-on-one.</p>
+  <div class="search-row">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search sessions, topics, or teachers…" id="searchInput" oninput="filterCards()"/>
+    </div>
+    <select class="filter-select" id="typeFilter" onchange="filterCards()">
+      <option value="all">All types</option>
+      <option value="group">Group</option>
+      <option value="solo">1-on-1</option>
+    </select>
+    <select class="filter-select" id="statusFilter" onchange="filterCards()">
+      <option value="all">All status</option>
+      <option value="live">Live now</option>
+      <option value="soon">Starting soon</option>
+      <option value="scheduled">Scheduled</option>
+    </select>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h3>Categories</h3>
+    <ul class="cat-list" id="catList">
+      <li><button class="cat-item active" data-cat="all" onclick="selectCat(this,'all')"><span class="cat-icon">🌐</span> All Skills <span class="cat-count" id="cnt-all">18</span></button></li>
+      <li><button class="cat-item" data-cat="Technology" onclick="selectCat(this,'Technology')"><span class="cat-icon">💻</span> Technology <span class="cat-count" id="cnt-Technology">4</span></button></li>
+      <li><button class="cat-item" data-cat="Music" onclick="selectCat(this,'Music')"><span class="cat-icon">🎵</span> Music <span class="cat-count" id="cnt-Music">3</span></button></li>
+      <li><button class="cat-item" data-cat="Art & Design" onclick="selectCat(this,'Art &amp; Design')"><span class="cat-icon">🎨</span> Art & Design <span class="cat-count" id="cnt-Art & Design">3</span></button></li>
+      <li><button class="cat-item" data-cat="Language" onclick="selectCat(this,'Language')"><span class="cat-icon">🗣</span> Language <span class="cat-count" id="cnt-Language">3</span></button></li>
+      <li><button class="cat-item" data-cat="Business" onclick="selectCat(this,'Business')"><span class="cat-icon">📈</span> Business <span class="cat-count" id="cnt-Business">2</span></button></li>
+      <li><button class="cat-item" data-cat="Cooking" onclick="selectCat(this,'Cooking')"><span class="cat-icon">🍳</span> Cooking <span class="cat-count" id="cnt-Cooking">2</span></button></li>
+      <li><button class="cat-item" data-cat="Fitness" onclick="selectCat(this,'Fitness')"><span class="cat-icon">🏋️</span> Fitness <span class="cat-count" id="cnt-Fitness">1</span></button></li>
+    </ul>
+    <hr class="sidebar-divider"/>
+    <button class="create-session-btn" onclick="openCreate()">
+      <span>📡</span> Host a Session
+    </button>
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- LIVE NOW -->
+    <div class="section-header">
+      <div class="section-title"><span class="live-dot"></span> Live Now</div>
+      <a class="see-all" href="#">See all</a>
+    </div>
+    <div class="cards-grid" id="liveGrid"></div>
+
+    <!-- STARTING SOON -->
+    <div class="section-header">
+      <div class="section-title">⏱ Starting Soon</div>
+      <a class="see-all" href="#">See all</a>
+    </div>
+    <div class="cards-grid" id="soonGrid"></div>
+
+    <!-- SCHEDULED -->
+    <div class="section-header">
+      <div class="section-title">📅 Scheduled</div>
+      <a class="see-all" href="#">See all</a>
+    </div>
+    <div class="cards-grid" id="schedGrid"></div>
+
+  </div>
+</div>
+
+<!-- CREATE SESSION MODAL -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCreate()">✕</button>
+    <h2>Host a live session</h2>
+    <p>Share your skill with learners around the world.</p>
+    <div class="form-group">
+      <label>Session title</label>
+      <input type="text" placeholder="e.g. Intro to fingerpicking guitar"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select>
+          <option>Technology</option><option>Music</option><option>Art & Design</option>
+          <option>Language</option><option>Business</option><option>Cooking</option><option>Fitness</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Session type</label>
+        <div class="type-toggle">
+          <button class="type-btn selected" onclick="selectType(this,'Group')">👥 Group</button>
+          <button class="type-btn" onclick="selectType(this,'1-on-1')">👤 1-on-1</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date & time</label>
+        <input type="datetime-local"/>
+      </div>
+      <div class="form-group">
+        <label>Duration</label>
+        <select>
+          <option>30 min</option><option>45 min</option><option selected>60 min</option>
+          <option>90 min</option><option>2 hours</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" id="maxSlotsGroup">
+      <label>Max participants</label>
+      <input type="number" value="10" min="2" max="100"/>
+    </div>
+    <div class="form-group">
+      <label>What will you teach?</label>
+      <textarea placeholder="Briefly describe what learners will take away…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCreate()">Cancel</button>
+      <button class="btn-create" onclick="onCreateSession()">Go live 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN CONFIRM MODAL -->
+<div class="modal-overlay" id="joinModal">
+  <div class="modal join-modal-content" id="joinModalContent">
+    <button class="modal-close" onclick="closeJoin()">✕</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const sessions = [
+  { id:1, title:"Build a React app from scratch", cat:"Technology", type:"group", status:"live", host:"Amara K.", hostInitial:"A", time:"Live now", duration:"60 min", slots:12, maxSlots:20, emoji:"💻", thumb:"c1" },
+  { id:2, title:"Arabic calligraphy for beginners", cat:"Art & Design", type:"group", status:"live", host:"Yusuf M.", hostInitial:"Y", time:"Live now", duration:"45 min", slots:7, maxSlots:15, emoji:"✍️", thumb:"c3" },
+  { id:3, title:"1-on-1 Python tutoring", cat:"Technology", type:"solo", status:"live", host:"Sara L.", hostInitial:"S", time:"Live now", duration:"30 min", slots:1, maxSlots:1, emoji:"🐍", thumb:"c4" },
+  { id:4, title:"Spanish conversation — intermediate", cat:"Language", type:"group", status:"soon", host:"Carlos V.", hostInitial:"C", time:"In 8 min", duration:"60 min", slots:5, maxSlots:12, emoji:"🇪🇸", thumb:"c1" },
+  { id:5, title:"Fingerpicking guitar — beginner", cat:"Music", type:"group", status:"soon", host:"Nadia R.", hostInitial:"N", time:"In 15 min", duration:"45 min", slots:9, maxSlots:20, emoji:"🎸", thumb:"c2" },
+  { id:6, title:"Logo design in Figma", cat:"Art & Design", type:"solo", status:"soon", host:"Jin W.", hostInitial:"J", time:"In 22 min", duration:"60 min", slots:1, maxSlots:1, emoji:"🎨", thumb:"c3" },
+  { id:7, title:"African cooking — Jollof rice masterclass", cat:"Cooking", type:"group", status:"scheduled", host:"Kemi A.", hostInitial:"K", time:"Today 5:00 PM", duration:"90 min", slots:14, maxSlots:25, emoji:"🍲", thumb:"c5" },
+  { id:8, title:"Pitch deck storytelling", cat:"Business", type:"group", status:"scheduled", host:"Omar F.", hostInitial:"O", time:"Today 6:30 PM", duration:"60 min", slots:8, maxSlots:18, emoji:"📊", thumb:"c4" },
+  { id:9, title:"Mandarin tones — 1-on-1 practice", cat:"Language", type:"solo", status:"scheduled", host:"Lin P.", hostInitial:"L", time:"Tomorrow 9:00 AM", duration:"30 min", slots:1, maxSlots:1, emoji:"🇨🇳", thumb:"c1" },
+  { id:10, title:"Drums for beginners — rhythm basics", cat:"Music", type:"group", status:"scheduled", host:"Kofi B.", hostInitial:"K", time:"Tomorrow 11:00 AM", duration:"60 min", slots:6, maxSlots:15, emoji:"🥁", thumb:"c2" },
+  { id:11, title:"HIIT training — full body", cat:"Fitness", type:"group", status:"scheduled", host:"Lena Z.", hostInitial:"L", time:"Tomorrow 7:00 AM", duration:"45 min", slots:20, maxSlots:50, emoji:"🏋️", thumb:"c6" },
+  { id:12, title:"Freelancing — finding your first client", cat:"Business", type:"group", status:"scheduled", host:"Tayo G.", hostInitial:"T", time:"Thu 3:00 PM", duration:"60 min", slots:11, maxSlots:30, emoji:"💼", thumb:"c4" },
+  { id:13, title:"Watercolor painting — landscapes", cat:"Art & Design", type:"group", status:"scheduled", host:"Mia H.", hostInitial:"M", time:"Fri 4:00 PM", duration:"90 min", slots:8, maxSlots:20, emoji:"🖌️", thumb:"c3" },
+  { id:14, title:"French pronunciation — 1-on-1", cat:"Language", type:"solo", status:"scheduled", host:"Claire D.", hostInitial:"C", time:"Sat 10:00 AM", duration:"45 min", slots:1, maxSlots:1, emoji:"🇫🇷", thumb:"c1" },
+  { id:15, title:"JavaScript async/await deep dive", cat:"Technology", type:"group", status:"scheduled", host:"Raj N.", hostInitial:"R", time:"Sat 2:00 PM", duration:"60 min", slots:15, maxSlots:30, emoji:"⚡", thumb:"c4" },
+  { id:16, title:"Piano chord progressions", cat:"Music", type:"solo", status:"scheduled", host:"Aria T.", hostInitial:"A", time:"Sun 11:00 AM", duration:"45 min", slots:1, maxSlots:1, emoji:"🎹", thumb:"c2" },
+  { id:17, title:"Smoothie bowls & healthy prep", cat:"Cooking", type:"group", status:"scheduled", host:"Priya S.", hostInitial:"P", time:"Sun 8:00 AM", duration:"30 min", slots:22, maxSlots:40, emoji:"🥗", thumb:"c5" },
+  { id:18, title:"No-code app building with Glide", cat:"Technology", type:"group", status:"scheduled", host:"Ben M.", hostInitial:"B", time:"Mon 1:00 PM", duration:"60 min", slots:10, maxSlots:20, emoji:"📱", thumb:"c4" },
+];
+
+let activeCat = 'all';
+
+function getFiltered() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const typeF = document.getElementById('typeFilter').value;
+  const statusF = document.getElementById('statusFilter').value;
+  return sessions.filter(s => {
+    const catMatch = activeCat === 'all' || s.cat === activeCat;
+    const typeMatch = typeF === 'all' || s.type === typeF;
+    const statusMatch = statusF === 'all' || s.status === statusF;
+    const qMatch = !q || s.title.toLowerCase().includes(q) || s.cat.toLowerCase().includes(q) || s.host.toLowerCase().includes(q);
+    return catMatch && typeMatch && statusMatch && qMatch;
+  });
+}
+
+function cardHTML(s) {
+  const liveClass = s.status === 'live' ? 'live-join' : s.status === 'soon' ? 'soon-join' : 'sched-join';
+  const liveLabel = s.status === 'live' ? 'Join now' : s.status === 'soon' ? 'Remind me' : 'Reserve spot';
+  const statusLabel = s.status === 'live' ? '<span class="status-badge live">Live</span>' :
+    s.status === 'soon' ? `<span class="status-badge soon">In ${s.time.replace('In ','')}</span>` :
+    `<span class="status-badge scheduled">${s.time}</span>`;
+  const typeLabel = `<span class="type-badge ${s.type === 'group' ? 'group' : 'solo'}">${s.type === 'group' ? '👥 Group' : '👤 1-on-1'}</span>`;
+  const slotsLeft = s.maxSlots - s.slots;
+  return `
+    <div class="session-card" onclick="openJoin(${s.id})">
+      <div class="card-thumb ${s.thumb}">
+        <span>${s.emoji}</span>
+        ${statusLabel}
+        ${typeLabel}
+        <div class="participants-bar">
+          <div class="avatars">
+            <span>👤</span><span>👤</span><span>👤</span>
+          </div>
+          <span>${s.slots} joined</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-cat">${s.cat}</div>
+        <div class="card-title">${s.title}</div>
+        <div class="card-host">
+          <span class="host-avatar">${s.hostInitial}</span>
+          ${s.host}
+        </div>
+        <div class="card-meta">
+          <div>
+            <div class="card-time">⏱ ${s.duration}</div>
+            <div class="card-slots" style="margin-top:3px">🪑 ${slotsLeft > 0 ? slotsLeft + ' spots left' : 'Full'}</div>
+          </div>
+          <button class="join-btn ${liveClass}" onclick="event.stopPropagation();openJoin(${s.id})">${liveLabel}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function render() {
+  const filtered = getFiltered();
+  document.getElementById('liveGrid').innerHTML = filtered.filter(s=>s.status==='live').map(cardHTML).join('') || '<p style="color:var(--muted);font-size:13px;padding:10px 0">No live sessions match your filters.</p>';
+  document.getElementById('soonGrid').innerHTML = filtered.filter(s=>s.status==='soon').map(cardHTML).join('') || '<p style="color:var(--muted);font-size:13px;padding:10px 0">None starting soon.</p>';
+  document.getElementById('schedGrid').innerHTML = filtered.filter(s=>s.status==='scheduled').map(cardHTML).join('') || '<p style="color:var(--muted);font-size:13px;padding:10px 0">No scheduled sessions.</p>';
+}
+
+function filterCards() { render(); }
+
+function selectCat(el, cat) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-item').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function openJoin(id) {
+  const s = sessions.find(x=>x.id===id);
+  const liveClass = s.status === 'live' ? 'live-join' : s.status === 'soon' ? 'soon-join' : 'sched-join';
+  const liveLabel = s.status === 'live' ? 'Join now →' : s.status === 'soon' ? 'Set reminder' : 'Reserve my spot';
+  document.getElementById('joinModalContent').innerHTML = `
+    <button class="modal-close" onclick="closeJoin()">✕</button>
+    <div class="join-session-emoji">${s.emoji}</div>
+    <h2>${s.title}</h2>
+    <p style="margin-bottom:0">Hosted by <strong>${s.host}</strong></p>
+    <div class="join-meta">
+      <div class="join-pill">⏱ ${s.duration}</div>
+      <div class="join-pill">${s.type === 'group' ? '👥 Group session' : '👤 1-on-1 session'}</div>
+      <div class="join-pill">📅 ${s.time}</div>
+      <div class="join-pill">🪑 ${s.maxSlots - s.slots} spots left</div>
+    </div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-cancel" onclick="closeJoin()">Back</button>
+      <button class="btn-create join-btn ${liveClass}" style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;flex:2;padding:12px;border-radius:10px" onclick="onJoin('${s.title}','${s.status}')">${liveLabel}</button>
+    </div>`;
+  document.getElementById('joinModal').classList.add('open');
+}
+
+function closeJoin() { document.getElementById('joinModal').classList.remove('open'); }
+function closeCreate() { document.getElementById('createModal').classList.remove('open'); }
+function openCreate() { document.getElementById('createModal').classList.add('open'); }
+
+function onJoin(title, status) {
+  closeJoin();
+  const msg = status === 'live' ? `Joining "${title}"…` : status === 'soon' ? `Reminder set for "${title}"!` : `Spot reserved for "${title}"!`;
+  showToast(msg);
+}
+
+function onCreateSession() {
+  closeCreate();
+  showToast('Your session is live! 🎉');
+}
+
+function selectType(btn, type) {
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('maxSlotsGroup').style.display = type === '1-on-1' ? 'none' : 'block';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+render();
+</script>
+</body>
+</html>
