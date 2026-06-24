@@ -2,209 +2,297 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#07080C"/>
 <title>SkillStream — Live Classroom</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
-  --accent:#7B6FFF;--live:#FF3D5A;--green:#00E5A0;--yellow:#FFB930;
-  --blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;--pill:#1A1D28;
-  --glass:rgba(15,17,24,0.92);
+  --accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
+  --yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
+  --pill:#1A1D28;--glass:rgba(15,17,24,0.92);--shadow:0 8px 40px rgba(0,0,0,0.7);
+  --radius:14px;--radius-sm:8px;--radius-full:9999px;
 }
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;display:flex;flex-direction:column}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-size:14px}
+body{color:var(--text);font-family:'Inter',sans-serif;display:flex;flex-direction:column;line-height:1.5;-webkit-font-smoothing:antialiased}
 
-.topbar{display:flex;align-items:center;gap:10px;padding:0 14px;height:52px;background:var(--glass);border-bottom:1px solid var(--border);backdrop-filter:blur(16px);flex-shrink:0;z-index:100}
-.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:var(--text);text-decoration:none;flex-shrink:0}
-.logo span{color:var(--accent)}
-.session-pill{display:flex;align-items:center;gap:8px;background:var(--pill);border:1px solid var(--border);border-radius:30px;padding:5px 12px 5px 8px;min-width:0;flex:1}
-.live-badge{display:flex;align-items:center;gap:4px;background:var(--live);color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:800;letter-spacing:.06em;flex-shrink:0}
-.live-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:#fff;animation:blink 1.2s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.session-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.timer-pill{background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);color:var(--green);border-radius:20px;padding:4px 11px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;flex-shrink:0}
-.btn-leave{background:rgba(255,61,90,.1);border:1px solid rgba(255,61,90,.3);color:var(--live);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;flex-shrink:0;transition:all .2s}
-.btn-leave:hover{background:var(--live);color:#fff}
+/* === SCROLLBARS === */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:var(--radius-full)}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 
+/* === TOPBAR === */
+.topbar{display:flex;align-items:center;gap:12px;padding:0 20px;height:60px;background:var(--glass);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);flex-shrink:0;z-index:100;position:relative}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:20px;color:var(--text);text-decoration:none;flex-shrink:0;letter-spacing:-0.5px;transition:opacity .2s}
+.logo:hover{opacity:.8}
+.logo span{color:var(--accent);background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.session-pill{display:flex;align-items:center;gap:10px;background:var(--pill);border:1px solid var(--border);border-radius:var(--radius-full);padding:6px 16px 6px 10px;min-width:0;flex:1;max-width:440px}
+.live-badge{display:flex;align-items:center;gap:6px;background:var(--live);color:#fff;border-radius:var(--radius-full);padding:4px 12px;font-size:10px;font-weight:800;letter-spacing:.08em;flex-shrink:0;text-transform:uppercase}
+.live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse-dot 1.2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+.session-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.timer-pill{background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.15);color:var(--green);border-radius:var(--radius-full);padding:5px 16px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;flex-shrink:0;letter-spacing:0.5px;font-variant-numeric:tabular-nums}
+.btn-leave{background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.2);color:var(--live);border-radius:var(--radius-sm);padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;flex-shrink:0;transition:all .25s}
+.btn-leave:hover{background:var(--live);color:#fff;transform:scale(1.03);box-shadow:0 4px 20px rgba(255,61,90,.3)}
+
+/* === MAIN LAYOUT === */
 .main{display:flex;flex:1;min-height:0;overflow:hidden}
-.stage{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;background:#050608}
-.presenter{flex:1;position:relative;min-height:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 30% 40%,#14103a 0%,#050608 70%)}
 
-.video-grid{display:grid;width:100%;height:100%;padding:8px;gap:6px;transition:all .3s}
+/* === STAGE === */
+.stage{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;background:#050608}
+
+/* === PRESENTER === */
+.presenter{flex:1;position:relative;min-height:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 30% 40%,#14103a 0%,#050608 70%);overflow:hidden}
+
+/* === VIDEO GRID === */
+.video-grid{display:grid;width:100%;height:100%;padding:12px;gap:10px;transition:all .4s cubic-bezier(.4,0,.2,1)}
 .video-grid.mode-speaker{grid-template-columns:1fr;grid-template-rows:1fr}
 .video-grid.mode-grid-2{grid-template-columns:1fr 1fr;grid-template-rows:1fr}
 .video-grid.mode-grid-4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
 .video-grid.mode-grid-6{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr}
+.video-grid.mode-grid-9{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr}
 
-.video-tile{border-radius:12px;overflow:hidden;position:relative;background:var(--card);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;min-height:0;transition:border-color .2s;cursor:pointer}
-.video-tile:hover{border-color:rgba(123,111,255,.5)}
-.video-tile.speaking{border-color:var(--green);box-shadow:0 0 0 2px rgba(0,229,160,.15)}
-.video-tile.pinned{border-color:var(--accent)}
+.video-tile{border-radius:var(--radius);overflow:hidden;position:relative;background:var(--card);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;min-height:0;transition:all .3s cubic-bezier(.4,0,.2,1);cursor:pointer}
+.video-tile:hover{border-color:rgba(123,111,255,.4);transform:scale(1.005)}
+.video-tile.speaking{border-color:var(--green);box-shadow:0 0 30px rgba(0,229,160,.15)}
+.video-tile.pinned{border-color:var(--accent);box-shadow:0 0 40px rgba(123,111,255,.2);transform:scale(1.01)}
+.video-tile.self-tile{border-color:var(--accent);border-width:2.5px}
 
-.tile-bg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
-.tile-avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.5)}
-.tile-avatar.sm{width:38px;height:38px;font-size:15px}
-.tile-name-big{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff}
-.tile-sub{font-size:11px;color:rgba(255,255,255,.4)}
+.tile-bg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,var(--tile-bg-start,#1a1040) 0%,#050608 100%)}
+.tile-avatar{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#fff;box-shadow:0 4px 30px rgba(0,0,0,.5);transition:all .3s;position:relative}
+.tile-avatar.sm{width:44px;height:44px;font-size:18px}
+.tile-avatar.xs{width:34px;height:34px;font-size:14px}
+.tile-name-big{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.tile-sub{font-size:12px;color:rgba(255,255,255,.5);font-weight:500}
 
-.tile-footer{position:absolute;bottom:0;left:0;right:0;padding:8px 10px;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,transparent 100%);display:flex;align-items:center;justify-content:space-between}
-.tile-name{font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px}
-.tile-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;background:rgba(0,0,0,.5)}
-.tile-icon.muted{background:rgba(255,61,90,.3)}
+.tile-footer{position:absolute;bottom:0;left:0;right:0;padding:12px 14px;background:linear-gradient(to top,rgba(0,0,0,.9) 0%,transparent 100%);display:flex;align-items:center;justify-content:space-between}
+.tile-name{font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.tile-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.05)}
+.tile-icon.muted{background:rgba(255,61,90,.4);border-color:rgba(255,61,90,.3)}
 
-.tile-top{position:absolute;top:8px;left:8px;right:8px;display:flex;align-items:center;justify-content:space-between}
-.speaking-wave{display:flex;align-items:center;gap:2px;background:rgba(0,0,0,.4);border-radius:20px;padding:3px 7px}
-.speaking-wave span{width:2px;background:var(--green);border-radius:1px;animation:wave 1s ease-in-out infinite}
+.tile-top{position:absolute;top:12px;left:12px;right:12px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+.speaking-wave{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.6);border-radius:var(--radius-full);padding:5px 12px;backdrop-filter:blur(4px);border:1px solid rgba(0,229,160,.1)}
+.speaking-wave span{width:3px;background:var(--green);border-radius:2px;animation:wave 1s ease-in-out infinite}
 .speaking-wave span:nth-child(2){animation-delay:.15s}
 .speaking-wave span:nth-child(3){animation-delay:.3s}
-@keyframes wave{0%,100%{height:3px}50%{height:12px}}
+@keyframes wave{0%,100%{height:4px}50%{height:18px}}
+.tile-badge{background:rgba(0,0,0,.7);border-radius:var(--radius-full);padding:4px 12px;font-size:10px;font-weight:700;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.05)}
 
-.view-switcher{position:absolute;top:12px;left:12px;display:flex;gap:4px;z-index:20}
-.vs-btn{background:rgba(0,0,0,.6);border:1px solid var(--border);color:var(--muted);border-radius:7px;width:30px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px)}
-.vs-btn.active{background:rgba(123,111,255,.25);border-color:var(--accent);color:var(--accent)}
+/* === VIEW SWITCHER === */
+.view-switcher{position:absolute;top:16px;left:16px;display:flex;gap:6px;z-index:20}
+.vs-btn{background:rgba(0,0,0,.7);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);width:34px;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);font-weight:700}
+.vs-btn:hover{background:rgba(123,111,255,.15);border-color:var(--accent);color:var(--text)}
+.vs-btn.active{background:rgba(123,111,255,.25);border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px rgba(123,111,255,.1)}
 
-.hand-notification{position:absolute;top:12px;right:12px;background:var(--glass);border:1px solid var(--accent);border-radius:12px;padding:8px 12px;font-size:12px;font-weight:600;display:none;align-items:center;gap:8px;z-index:20;backdrop-filter:blur(8px)}
+/* === HAND NOTIFICATION === */
+.hand-notification{position:absolute;top:16px;right:16px;background:var(--glass);border:1px solid var(--accent);border-radius:var(--radius);padding:12px 20px;font-size:13px;font-weight:600;display:none;align-items:center;gap:14px;z-index:20;backdrop-filter:blur(16px);box-shadow:var(--shadow);max-width:340px;animation:slideDown .4s cubic-bezier(.34,1.56,.64,1)}
 .hand-notification.show{display:flex}
-.call-on-btn{background:var(--accent);border:none;color:#fff;border-radius:6px;padding:3px 9px;font-size:10px;cursor:pointer;font-weight:700}
+@keyframes slideDown{from{transform:translateY(-30px) scale(.95);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.call-on-btn{background:var(--accent);border:none;color:#fff;border-radius:var(--radius-sm);padding:6px 16px;font-size:11px;cursor:pointer;font-weight:700;transition:all .2s;white-space:nowrap}
+.call-on-btn:hover{transform:scale(1.06);box-shadow:0 4px 16px rgba(123,111,255,.3)}
 
-.screen-overlay{position:absolute;inset:0;background:linear-gradient(135deg,#080d1a,#050a14);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:10}
+/* === SCREEN OVERLAY === */
+.screen-overlay{position:absolute;inset:0;background:rgba(5,6,8,.94);display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:15;backdrop-filter:blur(12px);animation:fadeIn .4s ease-out}
 .screen-overlay.active{display:flex}
-.screen-mock{width:72%;max-width:500px;background:#0d1117;border-radius:12px;border:1px solid var(--border);aspect-ratio:16/9;display:flex;flex-direction:column;overflow:hidden}
-.screen-mock-bar{background:#161920;padding:8px 12px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);flex-shrink:0}
-.screen-dot{width:10px;height:10px;border-radius:50%}
-.screen-mock-body{flex:1;padding:16px;display:flex;flex-direction:column;gap:7px}
-.code-line{height:9px;border-radius:3px;background:rgba(0,229,160,.07)}
-.code-line.hi{background:rgba(123,111,255,.15)}
-.screen-label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.screen-label::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.2s infinite}
+@keyframes fadeIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+.screen-mock{width:75%;max-width:600px;background:#0d1117;border-radius:var(--radius);border:1px solid var(--border);aspect-ratio:16/9;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow)}
+.screen-mock-bar{background:#161920;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.screen-dot{width:13px;height:13px;border-radius:50%}
+.screen-mock-body{flex:1;padding:24px;display:flex;flex-direction:column;gap:12px}
+.code-line{height:11px;border-radius:4px;background:rgba(0,229,160,.05)}
+.code-line.hi{background:rgba(123,111,255,.1)}
+.screen-label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px;font-weight:500;background:rgba(0,0,0,.3);padding:8px 16px;border-radius:var(--radius-full);backdrop-filter:blur(4px)}
+.screen-label::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse-dot 1.2s infinite}
 
-.self-view{position:absolute;bottom:12px;right:12px;width:110px;height:82px;border-radius:10px;background:linear-gradient(135deg,#1a1040,#0e0820);border:2px solid var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;z-index:20;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:transform .2s}
-.self-view:hover{transform:scale(1.05)}
-.self-view-av{width:32px;height:32px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:'Syne',sans-serif;color:#000}
-.self-view-name{font-size:10px;font-weight:700;color:#fff}
+/* === SELF VIEW (Floating) === */
+.self-view{position:absolute;bottom:16px;right:16px;width:130px;height:96px;border-radius:var(--radius);background:linear-gradient(135deg,#1a1040,#0e0820);border:2.5px solid var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;z-index:20;box-shadow:var(--shadow);transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.self-view:hover{transform:scale(1.06) translateY(-4px);box-shadow:0 12px 48px rgba(123,111,255,.3)}
+.self-view-av{width:38px;height:38px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;font-family:'Syne',sans-serif;color:#000;transition:all .3s}
+.self-view-name{font-size:11px;font-weight:700;color:#fff}
 .self-view-sub{font-size:9px;color:rgba(255,255,255,.4)}
 
-.reactions-float{position:absolute;left:16px;bottom:90px;display:flex;flex-direction:column;gap:4px;pointer-events:none;z-index:30}
-.reaction-bubble{font-size:24px;animation:floatUp 2.5s ease-out forwards;opacity:0}
-@keyframes floatUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-120px);opacity:0}}
-
-.controls{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;gap:8px}
-.ctrl-group{display:flex;gap:6px;align-items:center}
-.ctrl-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:54px;height:50px;border-radius:12px;background:var(--pill);border:1px solid var(--border);color:var(--text);cursor:pointer;transition:all .2s;font-size:17px}
-.ctrl-btn .lbl{font-size:9px;color:var(--muted);font-family:'Inter',sans-serif;line-height:1}
-.ctrl-btn:hover{border-color:var(--accent);background:rgba(123,111,255,.08)}
-.ctrl-btn.on{background:rgba(123,111,255,.12);border-color:var(--accent)}
-.ctrl-btn.off{background:rgba(255,61,90,.08);border-color:rgba(255,61,90,.3)}
+/* === CONTROLS === */
+.controls{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;gap:14px;flex-wrap:wrap}
+.ctrl-group{display:flex;gap:10px;align-items:center}
+.ctrl-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:60px;height:56px;border-radius:var(--radius);background:var(--pill);border:1px solid var(--border);color:var(--text);cursor:pointer;transition:all .2s;font-size:19px;position:relative;-webkit-tap-highlight-color:transparent}
+.ctrl-btn .lbl{font-size:9px;color:var(--muted);font-family:'Inter',sans-serif;line-height:1;font-weight:500;margin-top:2px;letter-spacing:.02em}
+.ctrl-btn:hover{border-color:var(--accent);background:rgba(123,111,255,.08);transform:translateY(-2px)}
+.ctrl-btn:active{transform:scale(.94)}
+.ctrl-btn.on{background:rgba(123,111,255,.15);border-color:var(--accent);color:var(--accent)}
+.ctrl-btn.on .lbl{color:var(--accent)}
+.ctrl-btn.off{background:rgba(255,61,90,.08);border-color:rgba(255,61,90,.25)}
 .ctrl-btn.off .lbl{color:var(--live)}
-.ctrl-btn.danger{background:rgba(255,61,90,.1);border-color:rgba(255,61,90,.3);color:var(--live)}
-.ctrl-btn.danger:hover{background:var(--live);color:#fff;border-color:var(--live)}
+.ctrl-btn.danger{background:rgba(255,61,90,.08);border-color:rgba(255,61,90,.25);color:var(--live)}
+.ctrl-btn.danger:hover{background:var(--live);color:#fff;border-color:var(--live);transform:translateY(-2px)}
+.ctrl-btn .badge{position:absolute;top:-5px;right:-5px;background:var(--live);color:#fff;border-radius:50%;width:20px;height:20px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface)}
 
-.reaction-bar{display:flex;gap:4px;align-items:center;background:var(--pill);border:1px solid var(--border);border-radius:30px;padding:4px 8px}
-.react-btn{width:30px;height:30px;border-radius:50%;border:none;background:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
-.react-btn:hover{transform:scale(1.35)}
+/* === REACTION BAR === */
+.reaction-bar{display:flex;gap:6px;align-items:center;background:var(--pill);border:1px solid var(--border);border-radius:var(--radius-full);padding:6px 14px}
+.react-btn{width:36px;height:36px;border-radius:50%;border:none;background:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.react-btn:hover{transform:scale(1.4);background:rgba(123,111,255,.1)}
 
-.sidebar{width:290px;flex-shrink:0;display:flex;flex-direction:column;border-left:1px solid var(--border);background:var(--surface)}
-.sidebar-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
-.stab{flex:1;padding:12px 6px;text-align:center;font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);border:none;background:none;border-bottom:2px solid transparent;transition:all .2s}
+/* === SIDEBAR === */
+.sidebar{width:320px;flex-shrink:0;display:flex;flex-direction:column;border-left:1px solid var(--border);background:var(--surface);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.sidebar-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
+.stab{flex:1;padding:16px 8px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);border:none;background:none;border-bottom:2.5px solid transparent;transition:all .2s;font-family:'Inter',sans-serif;letter-spacing:.02em}
+.stab:hover{color:var(--text)}
 .stab.active{color:var(--text);border-bottom-color:var(--accent)}
-.spanel{display:none;flex-direction:column;flex:1;min-height:0}
+.spanel{display:none;flex-direction:column;flex:1;min-height:0;background:var(--bg)}
 .spanel.active{display:flex}
 
-.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
-.chat-msgs::-webkit-scrollbar{width:3px}
-.chat-msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.msg{display:flex;gap:8px}
-.msg-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;font-family:'Syne',sans-serif;color:#fff;flex-shrink:0;margin-top:1px}
-.msg-head{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-.msg-name{font-size:11px;font-weight:700}
-.msg-time{font-size:10px;color:var(--muted)}
-.msg-text{font-size:13px;line-height:1.45;color:var(--text)}
+/* === CHAT === */
+.chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+.msg{display:flex;gap:12px;animation:msgIn .25s ease-out}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.msg-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:'Syne',sans-serif;color:#fff;flex-shrink:0;margin-top:2px}
+.msg-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.msg-name{font-size:12px;font-weight:700}
+.msg-time{font-size:10px;color:var(--muted);font-weight:500}
+.msg-text{font-size:13px;line-height:1.6;color:var(--text);word-break:break-word}
 .msg.system{justify-content:center}
-.msg.system .msg-text{font-size:11px;color:var(--muted);font-style:italic;background:var(--pill);border-radius:20px;padding:3px 10px}
-.chat-input-row{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
-.chat-inp{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
-.chat-inp:focus{border-color:var(--accent)}
+.msg.system .msg-text{font-size:12px;color:var(--muted);font-style:italic;background:var(--pill);border-radius:var(--radius-full);padding:5px 16px;border:1px solid var(--border)}
+.chat-input-row{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:12px;flex-shrink:0;background:var(--surface)}
+.chat-inp{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:11px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:all .2s}
+.chat-inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(123,111,255,.1)}
 .chat-inp::placeholder{color:var(--muted)}
-.send-btn{background:var(--accent);border:none;color:#fff;border-radius:9px;width:36px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s}
-.send-btn:hover{opacity:.85}
+.send-btn{background:var(--accent);border:none;color:#fff;border-radius:var(--radius);width:44px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.send-btn:hover{opacity:.85;transform:scale(1.05)}
 
-.p-count-bar{padding:8px 12px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;font-size:12px}
+/* === PARTICIPANTS === */
+.p-count-bar{padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600}
+.p-count-bar span{color:var(--text)}
 .plist{flex:1;overflow-y:auto;padding:8px}
-.plist::-webkit-scrollbar{width:3px}
-.plist-item{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:9px;transition:background .15s;cursor:pointer}
+.plist-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius);transition:all .15s;cursor:pointer}
 .plist-item:hover{background:var(--pill)}
-.plist-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;font-family:'Syne',sans-serif;color:#fff;flex-shrink:0}
-.plist-name{font-size:12px;font-weight:600;flex:1}
-.plist-role{font-size:10px;color:var(--muted)}
-.plist-icons{display:flex;gap:4px;font-size:12px;color:var(--muted)}
+.plist-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:'Syne',sans-serif;color:#fff;flex-shrink:0}
+.plist-name{font-size:13px;font-weight:600;flex:1}
+.plist-role{font-size:10px;color:var(--muted);font-weight:500}
+.plist-icons{display:flex;gap:6px;font-size:13px;color:var(--muted)}
 .muted-icon{color:var(--live)}
 
-.wb-panel{flex:1;display:flex;flex-direction:column;padding:10px;gap:8px}
-.wb-tools{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
-.wb-tool{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s}
-.wb-tool:hover,.wb-tool.active{border-color:var(--accent);color:var(--text);background:rgba(123,111,255,.08)}
-.wb-colors{display:flex;gap:4px;margin-left:auto}
-.wb-color{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color .15s}
-.wb-color.selected{border-color:#fff}
-canvas#wb{flex:1;background:#08090d;border-radius:10px;border:1px solid var(--border);cursor:crosshair;display:block;width:100%}
+/* === SELF CARD === */
+.self-card{background:linear-gradient(135deg,#1a1040,#0e0820);border:2px solid var(--accent);border-radius:var(--radius);padding:18px;display:flex;align-items:center;gap:16px;margin:12px 14px 8px}
+.self-card-av{width:58px;height:58px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;font-family:'Syne',sans-serif;color:#000;flex-shrink:0;transition:all .3s}
+.self-card-info{flex:1;min-width:0}
+.self-card-info .name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:2px}
+.self-card-info .status{font-size:12px;color:var(--muted);margin-bottom:10px}
+.self-card-info .btn-group{display:flex;gap:8px;flex-wrap:wrap}
+.self-card-info .btn-group button{background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);color:var(--green);border-radius:var(--radius-sm);padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.self-card-info .btn-group button:hover{transform:scale(1.05)}
+.self-card-info .btn-group button.off{background:rgba(255,61,90,.08);border-color:rgba(255,61,90,.2);color:var(--live)}
 
-.hand-toast{position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--accent);color:#fff;border-radius:20px;padding:8px 18px;font-size:12px;font-weight:700;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:200;white-space:nowrap;opacity:0;pointer-events:none}
+/* === WHITEBOARD === */
+.wb-panel{flex:1;display:flex;flex-direction:column;padding:14px;gap:12px;background:var(--bg)}
+.wb-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wb-tool{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 14px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .2s;font-family:'Inter',sans-serif;font-weight:500}
+.wb-tool:hover{border-color:var(--accent);color:var(--text);background:rgba(123,111,255,.05)}
+.wb-tool.active{background:rgba(123,111,255,.12);border-color:var(--accent);color:var(--accent)}
+.wb-colors{display:flex;gap:6px;margin-left:auto}
+.wb-color{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.wb-color:hover{transform:scale(1.15)}
+.wb-color.selected{border-color:#fff;box-shadow:0 0 16px rgba(255,255,255,.15)}
+canvas#wb{flex:1;background:#08090d;border-radius:var(--radius);border:1px solid var(--border);cursor:crosshair;display:block;width:100%;touch-action:none;min-height:150px}
+
+/* === HAND TOAST === */
+.hand-toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-40px);background:var(--accent);color:#fff;border-radius:var(--radius-full);padding:12px 28px;font-size:13px;font-weight:700;transition:all .5s cubic-bezier(.34,1.56,.64,1);z-index:200;white-space:nowrap;opacity:0;pointer-events:none;box-shadow:var(--shadow);max-width:90vw}
 .hand-toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-.mob-sidebar-btn{display:none;position:fixed;bottom:76px;right:12px;width:44px;height:44px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:18px;cursor:pointer;z-index:150;box-shadow:0 4px 20px rgba(123,111,255,.5);align-items:center;justify-content:center}
-.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:140}
+/* === MOBILE === */
+.mob-sidebar-btn{display:none;position:fixed;bottom:84px;right:16px;width:54px;height:54px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:22px;cursor:pointer;z-index:150;box-shadow:0 4px 30px rgba(123,111,255,.5);align-items:center;justify-content:center;transition:all .2s}
+.mob-sidebar-btn:hover{transform:scale(1.1)}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:140;backdrop-filter:blur(6px);animation:fadeIn .25s ease-out}
 
-@media(max-width:680px){
-  .sidebar{position:fixed;right:0;top:0;bottom:0;z-index:145;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);width:280px}
+/* === RESPONSIVE === */
+@media(max-width:1024px){.sidebar{width:300px}}
+@media(max-width:768px){
+  .sidebar{position:fixed;right:0;top:0;bottom:0;z-index:145;transform:translateX(100%);width:320px;max-width:88vw;box-shadow:var(--shadow)}
   .sidebar.open{transform:translateX(0)}
   .mob-sidebar-btn{display:flex}
   .mob-overlay.open{display:block}
-  .self-view{width:80px;height:62px}
-  .ctrl-btn{width:46px;height:44px;font-size:15px}
+  .self-view{width:96px;height:72px;bottom:12px;right:12px}
+  .self-view-av{width:30px;height:30px;font-size:12px}
+  .ctrl-btn{width:52px;height:48px;font-size:17px}
   .reaction-bar{display:none}
-  .session-name{max-width:110px}
+  .session-name{max-width:100px;font-size:11px}
+  .view-switcher{top:12px;left:12px}
+  .vs-btn{width:30px;height:28px;font-size:11px}
+  .hand-notification{font-size:12px;padding:10px 14px;right:12px;top:12px;max-width:280px}
+  .controls{padding:10px 14px;gap:8px}
+  .timer-pill{font-size:12px;padding:4px 12px}
+  .topbar{padding:0 14px;height:54px;gap:8px}
+  .logo{font-size:17px}
 }
+@media(max-width:480px){
+  .topbar{padding:0 10px;height:48px;gap:6px}
+  .logo{font-size:15px}
+  .session-pill{padding:4px 10px 4px 6px}
+  .live-badge{font-size:8px;padding:2px 8px}
+  .btn-leave{font-size:10px;padding:5px 12px}
+  .self-view{width:76px;height:58px;bottom:10px;right:10px}
+  .self-view-av{width:24px;height:24px;font-size:10px}
+  .self-view-name{font-size:9px}
+  .self-view-sub{font-size:8px}
+  .ctrl-btn{width:44px;height:40px;font-size:14px}
+  .ctrl-btn .lbl{font-size:8px}
+  .video-grid{padding:6px;gap:5px}
+  .hand-notification{font-size:11px;padding:8px 12px;right:8px;top:8px;max-width:200px}
+  .call-on-btn{font-size:10px;padding:4px 10px}
+}
+
+/* === UTILITY === */
+.hidden{display:none!important}
+.text-ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
 
+<!-- === TOPBAR === -->
 <div class="topbar">
-  <a href="skillstream.html" class="logo">Skill<span>Stream</span></a>
+  <a href="#" class="logo">Skill<span>Stream</span></a>
   <div class="session-pill">
     <div class="live-badge">LIVE</div>
-    <div class="session-name">Build a React App from Scratch</div>
+    <div class="session-name" id="sessionName">Build a React App from Scratch</div>
   </div>
-  <div class="timer-pill" id="timer">44:32</div>
-  <button class="btn-leave" onclick="if(confirm('Leave session?'))window.location='skillstream.html'">Leave</button>
+  <div class="timer-pill" id="timer">00:00</div>
+  <button class="btn-leave" onclick="handleLeave()">Leave</button>
 </div>
 
+<!-- === MAIN === -->
 <div class="main">
   <div class="stage">
 
+    <!-- View Switcher -->
     <div class="view-switcher">
-      <button class="vs-btn active" id="vs-speaker" onclick="setView('speaker')" title="Speaker">⬛</button>
-      <button class="vs-btn" id="vs-grid2" onclick="setView('grid2')" title="2-up">⊞</button>
-      <button class="vs-btn" id="vs-grid4" onclick="setView('grid4')" title="4-up">⊟</button>
-      <button class="vs-btn" id="vs-grid6" onclick="setView('grid6')" title="6-up">⊡</button>
+      <button class="vs-btn active" data-view="speaker" onclick="setView('speaker')" title="Speaker View">⬛</button>
+      <button class="vs-btn" data-view="grid2" onclick="setView('grid2')" title="2 Participants">⊞</button>
+      <button class="vs-btn" data-view="grid4" onclick="setView('grid4')" title="4 Participants">⊟</button>
+      <button class="vs-btn" data-view="grid6" onclick="setView('grid6')" title="6 Participants">⊡</button>
+      <button class="vs-btn" data-view="grid9" onclick="setView('grid9')" title="9 Participants">⊞</button>
     </div>
 
+    <!-- Hand Notification -->
     <div class="hand-notification" id="handNotif">
-      <span>✋</span><span>Carlos raised his hand</span>
-      <button class="call-on-btn" onclick="dismissHand()">Call on</button>
+      <span>✋</span>
+      <span id="handNotifName" class="text-ellipsis">Carlos raised their hand</span>
+      <button class="call-on-btn" onclick="callOnParticipant()">Call on</button>
+      <button onclick="dismissHand()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px">✕</button>
     </div>
 
+    <!-- Presenter -->
     <div class="presenter">
       <div class="video-grid mode-speaker" id="videoGrid"></div>
 
+      <!-- Screen Overlay -->
       <div class="screen-overlay" id="screenOverlay">
         <div class="screen-mock">
           <div class="screen-mock-bar">
             <div class="screen-dot" style="background:#ff5f57"></div>
             <div class="screen-dot" style="background:#febc2e"></div>
             <div class="screen-dot" style="background:#28c840"></div>
-            <span style="font-size:10px;color:var(--muted);margin-left:8px">App.jsx — SkillStream/src</span>
+            <span style="font-size:11px;color:var(--muted);margin-left:10px">App.jsx — SkillStream/src</span>
           </div>
           <div class="screen-mock-body">
             <div class="code-line" style="width:60%"></div>
@@ -215,286 +303,1068 @@ canvas#wb{flex:1;background:#08090d;border-radius:10px;border:1px solid var(--bo
             <div class="code-line" style="width:80%"></div>
             <div class="code-line hi" style="width:45%"></div>
             <div class="code-line" style="width:65%"></div>
+            <div class="code-line" style="width:50%"></div>
           </div>
         </div>
-        <div class="screen-label">Amara is sharing her screen</div>
+        <div class="screen-label" id="screenLabel">Amara is sharing her screen</div>
+        <button onclick="toggleMedia('screen')" style="background:rgba(255,61,90,.15);border:1px solid rgba(255,61,90,.3);color:var(--live);border-radius:var(--radius-full);padding:8px 20px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s">Stop Sharing</button>
       </div>
 
+      <!-- Reactions Float -->
       <div class="reactions-float" id="reactionsFloat"></div>
 
-
+      <!-- Floating Self View -->
+      <div class="self-view" id="selfView" onclick="openTab('participants')">
+        <div class="self-view-av" id="selfViewAv">Y</div>
+        <div class="self-view-name">You</div>
+        <div class="self-view-sub" id="selfViewSub">🎙️ Live</div>
+      </div>
     </div>
 
+    <!-- Controls -->
     <div class="controls">
       <div class="ctrl-group">
-        <button class="ctrl-btn" id="micBtn" onclick="toggle('mic')">
-          <span id="micIco">🎙️</span><span class="lbl" id="micLbl">Mute</span>
+        <button class="ctrl-btn on" id="micBtn" onclick="toggleMedia('mic')" title="Toggle Mic (Ctrl+M)">
+          <span id="micIco">🎙️</span>
+          <span class="lbl" id="micLbl">Mute</span>
         </button>
-        <button class="ctrl-btn" id="camBtn" onclick="toggle('cam')">
-          <span id="camIco">📷</span><span class="lbl" id="camLbl">Camera</span>
+        <button class="ctrl-btn on" id="camBtn" onclick="toggleMedia('cam')" title="Toggle Camera (Ctrl+C)">
+          <span id="camIco">📷</span>
+          <span class="lbl" id="camLbl">Camera</span>
         </button>
-        <button class="ctrl-btn" id="screenBtn" onclick="toggle('screen')">
-          <span id="screenIco">🖥️</span><span class="lbl">Share</span>
+        <button class="ctrl-btn" id="screenBtn" onclick="toggleMedia('screen')" title="Share Screen">
+          <span id="screenIco">🖥️</span>
+          <span class="lbl">Share</span>
         </button>
       </div>
 
       <div class="reaction-bar">
-        <button class="react-btn" onclick="sendReaction('👏')">👏</button>
-        <button class="react-btn" onclick="sendReaction('❤️')">❤️</button>
-        <button class="react-btn" onclick="sendReaction('😂')">😂</button>
-        <button class="react-btn" onclick="sendReaction('🔥')">🔥</button>
-        <button class="react-btn" onclick="sendReaction('💡')">💡</button>
+        <button class="react-btn" onclick="sendReaction('👏')" title="Clap">👏</button>
+        <button class="react-btn" onclick="sendReaction('❤️')" title="Heart">❤️</button>
+        <button class="react-btn" onclick="sendReaction('😂')" title="Laugh">😂</button>
+        <button class="react-btn" onclick="sendReaction('🔥')" title="Fire">🔥</button>
+        <button class="react-btn" onclick="sendReaction('💡')" title="Idea">💡</button>
+        <button class="react-btn" onclick="sendReaction('🤯')" title="Mind Blown">🤯</button>
+        <button class="react-btn" onclick="sendReaction('🚀')" title="Rocket">🚀</button>
       </div>
 
       <div class="ctrl-group">
-        <button class="ctrl-btn" id="handBtn" onclick="toggle('hand')">
-          <span id="handIco">✋</span><span class="lbl">Hand</span>
+        <button class="ctrl-btn" id="handBtn" onclick="toggleHand()" title="Raise Hand (Ctrl+H)">
+          <span id="handIco">✋</span>
+          <span class="lbl">Hand</span>
+          <span class="badge" id="handBadge" style="display:none">1</span>
         </button>
-        <button class="ctrl-btn" onclick="openTab('whiteboard')">
-          <span>✏️</span><span class="lbl">Board</span>
+        <button class="ctrl-btn" onclick="openTab('whiteboard')" title="Whiteboard">
+          <span>✏️</span>
+          <span class="lbl">Board</span>
         </button>
-        <button class="ctrl-btn danger" onclick="if(confirm('Leave?'))window.location='skillstream.html'">
-          <span>📴</span><span class="lbl">Leave</span>
+        <button class="ctrl-btn danger" onclick="handleLeave()" title="Leave Session">
+          <span>📴</span>
+          <span class="lbl">Leave</span>
         </button>
       </div>
     </div>
   </div>
 
+  <!-- === SIDEBAR === -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-tabs">
-      <button class="stab active" id="tab-chat" onclick="openTab('chat')">💬 Chat</button>
-      <button class="stab" id="tab-participants" onclick="openTab('participants')">👥 People</button>
-      <button class="stab" id="tab-whiteboard" onclick="openTab('whiteboard')">✏️ Board</button>
+      <button class="stab active" data-tab="chat" onclick="openTab('chat')">💬 Chat</button>
+      <button class="stab" data-tab="participants" onclick="openTab('participants')">👥 People</button>
+      <button class="stab" data-tab="whiteboard" onclick="openTab('whiteboard')">✏️ Board</button>
+      <button class="stab" data-tab="settings" onclick="openTab('settings')">⚙️</button>
     </div>
 
+    <!-- Chat Panel -->
     <div class="spanel active" id="panel-chat">
       <div class="chat-msgs" id="chatMsgs"></div>
       <div class="chat-input-row">
-        <input class="chat-inp" id="chatInp" placeholder="Message everyone…" onkeydown="if(event.key==='Enter')sendMsg()"/>
+        <input class="chat-inp" id="chatInp" placeholder="Type a message… (Enter to send)" onkeydown="if(event.key==='Enter')sendMsg()" maxlength="500"/>
         <button class="send-btn" onclick="sendMsg()">➤</button>
       </div>
     </div>
 
+    <!-- Participants Panel -->
     <div class="spanel" id="panel-participants">
       <div class="p-count-bar">
-        <span style="font-weight:700">12 in session</span>
-        <button style="background:none;border:1px solid var(--border);color:var(--accent);border-radius:7px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer" onclick="showToast('Invite link copied! 🔗')">+ Invite</button>
+        <span id="participantCount">12 in session</span>
+        <button class="wb-tool" onclick="copyInvite()">📋 Invite</button>
       </div>
-      <!-- SELF VIEW IN SIDEBAR -->
-      <div style="margin:10px 10px 4px;background:linear-gradient(135deg,#1a1040,#0e0820);border:2px solid var(--accent);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px">
-        <div style="width:52px;height:52px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;font-family:'Syne',sans-serif;color:#000;flex-shrink:0">Y</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:3px">You</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Your camera preview</div>
-          <div style="display:flex;gap:6px">
-            <button id="selfMicBtn" onclick="toggleSelfMic()" style="background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.3);color:var(--green);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s">🎙️ Live</button>
-            <button id="selfCamBtn" onclick="toggleSelfCam()" style="background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.3);color:var(--green);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s">📷 On</button>
+      <!-- Self Card -->
+      <div class="self-card">
+        <div class="self-card-av">Y</div>
+        <div class="self-card-info">
+          <div class="name">You</div>
+          <div class="status" id="selfStatus">Your camera preview</div>
+          <div class="btn-group">
+            <button id="selfMicBtn" onclick="toggleSelfMic()">🎙️ Live</button>
+            <button id="selfCamBtn" onclick="toggleSelfCam()">📷 On</button>
           </div>
         </div>
       </div>
-      <div style="padding:6px 12px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Other participants</div>
+      <div style="padding:6px 16px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Participants</div>
       <div class="plist" id="plist"></div>
     </div>
 
+    <!-- Whiteboard Panel -->
     <div class="spanel" id="panel-whiteboard">
       <div class="wb-panel">
         <div class="wb-tools">
           <button class="wb-tool active" id="wbt-pen" onclick="setTool('pen')">✏️ Pen</button>
           <button class="wb-tool" id="wbt-erase" onclick="setTool('erase')">🧹 Erase</button>
+          <button class="wb-tool" id="wbt-text" onclick="setTool('text')">📝 Text</button>
+          <button class="wb-tool" id="wbt-line" onclick="setTool('line')">📏 Line</button>
           <button class="wb-tool" onclick="clearWB()">🗑️ Clear</button>
+          <button class="wb-tool" onclick="undoWB()">↩️ Undo</button>
           <div class="wb-colors">
             <div class="wb-color selected" style="background:#7B6FFF" onclick="setColor(this,'#7B6FFF')"></div>
             <div class="wb-color" style="background:#00E5A0" onclick="setColor(this,'#00E5A0')"></div>
             <div class="wb-color" style="background:#FF3D5A" onclick="setColor(this,'#FF3D5A')"></div>
             <div class="wb-color" style="background:#FFB930" onclick="setColor(this,'#FFB930')"></div>
+            <div class="wb-color" style="background:#4B9EFF" onclick="setColor(this,'#4B9EFF')"></div>
             <div class="wb-color" style="background:#ECEDF5" onclick="setColor(this,'#ECEDF5')"></div>
           </div>
         </div>
         <canvas id="wb"></canvas>
       </div>
     </div>
+
+    <!-- Settings Panel -->
+    <div class="spanel" id="panel-settings">
+      <div style="padding:16px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;font-weight:700;font-family:'Syne',sans-serif">⚙️ Settings</div>
+        
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+            <input type="checkbox" id="settingNotifications" checked onchange="showToast('Notifications '+(this.checked?'enabled':'disabled'))"/>
+            <span>Enable notifications</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+            <input type="checkbox" id="settingAutoGrid" checked onchange="showToast('Auto-grid '+(this.checked?'enabled':'disabled'))"/>
+            <span>Auto-switch grid view</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+            <input type="checkbox" id="settingSound" checked onchange="showToast('Sound effects '+(this.checked?'enabled':'disabled'))"/>
+            <span>Sound effects</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+            <input type="checkbox" id="settingDarkMode" checked disabled/>
+            <span>Dark mode (always on)</span>
+          </label>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px">
+          <button class="wb-tool" onclick="resetAll()" style="color:var(--live)">🔄 Reset everything</button>
+          <button class="wb-tool" onclick="exportData()">📤 Export chat log</button>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:12px;font-size:12px;color:var(--muted);line-height:1.6">
+          <div>SkillStream v2.0</div>
+          <div>Built with ❤️</div>
+          <div style="margin-top:4px;font-size:11px">Press <kbd style="background:var(--pill);padding:2px 8px;border-radius:4px;border:1px solid var(--border)">?</kbd> for shortcuts</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
+<!-- === MOBILE === -->
 <div class="mob-overlay" id="mobOverlay" onclick="closeMob()"></div>
 <button class="mob-sidebar-btn" onclick="openMob()">💬</button>
 <div class="hand-toast" id="handToast"></div>
 
+<!-- === SHORTCUTS HELP === -->
+<div id="shortcutsHelp" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:420px;width:100%">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:16px">⌨️ Keyboard Shortcuts</div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:10px 20px;font-size:13px">
+      <kbd style="background:var(--pill);padding:3px 10px;border-radius:4px;border:1px solid var(--border);font-size:12px">Ctrl+M</kbd><span>Toggle microphone</span>
+      <kbd style="background:var(--pill);padding:3px 10px;border-radius:4px;border:1px solid var(--border);font-size:12px">Ctrl+C</kbd><span>Toggle camera</span>
+      <kbd style="background:var(--pill);padding:3px 10px;border-radius:4px;border:1px solid var(--border);font-size:12px">Ctrl+H</kbd><span>Raise/lower hand</span>
+      <kbd style="background:var(--pill);padding:3px 10px;border-radius:4px;border:1px solid var(--border);font-size:12px">Ctrl+S</kbd><span>Share screen</span>
+      <kbd style="background:var(--pill);padding:3px 10px;border-radius:4px;border:1px solid var(--border);font-size:12px">Enter</kbd><span>Send chat message</span>
+      <kbd style="background:var(--pill);padding:3px 10px;border-radius:4px;border:1px solid var(--border);font-size:12px">Escape</kbd><span>Close sidebar / popups</span>
+      <kbd style="background:var(--pill);padding:3px 10px;border-radius:4px;border:1px solid var(--border);font-size:12px">Ctrl+1-4</kbd><span>Switch grid views</span>
+      <kbd style="background:var(--pill);padding:3px 10px;border-radius:4px;border:1px solid var(--border);font-size:12px">?</kbd><span>Show this help</span>
+    </div>
+    <button onclick="document.getElementById('shortcutsHelp').style.display='none'" style="margin-top:16px;background:var(--accent);border:none;color:#fff;border-radius:var(--radius-sm);padding:8px 24px;font-weight:700;cursor:pointer;width:100%">Got it</button>
+  </div>
+</div>
+
 <script>
-const participants=[
-  {name:'Amara K.',init:'A',color:'#7B6FFF',role:'Host',muted:false,cam:true,hand:false},
-  {name:'You',init:'Y',color:'#00E5A0',role:'Student',muted:false,cam:true,hand:false,me:true},
-  {name:'Carlos V.',init:'C',color:'#FF3D5A',role:'Student',muted:true,cam:false,hand:true},
-  {name:'Nadia R.',init:'N',color:'#FFB930',role:'Student',muted:false,cam:true,hand:false},
-  {name:'Omar F.',init:'O',color:'#4B9EFF',role:'Student',muted:true,cam:true,hand:false},
-  {name:'Lin P.',init:'L',color:'#A78BFA',role:'Student',muted:false,cam:false,hand:false},
-  {name:'Kemi A.',init:'K',color:'#F97316',role:'Student',muted:true,cam:true,hand:false},
-  {name:'Jin W.',init:'J',color:'#22D3EE',role:'Student',muted:false,cam:true,hand:false},
-  {name:'Raj N.',init:'R',color:'#84CC16',role:'Student',muted:true,cam:false,hand:false},
-  {name:'Mia H.',init:'M',color:'#EC4899',role:'Student',muted:false,cam:true,hand:false},
-  {name:'Ben M.',init:'B',color:'#FB923C',role:'Student',muted:true,cam:true,hand:false},
-  {name:'Sara L.',init:'S',color:'#34D399',role:'Student',muted:false,cam:true,hand:false},
-];
-let chatLog=[
-  {name:'Amara K.',init:'A',color:'#7B6FFF',text:"Welcome everyone! Let's build something real today. 🚀",time:'44:01'},
-  {name:'Carlos V.',init:'C',color:'#FF3D5A',text:'So excited for this!',time:'44:05'},
-  {name:'Nadia R.',init:'N',color:'#FFB930',text:'Can we start with project setup?',time:'44:08'},
-  {name:'Amara K.',init:'A',color:'#7B6FFF',text:'Yes! Starting with Vite + React. Sharing my screen now.',time:'44:11'},
-  {name:'Omar F.',init:'O',color:'#4B9EFF',text:'What Node version do we need?',time:'44:13'},
-  {name:'Amara K.',init:'A',color:'#7B6FFF',text:'Node 18+ works great. Check with: node --version ⚡',time:'44:15'},
-];
-let seconds=44*60+32, states={mic:true,cam:true,screen:false,hand:false};
-let currentView='speaker', wbTool='pen', wbColor='#7B6FFF', drawing=false, lx=0, ly=0;
+// ============================================================
+// CONFIGURATION
+// ============================================================
+const CONFIG = {
+  maxChatLength: 500,
+  handTimeout: 12000,
+  botInterval: 8000,
+  botChance: 0.5,
+  reactions: ['👏','❤️','😂','🔥','💡','🤯','🚀'],
+  gridViews: ['speaker','grid2','grid4','grid6','grid9'],
+  colors: ['#7B6FFF','#00E5A0','#FF3D5A','#FFB930','#4B9EFF','#ECEDF5'],
+};
 
-setInterval(()=>{
-  seconds++;
-  const m=Math.floor(seconds/60),s=seconds%60;
-  document.getElementById('timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-},1000);
+// ============================================================
+// DATA
+// ============================================================
+const participants = [
+  {id:1,name:'Amara K.',init:'A',color:'#7B6FFF',role:'Host',muted:false,cam:true,hand:false,me:false,avatar:null},
+  {id:2,name:'You',init:'Y',color:'#00E5A0',role:'Student',muted:false,cam:true,hand:false,me:true,avatar:null},
+  {id:3,name:'Carlos V.',init:'C',color:'#FF3D5A',role:'Student',muted:true,cam:false,hand:true,me:false,avatar:null},
+  {id:4,name:'Nadia R.',init:'N',color:'#FFB930',role:'Student',muted:false,cam:true,hand:false,me:false,avatar:null},
+  {id:5,name:'Omar F.',init:'O',color:'#4B9EFF',role:'Student',muted:true,cam:true,hand:false,me:false,avatar:null},
+  {id:6,name:'Lin P.',init:'L',color:'#A78BFA',role:'Student',muted:false,cam:false,hand:false,me:false,avatar:null},
+  {id:7,name:'Kemi A.',init:'K',color:'#F97316',role:'Student',muted:true,cam:true,hand:false,me:false,avatar:null},
+  {id:8,name:'Jin W.',init:'J',color:'#22D3EE',role:'Student',muted:false,cam:true,hand:false,me:false,avatar:null},
+  {id:9,name:'Raj N.',init:'R',color:'#84CC16',role:'Student',muted:true,cam:false,hand:false,me:false,avatar:null},
+  {id:10,name:'Mia H.',init:'M',color:'#EC4899',role:'Student',muted:false,cam:true,hand:false,me:false,avatar:null},
+  {id:11,name:'Ben M.',init:'B',color:'#FB923C',role:'Student',muted:true,cam:true,hand:false,me:false,avatar:null},
+  {id:12,name:'Sara L.',init:'S',color:'#34D399',role:'Student',muted:false,cam:true,hand:false,me:false,avatar:null},
+];
 
-function setView(v){
-  currentView=v;
-  const map={speaker:'speaker',grid2:'grid-2',grid4:'grid-4',grid6:'grid-6'};
-  document.getElementById('videoGrid').className='video-grid mode-'+map[v];
-  document.querySelectorAll('.vs-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('vs-'+v).classList.add('active');
+let chatLog = [
+  {system:true,text:'🎯 Session started — Build a React App from Scratch'},
+  {name:'Amara K.',init:'A',color:'#7B6FFF',text:"Welcome everyone! Let's build something real today. 🚀",time:'00:01'},
+  {name:'Carlos V.',init:'C',color:'#FF3D5A',text:'So excited for this!',time:'00:05'},
+  {name:'Nadia R.',init:'N',color:'#FFB930',text:'Can we start with project setup?',time:'00:08'},
+  {name:'Amara K.',init:'A',color:'#7B6FFF',text:'Yes! Starting with Vite + React. Sharing my screen now.',time:'00:11'},
+  {name:'Omar F.',init:'O',color:'#4B9EFF',text:'What Node version do we need?',time:'00:13'},
+  {name:'Amara K.',init:'A',color:'#7B6FFF',text:'Node 18+ works great. Check with: node --version ⚡',time:'00:15'},
+];
+
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  mic: true,
+  cam: true,
+  screen: false,
+  hand: false,
+  view: 'speaker',
+  wbTool: 'pen',
+  wbColor: '#7B6FFF',
+  seconds: 0,
+  isDrawing: false,
+  lastX: 0,
+  lastY: 0,
+  pinned: new Set(),
+  handQueue: [],
+  wbHistory: [],
+  wbIndex: -1,
+  notifTimeout: null,
+  botInterval: null,
+};
+
+// ============================================================
+// TIMER
+// ============================================================
+function updateTimer() {
+  state.seconds++;
+  const m = Math.floor(state.seconds / 60);
+  const s = state.seconds % 60;
+  document.getElementById('timer').textContent = 
+    `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+setInterval(updateTimer, 1000);
+
+// ============================================================
+// VIEW MANAGEMENT
+// ============================================================
+function setView(view) {
+  if (!CONFIG.gridViews.includes(view)) return;
+  state.view = view;
+  const map = {
+    speaker:'speaker', grid2:'grid-2', grid4:'grid-4', 
+    grid6:'grid-6', grid9:'grid-9'
+  };
+  document.getElementById('videoGrid').className = 'video-grid mode-' + map[view];
+  document.querySelectorAll('.vs-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.vs-btn[data-view="${view}"]`)?.classList.add('active');
   buildGrid();
 }
 
-function buildGrid(){
-  const counts={speaker:1,grid2:2,grid4:4,grid6:6};
-  const n=counts[currentView]||1;
-  const toShow=participants.filter(p=>!p.me).slice(0,n);
-  document.getElementById('videoGrid').innerHTML=toShow.map((p,i)=>`
-    <div class="video-tile ${i===0&&currentView==='speaker'?'speaking':''}" onclick="this.classList.toggle('pinned')">
-      <div class="tile-bg" style="background:linear-gradient(135deg,${p.color}18,#050608)">
-        <div class="tile-avatar ${n>2?'sm':''}" style="background:${p.color}">${p.init}</div>
-        ${n<=2?`<div class="tile-name-big">${p.name}</div><div class="tile-sub">${p.role}</div>`:''}
-      </div>
-      ${i===0?`<div class="tile-top"><div class="speaking-wave"><span></span><span></span><span></span></div><div></div></div>`:''}
-      <div class="tile-footer">
-        <div class="tile-name">
-          <div class="tile-icon ${p.muted?'muted':''}">${p.muted?'🔇':'🎙'}</div>
-          ${p.name}
+// ============================================================
+// GRID BUILDING
+// ============================================================
+function buildGrid() {
+  const counts = {speaker:1, grid2:2, grid4:4, grid6:6, grid9:9};
+  const count = counts[state.view] || 1;
+  
+  let visible = participants.filter(p => !p.me);
+  
+  // Speaker view: show host first
+  if (state.view === 'speaker') {
+    const host = visible.find(p => p.role === 'Host');
+    if (host) visible = [host, ...visible.filter(p => p.id !== host.id)];
+  }
+  
+  // Show pinned participants first if any
+  const pinned = visible.filter(p => state.pinned.has(p.id));
+  const unpinned = visible.filter(p => !state.pinned.has(p.id));
+  visible = [...pinned, ...unpinned].slice(0, count);
+  
+  const grid = document.getElementById('videoGrid');
+  if (visible.length === 0) {
+    grid.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--muted);font-size:16px">No participants visible</div>`;
+    return;
+  }
+  
+  grid.innerHTML = visible.map((p, idx) => {
+    const isSpeaking = idx === 0 && state.view === 'speaker';
+    const isPinned = state.pinned.has(p.id);
+    const sizeClass = count <= 2 ? '' : (count <= 4 ? 'sm' : 'xs');
+    
+    return `
+      <div class="video-tile ${isSpeaking ? 'speaking' : ''} ${isPinned ? 'pinned' : ''} ${p.me ? 'self-tile' : ''}" 
+           data-id="${p.id}" onclick="togglePin(${p.id})" title="${p.name} - ${p.role}">
+        <div class="tile-bg" style="--tile-bg-start:${p.color}18;">
+          <div class="tile-avatar ${sizeClass}" style="background:${p.color};${p.cam ? '' : 'filter:grayscale(1)'}">${p.init}</div>
+          ${count <= 2 ? `<div class="tile-name-big">${p.name}</div><div class="tile-sub">${p.role}${p.hand ? ' ✋' : ''}</div>` : ''}
         </div>
-        <div>${p.hand?'✋':''} ${!p.cam?'🚫':''}</div>
+        ${isSpeaking ? `<div class="tile-top"><div class="speaking-wave"><span></span><span></span><span></span></div></div>` : ''}
+        <div class="tile-footer">
+          <div class="tile-name">
+            <div class="tile-icon ${p.muted ? 'muted' : ''}">${p.muted ? '🔇' : '🎙'}</div>
+            ${p.name}${p.hand ? ' ✋' : ''}
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;font-size:11px">
+            ${!p.cam ? '🚫' : ''}
+            ${isPinned ? '📌' : ''}
+          </div>
+        </div>
       </div>
-    </div>`).join('');
+    `;
+  }).join('');
 }
 
-function toggle(k){
-  states[k]=!states[k];
-  if(k==='mic'){document.getElementById('micIco').textContent=states.mic?'🎙️':'🔇';document.getElementById('micLbl').textContent=states.mic?'Mute':'Unmute';document.getElementById('micBtn').className='ctrl-btn '+(states.mic?'':'off')}
-  if(k==='cam'){document.getElementById('camIco').textContent=states.cam?'📷':'🚫';document.getElementById('camLbl').textContent=states.cam?'Camera':'Show';document.getElementById('camBtn').className='ctrl-btn '+(states.cam?'':'off')}
-  if(k==='screen'){document.getElementById('screenOverlay').classList.toggle('active',states.screen);document.getElementById('screenBtn').classList.toggle('on',states.screen)}
-  if(k==='hand'){document.getElementById('handBtn').classList.toggle('on',states.hand);showToast(states.hand?'✋ Hand raised — host will call on you':'Hand lowered')}
+// ============================================================
+// PINNING
+// ============================================================
+function togglePin(id) {
+  if (state.pinned.has(id)) {
+    state.pinned.delete(id);
+    showToast('Unpinned');
+  } else {
+    state.pinned.add(id);
+    showToast('📌 Pinned');
+  }
+  buildGrid();
 }
 
-function sendReaction(e){
-  const el=document.createElement('div');el.className='reaction-bubble';el.textContent=e;
-  document.getElementById('reactionsFloat').appendChild(el);setTimeout(()=>el.remove(),2600);
+// ============================================================
+// MEDIA CONTROLS
+// ============================================================
+function toggleMedia(type) {
+  if (type === 'mic') {
+    state.mic = !state.mic;
+    const el = document.getElementById('micIco');
+    el.textContent = state.mic ? '🎙️' : '🔇';
+    el.style.animation = 'none';
+    setTimeout(() => el.style.animation = '');
+    document.getElementById('micLbl').textContent = state.mic ? 'Mute' : 'Unmute';
+    document.getElementById('micBtn').className = 'ctrl-btn ' + (state.mic ? 'on' : 'off');
+    updateSelfStatus();
+    if (!state.mic) showToast('🔇 Microphone muted');
+    else showToast('🎙️ Microphone unmuted');
+  }
+  
+  if (type === 'cam') {
+    state.cam = !state.cam;
+    const el = document.getElementById('camIco');
+    el.textContent = state.cam ? '📷' : '🚫';
+    document.getElementById('camLbl').textContent = state.cam ? 'Camera' : 'Show';
+    document.getElementById('camBtn').className = 'ctrl-btn ' + (state.cam ? 'on' : 'off');
+    updateSelfStatus();
+    if (!state.cam) showToast('📷 Camera off');
+    else showToast('📷 Camera on');
+  }
+  
+  if (type === 'screen') {
+    state.screen = !state.screen;
+    document.getElementById('screenOverlay').classList.toggle('active', state.screen);
+    document.getElementById('screenBtn').classList.toggle('on', state.screen);
+    const label = document.getElementById('screenLabel');
+    if (state.screen) {
+      label.textContent = 'You are sharing your screen';
+      showToast('🖥️ Screen sharing started');
+    } else {
+      label.textContent = 'Amara is sharing her screen';
+      showToast('Screen sharing stopped');
+    }
+  }
 }
 
-function openTab(name){
-  ['chat','participants','whiteboard'].forEach(t=>{
-    document.getElementById('tab-'+t).classList.toggle('active',t===name);
-    document.getElementById('panel-'+t).classList.toggle('active',t===name);
+function toggleSelfMic() {
+  state.mic = !state.mic;
+  const btn = document.getElementById('selfMicBtn');
+  btn.textContent = state.mic ? '🎙️ Live' : '🔇 Muted';
+  btn.className = state.mic ? '' : 'off';
+  document.getElementById('micIco').textContent = state.mic ? '🎙️' : '🔇';
+  document.getElementById('micLbl').textContent = state.mic ? 'Mute' : 'Unmute';
+  document.getElementById('micBtn').className = 'ctrl-btn ' + (state.mic ? 'on' : 'off');
+  updateSelfStatus();
+}
+
+function toggleSelfCam() {
+  state.cam = !state.cam;
+  const btn = document.getElementById('selfCamBtn');
+  btn.textContent = state.cam ? '📷 On' : '🚫 Off';
+  btn.className = state.cam ? '' : 'off';
+  document.getElementById('camIco').textContent = state.cam ? '📷' : '🚫';
+  document.getElementById('camLbl').textContent = state.cam ? 'Camera' : 'Show';
+  document.getElementById('camBtn').className = 'ctrl-btn ' + (state.cam ? 'on' : 'off');
+  updateSelfStatus();
+}
+
+function updateSelfStatus() {
+  const sub = document.getElementById('selfViewSub');
+  const status = document.getElementById('selfStatus');
+  
+  if (!state.mic && !state.cam) {
+    sub.textContent = '🔇 · 📷 Off';
+    status.textContent = '🔇 Muted · 📷 Off';
+  } else if (!state.mic) {
+    sub.textContent = '🔇 Muted';
+    status.textContent = '🔇 Muted · 📷 On';
+  } else if (!state.cam) {
+    sub.textContent = '📷 Off';
+    status.textContent = '🎙️ Live · 📷 Off';
+  } else {
+    sub.textContent = '🎙️ Live';
+    status.textContent = '🎙️ Live · 📷 On';
+  }
+  
+  // Update self avatar
+  const av = document.getElementById('selfViewAv');
+  av.style.background = state.cam ? 'var(--green)' : 'var(--muted)';
+}
+
+// ============================================================
+// HAND RAISE
+// ============================================================
+function toggleHand() {
+  state.hand = !state.hand;
+  document.getElementById('handBtn').classList.toggle('on', state.hand);
+  document.getElementById('handIco').textContent = state.hand ? '✋' : '✋';
+  
+  const self = participants.find(p => p.me);
+  if (self) {
+    self.hand = state.hand;
+    if (state.hand) {
+      state.handQueue.push(self.id);
+      showToast('✋ Hand raised — host will call on you');
+      showHandNotification('You');
+      updateBadge();
+    } else {
+      state.handQueue = state.handQueue.filter(id => id !== self.id);
+      showToast('Hand lowered');
+      document.getElementById('handNotif').classList.remove('show');
+      updateBadge();
+    }
+  }
+  buildPList();
+  buildGrid();
+}
+
+function showHandNotification(name) {
+  document.getElementById('handNotifName').textContent = `${name} raised their hand`;
+  document.getElementById('handNotif').classList.add('show');
+  clearTimeout(state.notifTimeout);
+  state.notifTimeout = setTimeout(() => {
+    document.getElementById('handNotif').classList.remove('show');
+  }, CONFIG.handTimeout);
+}
+
+function callOnParticipant() {
+  const notif = document.getElementById('handNotif');
+  const name = document.getElementById('handNotifName').textContent.replace(' raised their hand', '');
+  notif.classList.remove('show');
+  
+  const p = participants.find(p => p.name === name || p.name === name + '');
+  if (p) {
+    p.hand = false;
+    state.handQueue = state.handQueue.filter(id => id !== p.id);
+    updateBadge();
+  }
+  
+  chatLog.push({system: true, text: `🎤 ${name} was called on by the host`});
+  renderChat();
+  buildPList();
+  buildGrid();
+  showToast(`🎤 Calling on ${name}...`);
+}
+
+function dismissHand() {
+  document.getElementById('handNotif').classList.remove('show');
+}
+
+function updateBadge() {
+  const badge = document.getElementById('handBadge');
+  const count = state.handQueue.length;
+  if (count > 0) {
+    badge.textContent = count;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ============================================================
+// REACTIONS
+// ============================================================
+function sendReaction(emoji) {
+  const el = document.createElement('div');
+  el.className = 'reaction-bubble';
+  el.textContent = emoji;
+  const container = document.getElementById('reactionsFloat');
+  container.appendChild(el);
+  // Random horizontal offset
+  el.style.marginLeft = (Math.random() - 0.5) * 40 + 'px';
+  setTimeout(() => el.remove(), 2800);
+}
+
+// ============================================================
+// CHAT
+// ============================================================
+function renderChat() {
+  const el = document.getElementById('chatMsgs');
+  el.innerHTML = chatLog.map(m => {
+    if (m.system) return `<div class="msg system"><div class="msg-text">${m.text}</div></div>`;
+    return `
+      <div class="msg">
+        <div class="msg-av" style="background:${m.color}">${m.init}</div>
+        <div>
+          <div class="msg-head">
+            <span class="msg-name" style="color:${m.color}">${m.name}</span>
+            <span class="msg-time">${m.time || 'now'}</span>
+          </div>
+          <div class="msg-text">${escapeHtml(m.text)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function sendMsg() {
+  const inp = document.getElementById('chatInp');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  
+  const m = Math.floor(state.seconds / 60);
+  const s = state.seconds % 60;
+  chatLog.push({
+    name: 'You',
+    init: 'Y',
+    color: '#00E5A0',
+    text: txt,
+    time: `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
   });
-  if(name==='whiteboard')setTimeout(initWB,50);
+  inp.value = '';
+  renderChat();
+  
+  // Simulate responses occasionally
+  if (Math.random() > 0.7) {
+    setTimeout(() => {
+      const responses = ['Great point!', 'Totally agree 👍', 'Nice!', 'Thanks for sharing!'];
+      const r = responses[Math.floor(Math.random() * responses.length)];
+      const bot = participants.filter(p => !p.me)[Math.floor(Math.random() * 4) + 1];
+      if (bot) {
+        const m2 = Math.floor(state.seconds / 60);
+        const s2 = state.seconds % 60;
+        chatLog.push({
+          name: bot.name,
+          init: bot.init,
+          color: bot.color,
+          text: r,
+          time: `${String(m2).padStart(2,'0')}:${String(s2).padStart(2,'0')}`
+        });
+        renderChat();
+      }
+    }, 800 + Math.random() * 1500);
+  }
+}
+
+// ============================================================
+// PARTICIPANTS LIST
+// ============================================================
+function buildPList() {
+  const list = document.getElementById('plist');
+  const sorted = [...participants];
+  // Show self first, then hosts, then others
+  sorted.sort((a,b) => {
+    if (a.me) return -1;
+    if (b.me) return 1;
+    if (a.role === 'Host') return -1;
+    if (b.role === 'Host') return 1;
+    return a.name.localeCompare(b.name);
+  });
+  
+  list.innerHTML = sorted.map(p => `
+    <div class="plist-item" onclick="showToast('${p.name} — ${p.role}${p.hand ? ' ✋' : ''}')">
+      <div class="plist-av" style="background:${p.color}">${p.init}</div>
+      <div style="flex:1;min-width:0">
+        <div class="plist-name">${p.name}${p.me ? ' (you)' : ''}</div>
+        <div class="plist-role">${p.role}${p.hand ? ' ✋' : ''}</div>
+      </div>
+      <div class="plist-icons">
+        ${p.hand ? '<span style="color:#FFB930">✋</span>' : ''}
+        <span class="${p.muted ? 'muted-icon' : ''}">${p.muted ? '🔇' : '🎙️'}</span>
+        <span>${p.cam ? '📷' : '🚫'}</span>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('participantCount').textContent = 
+    `${participants.length} in session`;
+}
+buildPList();
+
+// ============================================================
+// WHITEBOARD
+// ============================================================
+let wbInitialized = false;
+
+function initWB() {
+  const canvas = document.getElementById('wb');
+  if (!canvas || wbInitialized) return;
+  wbInitialized = true;
+  
+  const resize = () => {
+    const parent = canvas.parentElement;
+    const w = parent.clientWidth - 4;
+    const h = parent.clientHeight - 70;
+    if (w > 0 && h > 0) {
+      canvas.width = w;
+      canvas.height = h;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      // Redraw history if any
+      redrawWB();
+    }
+  };
+  resize();
+  window.addEventListener('resize', resize);
+  
+  const ctx = canvas.getContext('2d');
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = state.wbColor;
+  ctx.lineWidth = 3;
+  
+  const getPos = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return [
+      (clientX - rect.left) * (canvas.width / rect.width),
+      (clientY - rect.top) * (canvas.height / rect.height)
+    ];
+  };
+  
+  const startDraw = (e) => {
+    e.preventDefault();
+    state.isDrawing = true;
+    [state.lastX, state.lastY] = getPos(e);
+    canvas.classList.add('drawing');
+  };
+  
+  const draw = (e) => {
+    e.preventDefault();
+    if (!state.isDrawing) return;
+    const [x, y] = getPos(e);
+    
+    // Save to history for undo
+    if (state.wbTool !== 'erase' && state.wbTool !== 'text') {
+      saveWBSnapshot();
+    }
+    
+    if (state.wbTool === 'erase') {
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.strokeStyle = 'rgba(0,0,0,1)';
+      ctx.lineWidth = 30;
+      ctx.beginPath();
+      ctx.moveTo(state.lastX, state.lastY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.restore();
+    } else if (state.wbTool === 'line') {
+      // Draw line from start to current
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      redrawWB();
+      ctx.beginPath();
+      ctx.moveTo(state.lastX, state.lastY);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = state.wbColor;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    } else if (state.wbTool === 'text') {
+      const text = prompt('Enter text:', 'Hello');
+      if (text) {
+        ctx.fillStyle = state.wbColor;
+        ctx.font = '24px Inter, sans-serif';
+        ctx.fillText(text, x, y);
+        saveWBSnapshot();
+      }
+      state.isDrawing = false;
+      canvas.classList.remove('drawing');
+      return;
+    } else {
+      ctx.strokeStyle = state.wbColor;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(state.lastX, state.lastY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+    
+    [state.lastX, state.lastY] = [x, y];
+  };
+  
+  const stopDraw = () => {
+    if (state.isDrawing && state.wbTool !== 'line') {
+      saveWBSnapshot();
+    }
+    state.isDrawing = false;
+    canvas.classList.remove('drawing');
+  };
+  
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener('touchstart', startDraw, {passive: false});
+  canvas.addEventListener('touchmove', draw, {passive: false});
+  canvas.addEventListener('touchend', stopDraw, {passive: false});
+}
+
+function saveWBSnapshot() {
+  const canvas = document.getElementById('wb');
+  if (!canvas) return;
+  // Remove any future states
+  state.wbHistory = state.wbHistory.slice(0, state.wbIndex + 1);
+  // Save current canvas state
+  state.wbHistory.push(canvas.toDataURL());
+  state.wbIndex = state.wbHistory.length - 1;
+  // Keep history manageable
+  if (state.wbHistory.length > 50) {
+    state.wbHistory.shift();
+    state.wbIndex--;
+  }
+}
+
+function redrawWB() {
+  const canvas = document.getElementById('wb');
+  if (!canvas || state.wbIndex < 0 || !state.wbHistory[state.wbIndex]) return;
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  };
+  img.src = state.wbHistory[state.wbIndex];
+}
+
+function undoWB() {
+  if (state.wbIndex <= 0) {
+    showToast('Nothing to undo');
+    return;
+  }
+  state.wbIndex--;
+  redrawWB();
+  showToast('↩️ Undo');
+}
+
+function clearWB() {
+  const canvas = document.getElementById('wb');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Save clear as history
+    state.wbHistory = [];
+    state.wbIndex = -1;
+    saveWBSnapshot();
+    showToast('🗑️ Whiteboard cleared');
+  }
+}
+
+function setTool(tool) {
+  state.wbTool = tool;
+  document.querySelectorAll('[id^=wbt-]').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('wbt-' + tool);
+  if (el) el.classList.add('active');
+  showToast(`✏️ ${tool.charAt(0).toUpperCase() + tool.slice(1)} tool`);
+}
+
+function setColor(el, color) {
+  state.wbColor = color;
+  state.wbTool = 'pen';
+  document.querySelectorAll('.wb-color').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  setTool('pen');
+}
+
+// ============================================================
+// SIDEBAR / TAB MANAGEMENT
+// ============================================================
+function openTab(name) {
+  const tabs = ['chat', 'participants', 'whiteboard', 'settings'];
+  tabs.forEach(t => {
+    const tabBtn = document.querySelector(`.stab[data-tab="${t}"]`);
+    const panel = document.getElementById('panel-' + t);
+    if (tabBtn) tabBtn.classList.toggle('active', t === name);
+    if (panel) panel.classList.toggle('active', t === name);
+  });
+  
+  if (name === 'whiteboard') {
+    setTimeout(initWB, 150);
+  }
+  
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('mobOverlay').classList.add('open');
+  }
+}
+
+function openMob() {
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('mobOverlay').classList.add('open');
 }
 
-function renderChat(){
-  const el=document.getElementById('chatMsgs');
-  el.innerHTML=chatLog.map(m=>{
-    if(m.system)return`<div class="msg system"><div class="msg-text">${m.text}</div></div>`;
-    return`<div class="msg"><div class="msg-av" style="background:${m.color}">${m.init}</div><div><div class="msg-head"><span class="msg-name" style="color:${m.color}">${m.name}</span><span class="msg-time">${m.time}</span></div><div class="msg-text">${m.text}</div></div></div>`;
-  }).join('');
-  el.scrollTop=el.scrollHeight;
-}
-renderChat();
-
-function sendMsg(){
-  const inp=document.getElementById('chatInp');const txt=inp.value.trim();if(!txt)return;
-  const m=Math.floor(seconds/60),s=seconds%60;
-  chatLog.push({name:'You',init:'Y',color:'#00E5A0',text:txt,time:`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`});
-  inp.value='';renderChat();
+function closeMob() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobOverlay').classList.remove('open');
 }
 
-function buildPList(){
-  document.getElementById('plist').innerHTML=participants.map(p=>`
-    <div class="plist-item">
-      <div class="plist-av" style="background:${p.color}">${p.init}</div>
-      <div style="flex:1;min-width:0">
-        <div class="plist-name">${p.me?p.name+' (you)':p.name}</div>
-        <div class="plist-role">${p.role}</div>
-      </div>
-      <div class="plist-icons">
-        ${p.hand?'<span style="color:#FFB930">✋</span>':''}
-        <span class="${p.muted?'muted-icon':''}">${p.muted?'🔇':'🎙️'}</span>
-        <span>${p.cam?'📷':'🚫'}</span>
-      </div>
-    </div>`).join('');
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+function showToast(msg) {
+  const toast = document.getElementById('handToast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => toast.classList.remove('show'), 2800);
 }
-buildPList();
 
-function initWB(){
-  const c=document.getElementById('wb');if(!c||c._init)return;c._init=true;
-  c.width=c.offsetWidth;c.height=c.offsetHeight;
-  const ctx=c.getContext('2d');ctx.lineCap='round';ctx.lineJoin='round';
-  const gp=(e,t)=>{const r=c.getBoundingClientRect();const s=t||e;return[s.clientX-r.left,s.clientY-r.top]};
-  c.addEventListener('mousedown',e=>{drawing=true;[lx,ly]=gp(e)});
-  c.addEventListener('mousemove',e=>{if(!drawing)return;const[x,y]=gp(e);ctx.strokeStyle=wbTool==='erase'?'#08090d':wbColor;ctx.lineWidth=wbTool==='erase'?28:3;ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(x,y);ctx.stroke();[lx,ly]=[x,y]});
-  c.addEventListener('mouseup',()=>drawing=false);c.addEventListener('mouseleave',()=>drawing=false);
-  c.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;[lx,ly]=gp(e,e.touches[0])},{passive:false});
-  c.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const[x,y]=gp(e,e.touches[0]);ctx.strokeStyle=wbTool==='erase'?'#08090d':wbColor;ctx.lineWidth=wbTool==='erase'?28:3;ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(x,y);ctx.stroke();[lx,ly]=[x,y]},{passive:false});
-  c.addEventListener('touchend',()=>drawing=false);
-}
-function setTool(t){wbTool=t;document.querySelectorAll('[id^=wbt-]').forEach(b=>b.classList.remove('active'));document.getElementById('wbt-'+t)?.classList.add('active')}
-function setColor(el,c){wbColor=c;wbTool='pen';document.querySelectorAll('.wb-color').forEach(e=>e.classList.remove('selected'));el.classList.add('selected');setTool('pen')}
-function clearWB(){const c=document.getElementById('wb');if(c)c.getContext('2d').clearRect(0,0,c.width,c.height)}
-
-function toggleSelfMic(){
-  states.mic=!states.mic;
-  const btn=document.getElementById('selfMicBtn');
-  if(btn){btn.textContent=states.mic?'🎙️ Live':'🔇 Muted';btn.style.background=states.mic?'rgba(0,229,160,.1)':'rgba(255,61,90,.1)';btn.style.borderColor=states.mic?'rgba(0,229,160,.3)':'rgba(255,61,90,.3)';btn.style.color=states.mic?'var(--green)':'var(--live)'}
-  document.getElementById('micIco').textContent=states.mic?'🎙️':'🔇';
-  document.getElementById('micLbl').textContent=states.mic?'Mute':'Unmute';
-  document.getElementById('micBtn').className='ctrl-btn '+(states.mic?'':'off');
-}
-function toggleSelfCam(){
-  states.cam=!states.cam;
-  const btn=document.getElementById('selfCamBtn');
-  if(btn){btn.textContent=states.cam?'📷 On':'🚫 Off';btn.style.background=states.cam?'rgba(0,229,160,.1)':'rgba(255,61,90,.1)';btn.style.borderColor=states.cam?'rgba(0,229,160,.3)':'rgba(255,61,90,.3)';btn.style.color=states.cam?'var(--green)':'var(--live)'}
-  document.getElementById('camIco').textContent=states.cam?'📷':'🚫';
-  document.getElementById('camLbl').textContent=states.cam?'Camera':'Show';
-  document.getElementById('camBtn').className='ctrl-btn '+(states.cam?'':'off');
-}
-function openMob(){document.getElementById('sidebar').classList.add('open');document.getElementById('mobOverlay').classList.add('open')}
-function closeMob(){document.getElementById('sidebar').classList.remove('open');document.getElementById('mobOverlay').classList.remove('open')}
-
-function showToast(msg){const t=document.getElementById('handToast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
-function dismissHand(){document.getElementById('handNotif').classList.remove('show');chatLog.push({system:true,text:'Amara called on Carlos V.'});renderChat()}
-setTimeout(()=>document.getElementById('handNotif').classList.add('show'),5000);
-
-const bots=[
-  {name:'Lin P.',init:'L',color:'#A78BFA',msgs:['This makes so much sense!','When do we add state?','React hooks are 🔥']},
-  {name:'Sara L.',init:'S',color:'#34D399',msgs:['Great explanation!','Can you slow down on useEffect?','Thank you! 🙏']},
-  {name:'Mia H.',init:'M',color:'#EC4899',msgs:['I was stuck on this before','Is this different from class components?']},
+// ============================================================
+// BOT MESSAGES
+// ============================================================
+const botMessages = [
+  {name:'Lin P.',init:'L',color:'#A78BFA',msgs:['This makes so much sense!','When do we add state?','React hooks are 🔥','Can you share the code?','I love this approach!']},
+  {name:'Sara L.',init:'S',color:'#34D399',msgs:['Great explanation!','Can you slow down on useEffect?','Thank you! 🙏','This is so helpful!','Got it!']},
+  {name:'Mia H.',init:'M',color:'#EC4899',msgs:['I was stuck on this before','Is this different from class components?','Wow, mind blown! 🤯','Perfect timing!']},
+  {name:'Raj N.',init:'R',color:'#84CC16',msgs:['Can we see the output?','This is amazing!','What about props?','Makes total sense now!']},
 ];
-let bi=0;
-setInterval(()=>{
-  if(Math.random()>.55){
-    const bot=bots[bi%bots.length];bi++;
-    const txt=bot.msgs[Math.floor(Math.random()*bot.msgs.length)];
-    const m=Math.floor(seconds/60),s=seconds%60;
-    chatLog.push({name:bot.name,init:bot.init,color:bot.color,text:txt,time:`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`});
-    renderChat();
-  }
-},9000);
 
+let botIndex = 0;
+function startBotMessages() {
+  if (state.botInterval) clearInterval(state.botInterval);
+  state.botInterval = setInterval(() => {
+    if (Math.random() > CONFIG.botChance) {
+      const bot = botMessages[botIndex % botMessages.length];
+      botIndex++;
+      const txt = bot.msgs[Math.floor(Math.random() * bot.msgs.length)];
+      const m = Math.floor(state.seconds / 60);
+      const s = state.seconds % 60;
+      chatLog.push({
+        name: bot.name,
+        init: bot.init,
+        color: bot.color,
+        text: txt,
+        time: `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+      });
+      renderChat();
+    }
+  }, CONFIG.botInterval);
+}
+startBotMessages();
+
+// ============================================================
+// INVITE / SHARE
+// ============================================================
+function copyInvite() {
+  const link = window.location.href;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(`Join my SkillStream session: ${link}`)
+      .then(() => showToast('📋 Invite link copied!'))
+      .catch(() => fallbackCopy(link));
+  } else {
+    fallbackCopy(link);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast('📋 Invite link copied!');
+  } catch (e) {
+    showToast('📋 Copy this: ' + text);
+  }
+  document.body.removeChild(ta);
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function resetAll() {
+  if (!confirm('Reset everything? This will clear chat and whiteboard.')) return;
+  chatLog = [{system:true,text:'🔄 Session was reset'}];
+  renderChat();
+  clearWB();
+  state.pinned.clear();
+  state.handQueue = [];
+  state.wbHistory = [];
+  state.wbIndex = -1;
+  showToast('🔄 Reset complete');
+}
+
+function exportData() {
+  const data = {
+    chat: chatLog,
+    participants: participants,
+    timestamp: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `skillstream-chat-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📤 Chat exported!');
+}
+
+// ============================================================
+// LEAVE
+// ============================================================
+function handleLeave() {
+  if (confirm('Leave the session?')) {
+    showToast('👋 Goodbye!');
+    setTimeout(() => {
+      if (state.botInterval) clearInterval(state.botInterval);
+      window.location.reload();
+    }, 500);
+  }
+}
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  // Help
+  if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    const help = document.getElementById('shortcutsHelp');
+    help.style.display = help.style.display === 'none' ? 'flex' : 'none';
+    return;
+  }
+  
+  // Escape
+  if (e.key === 'Escape') {
+    closeMob();
+    document.getElementById('shortcutsHelp').style.display = 'none';
+    return;
+  }
+  
+  // Ctrl+ shortcuts
+  if (e.ctrlKey || e.metaKey) {
+    switch(e.key.toLowerCase()) {
+      case 'm': e.preventDefault(); toggleMedia('mic'); break;
+      case 'c': e.preventDefault(); toggleMedia('cam'); break;
+      case 'h': e.preventDefault(); toggleHand(); break;
+      case 's': e.preventDefault(); toggleMedia('screen'); break;
+      case '1': e.preventDefault(); setView('speaker'); break;
+      case '2': e.preventDefault(); setView('grid2'); break;
+      case '3': e.preventDefault(); setView('grid4'); break;
+      case '4': e.preventDefault(); setView('grid6'); break;
+    }
+  }
+});
+
+// ============================================================
+// SIMULATED HAND RAISE (Demo)
+// ============================================================
+setTimeout(() => {
+  const carlos = participants.find(p => p.name === 'Carlos V.');
+  if (carlos && !carlos.me) {
+    carlos.hand = true;
+    state.handQueue.push(carlos.id);
+    showHandNotification('Carlos V.');
+    buildPList();
+    buildGrid();
+    updateBadge();
+  }
+}, 5000);
+
+// Second hand raise demo
+setTimeout(() => {
+  const raj = participants.find(p => p.name === 'Raj N.');
+  if (raj && !raj.me) {
+    raj.hand = true;
+    state.handQueue.push(raj.id);
+    // Only show if first was dismissed
+    if (!document.getElementById('handNotif').classList.contains('show')) {
+      showHandNotification('Raj N.');
+    }
+    buildPList();
+    buildGrid();
+    updateBadge();
+  }
+}, 12000);
+
+// ============================================================
+// INIT
+// ============================================================
 buildGrid();
+updateSelfStatus();
+showToast('🎯 Welcome to SkillStream! Press ? for shortcuts');
+
+console.log('🎯 SkillStream Classroom v2.0 loaded!');
+console.log('⌨️  Shortcuts: Ctrl+M (mic), Ctrl+C (camera), Ctrl+H (hand), ? (help)');
+
+// Handle window resize for whiteboard
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (wbInitialized) {
+      const canvas = document.getElementById('wb');
+      if (canvas) {
+        const parent = canvas.parentElement;
+        const w = parent.clientWidth - 4;
+        const h = parent.clientHeight - 70;
+        if (w > 0 && h > 0) {
+          canvas.width = w;
+          canvas.height = h;
+          canvas.style.width = w + 'px';
+          canvas.style.height = h + 'px';
+          redrawWB();
+        }
+      }
+    }
+    buildGrid();
+  }, 200);
+});
+
+// Service worker registration placeholder (PWA ready)
+if ('serviceWorker' in navigator) {
+  // navigator.serviceWorker.register('/sw.js');
+}
 </script>
 </body>
 </html>
