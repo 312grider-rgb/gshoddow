@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SkillStream — Learn Anything, Live</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0f0f14;color:#e8e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:90px}
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#16161e;border-bottom:1px solid #2a2a3a;position:sticky;top:0;z-index:100}
+  .logo{font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px}.logo span{color:#7c6dfa}
+  .nav-right{display:flex;gap:10px;align-items:center}
+  .btn-outline{padding:8px 16px;border:1px solid #3a3a4e;border-radius:8px;background:none;color:#e8e8f0;font-size:14px;cursor:pointer}
+  .btn-primary{padding:8px 16px;border:none;border-radius:8px;background:#7c6dfa;color:#fff;font-size:14px;cursor:pointer;font-weight:700}
+  /* HERO */
+  .hero{padding:28px 20px 20px}
+  .hero h1{font-size:30px;font-weight:900;line-height:1.2;margin-bottom:8px}
+  .hero h1 span{color:#7c6dfa}
+  .hero p{color:#888;font-size:15px;margin-bottom:20px}
+  /* SEARCH */
+  .search-row{display:flex;gap:8px;margin-bottom:4px}
+  .search-box{flex:1;background:#1a1a26;border:1px solid #2a2a3a;border-radius:10px;display:flex;align-items:center;padding:0 14px;gap:8px}
+  .search-box input{flex:1;background:none;border:none;outline:none;color:#e8e8f0;font-size:14px;padding:12px 0}
+  .search-box input::placeholder{color:#555}
+  .filter-btn{padding:10px 14px;background:#1a1a26;border:1px solid #2a2a3a;border-radius:10px;color:#aaa;font-size:13px;cursor:pointer;white-space:nowrap}
+  /* CATEGORIES */
+  .section-label{padding:20px 20px 10px;font-size:13px;color:#666;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .categories{display:flex;gap:8px;overflow-x:auto;padding:0 20px 16px;scrollbar-width:none}
+  .categories::-webkit-scrollbar{display:none}
+  .cat{flex-shrink:0;display:flex;align-items:center;gap:7px;padding:9px 16px;background:#1a1a26;border:1.5px solid #2a2a3a;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+  .cat.active,.cat:hover{background:#7c6dfa;border-color:#7c6dfa;color:#fff}
+  .cat-count{background:#2a2a3a;color:#888;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700}
+  .cat.active .cat-count{background:rgba(255,255,255,.2);color:#fff}
+  /* LIVE SECTION */
+  .section-header{display:flex;justify-content:space-between;align-items:center;padding:0 20px 12px}
+  .section-header h2{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .live-indicator{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:pulse 1.5s infinite;display:inline-block}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .see-all{font-size:13px;color:#7c6dfa;cursor:pointer;font-weight:600}
+  /* SESSION CARDS */
+  .cards-scroll{display:flex;gap:12px;overflow-x:auto;padding:0 20px 4px;scrollbar-width:none}
+  .cards-scroll::-webkit-scrollbar{display:none}
+  .session-card{flex-shrink:0;width:200px;background:#1a1a26;border-radius:16px;overflow:hidden;border:1px solid #2a2a3a;cursor:pointer;transition:transform .2s,border-color .2s}
+  .session-card:hover{transform:translateY(-2px);border-color:#7c6dfa}
+  .card-thumb{height:110px;display:flex;align-items:center;justify-content:center;font-size:42px;position:relative}
+  .thumb-purple{background:linear-gradient(135deg,#2a1a4a,#1a1030)}
+  .thumb-teal{background:linear-gradient(135deg,#1a3a4a,#0a1a2a)}
+  .thumb-green{background:linear-gradient(135deg,#1a3a2a,#0a1a10)}
+  .thumb-orange{background:linear-gradient(135deg,#3a2a1a,#1a100a)}
+  .thumb-pink{background:linear-gradient(135deg,#3a1a3a,#1a0a1a)}
+  .thumb-blue{background:linear-gradient(135deg,#1a2a4a,#0a1020)}
+  .live-tag{position:absolute;top:8px;left:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;display:flex;align-items:center;gap:4px}
+  .type-tag{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#ddd;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;backdrop-filter:blur(4px)}
+  .joined{position:absolute;bottom:8px;left:8px;font-size:10px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:4px}
+  .card-body{padding:12px}
+  .card-cat{font-size:10px;font-weight:800;color:#7c6dfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .card-title{font-size:13px;font-weight:700;line-height:1.4;margin-bottom:6px}
+  .card-teacher{font-size:11px;color:#888;margin-bottom:8px}
+  .card-footer{display:flex;justify-content:space-between;align-items:center}
+  .card-meta{font-size:11px;color:#666}
+  .join-btn{padding:5px 12px;border-radius:6px;background:#7c6dfa;border:none;color:#fff;font-size:11px;font-weight:700;cursor:pointer}
+  .remind-btn{padding:5px 12px;border-radius:6px;background:#fbbf2420;border:1px solid #fbbf2440;color:#fbbf24;font-size:11px;font-weight:700;cursor:pointer}
+  /* STARTING SOON */
+  .soon-card{margin:0 20px 12px;background:#1a1a26;border-radius:14px;padding:14px;display:flex;gap:12px;align-items:center;border:1px solid #2a2a3a;cursor:pointer;transition:border-color .2s}
+  .soon-card:hover{border-color:#7c6dfa}
+  .soon-thumb{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+  .soon-info{flex:1}
+  .soon-cat{font-size:10px;font-weight:800;color:#7c6dfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+  .soon-title{font-size:14px;font-weight:700;margin-bottom:3px}
+  .soon-teacher{font-size:12px;color:#888}
+  .soon-right{text-align:right;flex-shrink:0}
+  .soon-time{display:inline-block;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800;margin-bottom:6px}
+  .time-yellow{background:#3a3a1a;color:#fbbf24}
+  .time-green{background:#1a3a2a;color:#4ade80}
+  /* ACADEMIC BANNER */
+  .academic-banner{margin:20px;background:linear-gradient(135deg,#1e1040,#2a1a4a);border-radius:20px;padding:20px;border:1px solid #3a2a5a;cursor:pointer;transition:transform .2s}
+  .academic-banner:hover{transform:scale(1.01)}
+  .academic-banner h3{font-size:18px;font-weight:800;margin-bottom:6px}
+  .academic-banner p{font-size:13px;color:#a78bfa;margin-bottom:14px}
+  .academic-levels{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .level-pill{padding:5px 12px;border-radius:10px;font-size:12px;font-weight:700;background:rgba(124,109,250,.15);color:#c084fc;border:1px solid rgba(124,109,250,.3)}
+  .banner-btn{padding:10px 20px;border-radius:10px;background:#7c6dfa;border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+  /* QUICK LINKS */
+  .quick-links{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 20px}
+  .quick-link{background:#1a1a26;border:1px solid #2a2a3a;border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;text-align:center}
+  .quick-link:hover{border-color:#7c6dfa;background:#1e1a30}
+  .quick-link .icon{font-size:28px;margin-bottom:8px}
+  .quick-link h4{font-size:14px;font-weight:700;margin-bottom:3px}
+  .quick-link p{font-size:11px;color:#888}
+  /* BOTTOM NAV */
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#16161e;border-top:1px solid #2a2a3a;display:flex;justify-content:space-around;padding:10px 0 16px;z-index:100}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:#555;font-size:10px;font-weight:600;transition:color .2s}
+  .nav-item.active{color:#7c6dfa}
+  .nav-icon{font-size:22px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Skill<span>Stream</span></div>
+  <div class="nav-right">
+    <button class="btn-outline">Sign in</button>
+    <button class="btn-primary" onclick="window.location='skillstream-teachers.html'">+ Teach a skill</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Learn anything, <span>live</span></h1>
+  <p>Join a live session or teach what you know — in groups or one-on-one.</p>
+  <div class="search-row">
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" placeholder="Search sessions, topics, or teachers..."/>
+    </div>
+    <button class="filter-btn">All types</button>
+    <button class="filter-btn">All status</button>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="section-label">Categories</div>
+<div class="categories">
+  <div class="cat active">🌟 All Skills <span class="cat-count">130</span></div>
+  <div class="cat" onclick="window.location='skillstream-academic.html'">🎓 Academic <span class="cat-count">45</span></div>
+  <div class="cat">💻 Technology <span class="cat-count">28</span></div>
+  <div class="cat">🎵 Music <span class="cat-count">19</span></div>
+  <div class="cat">🎨 Art & Design <span class="cat-count">15</span></div>
+  <div class="cat">🌍 Language <span class="cat-count">22</span></div>
+  <div class="cat">💼 Business <span class="cat-count">12</span></div>
+  <div class="cat">🍳 Cooking <span class="cat-count">8</span></div>
+  <div class="cat">💪 Fitness <span class="cat-count">11</span></div>
+</div>
+
+<!-- LIVE NOW -->
+<div class="section-header">
+  <h2><span class="live-indicator"></span> Live Now</h2>
+  <span class="see-all">See all</span>
+</div>
+<div class="cards-scroll">
+
+  <div class="session-card" onclick="window.location='skillstream-session-detail.html'">
+    <div class="card-thumb thumb-purple">
+      💻
+      <div class="live-tag">● LIVE</div>
+      <div class="type-tag">👥 Group</div>
+      <div class="joined">👤👤👤 12 joined</div>
+    </div>
+    <div class="card-body">
+      <div class="card-cat">Technology</div>
+      <div class="card-title">Build a React app from scratch</div>
+      <div class="card-teacher">Amara K.</div>
+      <div class="card-footer">
+        <div class="card-meta">⏱ 60 min · 8 spots</div>
+        <button class="join-btn">Join now</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="session-card" onclick="window.location='skillstream-session-detail.html'">
+    <div class="card-thumb thumb-orange">
+      ✍️
+      <div class="live-tag">● LIVE</div>
+      <div class="type-tag">👥 Group</div>
+      <div class="joined">👤👤👤 7 joined</div>
+    </div>
+    <div class="card-body">
+      <div class="card-cat">Art & Design</div>
+      <div class="card-title">Arabic calligraphy for beginners</div>
+      <div class="card-teacher">Yusuf M.</div>
+      <div class="card-footer">
+        <div class="card-meta">⏱ 45 min · 8 spots</div>
+        <button class="join-btn">Join now</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="session-card" onclick="window.location='skillstream-session-detail.html'">
+    <div class="card-thumb thumb-green">
+      🐍
+      <div class="live-tag">● LIVE</div>
+      <div class="type-tag">👤 1-on-1</div>
+      <div class="joined">👤 1 joined</div>
+    </div>
+    <div class="card-body">
+      <div class="card-cat">Technology</div>
+      <div class="card-title">1-on-1 Python tutoring</div>
+      <div class="card-teacher">Sara L.</div>
+      <div class="card-footer">
+        <div class="card-meta">⏱ 30 min · Full</div>
+        <button class="join-btn">Join now</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="session-card" onclick="window.location='skillstream-academic.html'">
+    <div class="card-thumb thumb-blue">
+      📊
+      <div class="live-tag">● LIVE</div>
+      <div class="type-tag">👥 Group</div>
+      <div class="joined">👤👤👤 14 joined</div>
+    </div>
+    <div class="card-body">
+      <div class="card-cat">Academic · Math</div>
+      <div class="card-title">Calculus — Derivatives & Integrals</div>
+      <div class="card-teacher">Dr. Amira S.</div>
+      <div class="card-footer">
+        <div class="card-meta">⏱ 60 min · 6 spots</div>
+        <button class="join-btn">Join now</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="session-card" onclick="window.location='skillstream-academic.html'">
+    <div class="card-thumb thumb-pink">
+      🔭
+      <div class="live-tag">● LIVE</div>
+      <div class="type-tag">👥 Group</div>
+      <div class="joined">👤👤👤 9 joined</div>
+    </div>
+    <div class="card-body">
+      <div class="card-cat">Academic · Science</div>
+      <div class="card-title">The Solar System — Interactive</div>
+      <div class="card-teacher">Khalid M.</div>
+      <div class="card-footer">
+        <div class="card-meta">⏱ 45 min · 11 spots</div>
+        <button class="join-btn">Join now</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ACADEMIC BANNER -->
+<div class="academic-banner" onclick="window.location='skillstream-academic.html'">
+  <h3>🎓 Academic Studies</h3>
+  <p>Live tutoring for every stage of education</p>
+  <div class="academic-levels">
+    <span class="level-pill">🧸 KG</span>
+    <span class="level-pill">🏫 Primary</span>
+    <span class="level-pill">📐 Middle</span>
+    <span class="level-pill">🎓 High School</span>
+    <span class="level-pill">🏛️ University</span>
+  </div>
+  <button class="banner-btn">Browse Academic Sessions →</button>
+</div>
+
+<!-- STARTING SOON -->
+<div class="section-header">
+  <h2>⏰ Starting Soon</h2>
+  <span class="see-all">See all</span>
+</div>
+
+<div class="soon-card" onclick="window.location='skillstream-session-detail.html'">
+  <div class="soon-thumb thumb-orange">🇪🇸</div>
+  <div class="soon-info">
+    <div class="soon-cat">Language</div>
+    <div class="soon-title">Spanish conversation — intermediate</div>
+    <div class="soon-teacher">Carlos V. · 👥 Group · 5 joined</div>
+  </div>
+  <div class="soon-right">
+    <div class="soon-time time-yellow">IN 8 MIN</div>
+    <button class="remind-btn">Remind me</button>
+  </div>
+</div>
+
+<div class="soon-card" onclick="window.location='skillstream-session-detail.html'">
+  <div class="soon-thumb thumb-green">🎸</div>
+  <div class="soon-info">
+    <div class="soon-cat">Music</div>
+    <div class="soon-title">Fingerpicking guitar — beginner</div>
+    <div class="soon-teacher">Nadia R. · 👥 Group · 9 joined</div>
+  </div>
+  <div class="soon-right">
+    <div class="soon-time time-yellow">IN 15 MIN</div>
+    <button class="remind-btn">Remind me</button>
+  </div>
+</div>
+
+<div class="soon-card" onclick="window.location='skillstream-academic.html'">
+  <div class="soon-thumb thumb-purple">⚗️</div>
+  <div class="soon-info">
+    <div class="soon-cat">Academic · Chemistry</div>
+    <div class="soon-title">Organic Chemistry — High School</div>
+    <div class="soon-teacher">Nour H. · 👥 Group · 7 joined</div>
+  </div>
+  <div class="soon-right">
+    <div class="soon-time time-green">IN 22 MIN</div>
+    <button class="remind-btn">Remind me</button>
+  </div>
+</div>
+
+<!-- QUICK LINKS -->
+<div class="section-label">Explore</div>
+<div class="quick-links">
+  <div class="quick-link" onclick="window.location='skillstream-teachers.html'">
+    <div class="icon">👩‍🏫</div>
+    <h4>Find Teachers</h4>
+    <p>Browse all tutors</p>
+  </div>
+  <div class="quick-link" onclick="window.location='skillstream-academic.html'">
+    <div class="icon">🎓</div>
+    <h4>Academic</h4>
+    <p>KG to University</p>
+  </div>
+  <div class="quick-link" onclick="window.location='skillstream-classroom.html'">
+    <div class="icon">🎥</div>
+    <h4>Live Classroom</h4>
+    <p>Join a live session</p>
+  </div>
+  <div class="quick-link" onclick="window.location='skillstream-dashboard.html'">
+    <div class="icon">📊</div>
+    <h4>Dashboard</h4>
+    <p>Manage sessions</p>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active">
+    <span class="nav-icon">🏠</span>Home
+  </div>
+  <div class="nav-item" onclick="window.location='skillstream-academic.html'">
+    <span class="nav-icon">🎓</span>Academic
+  </div>
+  <div class="nav-item" onclick="window.location='skillstream-teachers.html'">
+    <span class="nav-icon">🔍</span>Browse
+  </div>
+  <div class="nav-item" onclick="window.location='skillstream-payments.html'">
+    <span class="nav-icon">💳</span>Payments
+  </div>
+  <div class="nav-item" onclick="window.location='skillstream-profile.html'">
+    <span class="nav-icon">👤</span>Profile
+  </div>
+</div>
+
+</body>
+</html>
