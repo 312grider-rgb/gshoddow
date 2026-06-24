@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Academic Studies – SkillStream</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0f0f14;color:#e8e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#16161e;border-bottom:1px solid #2a2a3a;position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:800;color:#fff}.logo span{color:#7c6dfa}
+  .nav-right{display:flex;gap:10px;align-items:center}
+  .btn-outline{padding:8px 16px;border:1px solid #3a3a4e;border-radius:8px;background:none;color:#e8e8f0;font-size:14px;cursor:pointer}
+  .btn-primary{padding:8px 16px;border:none;border-radius:8px;background:#7c6dfa;color:#fff;font-size:14px;cursor:pointer;font-weight:600}
+  /* HERO */
+  .hero{padding:36px 20px 24px;text-align:center}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.2;margin-bottom:10px}
+  .hero h1 span{color:#7c6dfa}
+  .hero p{color:#888;font-size:15px;max-width:400px;margin:0 auto}
+  /* LEVEL TABS */
+  .levels{display:flex;gap:8px;overflow-x:auto;padding:0 20px 20px;scrollbar-width:none}
+  .levels::-webkit-scrollbar{display:none}
+  .level-tab{flex-shrink:0;padding:10px 18px;border-radius:20px;border:1.5px solid #2a2a3a;background:#16161e;color:#aaa;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+  .level-tab.active,.level-tab:hover{background:#7c6dfa;border-color:#7c6dfa;color:#fff}
+  /* LEVEL CARDS GRID */
+  .section-label{padding:0 20px 12px;font-size:13px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .level-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px 28px}
+  .level-card{background:#1a1a26;border-radius:16px;padding:20px 16px;cursor:pointer;border:1.5px solid #2a2a3a;transition:border-color .2s;text-align:center}
+  .level-card:hover{border-color:#7c6dfa}
+  .level-icon{font-size:36px;margin-bottom:10px}
+  .level-card h3{font-size:15px;font-weight:700;margin-bottom:4px}
+  .level-card p{font-size:12px;color:#666}
+  .level-badge{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700}
+  .badge-green{background:#1a3a2a;color:#4ade80}
+  .badge-blue{background:#1a2a3a;color:#60a5fa}
+  .badge-yellow{background:#3a2a1a;color:#fbbf24}
+  .badge-purple{background:#2a1a3a;color:#c084fc}
+  .badge-pink{background:#3a1a2a;color:#f472b6}
+  /* SESSIONS */
+  .sessions-section{padding:0 20px}
+  .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .section-header h2{font-size:17px;font-weight:700}
+  .see-all{font-size:13px;color:#7c6dfa;cursor:pointer}
+  .session-card{background:#1a1a26;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid #2a2a3a;display:flex;gap:12px;align-items:center}
+  .session-thumb{width:54px;height:54px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+  .thumb-purple{background:#2a1a4a}
+  .thumb-blue{background:#1a2a4a}
+  .thumb-green{background:#1a3a2a}
+  .thumb-yellow{background:#3a3a1a}
+  .thumb-pink{background:#3a1a3a}
+  .session-info{flex:1}
+  .session-meta{display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+  .tag{font-size:11px;font-weight:700;text-transform:uppercase;color:#7c6dfa}
+  .live-dot{width:7px;height:7px;background:#ef4444;border-radius:50%;display:inline-block;margin-right:3px;animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .session-info h3{font-size:14px;font-weight:700;margin-bottom:3px}
+  .session-info .teacher{font-size:12px;color:#888}
+  .session-right{text-align:right;flex-shrink:0}
+  .join-btn{padding:7px 14px;border-radius:8px;background:#7c6dfa;border:none;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+  .remind-btn{padding:7px 14px;border-radius:8px;background:#2a1a4a;border:none;color:#c084fc;font-size:12px;font-weight:700;cursor:pointer}
+  .spots{font-size:11px;color:#888;margin-top:4px}
+  /* SUBJECTS */
+  .subjects-grid{display:flex;gap:8px;overflow-x:auto;padding:0 20px 28px;scrollbar-width:none}
+  .subjects-grid::-webkit-scrollbar{display:none}
+  .subject-chip{flex-shrink:0;padding:8px 16px;background:#1a1a26;border:1px solid #2a2a3a;border-radius:20px;font-size:13px;cursor:pointer;white-space:nowrap;transition:all .2s}
+  .subject-chip:hover,.subject-chip.active{background:#7c6dfa;border-color:#7c6dfa;color:#fff}
+  /* BOTTOM NAV */
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#16161e;border-top:1px solid #2a2a3a;display:flex;justify-content:space-around;padding:10px 0 16px}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:#555;font-size:10px;font-weight:600}
+  .nav-item.active{color:#7c6dfa}
+  .nav-icon{font-size:20px}
+  .spacer{height:90px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Skill<span>Stream</span></div>
+  <div class="nav-right">
+    <button class="btn-outline" onclick="window.location='index.html'">← Back</button>
+    <button class="btn-primary">+ Teach</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Academic <span>Studies</span></h1>
+  <p>Live tutoring for every stage — from kindergarten to university.</p>
+</div>
+
+<!-- LEVEL TABS -->
+<div class="levels">
+  <div class="level-tab active" onclick="filterLevel('all',this)">All Levels</div>
+  <div class="level-tab" onclick="filterLevel('kg',this)">🧸 KG</div>
+  <div class="level-tab" onclick="filterLevel('primary',this)">🏫 Primary</div>
+  <div class="level-tab" onclick="filterLevel('middle',this)">📐 Middle School</div>
+  <div class="level-tab" onclick="filterLevel('high',this)">🎓 High School</div>
+  <div class="level-tab" onclick="filterLevel('university',this)">🏛️ University</div>
+</div>
+
+<!-- LEVEL CARDS -->
+<div class="section-label">Browse by Level</div>
+<div class="level-cards">
+  <div class="level-card" onclick="filterLevel('kg', null)">
+    <div class="level-icon">🧸</div>
+    <h3>Kindergarten</h3>
+    <p>Ages 4–6</p>
+    <span class="level-badge badge-green">12 live now</span>
+  </div>
+  <div class="level-card" onclick="filterLevel('primary', null)">
+    <div class="level-icon">🏫</div>
+    <h3>Primary School</h3>
+    <p>Grades 1–6</p>
+    <span class="level-badge badge-blue">24 live now</span>
+  </div>
+  <div class="level-card" onclick="filterLevel('middle', null)">
+    <div class="level-icon">📐</div>
+    <h3>Middle School</h3>
+    <p>Grades 7–9</p>
+    <span class="level-badge badge-yellow">18 live now</span>
+  </div>
+  <div class="level-card" onclick="filterLevel('high', null)">
+    <div class="level-icon">🎓</div>
+    <h3>High School</h3>
+    <p>Grades 10–12</p>
+    <span class="level-badge badge-purple">31 live now</span>
+  </div>
+  <div class="level-card" onclick="filterLevel('university', null)" style="grid-column:1/-1">
+    <div class="level-icon">🏛️</div>
+    <h3>University</h3>
+    <p>Undergraduate & Postgraduate</p>
+    <span class="level-badge badge-pink">45 live now</span>
+  </div>
+</div>
+
+<!-- SUBJECTS -->
+<div class="section-label">Subjects</div>
+<div class="subjects-grid">
+  <div class="subject-chip active">All</div>
+  <div class="subject-chip">Math</div>
+  <div class="subject-chip">Science</div>
+  <div class="subject-chip">English</div>
+  <div class="subject-chip">Arabic</div>
+  <div class="subject-chip">Physics</div>
+  <div class="subject-chip">Chemistry</div>
+  <div class="subject-chip">Biology</div>
+  <div class="subject-chip">History</div>
+  <div class="subject-chip">Geography</div>
+  <div class="subject-chip">Computer Science</div>
+  <div class="subject-chip">Economics</div>
+</div>
+
+<!-- LIVE SESSIONS -->
+<div class="sessions-section">
+  <div class="section-header">
+    <h2>🔴 Live Now</h2>
+    <span class="see-all">See all</span>
+  </div>
+
+  <div class="session-card" data-level="high">
+    <div class="session-thumb thumb-purple">📊</div>
+    <div class="session-info">
+      <div class="session-meta">
+        <span class="tag">MATH</span>
+        <span style="font-size:11px;color:#888">· High School · Group</span>
+      </div>
+      <h3>Calculus — Derivatives & Integrals</h3>
+      <div class="teacher">👤 Dr. Amira S. · <span style="color:#4ade80">●</span> 14 joined</div>
+    </div>
+    <div class="session-right">
+      <button class="join-btn">Join</button>
+      <div class="spots">6 spots left</div>
+    </div>
+  </div>
+
+  <div class="session-card" data-level="middle">
+    <div class="session-thumb thumb-blue">🔭</div>
+    <div class="session-info">
+      <div class="session-meta">
+        <span class="tag">SCIENCE</span>
+        <span style="font-size:11px;color:#888">· Middle · Group</span>
+      </div>
+      <h3>The Solar System — Interactive</h3>
+      <div class="teacher">👤 Khalid M. · <span style="color:#4ade80">●</span> 9 joined</div>
+    </div>
+    <div class="session-right">
+      <button class="join-btn">Join</button>
+      <div class="spots">11 spots left</div>
+    </div>
+  </div>
+
+  <div class="session-card" data-level="university">
+    <div class="session-thumb thumb-pink">📖</div>
+    <div class="session-info">
+      <div class="session-meta">
+        <span class="tag">ECONOMICS</span>
+        <span style="font-size:11px;color:#888">· University · 1-on-1</span>
+      </div>
+      <h3>Microeconomics — Exam Prep</h3>
+      <div class="teacher">👤 Prof. Layla A. · <span style="color:#4ade80">●</span> 1 joined</div>
+    </div>
+    <div class="session-right">
+      <button class="join-btn">Join</button>
+      <div class="spots">1 spot left</div>
+    </div>
+  </div>
+
+  <div class="session-card" data-level="kg">
+    <div class="session-thumb thumb-green">🎨</div>
+    <div class="session-info">
+      <div class="session-meta">
+        <span class="tag">ENGLISH</span>
+        <span style="font-size:11px;color:#888">· KG · Group</span>
+      </div>
+      <h3>Letters & Phonics — Fun Class</h3>
+      <div class="teacher">👤 Sara B. · <span style="color:#4ade80">●</span> 6 joined</div>
+    </div>
+    <div class="session-right">
+      <button class="join-btn">Join</button>
+      <div class="spots">14 spots left</div>
+    </div>
+  </div>
+
+  <div class="section-header" style="margin-top:10px">
+    <h2>⏰ Starting Soon</h2>
+    <span class="see-all">See all</span>
+  </div>
+
+  <div class="session-card" data-level="high">
+    <div class="session-thumb thumb-yellow">⚗️</div>
+    <div class="session-info">
+      <div class="session-meta">
+        <span class="tag">CHEMISTRY</span>
+        <span style="font-size:11px;color:#888">· High School · Group</span>
+      </div>
+      <h3>Organic Chemistry — Basics</h3>
+      <div class="teacher">👤 Nour H. · In 10 min</div>
+    </div>
+    <div class="session-right">
+      <button class="remind-btn">Remind</button>
+      <div class="spots">20 spots left</div>
+    </div>
+  </div>
+
+  <div class="session-card" data-level="university">
+    <div class="session-thumb thumb-purple">💻</div>
+    <div class="session-info">
+      <div class="session-meta">
+        <span class="tag">CS</span>
+        <span style="font-size:11px;color:#888">· University · Group</span>
+      </div>
+      <h3>Data Structures & Algorithms</h3>
+      <div class="teacher">👤 Omar T. · In 25 min</div>
+    </div>
+    <div class="session-right">
+      <button class="remind-btn">Remind</button>
+      <div class="spots">8 spots left</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="spacer"></div>
+
+<div class="bottom-nav">
+  <div class="nav-item" onclick="window.location='index.html'">
+    <span class="nav-icon">🏠</span>Home
+  </div>
+  <div class="nav-item active">
+    <span class="nav-icon">🎓</span>Academic
+  </div>
+  <div class="nav-item" onclick="window.location='skillstream-dashboard.html'">
+    <span class="nav-icon">🔍</span>Browse
+  </div>
+  <div class="nav-item" onclick="window.location='skillstream-profile.html'">
+    <span class="nav-icon">👤</span>Profile
+  </div>
+</div>
+
+<script>
+function filterLevel(level, el) {
+  // Update active tab
+  if(el) {
+    document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  // Filter session cards
+  const cards = document.querySelectorAll('.session-card');
+  cards.forEach(card => {
+    if(level === 'all' || card.dataset.level === level) {
+      card.style.display = 'flex';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+// Subject chip toggle
+document.querySelectorAll('.subject-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.subject-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

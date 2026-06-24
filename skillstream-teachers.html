@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Find Teachers – SkillStream</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0f0f14;color:#e8e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#16161e;border-bottom:1px solid #2a2a3a;position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:800;color:#fff}.logo span{color:#7c6dfa}
+  .btn-outline{padding:8px 16px;border:1px solid #3a3a4e;border-radius:8px;background:none;color:#e8e8f0;font-size:14px;cursor:pointer}
+  .btn-primary{padding:8px 16px;border:none;border-radius:8px;background:#7c6dfa;color:#fff;font-size:14px;cursor:pointer;font-weight:600}
+  /* SEARCH */
+  .search-bar{margin:16px 20px;background:#1a1a26;border:1px solid #2a2a3a;border-radius:12px;display:flex;align-items:center;padding:0 14px;gap:10px}
+  .search-bar input{flex:1;background:none;border:none;outline:none;color:#e8e8f0;font-size:14px;padding:14px 0}
+  .search-bar input::placeholder{color:#555}
+  /* FILTERS */
+  .filters{display:flex;gap:8px;overflow-x:auto;padding:0 20px 16px;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .filter-chip{flex-shrink:0;padding:8px 16px;background:#1a1a26;border:1px solid #2a2a3a;border-radius:20px;font-size:13px;cursor:pointer;white-space:nowrap;transition:all .2s}
+  .filter-chip.active,.filter-chip:hover{background:#7c6dfa;border-color:#7c6dfa;color:#fff}
+  /* SECTION */
+  .section-label{padding:0 20px 12px;font-size:13px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  /* FEATURED TEACHER */
+  .featured{margin:0 20px 20px;background:linear-gradient(135deg,#1e1040,#2a1a4a);border-radius:20px;padding:20px;border:1px solid #3a2a5a;display:flex;gap:14px;align-items:center}
+  .feat-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#7c6dfa,#c084fc);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+  .feat-info h3{font-size:17px;font-weight:800;margin-bottom:2px}
+  .feat-info .subject{font-size:13px;color:#c084fc;margin-bottom:6px}
+  .feat-stats{display:flex;gap:10px;flex-wrap:wrap}
+  .feat-stat{font-size:12px;color:#aaa}
+  .feat-stat span{color:#fff;font-weight:600}
+  .feat-right{margin-left:auto;text-align:right;flex-shrink:0}
+  .live-now{background:#ef444420;border:1px solid #ef444440;color:#ef4444;font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;margin-bottom:8px;display:inline-block}
+  .view-btn{padding:8px 16px;border-radius:8px;background:#7c6dfa;border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+  /* TEACHER CARD */
+  .teacher-card{margin:0 20px 12px;background:#1a1a26;border-radius:14px;padding:16px;border:1px solid #2a2a3a;display:flex;gap:12px;align-items:center;cursor:pointer;transition:border-color .2s}
+  .teacher-card:hover{border-color:#7c6dfa}
+  .t-avatar{width:50px;height:50px;border-radius:50%;background:#2a2a3a;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .t-info{flex:1}
+  .t-info h3{font-size:15px;font-weight:700;margin-bottom:2px}
+  .t-info .subject{font-size:12px;color:#7c6dfa;margin-bottom:4px}
+  .t-meta{display:flex;gap:10px;flex-wrap:wrap}
+  .t-meta span{font-size:11px;color:#888}
+  .t-right{text-align:right;flex-shrink:0}
+  .t-price{font-size:15px;font-weight:700;color:#7c6dfa}
+  .t-per{font-size:11px;color:#888}
+  .avail-badge{display:inline-block;margin-top:6px;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700}
+  .avail-live{background:#1a3a2a;color:#4ade80}
+  .avail-soon{background:#3a3a1a;color:#fbbf24}
+  .avail-book{background:#1a2a3a;color:#60a5fa}
+  /* BOTTOM NAV */
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#16161e;border-top:1px solid #2a2a3a;display:flex;justify-content:space-around;padding:10px 0 16px}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:#555;font-size:10px;font-weight:600}
+  .nav-item.active{color:#7c6dfa}
+  .nav-icon{font-size:20px}
+  .spacer{height:90px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Skill<span>Stream</span></div>
+  <div style="display:flex;gap:10px">
+    <button class="btn-outline" onclick="window.location='index.html'">← Back</button>
+    <button class="btn-primary">+ Teach</button>
+  </div>
+</nav>
+
+<div class="search-bar">
+  <span>🔍</span>
+  <input type="text" placeholder="Search teachers, subjects..."/>
+</div>
+
+<div class="filters">
+  <div class="filter-chip active">All</div>
+  <div class="filter-chip">🔴 Live Now</div>
+  <div class="filter-chip">🎓 Academic</div>
+  <div class="filter-chip">💻 Tech</div>
+  <div class="filter-chip">🎨 Creative</div>
+  <div class="filter-chip">🌍 Languages</div>
+  <div class="filter-chip">🎵 Music</div>
+  <div class="filter-chip">⭐ Top Rated</div>
+</div>
+
+<div class="section-label">Featured Teacher</div>
+
+<div class="featured">
+  <div class="feat-avatar">👩‍🏫</div>
+  <div class="feat-info">
+    <h3>Dr. Amira Saleh</h3>
+    <div class="subject">Mathematics · High School & University</div>
+    <div class="feat-stats">
+      <span class="feat-stat">⭐ <span>4.9</span></span>
+      <span class="feat-stat">👥 <span>1.2k</span> students</span>
+      <span class="feat-stat">📚 <span>312</span> sessions</span>
+    </div>
+  </div>
+  <div class="feat-right">
+    <div class="live-now">🔴 LIVE</div>
+    <button class="view-btn" onclick="window.location='skillstream-session-detail.html'">View</button>
+  </div>
+</div>
+
+<div class="section-label">All Teachers</div>
+
+<div class="teacher-card">
+  <div class="t-avatar">👨‍💻</div>
+  <div class="t-info">
+    <h3>Omar Tariq</h3>
+    <div class="subject">Computer Science · University</div>
+    <div class="t-meta">
+      <span>⭐ 4.8</span>
+      <span>👥 890 students</span>
+      <span>📍 Online</span>
+    </div>
+  </div>
+  <div class="t-right">
+    <div class="t-price">$12</div>
+    <div class="t-per">/session</div>
+    <div class="avail-badge avail-soon">In 25 min</div>
+  </div>
+</div>
+
+<div class="teacher-card">
+  <div class="t-avatar">👩‍🔬</div>
+  <div class="t-info">
+    <h3>Nour Hassan</h3>
+    <div class="subject">Chemistry & Biology · High School</div>
+    <div class="t-meta">
+      <span>⭐ 4.7</span>
+      <span>👥 640 students</span>
+    </div>
+  </div>
+  <div class="t-right">
+    <div class="t-price">$8</div>
+    <div class="t-per">/session</div>
+    <div class="avail-badge avail-live">🔴 Live</div>
+  </div>
+</div>
+
+<div class="teacher-card">
+  <div class="t-avatar">🎸</div>
+  <div class="t-info">
+    <h3>Nadia Rashid</h3>
+    <div class="subject">Guitar · All Levels</div>
+    <div class="t-meta">
+      <span>⭐ 5.0</span>
+      <span>👥 430 students</span>
+    </div>
+  </div>
+  <div class="t-right">
+    <div class="t-price">$10</div>
+    <div class="t-per">/session</div>
+    <div class="avail-badge avail-book">Book now</div>
+  </div>
+</div>
+
+<div class="teacher-card">
+  <div class="t-avatar">🇪🇸</div>
+  <div class="t-info">
+    <h3>Carlos Vega</h3>
+    <div class="subject">Spanish · Beginner to Advanced</div>
+    <div class="t-meta">
+      <span>⭐ 4.9</span>
+      <span>👥 1.1k students</span>
+    </div>
+  </div>
+  <div class="t-right">
+    <div class="t-price">$9</div>
+    <div class="t-per">/session</div>
+    <div class="avail-badge avail-live">🔴 Live</div>
+  </div>
+</div>
+
+<div class="teacher-card">
+  <div class="t-avatar">🧸</div>
+  <div class="t-info">
+    <h3>Sara Bayoumi</h3>
+    <div class="subject">English · Kindergarten & Primary</div>
+    <div class="t-meta">
+      <span>⭐ 4.9</span>
+      <span>👥 320 students</span>
+    </div>
+  </div>
+  <div class="t-right">
+    <div class="t-price">$6</div>
+    <div class="t-per">/session</div>
+    <div class="avail-badge avail-live">🔴 Live</div>
+  </div>
+</div>
+
+<div class="teacher-card">
+  <div class="t-avatar">📐</div>
+  <div class="t-info">
+    <h3>Khalid Mansour</h3>
+    <div class="subject">Science & Math · Middle School</div>
+    <div class="t-meta">
+      <span>⭐ 4.6</span>
+      <span>👥 510 students</span>
+    </div>
+  </div>
+  <div class="t-right">
+    <div class="t-price">$7</div>
+    <div class="t-per">/session</div>
+    <div class="avail-badge avail-soon">In 1 hr</div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<div class="bottom-nav">
+  <div class="nav-item" onclick="window.location='index.html'">
+    <span class="nav-icon">🏠</span>Home
+  </div>
+  <div class="nav-item" onclick="window.location='skillstream-academic.html'">
+    <span class="nav-icon">🎓</span>Academic
+  </div>
+  <div class="nav-item active">
+    <span class="nav-icon">🔍</span>Browse
+  </div>
+  <div class="nav-item" onclick="window.location='skillstream-profile.html'">
+    <span class="nav-icon">👤</span>Profile
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
