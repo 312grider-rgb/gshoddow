@@ -4,8 +4,19 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>SkillStream — My Account</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
+html[lang="ar"] body{font-family:'Noto Sans Arabic','Inter',sans-serif}
+.lang-switcher{position:relative}
+.lang-btn{display:flex;align-items:center;gap:5px;background:var(--pill);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer}
+.lang-btn:hover{border-color:var(--accent)}
+.lang-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);min-width:150px;box-shadow:var(--shadow);display:none;z-index:999;overflow:hidden}
+html[dir="rtl"] .lang-dropdown{right:auto;left:0}
+.lang-dropdown.open{display:block}
+.lang-option{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:500;border:none;background:none;color:var(--text);width:100%;text-align:left;transition:all .15s}
+html[dir="rtl"] .lang-option{text-align:right}
+.lang-option:hover{background:rgba(123,111,255,.08);color:var(--accent)}
+.lang-option.active{color:var(--accent);font-weight:700}
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
@@ -129,8 +140,18 @@ select option{background:var(--card)}
 <div class="topbar">
   <a class="logo" href="index.html">Skill<span>Stream</span></a>
   <div class="nav-links">
-    <a class="nav-btn" href="skillstream-classroom.html">🎥 Join Session</a>
-    <button class="nav-btn danger" onclick="signOut()">Sign Out</button>
+    <a class="nav-btn" href="skillstream-classroom.html" id="spJoinBtn">🎥 Join Session</a>
+    <div class="lang-switcher" id="spLangSwitcher">
+      <button class="lang-btn" onclick="toggleSPLang()">🌐 <span id="spLangName">EN</span> ▾</button>
+      <div class="lang-dropdown" id="spLangDropdown">
+        <button class="lang-option" onclick="setSPLang('en')">🇬🇧 English</button>
+        <button class="lang-option" onclick="setSPLang('ar')">🇸🇦 العربية</button>
+        <button class="lang-option" onclick="setSPLang('fr')">🇫🇷 Français</button>
+        <button class="lang-option" onclick="setSPLang('es')">🇪🇸 Español</button>
+        <button class="lang-option" onclick="setSPLang('zh')">🇨🇳 中文</button>
+      </div>
+    </div>
+    <button class="nav-btn danger" onclick="signOut()" id="spSignOutBtn">Sign Out</button>
   </div>
 </div>
 
@@ -458,8 +479,48 @@ function showToast(msg, error = false) {
   t._t = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+// ===== LANGUAGE SWITCHER =====
+const SP_I18N = {
+  en:{ join:'🎥 Join Session', signout:'Sign Out', my_account:'My Account', personal_info:'👤 Personal Info', contact:'📬 Contact', skills:'⚡ Skills & Subjects', sessions:'🕒 Recent Sessions', save:'💾 Save Account', discard:'Discard', danger:'⚠️ Danger Zone', delete_btn:'🗑️ Delete Account', delete_title:'Delete Account', delete_desc:'Permanently remove your profile and all saved data.', stat_sessions:'Sessions', stat_hours:'Hours', stat_skills:'Skills' },
+  ar:{ join:'🎥 انضم إلى جلسة', signout:'تسجيل الخروج', my_account:'حسابي', personal_info:'👤 المعلومات الشخصية', contact:'📬 التواصل', skills:'⚡ المهارات والمواضيع', sessions:'🕒 الجلسات الأخيرة', save:'💾 حفظ الحساب', discard:'تجاهل', danger:'⚠️ منطقة الخطر', delete_btn:'🗑️ حذف الحساب', delete_title:'حذف الحساب', delete_desc:'إزالة ملفك الشخصي وجميع بياناتك بشكل دائم.', stat_sessions:'جلسات', stat_hours:'ساعات', stat_skills:'مهارات' },
+  fr:{ join:'🎥 Rejoindre', signout:'Déconnexion', my_account:'Mon compte', personal_info:'👤 Infos personnelles', contact:'📬 Contact', skills:'⚡ Compétences', sessions:'🕒 Sessions récentes', save:'💾 Sauvegarder', discard:'Annuler', danger:'⚠️ Zone dangereuse', delete_btn:'🗑️ Supprimer le compte', delete_title:'Supprimer le compte', delete_desc:'Supprimer définitivement votre profil et toutes vos données.', stat_sessions:'Sessions', stat_hours:'Heures', stat_skills:'Compétences' },
+  es:{ join:'🎥 Unirse', signout:'Cerrar sesión', my_account:'Mi cuenta', personal_info:'👤 Información personal', contact:'📬 Contacto', skills:'⚡ Habilidades', sessions:'🕒 Sesiones recientes', save:'💾 Guardar cuenta', discard:'Descartar', danger:'⚠️ Zona peligrosa', delete_btn:'🗑️ Eliminar cuenta', delete_title:'Eliminar cuenta', delete_desc:'Eliminar permanentemente tu perfil y todos tus datos.', stat_sessions:'Sesiones', stat_hours:'Horas', stat_skills:'Habilidades' },
+  zh:{ join:'🎥 加入课程', signout:'退出登录', my_account:'我的账户', personal_info:'👤 个人信息', contact:'📬 联系方式', skills:'⚡ 技能与科目', sessions:'🕒 最近课程', save:'💾 保存账户', discard:'放弃', danger:'⚠️ 危险区域', delete_btn:'🗑️ 删除账户', delete_title:'删除账户', delete_desc:'永久删除您的个人资料和所有保存的数据。', stat_sessions:'课程', stat_hours:'小时', stat_skills:'技能' },
+};
+
+function setSPLang(lang) {
+  localStorage.setItem('ss_lang', lang);
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  const t = SP_I18N[lang];
+  const names = {en:'EN',ar:'عر',fr:'FR',es:'ES',zh:'中文'};
+  document.getElementById('spLangName').textContent = names[lang];
+  document.querySelectorAll('#spLangDropdown .lang-option').forEach(o => o.classList.toggle('active', o.getAttribute('onclick') === `setSPLang('${lang}')`));
+  const el = (id) => document.getElementById(id);
+  if(el('spJoinBtn')) el('spJoinBtn').textContent = t.join;
+  if(el('spSignOutBtn')) el('spSignOutBtn').textContent = t.signout;
+  // Section titles
+  document.querySelectorAll('.section-title').forEach((s,i) => {
+    const keys = ['personal_info','contact','skills','sessions'];
+    if(t[keys[i]]) s.textContent = t[keys[i]];
+  });
+  // Buttons
+  const saveBtn = document.querySelector('.btn-primary'); if(saveBtn) saveBtn.textContent = t.save;
+  const discardBtn = document.querySelector('.btn-ghost'); if(discardBtn) discardBtn.textContent = t.discard;
+  // Stat labels
+  const statLbls = document.querySelectorAll('.stat .lbl');
+  if(statLbls[0]) statLbls[0].textContent = t.stat_sessions;
+  if(statLbls[1]) statLbls[1].textContent = t.stat_hours;
+  if(statLbls[2]) statLbls[2].textContent = t.stat_skills;
+  closeSPLangMenu();
+}
+function toggleSPLang() { document.getElementById('spLangDropdown').classList.toggle('open'); }
+function closeSPLangMenu() { document.getElementById('spLangDropdown').classList.remove('open'); }
+document.addEventListener('click', e => { const sw = document.getElementById('spLangSwitcher'); if(sw && !sw.contains(e.target)) closeSPLangMenu(); });
+
 // ===== INIT =====
 loadProfile();
+setSPLang(localStorage.getItem('ss_lang') || 'en');
 
 // If no profile yet, pre-fill name placeholder
 const saved = JSON.parse(localStorage.getItem(SS_KEY) || 'null');
