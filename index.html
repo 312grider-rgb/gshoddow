@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SkillStream — Live Learning, Right Now</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
+  --accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
+  --yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
+  --radius:14px;--radius-sm:8px;--radius-full:9999px;
+  --shadow:0 8px 40px rgba(0,0,0,.7);--glass:rgba(10,11,18,0.9)
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;background:var(--glass);border-bottom:1px solid var(--border);backdrop-filter:blur(24px)}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:24px;text-decoration:none;color:var(--text)}
+.logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-link{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;border-radius:var(--radius-sm);transition:all .2s}
+.nav-link:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.nav-cta{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;text-decoration:none;transition:all .25s}
+.nav-cta:hover{background:var(--accent-dark);transform:scale(1.03)}
+.user-pill{display:none;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);padding:6px 14px 6px 6px;cursor:pointer;text-decoration:none;transition:all .2s}
+.user-pill:hover{border-color:var(--accent)}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff}
+.user-pill .uname{font-size:13px;font-weight:600}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none}
+.hero-bg .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18}
+.orb-1{width:600px;height:600px;background:var(--accent);top:-100px;left:-100px}
+.orb-2{width:500px;height:500px;background:var(--blue);bottom:-100px;right:-50px}
+.orb-3{width:300px;height:300px;background:var(--green);top:40%;left:50%;transform:translate(-50%,-50%)}
+.live-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,61,90,.1);border:1px solid rgba(255,61,90,.25);border-radius:var(--radius-full);padding:7px 18px;font-size:12px;font-weight:700;color:var(--live);margin-bottom:28px;letter-spacing:.06em}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(40px,8vw,88px);font-weight:900;line-height:1;letter-spacing:-.03em;margin-bottom:24px;max-width:900px}
+.hero h1 .line2{display:block;background:linear-gradient(135deg,var(--accent) 0%,var(--blue) 50%,var(--green) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--muted);max-width:540px;line-height:1.6;margin-bottom:40px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:56px}
+.btn-hero{display:inline-flex;align-items:center;gap:8px;padding:16px 32px;border-radius:var(--radius-sm);font-size:16px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;text-decoration:none;border:none;transition:all .25s}
+.btn-hero-primary{background:var(--accent);color:#fff;box-shadow:0 0 32px rgba(123,111,255,.35)}
+.btn-hero-primary:hover{background:var(--accent-dark);transform:translateY(-2px);box-shadow:0 0 48px rgba(123,111,255,.5)}
+.btn-hero-ghost{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--border)}
+.btn-hero-ghost:hover{border-color:var(--accent);background:rgba(123,111,255,.08)}
+.hero-stats{display:flex;gap:40px;justify-content:center;flex-wrap:wrap}
+.hstat{text-align:center}
+.hstat .val{font-family:'Syne',sans-serif;font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--text),var(--muted));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hstat .lbl{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:.04em}
+
+/* ── SCROLL HINT ── */
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+.scroll-arrow{font-size:18px}
+
+/* ── SECTION WRAPPER ── */
+.section{padding:80px 24px;max-width:1200px;margin:0 auto}
+.section-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+.section-title{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.1;margin-bottom:12px}
+.section-sub{font-size:15px;color:var(--muted);max-width:480px;line-height:1.6;margin-bottom:40px}
+
+/* ── LIVE SESSIONS ── */
+.sessions-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-full);padding:7px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.filter-btn.active,.filter-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.sessions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.session-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .25s;text-decoration:none;display:block}
+.session-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.sc-thumb{height:150px;background:linear-gradient(135deg,#14103a,#0a1020);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.sc-thumb .thumb-icon{font-size:48px;opacity:.7}
+.sc-thumb::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),transparent)}
+.sc-live-badge{position:absolute;top:10px;left:10px;background:var(--live);color:#fff;border-radius:var(--radius-full);padding:4px 10px;font-size:10px;font-weight:800;display:flex;align-items:center;gap:5px;z-index:1}
+.sc-ai-badge{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,var(--accent),var(--blue));color:#fff;border-radius:var(--radius-full);padding:4px 10px;font-size:10px;font-weight:800;z-index:1}
+.sc-viewers{position:absolute;bottom:10px;right:10px;color:#fff;font-size:11px;font-weight:600;z-index:1;display:flex;align-items:center;gap:4px}
+.sc-body{padding:16px}
+.sc-category{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.sc-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:8px;line-height:1.3}
+.sc-host{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sc-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
+.sc-host-name{font-size:12px;color:var(--muted)}
+.sc-footer{display:flex;align-items:center;justify-content:space-between}
+.sc-tag{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);padding:3px 10px;font-size:10px;color:var(--muted)}
+.join-mini-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s}
+.join-mini-btn:hover{background:var(--accent-dark)}
+
+/* HOST NOW card */
+.host-card{background:linear-gradient(135deg,rgba(123,111,255,.12),rgba(75,158,255,.08));border:1px solid rgba(123,111,255,.25);border-radius:var(--radius);padding:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+.host-card-text h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px}
+.host-card-text p{font-size:13px;color:var(--muted);max-width:340px;line-height:1.5}
+.host-btn{background:linear-gradient(135deg,var(--accent),var(--blue));border:none;color:#fff;border-radius:var(--radius-sm);padding:14px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap;transition:all .25s;text-decoration:none;display:inline-block}
+.host-btn:hover{transform:scale(1.04);box-shadow:0 0 28px rgba(123,111,255,.4)}
+
+/* ── HOW IT WORKS ── */
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;position:relative;transition:all .3s}
+.step-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.step-num{font-family:'Syne',sans-serif;font-size:48px;font-weight:900;color:rgba(123,111,255,.12);position:absolute;top:16px;right:20px;line-height:1}
+.step-icon{font-size:32px;margin-bottom:16px}
+.step-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── FEATURES ── */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all .3s}
+.feat-card:hover{border-color:var(--accent)}
+.feat-icon{width:44px;height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.feat-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── CTA FOOTER ── */
+.cta-section{background:linear-gradient(135deg,rgba(123,111,255,.08) 0%,rgba(0,229,160,.05) 100%);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:80px 24px;text-align:center}
+.cta-section h2{font-family:'Syne',sans-serif;font-size:clamp(28px,5vw,52px);font-weight:900;margin-bottom:16px;line-height:1.1}
+.cta-section p{color:var(--muted);font-size:16px;margin-bottom:36px}
+
+/* ── FOOTER ── */
+footer{padding:32px 24px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+footer a{color:var(--muted);text-decoration:none}
+footer a:hover{color:var(--text)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  nav{padding:0 16px}
+  .nav-link{display:none}
+  .hero{padding:90px 20px 60px}
+  .hero-stats{gap:24px}
+  .hstat .val{font-size:24px}
+  .section{padding:52px 16px}
+  .host-card{flex-direction:column}
+  .host-btn{width:100%;text-align:center}
+  .sessions-header{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="index.html">Skill<span>Stream</span></a>
+  <div class="nav-right">
+    <a class="nav-link" href="#sessions">Browse</a>
+    <a class="nav-link" href="#how">How it works</a>
+    <a class="user-pill" id="userPill" href="skillstream-signup.html">
+      <div class="user-av" id="navAv">?</div>
+      <span class="uname" id="navName">My Account</span>
+    </a>
+    <a class="nav-cta" id="navSignin" href="skillstream-signup.html">Get Started →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="live-badge"><span class="live-dot"></span> Sessions happening right now</div>
+  <h1>
+    Learn anything.<br>
+    <span class="line2">Teach anyone. Live.</span>
+  </h1>
+  <p class="hero-sub">Join live classrooms taught by real people and an AI teacher — or host your own session in seconds.</p>
+  <div class="hero-btns">
+    <a class="btn-hero btn-hero-primary" href="#sessions">🎥 Browse Live Sessions</a>
+    <a class="btn-hero btn-hero-ghost" href="skillstream-classroom.html">🚀 Start a Session</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hstat"><div class="val" id="statLive">12</div><div class="lbl">Live Now</div></div>
+    <div class="hstat"><div class="val" id="statUsers">2.4k</div><div class="lbl">Learners Today</div></div>
+    <div class="hstat"><div class="val">50+</div><div class="lbl">Topics</div></div>
+    <div class="hstat"><div class="val">🤖</div><div class="lbl">AI Teacher</div></div>
+  </div>
+  <div class="scroll-hint"><span class="scroll-arrow">↓</span>Live Sessions</div>
+</section>
+
+<!-- LIVE SESSIONS -->
+<div style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+<div class="section" id="sessions">
+  <div class="sessions-header">
+    <div>
+      <div class="section-eyebrow">🔴 Live Now</div>
+      <div class="section-title" style="margin-bottom:0">Pick a session to join</div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterSessions('all',this)">All</button>
+      <button class="filter-btn" onclick="filterSessions('tech',this)">💻 Tech</button>
+      <button class="filter-btn" onclick="filterSessions('math',this)">📐 Math</button>
+      <button class="filter-btn" onclick="filterSessions('design',this)">🎨 Design</button>
+      <button class="filter-btn" onclick="filterSessions('language',this)">🗣️ Language</button>
+      <button class="filter-btn" onclick="filterSessions('ai',this)">🤖 AI Only</button>
+    </div>
+  </div>
+
+  <!-- Host prompt -->
+  <div class="host-card">
+    <div class="host-card-text">
+      <h3>Start your own live session</h3>
+      <p>Teach a topic you know, or use the built-in AI teacher to guide your students — no prep needed.</p>
+    </div>
+    <a class="host-btn" href="skillstream-classroom.html">🎙 Host a Session</a>
+  </div>
+
+  <!-- Session cards grid -->
+  <div class="sessions-grid" id="sessionsGrid"></div>
+</div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section" id="how">
+  <div class="section-eyebrow">✨ Simple by design</div>
+  <div class="section-title">Up in 30 seconds</div>
+  <div class="section-sub">No downloads, no setup. Just open and learn.</div>
+  <div class="steps-grid">
+    <div class="step-card"><div class="step-num">1</div><div class="step-icon">👤</div><div class="step-title">Create your account</div><div class="step-desc">Sign up with your phone number or email. Your profile is saved permanently on your device.</div></div>
+    <div class="step-card"><div class="step-num">2</div><div class="step-icon">🎥</div><div class="step-title">Join or host a session</div><div class="step-desc">Browse live sessions and jump in with one tap, or start your own classroom in seconds.</div></div>
+    <div class="step-card"><div class="step-num">3</div><div class="step-icon">🤖</div><div class="step-title">Learn with AI</div><div class="step-desc">Your AI teacher can guide a full step-by-step lesson or answer any question live during the session.</div></div>
+    <div class="step-card"><div class="step-num">4</div><div class="step-icon">🚀</div><div class="step-title">Grow your skills</div><div class="step-desc">Track sessions, build your skill profile, and connect with other learners and teachers.</div></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div style="background:var(--surface);border-top:1px solid var(--border)">
+<div class="section">
+  <div class="section-eyebrow">⚡ Everything you need</div>
+  <div class="section-title">Built for real learning</div>
+  <div class="features-grid">
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(123,111,255,.12)">🤖</div><div class="feat-title">AI Teacher</div><div class="feat-desc">Generates full step-by-step lessons on any topic and answers questions live in every session.</div></div>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(75,158,255,.12)">🎥</div><div class="feat-title">Live Video</div><div class="feat-desc">Real-time camera and mic — join with one tap, no downloads or installs needed.</div></div>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(0,229,160,.12)">💬</div><div class="feat-title">Live Chat</div><div class="feat-desc">Real-time class chat with emoji reactions so students can engage without interrupting.</div></div>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(255,185,48,.12)">👥</div><div class="feat-title">Participants</div><div class="feat-desc">See who's in the room, manage participants, and know when someone wants to speak.</div></div>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(255,61,90,.12)">🔑</div><div class="feat-title">Room Codes</div><div class="feat-desc">Share a simple room code and anyone can join your live session instantly from any device.</div></div>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(123,111,255,.12)">👤</div><div class="feat-title">Saved Profile</div><div class="feat-desc">Your name, photo, and skills are saved permanently — pick up right where you left off.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Ready to learn something today?</h2>
+  <p>Join a live session now or create your free account in 30 seconds.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a class="btn-hero btn-hero-primary" href="#sessions">Browse Live Sessions</a>
+    <a class="btn-hero btn-hero-ghost" href="skillstream-signup.html">Create Account →</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="margin-bottom:12px">
+    <a href="skillstream-classroom.html" style="margin:0 12px">Classroom</a>
+    <a href="skillstream-signup.html" style="margin:0 12px">My Account</a>
+  </div>
+  © 2026 SkillStream — Live Learning Platform
+</footer>
+
+<script>
+// ── Session data — room codes match the classroom quick-join rooms ──
+const SESSIONS = [
+  { id:'s1', title:'React Workshop — Hooks & State Live Coding', host:'Amir K.', hostColor:'#7B6FFF', hostInit:'A', category:'tech', viewers:14, icon:'⚛️', tag:'Beginner', ai:true, room:'react123', session:'React Workshop' },
+  { id:'s2', title:'Python 101 — Variables, Loops & Functions', host:'Sara L.', hostColor:'#00E5A0', hostInit:'S', category:'tech', viewers:8, icon:'🐍', tag:'Beginner', ai:true, room:'python101', session:'Python 101' },
+  { id:'s3', title:'UX Design Fundamentals — Live Critique Session', host:'Mia J.', hostColor:'#4B9EFF', hostInit:'M', category:'design', viewers:22, icon:'🎨', tag:'All levels', ai:true, room:'uxdesign', session:'UX Design' },
+  { id:'s4', title:'Calculus Crash Course: Derivatives Explained', host:'AI Teacher 🤖', hostColor:'#FFB930', hostInit:'🤖', category:'math', viewers:6, icon:'📐', tag:'Intermediate', ai:true, room:'calc101', session:'Calculus 101' },
+  { id:'s5', title:'Arabic for Beginners: Alphabet & Greetings', host:'Omar F.', hostColor:'#FF3D5A', hostInit:'O', category:'language', viewers:11, icon:'🗣️', tag:'Beginner', ai:false, room:'arabic101', session:'Arabic for Beginners' },
+  { id:'s6', title:'Machine Learning with Python — Live Walkthrough', host:'Lin P.', hostColor:'#7B6FFF', hostInit:'L', category:'tech', viewers:31, icon:'🧠', tag:'Advanced', ai:true, room:'ml-live', session:'Machine Learning' },
+  { id:'s7', title:'AI Prompt Engineering Masterclass', host:'AI Teacher 🤖', hostColor:'#4B9EFF', hostInit:'🤖', category:'ai', viewers:19, icon:'🤖', tag:'All levels', ai:true, room:'ai-prompts', session:'AI Prompt Engineering' },
+  { id:'s8', title:'Public Speaking Confidence — Live Workshop', host:'Priya R.', hostColor:'#00E5A0', hostInit:'P', category:'language', viewers:9, icon:'🎤', tag:'All levels', ai:false, room:'speak101', session:'Public Speaking' },
+];
+
+let activeFilter = 'all';
+
+function filterSessions(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSessions();
+}
+
+// Passes room + session name to classroom via URL so join screen pre-fills them
+function joinRoom(room, session) {
+  window.location = `skillstream-classroom.html?room=${encodeURIComponent(room)}&session=${encodeURIComponent(session)}`;
+}
+
+function renderSessions() {
+  const grid = document.getElementById('sessionsGrid');
+  const filtered = activeFilter === 'all' ? SESSIONS
+    : activeFilter === 'ai' ? SESSIONS.filter(s => s.ai)
+    : SESSIONS.filter(s => s.category === activeFilter);
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:40px;text-align:center;grid-column:1/-1">No live sessions in this category right now.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(s => `
+    <div class="session-card" onclick="joinRoom('${s.room}','${s.session}')">
+      <div class="sc-thumb">
+        <span class="thumb-icon">${s.icon}</span>
+        <div class="sc-live-badge"><span style="width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;animation:blink 1.2s infinite"></span> LIVE</div>
+        ${s.ai ? '<div class="sc-ai-badge">🤖 AI</div>' : ''}
+        <div class="sc-viewers" id="viewers-${s.id}">👁 ${s.viewers}</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-category">${s.category.toUpperCase()}</div>
+        <div class="sc-title">${s.title}</div>
+        <div class="sc-host">
+          <div class="sc-av" style="background:${s.hostColor}">${s.hostInit}</div>
+          <span class="sc-host-name">${s.host}</span>
+        </div>
+        <div class="sc-footer">
+          <span class="sc-tag">${s.tag}</span>
+          <button class="join-mini-btn" onclick="event.stopPropagation();joinRoom('${s.room}','${s.session}')">Join →</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Animate live viewer counts ──
+setInterval(() => {
+  SESSIONS.forEach(s => {
+    const el = document.getElementById('viewers-' + s.id);
+    if (!el) return;
+    const cur = parseInt(el.textContent.replace(/\D/g,''));
+    const next = Math.max(1, cur + (Math.random() > 0.5 ? 1 : -1));
+    s.viewers = next;
+    el.textContent = `👁 ${next}`;
+  });
+}, 4000);
+
+// ── Nav user state ──
+function initNav() {
+  const user = JSON.parse(localStorage.getItem('skillstream_user') || 'null');
+  const pill = document.getElementById('userPill');
+  const signin = document.getElementById('navSignin');
+  if (user) {
+    pill.style.display = 'flex';
+    signin.style.display = 'none';
+    document.getElementById('navAv').textContent = user.name.charAt(0).toUpperCase();
+    document.getElementById('navName').textContent = user.name.split(' ')[0];
+  }
+}
+
+renderSessions();
+initNav();
+</script>
+</body>
+</html>
