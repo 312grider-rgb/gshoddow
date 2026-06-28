@@ -646,54 +646,62 @@ canvas#wb{flex:1;background:#08090d;border-radius:var(--radius);border:1px solid
 <script>
 // ===== BACKEND CONFIG =====
 const BACKEND_URL = 'https://skillstream-backend-1p.onrender.com';
-localStorage.setItem('ss_backend_url', BACKEND_URL);
 
-// ─── Wake up the backend immediately (Render free tier sleeps) ───
-let backendReady = false;
-const wakeStatus = document.createElement('div');
-wakeStatus.id = 'wakeStatus';
-wakeStatus.style.cssText = 'position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#1a1d28;border:1px solid var(--border);border-radius:99px;padding:8px 18px;font-size:12px;color:var(--muted);z-index:9999;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow);transition:all .4s';
-wakeStatus.innerHTML = '⏳ Connecting to AI backend…';
-document.body.appendChild(wakeStatus);
-
-async function pingBackend(retries = 3) {
-  for (let i = 0; i < retries; i++) {
+// ─── Direct Anthropic API call (works from browser with danger header) ───────
+async function callAI(system, messages) {
+  const key = localStorage.getItem('ss_api_key') || '';
+  if (!key) {
+    // Try backend as fallback
     try {
-      const res = await fetch(BACKEND_URL + '/health', { signal: AbortSignal.timeout(60000) });
-      if (res.ok) {
-        backendReady = true;
-        wakeStatus.innerHTML = '✅ AI backend connected';
-        wakeStatus.style.borderColor = 'rgba(0,229,160,.3)';
-        wakeStatus.style.color = 'var(--green)';
-        setTimeout(() => wakeStatus.remove(), 3000);
-        return true;
-      }
-    } catch(e) {
-      if (i < retries - 1) {
-        wakeStatus.innerHTML = `⏳ Waking up AI backend… (${i+2}/${retries})`;
-        await new Promise(r => setTimeout(r, 5000));
-      }
-    }
+      const res = await fetch(BACKEND_URL + '/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: messages[messages.length-1]?.content || '', history: messages.slice(0,-1), language: currentLang || 'en' }),
+        signal: AbortSignal.timeout(60000)
+      });
+      if (res.ok) { const d = await res.json(); return d.reply; }
+    } catch(e) {}
+    throw new Error('No API key set');
   }
-  wakeStatus.innerHTML = '⚠️ Backend offline — AI unavailable';
-  wakeStatus.style.borderColor = 'rgba(255,61,90,.3)';
-  wakeStatus.style.color = 'var(--live)';
-  return false;
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system, messages })
+  });
+  if (!res.ok) throw new Error('AI request failed');
+  const data = await res.json();
+  return data.content.map(b => b.text || '').join('').trim();
 }
-pingBackend();
 
-// ─── API HELPERS ───────────────────────────────────────────────────────────
-async function apiPost(path, body, auth = false) {
-  const headers = { 'Content-Type': 'application/json' };
-  const token = localStorage.getItem('ss_token');
-  if (auth && token) headers['Authorization'] = `Bearer ${token}`;
+// ─── API key setup banner ────────────────────────────────────────────────────
+if (!localStorage.getItem('ss_api_key')) {
+  const banner = document.createElement('div');
+  banner.id = 'apiBanner';
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#0f1020;border-top:2px solid rgba(123,111,255,.4);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:9999;font-size:13px;flex-wrap:wrap';
+  banner.innerHTML = `<span>🔑 <strong>Enter your Anthropic API key</strong> to enable the AI teacher:</span><div style="display:flex;gap:8px;flex:1;min-width:180px"><input id="apiKeyInp" type="password" placeholder="sk-ant-..." style="flex:1;background:#0a0c14;border:1px solid #7B6FFF;color:#fff;border-radius:8px;padding:8px 12px;font-size:12px;outline:none"/><button onclick="saveAPIKey()" style="background:#7B6FFF;border:none;color:#fff;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer">Save</button></div><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#5A5E75;cursor:pointer;font-size:20px">✕</button>`;
+  document.body.appendChild(banner);
+}
+function saveAPIKey() {
+  const val = document.getElementById('apiKeyInp')?.value?.trim();
+  if (!val || !val.startsWith('sk-')) { alert('Please enter a valid Anthropic API key (starts with sk-)'); return; }
+  localStorage.setItem('ss_api_key', val);
+  document.getElementById('apiBanner')?.remove();
+  showToast('✅ API key saved — AI teacher ready!');
+}
+
+async function apiPost(path, body) {
   const res = await fetch(BACKEND_URL + path, {
     method: 'POST',
-    headers,
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(60000)
+    signal: AbortSignal.timeout(30000)
   });
-  if (!res.ok) throw new Error((await res.json()).detail || 'Request failed');
+  if (!res.ok) throw new Error('Request failed');
   return res.json();
 }
 
@@ -1446,22 +1454,25 @@ async function startAILesson() {
   setAITileStatus('📚 Preparing lesson…', true);
   addAIMessage('ai', `📚 Starting a lesson on: <strong>${topic}</strong>`);
 
-  // Ask backend to generate a 5-step lesson plan
+  // Generate lesson via direct AI call
   try {
-    addAIMessage('ai', '⏳ Loading lesson… (may take up to 30 seconds if backend is waking up)');
-    const data = await apiPost('/api/ai/lesson', { topic, language: currentLang || 'en' });
-    // Remove loading message
+    addAIMessage('ai', '⏳ Generating lesson…');
+    const langMap = { en:'English', ar:'Arabic', fr:'French', es:'Spanish', zh:'Chinese' };
+    const system = `You are an enthusiastic AI teacher in SkillStream. Respond in ${langMap[currentLang||'en']||'English'}. Return ONLY a JSON object, no markdown: {"steps":["step1","step2","step3","step4","step5"]} Each step: 2-4 sentences, clear and educational.`;
+    const raw = await callAI(system, [{ role:'user', content:`Create a 5-step lesson on: ${topic}` }]);
     const msgs = document.getElementById('aiChatMsgs');
-    if (msgs && msgs.lastChild) msgs.removeChild(msgs.lastChild);
-    aiLesson.steps = data.steps || [];
+    if (msgs?.lastChild) msgs.removeChild(msgs.lastChild);
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    aiLesson.steps = parsed.steps || [];
     aiLesson.currentStep = 0;
     document.getElementById('aiNextBtn').disabled = false;
     updateAIProgress();
     deliverAIStep();
   } catch(e) {
     const msgs = document.getElementById('aiChatMsgs');
-    if (msgs && msgs.lastChild) msgs.removeChild(msgs.lastChild);
-    addAIMessage('ai', '⚠️ Backend is still waking up. Please wait 30 seconds and try again.');
+    if (msgs?.lastChild) msgs.removeChild(msgs.lastChild);
+    addAIMessage('ai', '⚠️ Could not generate lesson. Make sure your API key is saved.');
     setAITileStatus('Ready to teach', false);
     document.getElementById('aiLessonControls').style.display = 'none';
   }
@@ -1563,36 +1574,21 @@ async function sendAIMessage() {
   setAITileStatus('Thinking…', true);
 
   try {
-    const lessonContext = aiLesson.active
-      ? `Lesson about "${aiLesson.topic}", step ${aiLesson.currentStep + 1} of ${aiLesson.steps.length}.`
-      : '';
-    const data = await apiPost('/api/ai/chat', {
-      message: text,
-      history: aiChatHistory,
-      lesson_context: lessonContext,
-      language: currentLang || 'en'
-    });
-    const reply = data.reply || '';
+    const lessonContext = aiLesson.active ? `Lesson about "${aiLesson.topic}", step ${aiLesson.currentStep+1} of ${aiLesson.steps.length}.` : '';
+    const langMap = { en:'English', ar:'Arabic', fr:'French', es:'Spanish', zh:'Chinese' };
+    const system = `You are a friendly AI teacher in SkillStream. Respond in ${langMap[currentLang||'en']||'English'}. ${lessonContext} Answer clearly. Plain text only. Under 150 words.`;
+    const reply = await callAI(system, [...aiChatHistory, { role:'user', content:text }]);
     document.getElementById(typingId)?.remove();
-    aiChatHistory.push({ role: 'assistant', content: reply });
+    aiChatHistory.push({ role:'assistant', content:reply });
     addAIMessage('ai', reply);
     setAITileStatus('Ready', false);
-
-    // Flash on tile
     const bubble = document.getElementById('aiSpeechBubble');
-    if (bubble) {
-      bubble.textContent = reply.slice(0, 120) + (reply.length > 120 ? '…' : '');
-      bubble.classList.add('show');
-      setTimeout(() => bubble.classList.remove('show'), 5000);
-    }
+    if (bubble) { bubble.textContent = reply.slice(0,120)+(reply.length>120?'…':''); bubble.classList.add('show'); setTimeout(()=>bubble.classList.remove('show'),5000); }
     const av = document.getElementById('aiAvatar');
     const tile = document.getElementById('aiTeacherTile');
     if (av) av.classList.add('talking');
     if (tile) tile.classList.add('speaking');
-    setTimeout(() => {
-      if (av) av.classList.remove('talking');
-      if (tile) tile.classList.remove('speaking');
-    }, 2500);
+    setTimeout(()=>{ if(av)av.classList.remove('talking'); if(tile)tile.classList.remove('speaking'); },2500);
   } catch(e) {
     document.getElementById(typingId)?.remove();
     addAIMessage('ai', '⚠️ Could not reach backend. Make sure it is running.');
