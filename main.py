@@ -9,27 +9,24 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import httpx
 
-# ─── CONFIG ───────────────────────────────────────────────────────────────────
+# ─── CONFIG ──────────────────────────────────────────────────────────────────
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-SECRET_KEY        = os.environ.get("SECRET_KEY", "skillstream-secret-change-in-prod")
+SECRET_KEY        = os.environ.get("SECRET_KEY", "skillstream-secret-2026")
 ANTHROPIC_URL     = "https://api.anthropic.com/v1/messages"
 MODEL             = "claude-sonnet-4-6"
 
-# ─── IN-MEMORY STORES (replace with DB later) ─────────────────────────────────
-users    = {}   # { user_id: { id, name, email, phone, password_hash, role, skills, avatar, created_at } }
-sessions = {}   # { room_code: { room_code, title, host_id, host_name, created_at, participants: [] } }
-rooms    = {}   # { room_code: ConnectionManager }
+users    = {}
+sessions = {}
+rooms    = {}
 
-# ─── APP ──────────────────────────────────────────────────────────────────────
+# ─── APP ─────────────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("🚀 SkillStream backend starting...")
     yield
-    print("👋 SkillStream backend shutting down")
 
 app = FastAPI(title="SkillStream API", version="1.0.0", lifespan=lifespan)
 
@@ -37,11 +34,11 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
-# ─── HELPERS ──────────────────────────────────────────────────────────────────
+# ─── HELPERS ─────────────────────────────────────────────────────────────────
 def hash_password(password: str) -> str:
     return hashlib.sha256((password + SECRET_KEY).encode()).hexdigest()
 
@@ -88,12 +85,12 @@ async def call_anthropic(system: str, messages: list, max_tokens: int = 1000) ->
         data = resp.json()
         return "".join(b.get("text", "") for b in data.get("content", []))
 
-# ─── WEBSOCKET ROOM MANAGER ───────────────────────────────────────────────────
+# ─── WEBSOCKET MANAGER ───────────────────────────────────────────────────────
 class RoomManager:
     def __init__(self, room_code: str):
         self.room_code = room_code
-        self.connections: dict[str, WebSocket] = {}  # { user_id: ws }
-        self.user_names: dict[str, str] = {}
+        self.connections: dict = {}
+        self.user_names: dict = {}
 
     async def connect(self, ws: WebSocket, user_id: str, name: str):
         await ws.accept()
@@ -103,8 +100,7 @@ class RoomManager:
 
     def disconnect(self, user_id: str):
         self.connections.pop(user_id, None)
-        name = self.user_names.pop(user_id, "Someone")
-        return name
+        return self.user_names.pop(user_id, "Someone")
 
     async def broadcast(self, data: dict, exclude: str = None):
         dead = []
@@ -134,7 +130,7 @@ def get_room(room_code: str) -> RoomManager:
         rooms[room_code] = RoomManager(room_code)
     return rooms[room_code]
 
-# ─── MODELS ───────────────────────────────────────────────────────────────────
+# ─── MODELS ──────────────────────────────────────────────────────────────────
 class SignupRequest(BaseModel):
     name: str
     email: Optional[str] = None
@@ -143,7 +139,7 @@ class SignupRequest(BaseModel):
     role: str = "student"
 
 class SigninRequest(BaseModel):
-    contact: str   # email or phone
+    contact: str
     password: str
 
 class LessonRequest(BaseModel):
@@ -168,7 +164,7 @@ class ProfileUpdate(BaseModel):
     country: Optional[str] = None
     timezone: Optional[str] = None
 
-# ─── HEALTH ───────────────────────────────────────────────────────────────────
+# ─── HEALTH ──────────────────────────────────────────────────────────────────
 @app.get("/")
 async def root():
     return {"status": "ok", "service": "SkillStream API", "version": "1.0.0"}
@@ -177,7 +173,7 @@ async def root():
 async def health():
     return {"status": "healthy", "ai_configured": bool(ANTHROPIC_API_KEY), "users": len(users), "sessions": len(sessions)}
 
-# ─── AUTH ─────────────────────────────────────────────────────────────────────
+# ─── AUTH ────────────────────────────────────────────────────────────────────
 @app.post("/api/auth/signup")
 async def signup(req: SignupRequest):
     if not req.email and not req.phone:
@@ -186,35 +182,21 @@ async def signup(req: SignupRequest):
         raise HTTPException(400, "Name required")
     if not req.password or len(req.password) < 4:
         raise HTTPException(400, "Password must be at least 4 characters")
-
     contact = (req.email or req.phone).lower().strip()
-    # Check duplicate
     for u in users.values():
         if u.get("contact") == contact:
-            raise HTTPException(409, "Account already exists with this email/phone")
-
+            raise HTTPException(409, "Account already exists")
     user_id = str(uuid.uuid4())
     users[user_id] = {
-        "id": user_id,
-        "name": req.name.strip(),
-        "email": req.email,
-        "phone": req.phone,
-        "contact": contact,
+        "id": user_id, "name": req.name.strip(), "email": req.email,
+        "phone": req.phone, "contact": contact,
         "password_hash": hash_password(req.password),
-        "role": req.role,
-        "skills": [],
-        "bio": "",
-        "country": "",
-        "timezone": "",
-        "avatar": None,
-        "sessions": 0,
-        "hours": 0,
-        "session_history": [],
-        "created_at": int(time.time()),
+        "role": req.role, "skills": [], "bio": "", "country": "",
+        "timezone": "", "avatar": None, "sessions": 0, "hours": 0,
+        "session_history": [], "created_at": int(time.time()),
     }
     token = make_token(user_id)
-    u = users[user_id]
-    return {"token": token, "user": {k: v for k, v in u.items() if k != "password_hash"}}
+    return {"token": token, "user": {k: v for k, v in users[user_id].items() if k != "password_hash"}}
 
 @app.post("/api/auth/signin")
 async def signin(req: SigninRequest):
@@ -236,7 +218,7 @@ async def update_profile(req: ProfileUpdate, user=Depends(get_current_user)):
         user[field] = val
     return {k: v for k, v in user.items() if k != "password_hash"}
 
-# ─── SESSIONS ─────────────────────────────────────────────────────────────────
+# ─── SESSIONS ────────────────────────────────────────────────────────────────
 @app.get("/api/sessions")
 async def list_sessions():
     return {"sessions": list(sessions.values())}
@@ -245,13 +227,9 @@ async def list_sessions():
 async def create_session(req: SessionCreate, user=Depends(get_current_user)):
     room_code = req.room_code or str(uuid.uuid4())[:8].upper()
     sessions[room_code] = {
-        "room_code": room_code,
-        "title": req.title,
-        "host_id": user["id"],
-        "host_name": user["name"],
-        "created_at": int(time.time()),
-        "participants": [],
-        "ai_enabled": True,
+        "room_code": room_code, "title": req.title,
+        "host_id": user["id"], "host_name": user["name"],
+        "created_at": int(time.time()), "participants": [], "ai_enabled": True,
     }
     return sessions[room_code]
 
@@ -264,19 +242,10 @@ async def get_session(room_code: str):
     s["participants"] = room.get_participants() if room else []
     return s
 
-@app.delete("/api/sessions/{room_code}")
-async def end_session(room_code: str, user=Depends(get_current_user)):
-    if room_code not in sessions:
-        raise HTTPException(404, "Session not found")
-    if sessions[room_code]["host_id"] != user["id"]:
-        raise HTTPException(403, "Only the host can end the session")
-    del sessions[room_code]
-    return {"ok": True}
-
-# ─── AI ───────────────────────────────────────────────────────────────────────
+# ─── AI ──────────────────────────────────────────────────────────────────────
 LANG_INSTRUCTIONS = {
     "en": "Respond in English.",
-    "ar": "Respond in Arabic (العربية). Use clear Modern Standard Arabic.",
+    "ar": "Respond in Arabic (العربية).",
     "fr": "Réponds en français.",
     "es": "Responde en español.",
     "zh": "用中文回答。",
@@ -285,63 +254,46 @@ LANG_INSTRUCTIONS = {
 @app.post("/api/ai/lesson")
 async def generate_lesson(req: LessonRequest):
     lang_instr = LANG_INSTRUCTIONS.get(req.language, LANG_INSTRUCTIONS["en"])
-    system = f"""You are an enthusiastic AI teacher in a live classroom app called SkillStream.
+    system = f"""You are an enthusiastic AI teacher in SkillStream.
 {lang_instr}
-Return ONLY a JSON object with this exact shape, no markdown, no explanation:
-{{"steps":["step1 text","step2 text","step3 text","step4 text","step5 text"]}}
-Each step should be 2-4 sentences: clear, engaging, and educational. Use simple language."""
+Return ONLY a JSON object, no markdown:
+{{"steps":["step1","step2","step3","step4","step5"]}}
+Each step: 2-4 sentences, clear and educational."""
     raw = await call_anthropic(system, [{"role": "user", "content": f"Create a 5-step lesson on: {req.topic}"}])
     clean = raw.replace("```json", "").replace("```", "").strip()
     try:
         parsed = json.loads(clean)
         return {"steps": parsed.get("steps", []), "topic": req.topic}
     except json.JSONDecodeError:
-        raise HTTPException(502, "AI returned invalid lesson format")
+        raise HTTPException(502, "AI returned invalid format")
 
 @app.post("/api/ai/chat")
 async def ai_chat(req: ChatRequest):
     lang_instr = LANG_INSTRUCTIONS.get(req.language, LANG_INSTRUCTIONS["en"])
-    system = f"""You are a friendly, expert AI teacher in a live classroom app called SkillStream.
+    system = f"""You are a friendly AI teacher in SkillStream.
 {lang_instr}
-{f'We are in a lesson about: {req.lesson_context}.' if req.lesson_context else ''}
-Answer clearly and concisely. Use plain text only (no markdown). Keep responses under 150 words."""
-    messages = req.history + [{"role": "user", "content": req.message}]
+{f'Lesson context: {req.lesson_context}' if req.lesson_context else ''}
+Answer clearly. Plain text only. Under 150 words."""
+    messages = req.history[-10:] + [{"role": "user", "content": req.message}]
     reply = await call_anthropic(system, messages)
     return {"reply": reply.strip()}
 
-# ─── WEBSOCKET ────────────────────────────────────────────────────────────────
+# ─── WEBSOCKET ───────────────────────────────────────────────────────────────
 @app.websocket("/ws/{room_code}")
 async def websocket_endpoint(ws: WebSocket, room_code: str, user_id: str = None, name: str = "Guest"):
     room = get_room(room_code)
     uid = user_id or str(uuid.uuid4())[:8]
     await room.connect(ws, uid, name)
-
-    # Track session participant
-    if room_code in sessions and uid not in [p["user_id"] for p in sessions[room_code]["participants"]]:
-        sessions[room_code]["participants"].append({"user_id": uid, "name": name})
-
-    # Send current participant list to new joiner
     await ws.send_json({"type": "participants", "participants": room.get_participants()})
-
     try:
         while True:
             data = await ws.receive_json()
             msg_type = data.get("type")
-
             if msg_type == "chat":
-                await room.broadcast({
-                    "type": "chat",
-                    "user_id": uid,
-                    "name": name,
-                    "text": data.get("text", ""),
-                    "ts": int(time.time())
-                })
+                await room.broadcast({"type": "chat", "user_id": uid, "name": name, "text": data.get("text", ""), "ts": int(time.time())})
             elif msg_type == "reaction":
                 await room.broadcast({"type": "reaction", "emoji": data.get("emoji"), "name": name})
-            elif msg_type == "hand":
-                await room.broadcast({"type": "hand", "user_id": uid, "name": name, "raised": data.get("raised", True)})
             elif msg_type == "signal":
-                # WebRTC signaling relay
                 target = data.get("target")
                 if target:
                     await room.send_to(target, {"type": "signal", "from": uid, "signal": data.get("signal")})
@@ -349,14 +301,8 @@ async def websocket_endpoint(ws: WebSocket, room_code: str, user_id: str = None,
                     await room.broadcast({"type": "signal", "from": uid, "signal": data.get("signal")}, exclude=uid)
             elif msg_type == "ping":
                 await ws.send_json({"type": "pong"})
-
     except WebSocketDisconnect:
         name_left = room.disconnect(uid)
         await room.broadcast({"type": "user_left", "user_id": uid, "name": name_left, "count": len(room.connections)})
-        # Clean up empty rooms
         if not room.connections and room_code in rooms:
             del rooms[room_code]
-        if room_code in sessions:
-            sessions[room_code]["participants"] = [
-                p for p in sessions[room_code]["participants"] if p["user_id"] != uid
-            ]
