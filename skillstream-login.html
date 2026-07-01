@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>SkillStream — Log In</title>
+<meta name="theme-color" content="#7B6FFF"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237B6FFF'/><text y='.9em' font-size='80' x='10'>🎓</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
+--accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
+--text:#ECEDF5;--muted:#5A5E75;--pill:#1A1D28;--shadow:0 8px 40px rgba(0,0,0,0.7);
+--radius:14px;--radius-sm:8px;--radius-full:9999px
+}
+html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
+body{display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;padding:0 24px;height:60px;background:rgba(15,17,24,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px)}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:22px;color:var(--text);text-decoration:none}
+.logo span{background:linear-gradient(135deg,var(--accent),#4B9EFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;width:100%;max-width:380px;position:relative;overflow:hidden}
+.auth-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(123,111,255,.10) 0%,transparent 70%);pointer-events:none}
+.auth-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;position:relative}
+.auth-sub{color:var(--muted);font-size:13px;margin-bottom:24px;position:relative}
+label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.field{margin-bottom:16px;position:relative}
+input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:11px 13px;font-size:14px;font-family:'Inter',sans-serif;transition:all .2s}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(123,111,255,.1)}
+.btn-primary{width:100%;background:var(--accent);border:none;color:#fff;border-radius:var(--radius-sm);padding:12px;cursor:pointer;font-size:14px;font-weight:700;font-family:'Syne',sans-serif;transition:all .25s;margin-top:6px;position:relative}
+.btn-primary:hover{background:var(--accent-dark);transform:scale(1.02)}
+.error-msg{background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.2);color:var(--live);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;margin-bottom:16px;display:none;position:relative}
+.switch-link{text-align:center;font-size:13px;color:var(--muted);margin-top:20px;position:relative}
+.switch-link a{color:var(--accent);text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<div class="topbar"><a href="index.html" class="logo">Skill<span>Stream</span></a></div>
+<div class="wrap">
+  <div class="auth-card">
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-sub">Log in to reach your classrooms</div>
+    <div class="error-msg" id="errorMsg"></div>
+    <form id="loginForm">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" required autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" required autocomplete="current-password"/>
+      </div>
+      <button type="submit" class="btn-primary">Log in</button>
+    </form>
+    <div class="switch-link">New to SkillStream? <a href="skillstream-signup.html">Create an account</a></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="skillstream-auth.js"></script>
+<script>
+(async () => {
+  await SSAuth.ready;
+  if (SSAuth.currentUser()) window.location.href = 'skillstream-dashboard.html';
+})();
+
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const err = document.getElementById('errorMsg');
+  err.style.display = 'none';
+  const result = await SSAuth.login({ email, password });
+  if (!result.ok) {
+    err.textContent = result.error;
+    err.style.display = 'block';
+    return;
+  }
+  window.location.href = 'skillstream-dashboard.html';
+});
+</script>
+</body>
+</html>
