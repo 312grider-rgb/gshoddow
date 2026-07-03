@@ -258,4 +258,223 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="skillstream-auth.js"></script>
+<script src="skillstream-classrooms.js"></script>
+<script>
+let me = null;
+let currentClassId = null;
+let currentClassroom = null; // cached hydrated classroom while detail view is open
+
+function showToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (error ? ' error' : '') + ' show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function fmtDate(ts) { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); }
+
+/* ---------- LIST VIEW ---------- */
+async function renderList() {
+  const { teaching, enrolled } = await SSClass.myClasses();
+  const unread = await SSClass.unreadCounts();
+  const teachEl = document.getElementById('teachingList');
+  const enrEl = document.getElementById('enrolledList');
+
+  const badge = (id) => unread[id] ? `<span class="class-code-pill" style="background:var(--live);color:#fff;border-color:var(--live)">${unread[id]} new</span>` : '';
+
+  teachEl.innerHTML = teaching.length ? teaching.map(c => `
+    <div class="class-card" onclick="openClass('${c.id}')">
+      <div><div class="class-name">${c.name}</div><div class="class-meta">${c.students.length} student${c.students.length===1?'':'s'} · ${c.subject||'General'}</div></div>
+      <div style="display:flex;gap:6px;align-items:center">${badge(c.id)}<div class="class-code-pill">${c.code}</div></div>
+    </div>`).join('') : '<div class="empty">You\'re not teaching any classes yet.</div>';
+
+  enrEl.innerHTML = enrolled.length ? enrolled.map(c => `
+    <div class="class-card" onclick="openClass('${c.id}')">
+      <div><div class="class-name">${c.name}</div><div class="class-meta">Taught by ${c.teacherName} · ${c.subject||'General'}</div></div>
+      ${badge(c.id)}
+    </div>`).join('') : '<div class="empty">You haven\'t joined any classes yet.</div>';
+}
+
+async function submitCreate() {
+  const name = document.getElementById('cName').value.trim();
+  const subject = document.getElementById('cSubject').value.trim();
+  const description = document.getElementById('cDesc').value.trim();
+  const err = document.getElementById('createError');
+  try {
+    const result = await SSClass.create({ name, subject, description });
+    if (!result.ok) { err.textContent = result.error; err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    closeModal('createModal');
+    document.getElementById('cName').value = ''; document.getElementById('cSubject').value = ''; document.getElementById('cDesc').value = '';
+    await renderList();
+    showToast('✅ Classroom created — code: ' + result.classroom.code);
+  } catch (e) {
+    console.error('submitCreate error:', e);
+    err.textContent = 'Error: ' + e.message;
+    err.style.display = 'block';
+  }
+}
+
+async function submitJoin() {
+  const code = document.getElementById('jCode').value.trim();
+  const result = await SSClass.join(code);
+  const err = document.getElementById('joinError');
+  if (!result.ok) { err.textContent = result.error; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  closeModal('joinModal');
+  document.getElementById('jCode').value = '';
+  await renderList();
+  showToast('✅ Joined ' + result.classroom.name);
+}
+
+/* ---------- DETAIL VIEW ---------- */
+async function openClass(id) {
+  currentClassId = id;
+  await SSClass.markSeen(id);
+  document.getElementById('listView').classList.add('hidden');
+  document.getElementById('detailView').classList.remove('hidden');
+  await renderDetail();
+}
+function showList() {
+  currentClassId = null;
+  currentClassroom = null;
+  document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('listView').classList.remove('hidden');
+  renderList();
+}
+function isTeacherOfCurrent(c) { return c.teacherEmail === me.id; }
+
+async function renderDetail() {
+  const c = await SSClass.get(currentClassId);
+  if (!c) { showList(); return; }
+  currentClassroom = c;
+  const teaching = isTeacherOfCurrent(c);
+
+  document.getElementById('dName').textContent = c.name;
+  document.getElementById('dMeta').textContent = (c.subject || 'General') + ' · ' + (teaching ? 'You are the teacher' : 'Taught by ' + c.teacherName);
+  document.getElementById('dCodeBox').classList.toggle('hidden', !teaching);
+  document.getElementById('dCode').textContent = c.code;
+
+  document.getElementById('announceActionRow').innerHTML = `<button class="btn btn-primary" onclick="openModal('announceModal')">📢 Post Announcement</button>`;
+  document.getElementById('announceList').innerHTML = c.announcements.length ? c.announcements.map(a => `
+    <div class="card">
+      <div class="card-title">${a.title || '(no title)'}</div>
+      <div class="card-meta">${a.authorName} · ${fmtDate(a.createdAt)}</div>
+      <div class="card-body">${escapeHtml(a.body)}</div>
+    </div>`).join('') : '<div class="empty">No announcements yet.</div>';
+
+  document.getElementById('assignActionRow').innerHTML = teaching
+    ? `<button class="btn btn-primary" onclick="openModal('assignModal')">+ New Assignment</button>` : '';
+  document.getElementById('assignList').innerHTML = c.assignments.length ? c.assignments.map(a => renderAssignment(c, a, teaching)).join('') : '<div class="empty">No assignments posted yet.</div>';
+
+  renderQuizzes();
+
+  document.getElementById('teacherLine').textContent = '👩‍🏫 ' + c.teacherName + ' (Teacher)';
+  document.getElementById('studentCount').textContent = c.students.length;
+  document.getElementById('rosterCard').innerHTML = c.students.length ? c.students.map(s => `
+    <div class="roster-item"><div class="roster-dot">${s.name.charAt(0).toUpperCase()}</div>${s.name}</div>
+  `).join('') : '<div style="color:var(--muted);font-size:13px">No students enrolled yet. Share the class code!</div>';
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML;
+}
+
+function renderAssignment(c, a, teaching) {
+  const overdue = a.dueDate && new Date(a.dueDate) < new Date();
+  const dueChip = a.dueDate ? `<span class="due ${overdue ? 'overdue' : ''}">Due ${fmtDate(new Date(a.dueDate).getTime())}</span>` : '';
+  const attachHtml = (a.attachments || []).map(f => `<a class="attach-pill" href="${f.data}" download="${f.name}">📎 ${f.name}</a>`).join('');
+
+  let bodyExtra = '';
+  if (teaching) {
+    const subs = c.submissions[a.id] || [];
+    bodyExtra = `<div class="submit-box"><div class="card-meta">${subs.length} of ${c.students.length} submitted</div>` +
+      subs.map(s => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border);font-size:12px">
+          <span>${s.studentName}${s.grade !== null && s.grade !== undefined ? '' : ' · not graded'}</span>
+          <span>
+            ${s.grade !== null && s.grade !== undefined ? `<span class="grade-badge">${s.grade}/${a.points}</span>` : `<button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="gradePrompt('${a.id}','${s.studentEmail}',${a.points})">Grade</button>`}
+          </span>
+        </div>`).join('') || '<div style="font-size:12px;color:var(--muted);margin-top:6px">No submissions yet.</div>';
+    bodyExtra += '</div>';
+  } else {
+    const mySub = (c.submissions[a.id] || []).find(s => s.studentEmail === me.id);
+    if (mySub) {
+      bodyExtra = `<div class="submit-box"><div class="card-meta">✅ Submitted ${fmtDate(mySub.submittedAt)}${mySub.grade !== null && mySub.grade !== undefined ? ' · Grade: ' + mySub.grade + '/' + a.points : ' · Awaiting grade'}</div>
+      ${mySub.feedback ? `<div class="card-body" style="margin-top:4px">💬 ${escapeHtml(mySub.feedback)}</div>` : ''}
+      </div>`;
+    } else {
+      bodyExtra = `<div class="submit-box">
+        <textarea id="subtext_${a.id}" placeholder="Type your answer or notes…" style="margin-bottom:8px"></textarea>
+        <input type="file" id="subfile_${a.id}" style="font-size:12px;margin-bottom:8px"/><br/>
+        <button class="btn btn-primary" style="padding:8px 16px;font-size:12px" onclick="submitWork('${a.id}')">Submit</button>
+      </div>`;
+    }
+  }
+
+  return `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div class="card-title">${a.title}</div>
+      <span class="pts">${a.points} pts</span>
+    </div>
+    <div class="card-meta">${dueChip} Posted ${fmtDate(a.createdAt)}</div>
+    <div class="card-body">${escapeHtml(a.description)}</div>
+    ${attachHtml}
+    ${bodyExtra}
+  </div>`;
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  ['stream', 'assignments', 'quizzes', 'grades', 'chat', 'people'].forEach(t => document.getElementById('tab-' + t).classList.toggle('hidden', t !== name));
+  if (name === 'grades') renderGrades();
+  if (name === 'chat') renderChat();
+}
+
+/* ---------- QUIZZES ---------- */
+function renderQuizzes() {
+  const c = currentClassroom;
+  const teaching = isTeacherOfCurrent(c);
+  document.getElementById('quizActionRow').innerHTML = teaching
+    ? `<button class="btn btn-primary" onclick="openQuizBuilder()">+ New Quiz</button>` : '';
+  document.getElementById('quizList').innerHTML = c.quizzes.length ? c.quizzes.map(q => {
+    const results = c.quizResults[q.id] || [];
+    const totalPts = q.questions.reduce((s, x) => s + (x.points || 1), 0);
+    if (teaching) {
+      return `<div class="card">
+        <div class="card-title">${q.title}</div>
+        <div class="card-meta">${q.questions.length} question${q.questions.length===1?'':'s'} · ${totalPts} pts · ${results.length}/${c.students.length} completed</div>
+        ${results.map(r => `<div class="grade-row"><span>${r.studentName}</span><span class="grade-badge">${r.score}/${r.total}</span></div>`).join('') || '<div style="color:var(--muted);font-size:12px">No attempts yet.</div>'}
+      </div>`;
+    } else {
+      const mine = results.find(r => r.studentEmail === me.id);
+      return `<div class="card">
+        <div class="card-title">${q.title}</div>
+        <div class="card-meta">${q.questions.length} question${q.questions.length===1?'':'s'} · ${totalPts} pts</div>
+        ${mine
+          ? `<div class="card-body">✅ Completed — score: <span class="grade-badge">${mine.score}/${mine.total}</span></div>`
+          : `<button class="btn btn-primary" style="padding:8px 16px;font-size:12px;margin-top:8px" onclick="takeQuiz('${q.id}')">Take Quiz</button>`}
+      </div>`;
+    }
+  }).join('') : '<div class="empty">No quizzes yet.</div>';
+}
+
+let qzQuestionCount = 0;
+function openQuizBuilder() {
+  document.getElementById('qzTitle').value = '';
+  document.getElementById('qzQuestions').innerHTML = '';
+  qzQuestionCount = 0;
+  addQuestionRow();
+  openModal('quizModal');
+}
+function addQuestionRow() {
+  const idx = qzQuestionCount++;
+  const wrap = document.createElement('div');
+  wrap.className = 'qz-row';
+  wrap.id = 'qzq_' + idx;
+  wrap.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6
