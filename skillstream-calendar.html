@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>SkillStream — Calendar</title>
+<meta name="theme-color" content="#7B6FFF"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
+--accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
+--yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
+--pill:#1A1D28;--shadow:0 8px 40px rgba(0,0,0,0.7);
+--radius:14px;--radius-sm:8px;--radius-full:9999px
+}
+html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:var(--radius-full)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;background:rgba(15,17,24,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:22px;color:var(--text);text-decoration:none}
+.logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-btn{background:var(--pill);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+.nav-btn:hover{border-color:var(--accent);color:var(--text)}
+.page{max-width:720px;margin:0 auto;padding:28px 18px 60px}
+h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.month-nav .label{font-family:'Syne',sans-serif;font-weight:800;font-size:17px}
+.month-nav button{background:var(--pill);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);width:34px;height:34px;cursor:pointer;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:26px}
+.dow{text-align:center;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;padding-bottom:4px}
+.day{background:var(--surface);border:1px solid var(--border);border-radius:8px;min-height:56px;padding:6px;font-size:11px;position:relative}
+.day.empty{background:transparent;border:none}
+.day .num{font-weight:700;color:var(--muted)}
+.day.today .num{color:var(--accent)}
+.day.today{border-color:var(--accent)}
+.dot-row{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
+.dot{width:6px;height:6px;border-radius:50%}
+.dot.assignment{background:var(--yellow)}
+.dot.announcement{background:var(--blue)}
+.group-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:22px 0 10px}
+.event-card{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
+.event-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.event-icon.assignment{background:rgba(255,185,48,.12)}
+.event-icon.announcement{background:rgba(75,158,255,.12)}
+.event-title{font-size:13px;font-weight:700}
+.event-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.legend{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-bottom:18px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:24px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius)}
+@media(max-width:480px){.day{min-height:44px;font-size:10px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+<a class="logo" href="skillstream-dashboard.html">Skill<span>Stream</span></a>
+<a class="nav-btn" href="skillstream-classrooms.html">← Classrooms</a>
+</div>
+<div class="page">
+  <h1>Calendar</h1>
+  <div class="sub">Assignment due dates and announcements across all your classes.</div>
+  <div class="legend">
+    <span><span class="dot assignment"></span> Assignment due</span>
+    <span><span class="dot announcement"></span> Announcement</span>
+  </div>
+
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">‹</button>
+    <div class="label" id="monthLabel"></div>
+    <button onclick="changeMonth(1)">›</button>
+  </div>
+  <div class="grid" id="calGrid"></div>
+
+  <div class="group-label">Upcoming</div>
+  <div id="agendaList"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="skillstream-auth.js"></script>
+<script src="skillstream-classrooms.js"></script>
+<script>
+let viewDate = new Date();
+viewDate.setDate(1);
+
+function ymd(d) { return d.toISOString().slice(0, 10); }
+
+async function renderCalendar() {
+  const events = await SSClass.upcomingEvents();
+  const byDate = {};
+  events.forEach(e => { (byDate[e.date] = byDate[e.date] || []).push(e); });
+
+  const year = viewDate.getFullYear(), month = viewDate.getMonth();
+  document.getElementById('monthLabel').textContent = viewDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayStr = ymd(new Date());
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = ['S','M','T','W','T','F','S'].map(d => `<div class="dow">${d}</div>`).join('');
+  for (let i = 0; i < firstDow; i++) grid.innerHTML += '<div class="day empty"></div>';
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = ymd(new Date(year, month, day));
+    const dayEvents = byDate[dateStr] || [];
+    const isToday = dateStr === todayStr;
+    grid.innerHTML += `<div class="day ${isToday ? 'today' : ''}">
+      <div class="num">${day}</div>
+      <div class="dot-row">${dayEvents.slice(0,4).map(e => `<div class="dot ${e.type}" title="${e.title}"></div>`).join('')}</div>
+    </div>`;
+  }
+
+  // Agenda: upcoming events from today forward
+  const upcoming = events.filter(e => e.date >= todayStr).slice(0, 15);
+  const agenda = document.getElementById('agendaList');
+  agenda.innerHTML = upcoming.length ? upcoming.map(e => `
+    <div class="event-card">
+      <div class="event-icon ${e.type}">${e.type === 'assignment' ? '📝' : '📢'}</div>
+      <div>
+        <div class="event-title">${e.title}</div>
+        <div class="event-meta">${e.className} · ${new Date(e.date).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</div>
+      </div>
+    </div>`).join('') : '<div class="empty">Nothing scheduled — you\'re all caught up.</div>';
+}
+
+function changeMonth(delta) {
+  viewDate.setMonth(viewDate.getMonth() + delta);
+  renderCalendar();
+}
+
+(async () => {
+  const user = await SSAuth.requireAuth();
+  if (!user) return;
+  await renderCalendar();
+})();
+</script>
+</body>
+</html>
