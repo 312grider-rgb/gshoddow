@@ -258,7 +258,9 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<div class="toast" id="toast"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="skillstream-auth.js"></script>
 <script src="skillstream-classrooms.js"></script>
 <script>
@@ -303,20 +305,14 @@ async function submitCreate() {
   const name = document.getElementById('cName').value.trim();
   const subject = document.getElementById('cSubject').value.trim();
   const description = document.getElementById('cDesc').value.trim();
+  const result = await SSClass.create({ name, subject, description });
   const err = document.getElementById('createError');
-  try {
-    const result = await SSClass.create({ name, subject, description });
-    if (!result.ok) { err.textContent = result.error; err.style.display = 'block'; return; }
-    err.style.display = 'none';
-    closeModal('createModal');
-    document.getElementById('cName').value = ''; document.getElementById('cSubject').value = ''; document.getElementById('cDesc').value = '';
-    await renderList();
-    showToast('✅ Classroom created — code: ' + result.classroom.code);
-  } catch (e) {
-    console.error('submitCreate error:', e);
-    err.textContent = 'Error: ' + e.message;
-    err.style.display = 'block';
-  }
+  if (!result.ok) { err.textContent = result.error; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  closeModal('createModal');
+  document.getElementById('cName').value = ''; document.getElementById('cSubject').value = ''; document.getElementById('cDesc').value = '';
+  await renderList();
+  showToast('✅ Classroom created — code: ' + result.classroom.code);
 }
 
 async function submitJoin() {
@@ -359,6 +355,7 @@ async function renderDetail() {
   document.getElementById('dCodeBox').classList.toggle('hidden', !teaching);
   document.getElementById('dCode').textContent = c.code;
 
+  // Stream tab
   document.getElementById('announceActionRow').innerHTML = `<button class="btn btn-primary" onclick="openModal('announceModal')">📢 Post Announcement</button>`;
   document.getElementById('announceList').innerHTML = c.announcements.length ? c.announcements.map(a => `
     <div class="card">
@@ -367,12 +364,15 @@ async function renderDetail() {
       <div class="card-body">${escapeHtml(a.body)}</div>
     </div>`).join('') : '<div class="empty">No announcements yet.</div>';
 
+  // Assignments tab
   document.getElementById('assignActionRow').innerHTML = teaching
     ? `<button class="btn btn-primary" onclick="openModal('assignModal')">+ New Assignment</button>` : '';
   document.getElementById('assignList').innerHTML = c.assignments.length ? c.assignments.map(a => renderAssignment(c, a, teaching)).join('') : '<div class="empty">No assignments posted yet.</div>';
 
+  // Quizzes tab
   renderQuizzes();
 
+  // People tab
   document.getElementById('teacherLine').textContent = '👩‍🏫 ' + c.teacherName + ' (Teacher)';
   document.getElementById('studentCount').textContent = c.students.length;
   document.getElementById('rosterCard').innerHTML = c.students.length ? c.students.map(s => `
@@ -477,4 +477,197 @@ function addQuestionRow() {
   wrap.className = 'qz-row';
   wrap.id = 'qzq_' + idx;
   wrap.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <label style="margin:0">Question ${idx + 1}</label>
+      <button class="remove-q" onclick="document.getElementById('qzq_${idx}').remove()">Remove</button>
+    </div>
+    <input type="text" placeholder="Question text" id="qzq_${idx}_text"/>
+    ${[0,1,2,3].map(i => `
+      <div class="qz-choice-row">
+        <input type="radio" name="qzq_${idx}_correct" value="${i}" ${i===0?'checked':''}/>
+        <input type="text" placeholder="Choice ${i+1}" id="qzq_${idx}_choice${i}"/>
+      </div>`).join('')}
+    <input type="number" placeholder="Points (default 1)" id="qzq_${idx}_points" value="1" style="margin-top:4px"/>
+  `;
+  document.getElementById('qzQuestions').appendChild(wrap);
+}
+async function submitQuizCreate() {
+  const title = document.getElementById('qzTitle').value.trim();
+  const rows = document.querySelectorAll('#qzQuestions .qz-row');
+  const questions = [];
+  rows.forEach(row => {
+    const idx = row.id.split('_')[1];
+    const qText = document.getElementById(`qzq_${idx}_text`).value.trim();
+    const choices = [0,1,2,3].map(i => document.getElementById(`qzq_${idx}_choice${i}`).value.trim()).filter(Boolean);
+    const correctRadio = document.querySelector(`input[name="qzq_${idx}_correct"]:checked`);
+    const correctIndex = correctRadio ? parseInt(correctRadio.value) : 0;
+    const points = parseInt(document.getElementById(`qzq_${idx}_points`).value) || 1;
+    if (qText && choices.length >= 2) questions.push({ q: qText, choices, correctIndex, points });
+  });
+  if (!title || !questions.length) { showToast('Add a title and at least one complete question', true); return; }
+  const result = await SSClass.addQuiz(currentClassId, { title, questions });
+  if (!result.ok) { showToast(result.error, true); return; }
+  closeModal('quizModal');
+  await renderDetail();
+  showToast('✅ Quiz created');
+}
+
+let takingQuizId = null;
+function takeQuiz(quizId) {
+  const c = currentClassroom;
+  const quiz = c.quizzes.find(q => q.id === quizId);
+  if (!quiz) return;
+  takingQuizId = quizId;
+  document.getElementById('tqTitle').textContent = quiz.title;
+  document.getElementById('tqQuestions').innerHTML = quiz.questions.map((q, i) => `
+    <div class="qz-row">
+      <div style="font-weight:700;margin-bottom:8px">${i + 1}. ${escapeHtml(q.q)}</div>
+      ${q.choices.map((ch, ci) => `
+        <div class="qz-choice-row">
+          <input type="radio" name="tqq_${i}" value="${ci}"/>
+          <label style="font-weight:400;text-transform:none;font-size:13px;color:var(--text)">${escapeHtml(ch)}</label>
+        </div>`).join('')}
+    </div>`).join('');
+  openModal('takeQuizModal');
+}
+async function submitQuizAnswers() {
+  const c = currentClassroom;
+  const quiz = c.quizzes.find(q => q.id === takingQuizId);
+  const answers = quiz.questions.map((q, i) => {
+    const checked = document.querySelector(`input[name="tqq_${i}"]:checked`);
+    return checked ? parseInt(checked.value) : -1;
+  });
+  const result = await SSClass.submitQuiz(currentClassId, takingQuizId, answers);
+  if (!result.ok) { showToast(result.error, true); return; }
+  closeModal('takeQuizModal');
+  await renderDetail();
+  showToast(`✅ Scored ${result.score}/${result.total}`);
+}
+
+/* ---------- GRADES ---------- */
+function renderGrades() {
+  const c = currentClassroom;
+  const teaching = isTeacherOfCurrent(c);
+  const el = document.getElementById('gradesView');
+
+  if (teaching) {
+    if (!c.students.length) { el.innerHTML = '<div class="empty">No students enrolled yet.</div>'; return; }
+    el.innerHTML = c.students.map(s => {
+      const rows = [];
+      c.assignments.forEach(a => {
+        const sub = (c.submissions[a.id] || []).find(x => x.studentEmail === s.email);
+        rows.push(`<div class="grade-row"><span>${a.title}</span><span>${sub && sub.grade !== null && sub.grade !== undefined ? sub.grade + '/' + a.points : '—'}</span></div>`);
+      });
+      c.quizzes.forEach(q => {
+        const r = (c.quizResults[q.id] || []).find(x => x.studentEmail === s.email);
+        rows.push(`<div class="grade-row"><span>${q.title} (quiz)</span><span>${r ? r.score + '/' + r.total : '—'}</span></div>`);
+      });
+      return `<div class="card"><div class="card-title">${s.name}</div>${rows.join('') || '<div style="color:var(--muted);font-size:12px">No grades yet.</div>'}</div>`;
+    }).join('');
+  } else {
+    const rows = [];
+    let earned = 0, possible = 0;
+    c.assignments.forEach(a => {
+      const sub = (c.submissions[a.id] || []).find(x => x.studentEmail === me.id);
+      if (sub && sub.grade !== null && sub.grade !== undefined) { earned += sub.grade; possible += a.points; }
+      rows.push(`<div class="grade-row"><span>${a.title}</span><span>${sub && sub.grade !== null && sub.grade !== undefined ? sub.grade + '/' + a.points : (sub ? 'Awaiting grade' : 'Not submitted')}</span></div>`);
+    });
+    c.quizzes.forEach(q => {
+      const r = (c.quizResults[q.id] || []).find(x => x.studentEmail === me.id);
+      if (r) { earned += r.score; possible += r.total; }
+      rows.push(`<div class="grade-row"><span>${q.title} (quiz)</span><span>${r ? r.score + '/' + r.total : 'Not taken'}</span></div>`);
+    });
+    const pct = possible ? Math.round((earned / possible) * 100) : null;
+    el.innerHTML = `
+      <div class="card" style="text-align:center">
+        <div class="grade-avg">${pct !== null ? pct + '%' : '—'}</div>
+        <div class="card-meta">Overall grade</div>
+      </div>
+      <div class="card">${rows.join('') || '<div style="color:var(--muted);font-size:12px">No graded work yet.</div>'}</div>`;
+  }
+}
+
+/* ---------- CHAT ---------- */
+function renderChat() {
+  const c = currentClassroom;
+  const msgs = c.messages || [];
+  const log = document.getElementById('chatLog');
+  log.innerHTML = msgs.length ? msgs.map(m => `
+    <div class="chat-msg"><span class="who">${m.authorName}</span>${escapeHtml(m.text)}<span class="when">${new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></div>
+  `).join('') : '<div class="empty">No messages yet — say hi!</div>';
+  log.scrollTop = log.scrollHeight;
+}
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const result = await SSClass.postMessage(currentClassId, text);
+  if (!result.ok) { showToast(result.error, true); return; }
+  input.value = '';
+  currentClassroom = await SSClass.get(currentClassId);
+  renderChat();
+}
+
+async function submitAnnouncement() {
+  const title = document.getElementById('aTitle').value.trim();
+  const body = document.getElementById('aBody').value.trim();
+  if (!body) { showToast('Write a message first', true); return; }
+  const result = await SSClass.addAnnouncement(currentClassId, { title, body });
+  if (!result.ok) { showToast(result.error, true); return; }
+  document.getElementById('aTitle').value = ''; document.getElementById('aBody').value = '';
+  closeModal('announceModal');
+  await renderDetail();
+  showToast('📢 Announcement posted');
+}
+
+function getSelectedFile(fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return null;
+  if (file.size > 8 * 1024 * 1024) { showToast('File too large (max 8MB)', true); return null; }
+  return { _file: file, name: file.name, type: file.type };
+}
+
+async function submitAssignment() {
+  const title = document.getElementById('asTitle').value.trim();
+  const description = document.getElementById('asDesc').value.trim();
+  const dueDate = document.getElementById('asDue').value;
+  const points = parseInt(document.getElementById('asPoints').value) || 100;
+  if (!title) { showToast('Give the assignment a title', true); return; }
+  const file = getSelectedFile(document.getElementById('asFile'));
+  const result = await SSClass.addAssignment(currentClassId, { title, description, dueDate, points, attachments: file ? [file] : [] });
+  if (!result.ok) { showToast(result.error, true); return; }
+  ['asTitle', 'asDesc', 'asDue'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('asPoints').value = 100;
+  closeModal('assignModal');
+  await renderDetail();
+  showToast('✅ Assignment posted');
+}
+
+async function submitWork(assignmentId) {
+  const text = document.getElementById('subtext_' + assignmentId).value.trim();
+  const fileInput = document.getElementById('subfile_' + assignmentId);
+  const file = getSelectedFile(fileInput);
+  if (!text && !file) { showToast('Add a note or attach a file', true); return; }
+  const result = await SSClass.addSubmission(currentClassId, assignmentId, { text, attachments: file ? [file] : [] });
+  if (!result.ok) { showToast(result.error, true); return; }
+  await renderDetail();
+  showToast('✅ Submitted');
+}
+
+async function gradePrompt(assignmentId, studentEmail, maxPoints) {
+  const grade = prompt(`Grade out of ${maxPoints}:`);
+  if (grade === null || grade.trim() === '') return;
+  const feedback = prompt('Feedback (optional):') || '';
+  await SSClass.gradeSubmission(currentClassId, assignmentId, studentEmail, { grade: parseInt(grade), feedback });
+  await renderDetail();
+  showToast('✅ Grade saved');
+}
+
+(async () => {
+  me = await SSAuth.requireAuth();
+  if (!me) return;
+  await renderList();
+})();
+</script>
+</body>
+</html>
