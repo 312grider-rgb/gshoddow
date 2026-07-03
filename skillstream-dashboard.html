@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>SkillStream — Dashboard</title>
+<meta name="theme-color" content="#7B6FFF"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
+--accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
+--yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
+--pill:#1A1D28;--shadow:0 8px 40px rgba(0,0,0,0.7);
+--radius:14px;--radius-sm:8px;--radius-full:9999px
+}
+html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;background:rgba(15,17,24,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:22px;color:var(--text);text-decoration:none}
+.logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-btn{background:var(--pill);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+.nav-btn:hover{border-color:var(--accent);color:var(--text)}
+.page{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+.hero{background:linear-gradient(160deg,#14103a 0%,#0a0c18 100%);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;margin-bottom:20px}
+.hero-greet{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px}
+.hero-sub{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-decoration:none;color:var(--text);display:block;transition:all .2s}
+.tile:hover{border-color:var(--accent)}
+.tile-icon{font-size:26px;margin-bottom:10px}
+.tile-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px}
+.tile-sub{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="topbar">
+<a class="logo" href="skillstream-dashboard.html">Skill<span>Stream</span></a>
+<a class="nav-btn" href="skillstream-profile.html">My Account</a>
+</div>
+<div class="page">
+  <div class="hero">
+    <div class="hero-greet" id="greet">Welcome back</div>
+    <div class="hero-sub">Here's where you left off.</div>
+  </div>
+
+  <div class="grid">
+    <a class="tile" href="skillstream-classrooms.html">
+      <div class="tile-icon">🏫</div>
+      <div class="tile-title">Classrooms</div>
+      <div class="tile-sub">Create, join, and manage your classes</div>
+    </a>
+    <a class="tile" href="skillstream-calendar.html">
+      <div class="tile-icon">📅</div>
+      <div class="tile-title">Calendar</div>
+      <div class="tile-sub">Assignment due dates & announcements</div>
+    </a>
+    <a class="tile" href="skillstream-profile.html">
+      <div class="tile-icon">👤</div>
+      <div class="tile-title">My Account</div>
+      <div class="tile-sub">Profile, skills, and settings</div>
+    </a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="skillstream-auth.js"></script>
+<script>
+(async () => {
+  const user = await SSAuth.requireAuth();
+  if (!user) return;
+  document.getElementById('greet').textContent = 'Welcome back, ' + (user.name || 'there') + '!';
+})();
+</script>
+</body>
+</html>
