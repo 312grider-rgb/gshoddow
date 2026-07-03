@@ -68,11 +68,18 @@
       cachedUser = null;
     },
 
-    // Synchronous read of the last-known user (populated after `ready` resolves,
-    // and kept fresh automatically). Returns null if nobody's logged in.
-    currentUser() {
+    async function refreshCache() {
+    try {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) { cachedUser = null; return null; }
+      cachedUser = await fetchProfile(user.id);
       return cachedUser;
-    },
+    } catch (e) {
+      console.error('SSAuth refreshCache error:', e);
+      cachedUser = null;
+      return null;
+    }
+    }
 
     async updateProfile(patch) {
       const { data: { user } } = await client.auth.getUser();
