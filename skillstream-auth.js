@@ -61,8 +61,12 @@
   }
 
   // Resolves once the initial session check is done. Pages can `await SSAuth.ready`
-  // before relying on SSAuth.currentUser() synchronously.
-  const ready = refreshCache();
+  // before relying on SSAuth.currentUser() synchronously. Times out after 10s so a
+  // stuck network request can never freeze the page forever.
+  const ready = Promise.race([
+    refreshCache(),
+    new Promise((resolve) => setTimeout(() => { console.error('SSAuth: initial session check timed out'); resolve(null); }, 10000))
+  ]);
 
   client.auth.onAuthStateChange(() => { refreshCache(); });
 
