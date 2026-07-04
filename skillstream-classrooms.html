@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>SkillStream — Classrooms</title>
+<meta name="theme-color" content="#7B6FFF"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
+--accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
+--yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
+--pill:#1A1D28;--shadow:0 8px 40px rgba(0,0,0,0.7);
+--radius:14px;--radius-sm:8px;--radius-full:9999px
+}
+html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:var(--radius-full)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;background:rgba(15,17,24,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:22px;color:var(--text);text-decoration:none}
+.logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-btn{background:var(--pill);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+.nav-btn:hover{border-color:var(--accent);color:var(--text)}
+.page{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+.hidden{display:none !important}
+h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+.action-row{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+.btn{padding:11px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;border:none;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-ghost{background:var(--pill);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--accent)}
+.group-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:22px 0 10px}
+.class-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.class-card:hover{border-color:var(--accent)}
+.class-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px}
+.class-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.class-code-pill{background:var(--pill);border:1px solid var(--border);border-radius:var(--radius-full);padding:5px 12px;font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap;font-family:'Syne',sans-serif;letter-spacing:.05em}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:24px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius)}
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:500;padding:16px}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px;width:100%;max-width:420px;max-height:88vh;overflow-y:auto}
+.modal h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:16px}
+label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.field{margin-bottom:14px}
+input[type=text],input[type=number],input[type=date],textarea{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:'Inter',sans-serif}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+textarea{resize:vertical;min-height:70px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.error-msg{background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.2);color:var(--live);border-radius:var(--radius-sm);padding:9px 11px;font-size:12px;margin-bottom:12px;display:none}
+/* Classroom detail */
+.back-link{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:13px;text-decoration:none;margin-bottom:14px;cursor:pointer}
+.back-link:hover{color:var(--text)}
+.class-header{background:linear-gradient(160deg,#14103a 0%,#0a0c18 100%);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+.class-header .name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800}
+.class-header .meta{font-size:12px;color:var(--muted);margin-top:4px}
+.class-header .code-box{display:inline-flex;align-items:center;gap:8px;background:rgba(123,111,255,.12);border:1px solid rgba(123,111,255,.3);border-radius:var(--radius-sm);padding:8px 14px;margin-top:12px;font-family:'Syne',sans-serif;font-weight:800;letter-spacing:.1em;color:var(--accent)}
+.tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.tab{padding:10px 14px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px}
+.card-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.card-body{font-size:13px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+.attach-pill{display:inline-flex;align-items:center;gap:5px;background:var(--pill);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;margin:8px 6px 0 0;text-decoration:none;color:var(--blue)}
+.roster-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.roster-item:last-child{border-bottom:none}
+.roster-dot{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.due{font-size:11px;font-weight:700;padding:3px 9px;border-radius:var(--radius-full);background:rgba(255,185,48,.12);color:var(--yellow)}
+.due.overdue{background:rgba(255,61,90,.12);color:var(--live)}
+.pts{font-size:11px;color:var(--muted);font-weight:700}
+.submit-box{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.file-input-btn{display:inline-block;background:var(--pill);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;cursor:pointer;color:var(--muted)}
+.grade-badge{font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:var(--green)}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#000;border-radius:var(--radius-full);padding:12px 28px;font-weight:800;font-size:14px;z-index:600;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:all .4s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:var(--live);color:#fff}
+.qz-row{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px}
+.qz-row input[type=text]{margin-bottom:8px}
+.qz-choice-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.qz-choice-row input[type=radio]{accent-color:var(--accent);flex-shrink:0}
+.qz-choice-row input[type=text]{margin-bottom:0}
+.remove-q{background:none;border:none;color:var(--live);cursor:pointer;font-size:11px;font-weight:700}
+.chat-msg{padding:7px 0;font-size:13px}
+.chat-msg .who{font-weight:700;color:var(--accent);margin-right:6px}
+.chat-msg .when{color:var(--muted);font-size:10px;margin-left:6px}
+.grade-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.grade-row:last-child{border-bottom:none}
+.grade-avg{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="topbar">
+<a class="logo" href="skillstream-dashboard.html">Skill<span>Stream</span></a>
+<div style="display:flex;gap:8px">
+<a class="nav-btn" href="skillstream-calendar.html">📅 Calendar</a>
+<a class="nav-btn" href="skillstream-dashboard.html">← Dashboard</a>
+</div>
+</div>
+
+<div class="page">
+
+  <!-- LIST VIEW -->
+  <div id="listView">
+    <h1>Classrooms</h1>
+    <div class="sub">Create a class to teach, or join one with a code.</div>
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="openModal('createModal')">+ Create Classroom</button>
+      <button class="btn btn-ghost" onclick="openModal('joinModal')">🔑 Join with Code</button>
+    </div>
+
+    <div class="group-label">Teaching</div>
+    <div id="teachingList"></div>
+
+    <div class="group-label">Enrolled</div>
+    <div id="enrolledList"></div>
+  </div>
+
+  <!-- DETAIL VIEW -->
+  <div id="detailView" class="hidden">
+    <div class="back-link" onclick="showList()">← All classrooms</div>
+    <div class="class-header">
+      <div class="name" id="dName"></div>
+      <div class="meta" id="dMeta"></div>
+      <div class="code-box hidden" id="dCodeBox">Class code: <span id="dCode"></span></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-tab="stream" onclick="switchTab('stream')">Stream</div>
+      <div class="tab" data-tab="assignments" onclick="switchTab('assignments')">Assignments</div>
+      <div class="tab" data-tab="quizzes" onclick="switchTab('quizzes')">Quizzes</div>
+      <div class="tab" data-tab="grades" onclick="switchTab('grades')">Grades</div>
+      <div class="tab" data-tab="chat" onclick="switchTab('chat')">Chat</div>
+      <div class="tab" data-tab="people" onclick="switchTab('people')">People</div>
+    </div>
+
+    <div id="tab-stream">
+      <div class="action-row" id="announceActionRow"></div>
+      <div id="announceList"></div>
+    </div>
+
+    <div id="tab-assignments" class="hidden">
+      <div class="action-row" id="assignActionRow"></div>
+      <div id="assignList"></div>
+    </div>
+
+    <div id="tab-quizzes" class="hidden">
+      <div class="action-row" id="quizActionRow"></div>
+      <div id="quizList"></div>
+    </div>
+
+    <div id="tab-grades" class="hidden">
+      <div id="gradesView"></div>
+    </div>
+
+    <div id="tab-chat" class="hidden">
+      <div class="card" style="max-height:380px;overflow-y:auto" id="chatLog"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input type="text" id="chatInput" placeholder="Message the class…" style="flex:1" onkeydown="if(event.key==='Enter'){sendChat();}"/>
+        <button class="btn btn-primary" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+
+    <div id="tab-people" class="hidden">
+      <div class="card">
+        <div class="card-title" id="teacherLine"></div>
+      </div>
+      <div class="group-label">Students (<span id="studentCount">0</span>)</div>
+      <div class="card" id="rosterCard"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE QUIZ MODAL -->
+<div class="modal-bg hidden" id="quizModal">
+  <div class="modal">
+    <h2>New Quiz</h2>
+    <div class="field"><label>Quiz Title</label><input type="text" id="qzTitle" placeholder="e.g. Chapter 3 Check"/></div>
+    <div id="qzQuestions"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:14px" onclick="addQuestionRow()">+ Add Question</button>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('quizModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitQuizCreate()">Create Quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAKE QUIZ MODAL -->
+<div class="modal-bg hidden" id="takeQuizModal">
+  <div class="modal">
+    <h2 id="tqTitle">Quiz</h2>
+    <div id="tqQuestions"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('takeQuizModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitQuizAnswers()">Submit Quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE CLASSROOM MODAL -->
+<div class="modal-bg hidden" id="createModal">
+  <div class="modal">
+    <h2>Create a Classroom</h2>
+    <div class="error-msg" id="createError"></div>
+    <div class="field"><label>Class Name</label><input type="text" id="cName" placeholder="e.g. AP Biology, Guitar Basics"/></div>
+    <div class="field"><label>Subject</label><input type="text" id="cSubject" placeholder="e.g. Science, Music"/></div>
+    <div class="field"><label>Description</label><textarea id="cDesc" placeholder="What will students learn?"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('createModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCreate()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN MODAL -->
+<div class="modal-bg hidden" id="joinModal">
+  <div class="modal">
+    <h2>Join a Classroom</h2>
+    <div class="error-msg" id="joinError"></div>
+    <div class="field"><label>Class Code</label><input type="text" id="jCode" placeholder="e.g. 7XQP2K" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700"/></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('joinModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitJoin()">Join</button>
+    </div>
+  </div>
+</div>
+
+<!-- POST ANNOUNCEMENT MODAL -->
+<div class="modal-bg hidden" id="announceModal">
+  <div class="modal">
+    <h2>Post Announcement</h2>
+    <div class="field"><label>Title</label><input type="text" id="aTitle" placeholder="e.g. Class moved to Friday"/></div>
+    <div class="field"><label>Message</label><textarea id="aBody" placeholder="Write your announcement…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('announceModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAnnouncement()">Post</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE ASSIGNMENT MODAL -->
+<div class="modal-bg hidden" id="assignModal">
+  <div class="modal">
+    <h2>New Assignment</h2>
+    <div class="field"><label>Title</label><input type="text" id="asTitle" placeholder="e.g. Chapter 3 worksheet"/></div>
+    <div class="field"><label>Instructions</label><textarea id="asDesc" placeholder="What should students do?"></textarea></div>
+    <div class="field"><label>Due Date</label><input type="date" id="asDue"/></div>
+    <div class="field"><label>Points</label><input type="number" id="asPoints" value="100"/></div>
+    <div class="field">
+      <label>Attach File (optional)</label>
+      <input type="file" id="asFile" style="font-size:12px"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('assignModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAssignment()">Post Assignment</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="skillstream-auth.js"></script>
+<script src="skillstream-classrooms.js"></script>
+<script>
+let me = null;
+let currentClassId = null;
+let currentClassroom = null; // cached hydrated classroom while detail view is open
+
+function showToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (error ? ' error' : '') + ' show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function fmtDate(ts) { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); }
+
+/* ---------- LIST VIEW ---------- */
+async function renderList() {
+  const teachEl = document.getElementById('teachingList');
+  const enrEl = document.getElementById('enrolledList');
+  try {
+    const { teaching, enrolled } = await SSClass.myClasses();
+    const unread = await SSClass.unreadCounts();
+
+    const badge = (id) => unread[id] ? `<span class="class-code-pill" style="background:var(--live);color:#fff;border-color:var(--live)">${unread[id]} new</span>` : '';
+
+    teachEl.innerHTML = teaching.length ? teaching.map(c => `
+      <div class="class-card" onclick="openClass('${c.id}')">
+        <div><div class="class-name">${c.name}</div><div class="class-meta">${c.students.length} student${c.students.length===1?'':'s'} · ${c.subject||'General'}</div></div>
+        <div style="display:flex;gap:6px;align-items:center">${badge(c.id)}<div class="class-code-pill">${c.code}</div></div>
+      </div>`).join('') : '<div class="empty">You\'re not teaching any classes yet.</div>';
+
+    enrEl.innerHTML = enrolled.length ? enrolled.map(c => `
+      <div class="class-card" onclick="openClass('${c.id}')">
+        <div><div class="class-name">${c.name}</div><div class="class-meta">Taught by ${c.teacherName} · ${c.subject||'General'}</div></div>
+        ${badge(c.id)}
+      </div>`).join('') : '<div class="empty">You haven\'t joined any classes yet.</div>';
+  } catch (e) {
+    console.error('renderList error:', e);
+    teachEl.innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error: ${e.message}</div>`;
+    enrEl.innerHTML = '';
+  }
+}
+
+async function submitCreate() {
+  const name = document.getElementById('cName').value.trim();
+  const subject = document.getElementById('cSubject').value.trim();
+  const description = document.getElementById('cDesc').value.trim();
+  const err = document.getElementById('createError');
+  const btn = document.querySelector('#createModal .btn-primary');
+  btn.textContent = 'Creating…'; btn.disabled = true;
+  try {
+    const result = await SSClass.create({ name, subject, description });
+    btn.textContent = 'Create'; btn.disabled = false;
+    if (!result.ok) { err.textContent = result.error; err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    closeModal('createModal');
+    document.getElementById('cName').value = ''; document.getElementById('cSubject').value = ''; document.getElementById('cDesc').value = '';
+    await renderList();
+    showToast('✅ Classroom created — code: ' + result.classroom.code);
+  } catch (e) {
+    btn.textContent = 'Create'; btn.disabled = false;
+    console.error('submitCreate error:', e);
+    err.textContent = 'Error: ' + (e && e.message ? e.message : String(e));
+    err.style.display = 'block';
+  }
+}
+
+async function submitJoin() {
+  const code = document.getElementById('jCode').value.trim();
+  const result = await SSClass.join(code);
+  const err = document.getElementById('joinError');
+  if (!result.ok) { err.textContent = result.error; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  closeModal('joinModal');
+  document.getElementById('jCode').value = '';
+  await renderList();
+  showToast('✅ Joined ' + result.classroom.name);
+}
+
+/* ---------- DETAIL VIEW ---------- */
+async function openClass(id) {
+  currentClassId = id;
+  await SSClass.markSeen(id);
+  document.getElementById('listView').classList.add('hidden');
+  document.getElementById('detailView').classList.remove('hidden');
+  await renderDetail();
+}
+function showList() {
+  currentClassId = null;
+  currentClassroom = null;
+  document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('listView').classList.remove('hidden');
+  renderList();
+}
+function isTeacherOfCurrent(c) { return c.teacherEmail === me.id; }
+
+async function renderDetail() {
+  const c = await SSClass.get(currentClassId);
+  if (!c) { showList(); return; }
+  currentClassroom = c;
+  const teaching = isTeacherOfCurrent(c);
+
+  document.getElementById('dName').textContent = c.name;
+  document.getElementById('dMeta').textContent = (c.subject || 'General') + ' · ' + (teaching ? 'You are the teacher' : 'Taught by ' + c.teacherName);
+  document.getElementById('dCodeBox').classList.toggle('hidden', !teaching);
+  document.getElementById('dCode').textContent = c.code;
+
+  // Stream tab
+  document.getElementById('announceActionRow').innerHTML = `<button class="btn btn-primary" onclick="openModal('announceModal')">📢 Post Announcement</button>`;
+  document.getElementById('announceList').innerHTML = c.announcements.length ? c.announcements.map(a => `
+    <div class="card">
+      <div class="card-title">${a.title || '(no title)'}</div>
+      <div class="card-meta">${a.authorName} · ${fmtDate(a.createdAt)}</div>
+      <div class="card-body">${escapeHtml(a.body)}</div>
+    </div>`).join('') : '<div class="empty">No announcements yet.</div>';
+
+  // Assignments tab
+  document.getElementById('assignActionRow').innerHTML = teaching
+    ? `<button class="btn btn-primary" onclick="openModal('assignModal')">+ New Assignment</button>` : '';
+  document.getElementById('assignList').innerHTML = c.assignments.length ? c.assignments.map(a => renderAssignment(c, a, teaching)).join('') : '<div class="empty">No assignments posted yet.</div>';
+
+  // Quizzes tab
+  renderQuizzes();
+
+  // People tab
+  document.getElementById('teacherLine').textContent = '👩‍🏫 ' + c.teacherName + ' (Teacher)';
+  document.getElementById('studentCount').textContent = c.students.length;
+  document.getElementById('rosterCard').innerHTML = c.students.length ? c.students.map(s => `
+    <div class="roster-item"><div class="roster-dot">${s.name.charAt(0).toUpperCase()}</div>${s.name}</div>
+  `).join('') : '<div style="color:var(--muted);font-size:13px">No students enrolled yet. Share the class code!</div>';
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML;
+}
+
+function renderAssignment(c, a, teaching) {
+  const overdue = a.dueDate && new Date(a.dueDate) < new Date();
+  const dueChip = a.dueDate ? `<span class="due ${overdue ? 'overdue' : ''}">Due ${fmtDate(new Date(a.dueDate).getTime())}</span>` : '';
+  const attachHtml = (a.attachments || []).map(f => `<a class="attach-pill" href="${f.data}" download="${f.name}">📎 ${f.name}</a>`).join('');
+
+  let bodyExtra = '';
+  if (teaching) {
+    const subs = c.submissions[a.id] || [];
+    bodyExtra = `<div class="submit-box"><div class="card-meta">${subs.length} of ${c.students.length} submitted</div>` +
+      subs.map(s => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border);font-size:12px">
+          <span>${s.studentName}${s.grade !== null && s.grade !== undefined ? '' : ' · not graded'}</span>
+          <span>
+            ${s.grade !== null && s.grade !== undefined ? `<span class="grade-badge">${s.grade}/${a.points}</span>` : `<button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="gradePrompt('${a.id}','${s.studentEmail}',${a.points})">Grade</button>`}
+          </span>
+        </div>`).join('') || '<div style="font-size:12px;color:var(--muted);margin-top:6px">No submissions yet.</div>';
+    bodyExtra += '</div>';
+  } else {
+    const mySub = (c.submissions[a.id] || []).find(s => s.studentEmail === me.id);
+    if (mySub) {
+      bodyExtra = `<div class="submit-box"><div class="card-meta">✅ Submitted ${fmtDate(mySub.submittedAt)}${mySub.grade !== null && mySub.grade !== undefined ? ' · Grade: ' + mySub.grade + '/' + a.points : ' · Awaiting grade'}</div>
+      ${mySub.feedback ? `<div class="card-body" style="margin-top:4px">💬 ${escapeHtml(mySub.feedback)}</div>` : ''}
+      </div>`;
+    } else {
+      bodyExtra = `<div class="submit-box">
+        <textarea id="subtext_${a.id}" placeholder="Type your answer or notes…" style="margin-bottom:8px"></textarea>
+        <input type="file" id="subfile_${a.id}" style="font-size:12px;margin-bottom:8px"/><br/>
+        <button class="btn btn-primary" style="padding:8px 16px;font-size:12px" onclick="submitWork('${a.id}')">Submit</button>
+      </div>`;
+    }
+  }
+
+  return `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div class="card-title">${a.title}</div>
+      <span class="pts">${a.points} pts</span>
+    </div>
+    <div class="card-meta">${dueChip} Posted ${fmtDate(a.createdAt)}</div>
+    <div class="card-body">${escapeHtml(a.description)}</div>
+    ${attachHtml}
+    ${bodyExtra}
+  </div>`;
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  ['stream', 'assignments', 'quizzes', 'grades', 'chat', 'people'].forEach(t => document.getElementById('tab-' + t).classList.toggle('hidden', t !== name));
+  if (name === 'grades') renderGrades();
+  if (name === 'chat') renderChat();
+}
+
+/* ---------- QUIZZES ---------- */
+function renderQuizzes() {
+  const c = currentClassroom;
+  const teaching = isTeacherOfCurrent(c);
+  document.getElementById('quizActionRow').innerHTML = teaching
+    ? `<button class="btn btn-primary" onclick="openQuizBuilder()">+ New Quiz</button>` : '';
+  document.getElementById('quizList').innerHTML = c.quizzes.length ? c.quizzes.map(q => {
+    const results = c.quizResults[q.id] || [];
+    const totalPts = q.questions.reduce((s, x) => s + (x.points || 1), 0);
+    if (teaching) {
+      return `<div class="card">
+        <div class="card-title">${q.title}</div>
+        <div class="card-meta">${q.questions.length} question${q.questions.length===1?'':'s'} · ${totalPts} pts · ${results.length}/${c.students.length} completed</div>
+        ${results.map(r => `<div class="grade-row"><span>${r.studentName}</span><span class="grade-badge">${r.score}/${r.total}</span></div>`).join('') || '<div style="color:var(--muted);font-size:12px">No attempts yet.</div>'}
+      </div>`;
+    } else {
+      const mine = results.find(r => r.studentEmail === me.id);
+      return `<div class="card">
+        <div class="card-title">${q.title}</div>
+        <div class="card-meta">${q.questions.length} question${q.questions.length===1?'':'s'} · ${totalPts} pts</div>
+        ${mine
+          ? `<div class="card-body">✅ Completed — score: <span class="grade-badge">${mine.score}/${mine.total}</span></div>`
+          : `<button class="btn btn-primary" style="padding:8px 16px;font-size:12px;margin-top:8px" onclick="takeQuiz('${q.id}')">Take Quiz</button>`}
+      </div>`;
+    }
+  }).join('') : '<div class="empty">No quizzes yet.</div>';
+}
+
+let qzQuestionCount = 0;
+function openQuizBuilder() {
+  document.getElementById('qzTitle').value = '';
+  document.getElementById('qzQuestions').innerHTML = '';
+  qzQuestionCount = 0;
+  addQuestionRow();
+  openModal('quizModal');
+}
+function addQuestionRow() {
+  const idx = qzQuestionCount++;
+  const wrap = document.createElement('div');
+  wrap.className = 'qz-row';
+  wrap.id = 'qzq_' + idx;
+  wrap.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <label style="margin:0">Question ${idx + 1}</label>
+      <button class="remove-q" onclick="document.getElementById('qzq_${idx}').remove()">Remove</button>
+    </div>
+    <input type="text" placeholder="Question text" id="qzq_${idx}_text"/>
+    ${[0,1,2,3].map(i => `
+      <div class="qz-choice-row">
+        <input type="radio" name="qzq_${idx}_correct" value="${i}" ${i===0?'checked':''}/>
+        <input type="text" placeholder="Choice ${i+1}" id="qzq_${idx}_choice${i}"/>
+      </div>`).join('')}
+    <input type="number" placeholder="Points (default 1)" id="qzq_${idx}_points" value="1" style="margin-top:4px"/>
+  `;
+  document.getElementById('qzQuestions').appendChild(wrap);
+}
+async function submitQuizCreate() {
+  const title = document.getElementById('qzTitle').value.trim();
+  const rows = document.querySelectorAll('#qzQuestions .qz-row');
+  const questions = [];
+  rows.forEach(row => {
+    const idx = row.id.split('_')[1];
+    const qText = document.getElementById(`qzq_${idx}_text`).value.trim();
+    const choices = [0,1,2,3].map(i => document.getElementById(`qzq_${idx}_choice${i}`).value.trim()).filter(Boolean);
+    const correctRadio = document.querySelector(`input[name="qzq_${idx}_correct"]:checked`);
+    const correctIndex = correctRadio ? parseInt(correctRadio.value) : 0;
+    const points = parseInt(document.getElementById(`qzq_${idx}_points`).value) || 1;
+    if (qText && choices.length >= 2) questions.push({ q: qText, choices, correctIndex, points });
+  });
+  if (!title || !questions.length) { showToast('Add a title and at least one complete question', true); return; }
+  const result = await SSClass.addQuiz(currentClassId, { title, questions });
+  if (!result.ok) { showToast(result.error, true); return; }
+  closeModal('quizModal');
+  await renderDetail();
+  showToast('✅ Quiz created');
+}
+
+let takingQuizId = null;
+function takeQuiz(quizId) {
+  const c = currentClassroom;
+  const quiz = c.quizzes.find(q => q.id === quizId);
+  if (!quiz) return;
+  takingQuizId = quizId;
+  document.getElementById('tqTitle').textContent = quiz.title;
+  document.getElementById('tqQuestions').innerHTML = quiz.questions.map((q, i) => `
+    <div class="qz-row">
+      <div style="font-weight:700;margin-bottom:8px">${i + 1}. ${escapeHtml(q.q)}</div>
+      ${q.choices.map((ch, ci) => `
+        <div class="qz-choice-row">
+          <input type="radio" name="tqq_${i}" value="${ci}"/>
+          <label style="font-weight:400;text-transform:none;font-size:13px;color:var(--text)">${escapeHtml(ch)}</label>
+        </div>`).join('')}
+    </div>`).join('');
+  openModal('takeQuizModal');
+}
+async function submitQuizAnswers() {
+  const c = currentClassroom;
+  const quiz = c.quizzes.find(q => q.id === takingQuizId);
+  const answers = quiz.questions.map((q, i) => {
+    const checked = document.querySelector(`input[name="tqq_${i}"]:checked`);
+    return checked ? parseInt(checked.value) : -1;
+  });
+  const result = await SSClass.submitQuiz(currentClassId, takingQuizId, answers);
+  if (!result.ok) { showToast(result.error, true); return; }
+  closeModal('takeQuizModal');
+  await renderDetail();
+  showToast(`✅ Scored ${result.score}/${result.total}`);
+}
+
+/* ---------- GRADES ---------- */
+function renderGrades() {
+  const c = currentClassroom;
+  const teaching = isTeacherOfCurrent(c);
+  const el = document.getElementById('gradesView');
+
+  if (teaching) {
+    if (!c.students.length) { el.innerHTML = '<div class="empty">No students enrolled yet.</div>'; return; }
+    el.innerHTML = c.students.map(s => {
+      const rows = [];
+      c.assignments.forEach(a => {
+        const sub = (c.submissions[a.id] || []).find(x => x.studentEmail === s.email);
+        rows.push(`<div class="grade-row"><span>${a.title}</span><span>${sub && sub.grade !== null && sub.grade !== undefined ? sub.grade + '/' + a.points : '—'}</span></div>`);
+      });
+      c.quizzes.forEach(q => {
+        const r = (c.quizResults[q.id] || []).find(x => x.studentEmail === s.email);
+        rows.push(`<div class="grade-row"><span>${q.title} (quiz)</span><span>${r ? r.score + '/' + r.total : '—'}</span></div>`);
+      });
+      return `<div class="card"><div class="card-title">${s.name}</div>${rows.join('') || '<div style="color:var(--muted);font-size:12px">No grades yet.</div>'}</div>`;
+    }).join('');
+  } else {
+    const rows = [];
+    let earned = 0, possible = 0;
+    c.assignments.forEach(a => {
+      const sub = (c.submissions[a.id] || []).find(x => x.studentEmail === me.id);
+      if (sub && sub.grade !== null && sub.grade !== undefined) { earned += sub.grade; possible += a.points; }
+      rows.push(`<div class="grade-row"><span>${a.title}</span><span>${sub && sub.grade !== null && sub.grade !== undefined ? sub.grade + '/' + a.points : (sub ? 'Awaiting grade' : 'Not submitted')}</span></div>`);
+    });
+    c.quizzes.forEach(q => {
+      const r = (c.quizResults[q.id] || []).find(x => x.studentEmail === me.id);
+      if (r) { earned += r.score; possible += r.total; }
+      rows.push(`<div class="grade-row"><span>${q.title} (quiz)</span><span>${r ? r.score + '/' + r.total : 'Not taken'}</span></div>`);
+    });
+    const pct = possible ? Math.round((earned / possible) * 100) : null;
+    el.innerHTML = `
+      <div class="card" style="text-align:center">
+        <div class="grade-avg">${pct !== null ? pct + '%' : '—'}</div>
+        <div class="card-meta">Overall grade</div>
+      </div>
+      <div class="card">${rows.join('') || '<div style="color:var(--muted);font-size:12px">No graded work yet.</div>'}</div>`;
+  }
+}
+
+/* ---------- CHAT ---------- */
+function renderChat() {
+  const c = currentClassroom;
+  const msgs = c.messages || [];
+  const log = document.getElementById('chatLog');
+  log.innerHTML = msgs.length ? msgs.map(m => `
+    <div class="chat-msg"><span class="who">${m.authorName}</span>${escapeHtml(m.text)}<span class="when">${new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></div>
+  `).join('') : '<div class="empty">No messages yet — say hi!</div>';
+  log.scrollTop = log.scrollHeight;
+}
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const result = await SSClass.postMessage(currentClassId, text);
+  if (!result.ok) { showToast(result.error, true); return; }
+  input.value = '';
+  currentClassroom = await SSClass.get(currentClassId);
+  renderChat();
+}
+
+async function submitAnnouncement() {
+  const title = document.getElementById('aTitle').value.trim();
+  const body = document.getElementById('aBody').value.trim();
+  if (!body) { showToast('Write a message first', true); return; }
+  const result = await SSClass.addAnnouncement(currentClassId, { title, body });
+  if (!result.ok) { showToast(result.error, true); return; }
+  document.getElementById('aTitle').value = ''; document.getElementById('aBody').value = '';
+  closeModal('announceModal');
+  await renderDetail();
+  showToast('📢 Announcement posted');
+}
+
+function getSelectedFile(fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return null;
+  if (file.size > 8 * 1024 * 1024) { showToast('File too large (max 8MB)', true); return null; }
+  return { _file: file, name: file.name, type: file.type };
+}
+
+async function submitAssignment() {
+  const title = document.getElementById('asTitle').value.trim();
+  const description = document.getElementById('asDesc').value.trim();
+  const dueDate = document.getElementById('asDue').value;
+  const points = parseInt(document.getElementById('asPoints').value) || 100;
+  if (!title) { showToast('Give the assignment a title', true); return; }
+  const file = getSelectedFile(document.getElementById('asFile'));
+  const result = await SSClass.addAssignment(currentClassId, { title, description, dueDate, points, attachments: file ? [file] : [] });
+  if (!result.ok) { showToast(result.error, true); return; }
+  ['asTitle', 'asDesc', 'asDue'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('asPoints').value = 100;
+  closeModal('assignModal');
+  await renderDetail();
+  showToast('✅ Assignment posted');
+}
+
+async function submitWork(assignmentId) {
+  const text = document.getElementById('subtext_' + assignmentId).value.trim();
+  const fileInput = document.getElementById('subfile_' + assignmentId);
+  const file = getSelectedFile(fileInput);
+  if (!text && !file) { showToast('Add a note or attach a file', true); return; }
+  const result = await SSClass.addSubmission(currentClassId, assignmentId, { text, attachments: file ? [file] : [] });
+  if (!result.ok) { showToast(result.error, true); return; }
+  await renderDetail();
+  showToast('✅ Submitted');
+}
+
+async function gradePrompt(assignmentId, studentEmail, maxPoints) {
+  const grade = prompt(`Grade out of ${maxPoints}:`);
+  if (grade === null || grade.trim() === '') return;
+  const feedback = prompt('Feedback (optional):') || '';
+  await SSClass.gradeSubmission(currentClassId, assignmentId, studentEmail, { grade: parseInt(grade), feedback });
+  await renderDetail();
+  showToast('✅ Grade saved');
+}
+
+(async () => {
+  me = await SSAuth.requireAuth();
+  if (!me) return;
+  await renderList();
+})();
+</script>
+</body>
+</html>
