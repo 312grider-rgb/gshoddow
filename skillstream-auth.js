@@ -10,6 +10,33 @@
   const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhdXVkdGVkb2p0Y3ZlaXFhamxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4OTc5OTQsImV4cCI6MjA5ODQ3Mzk5NH0.QwJNPegqBPPfv4Tq7PqIGjuy9-iycajuJihMo-dlizo';
 
+  // If the Supabase library failed to load (blocked, slow/flaky connection, etc.),
+  // show a friendly retry banner instead of letting every button silently fail.
+  if (!window.supabase) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#FF3D5A;color:#fff;padding:14px 20px;text-align:center;font-family:sans-serif;font-size:14px;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+    banner.innerHTML = 'Connection issue loading SkillStream. Please check your internet connection and <a href="javascript:location.reload()" style="color:#fff;text-decoration:underline;font-weight:700">tap here to retry</a>.';
+    document.addEventListener('DOMContentLoaded', () => document.body.prepend(banner));
+    if (document.body) document.body.prepend(banner);
+
+    // Provide a stub SSAuth so pages don't throw "SSAuth is not defined" —
+    // every method just reports the connection error instead.
+    const connError = { ok: false, error: 'Connection issue — please reload the page.' };
+    window.SSAuth = {
+      ready: Promise.resolve(null),
+      currentUser: () => null,
+      signup: async () => connError,
+      login: async () => connError,
+      logout: async () => {},
+      updateProfile: async () => connError,
+      deleteAccount: async () => connError,
+      uploadFile: async () => connError,
+      requireAuth: async () => { return null; },
+      requireRole: async () => { return null; }
+    };
+    return; // skip the rest of this file — nothing else can work without the library
+  }
+
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   let cachedUser = null; // synchronous read cache, kept in sync below
@@ -68,18 +95,11 @@
       cachedUser = null;
     },
 
-    async function refreshCache() {
-    try {
-      const { data: { user } } = await client.auth.getUser();
-      if (!user) { cachedUser = null; return null; }
-      cachedUser = await fetchProfile(user.id);
+    // Synchronous read of the last-known user (populated after `ready` resolves,
+    // and kept fresh automatically). Returns null if nobody's logged in.
+    currentUser() {
       return cachedUser;
-    } catch (e) {
-      console.error('SSAuth refreshCache error:', e);
-      cachedUser = null;
-      return null;
-    }
-    }
+    },
 
     async updateProfile(patch) {
       const { data: { user } } = await client.auth.getUser();
