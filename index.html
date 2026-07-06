@@ -219,7 +219,7 @@ footer a:hover{color:var(--text)}
   <p class="hero-sub" data-i18n="hero_sub">Join live classrooms taught by real people and an AI teacher — or host your own session in seconds.</p>
   <div class="hero-btns">
     <a class="btn-hero btn-hero-primary" href="#sessions" data-i18n="hero_btn_browse">🎥 Browse Live Sessions</a>
-    <a class="btn-hero btn-hero-ghost" href="skillstream-classroom.html" data-i18n="hero_btn_start">🚀 Start a Session</a>
+    <a class="btn-hero btn-hero-ghost" href="skillstream-live-session.html" data-i18n="hero_btn_start">🚀 Start a Session</a>
   </div>
   <div class="hero-stats">
     <div class="hstat"><div class="val" id="statLive">12</div><div class="lbl" data-i18n="stat_live">Live Now</div></div>
@@ -254,7 +254,7 @@ footer a:hover{color:var(--text)}
       <h3 data-i18n="host_title">Start your own live session</h3>
       <p data-i18n="host_desc">Teach a topic you know, or use the built-in AI teacher to guide your students — no prep needed.</p>
     </div>
-    <a class="host-btn" href="skillstream-classroom.html" data-i18n="host_btn">🎙 Host a Session</a>
+    <a class="host-btn" href="skillstream-live-session.html" data-i18n="host_btn">🎙 Host a Session</a>
   </div>
 
   <div class="sessions-grid" id="sessionsGrid"></div>
@@ -303,7 +303,7 @@ footer a:hover{color:var(--text)}
 <!-- FOOTER -->
 <footer>
   <div style="margin-bottom:12px">
-    <a href="skillstream-classroom.html" style="margin:0 12px" data-i18n="footer_classroom">Classroom</a>
+    <a href="skillstream-classrooms.html" style="margin:0 12px" data-i18n="footer_classroom">Classroom</a>
     <a href="skillstream-signup.html" style="margin:0 12px" data-i18n="footer_account">My Account</a>
   </div>
   © 2026 SkillStream — Live Learning Platform
@@ -542,7 +542,7 @@ function filterSessions(cat, btn) {
 }
 
 function joinRoom(room, session) {
-  window.location = `skillstream-classroom.html?room=${encodeURIComponent(room)}&session=${encodeURIComponent(session)}`;
+  window.location = `skillstream-live-session.html?room=${encodeURIComponent(room)}&session=${encodeURIComponent(session)}`;
 }
 
 function renderSessions() {
