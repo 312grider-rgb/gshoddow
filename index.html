@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SkillStream — Live Learning, Right Now</title>
+<meta name="description" content="Join live classrooms taught by real people and an AI teacher — or host your own session in seconds. Free, no download needed."/>
+<meta property="og:title" content="SkillStream — Live Learning, Right Now"/>
+<meta property="og:description" content="Learn anything. Teach anyone. Live."/>
+<meta property="og:type" content="website"/>
+<meta name="theme-color" content="#7B6FFF"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237B6FFF'/><text y='.9em' font-size='80' x='10'>🎓</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
+  --accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
+  --yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
+  --radius:14px;--radius-sm:8px;--radius-full:9999px;
+  --shadow:0 8px 40px rgba(0,0,0,.7);--glass:rgba(10,11,18,0.9)
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden}
+html[lang="ar"] body{font-family:'Noto Sans Arabic','Inter',sans-serif}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;background:var(--glass);border-bottom:1px solid var(--border);backdrop-filter:blur(24px)}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:24px;text-decoration:none;color:var(--text)}
+.logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-link{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;border-radius:var(--radius-sm);transition:all .2s}
+.nav-link:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.nav-cta{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;text-decoration:none;transition:all .25s}
+.nav-cta:hover{background:var(--accent-dark);transform:scale(1.03)}
+.user-pill{display:none;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);padding:6px 14px 6px 6px;cursor:pointer;text-decoration:none;transition:all .2s}
+.user-pill:hover{border-color:var(--accent)}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff}
+.user-pill .uname{font-size:13px;font-weight:600}
+
+/* ── LANGUAGE SWITCHER ── */
+.lang-switcher{position:relative}
+.lang-btn{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.lang-btn:hover{border-color:var(--accent)}
+.lang-flag{font-size:16px}
+.lang-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);min-width:160px;box-shadow:var(--shadow);display:none;z-index:200;overflow:hidden}
+html[dir="rtl"] .lang-dropdown{right:auto;left:0}
+.lang-dropdown.open{display:block}
+.lang-option{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;color:var(--text);width:100%;text-align:left}
+html[dir="rtl"] .lang-option{text-align:right}
+.lang-option:hover{background:rgba(123,111,255,.08);color:var(--accent)}
+.lang-option.active{color:var(--accent);font-weight:700}
+.lang-option .flag{font-size:18px;flex-shrink:0}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none}
+.hero-bg .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18}
+.orb-1{width:600px;height:600px;background:var(--accent);top:-100px;left:-100px}
+.orb-2{width:500px;height:500px;background:var(--blue);bottom:-100px;right:-50px}
+.orb-3{width:300px;height:300px;background:var(--green);top:40%;left:50%;transform:translate(-50%,-50%)}
+.live-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,61,90,.1);border:1px solid rgba(255,61,90,.25);border-radius:var(--radius-full);padding:7px 18px;font-size:12px;font-weight:700;color:var(--live);margin-bottom:28px;letter-spacing:.06em}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(40px,8vw,88px);font-weight:900;line-height:1;letter-spacing:-.03em;margin-bottom:24px;max-width:900px}
+html[lang="ar"] .hero h1{font-family:'Noto Sans Arabic',sans-serif;letter-spacing:0}
+.hero h1 .line2{display:block;background:linear-gradient(135deg,var(--accent) 0%,var(--blue) 50%,var(--green) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--muted);max-width:540px;line-height:1.6;margin-bottom:40px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:56px}
+.btn-hero{display:inline-flex;align-items:center;gap:8px;padding:16px 32px;border-radius:var(--radius-sm);font-size:16px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;text-decoration:none;border:none;transition:all .25s}
+.btn-hero-primary{background:var(--accent);color:#fff;box-shadow:0 0 32px rgba(123,111,255,.35)}
+.btn-hero-primary:hover{background:var(--accent-dark);transform:translateY(-2px);box-shadow:0 0 48px rgba(123,111,255,.5)}
+.btn-hero-ghost{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--border)}
+.btn-hero-ghost:hover{border-color:var(--accent);background:rgba(123,111,255,.08)}
+.hero-stats{display:flex;gap:40px;justify-content:center;flex-wrap:wrap}
+.hstat{text-align:center}
+.hstat .val{font-family:'Syne',sans-serif;font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--text),var(--muted));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hstat .lbl{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:.04em}
+
+/* ── SCROLL HINT ── */
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+.scroll-arrow{font-size:18px}
+
+/* ── SECTION WRAPPER ── */
+.section{padding:80px 24px;max-width:1200px;margin:0 auto}
+.section-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+.section-title{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.1;margin-bottom:12px}
+html[lang="ar"] .section-title{font-family:'Noto Sans Arabic',sans-serif}
+.section-sub{font-size:15px;color:var(--muted);max-width:480px;line-height:1.6;margin-bottom:40px}
+
+/* ── LIVE SESSIONS ── */
+.sessions-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-full);padding:7px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.filter-btn.active,.filter-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.sessions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.session-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .25s;text-decoration:none;display:block}
+.session-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.sc-thumb{height:150px;background:linear-gradient(135deg,#14103a,#0a1020);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.sc-thumb .thumb-icon{font-size:48px;opacity:.7}
+.sc-thumb::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),transparent)}
+.sc-live-badge{position:absolute;top:10px;left:10px;background:var(--live);color:#fff;border-radius:var(--radius-full);padding:4px 10px;font-size:10px;font-weight:800;display:flex;align-items:center;gap:5px;z-index:1}
+.sc-ai-badge{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,var(--accent),var(--blue));color:#fff;border-radius:var(--radius-full);padding:4px 10px;font-size:10px;font-weight:800;z-index:1}
+.sc-viewers{position:absolute;bottom:10px;right:10px;color:#fff;font-size:11px;font-weight:600;z-index:1;display:flex;align-items:center;gap:4px}
+.sc-body{padding:16px}
+.sc-category{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.sc-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:8px;line-height:1.3}
+.sc-host{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sc-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
+.sc-host-name{font-size:12px;color:var(--muted)}
+.sc-footer{display:flex;align-items:center;justify-content:space-between}
+.sc-tag{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-full);padding:3px 10px;font-size:10px;color:var(--muted)}
+.join-mini-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s}
+.join-mini-btn:hover{background:var(--accent-dark)}
+
+/* HOST NOW card */
+.host-card{background:linear-gradient(135deg,rgba(123,111,255,.12),rgba(75,158,255,.08));border:1px solid rgba(123,111,255,.25);border-radius:var(--radius);padding:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+.host-card-text h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px}
+.host-card-text p{font-size:13px;color:var(--muted);max-width:340px;line-height:1.5}
+.host-btn{background:linear-gradient(135deg,var(--accent),var(--blue));border:none;color:#fff;border-radius:var(--radius-sm);padding:14px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap;transition:all .25s;text-decoration:none;display:inline-block}
+.host-btn:hover{transform:scale(1.04);box-shadow:0 0 28px rgba(123,111,255,.4)}
+
+/* ── HOW IT WORKS ── */
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;position:relative;transition:all .3s}
+.step-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.step-num{font-family:'Syne',sans-serif;font-size:48px;font-weight:900;color:rgba(123,111,255,.12);position:absolute;top:16px;right:20px;line-height:1}
+.step-icon{font-size:32px;margin-bottom:16px}
+.step-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px}
+html[lang="ar"] .step-title{font-family:'Noto Sans Arabic',sans-serif}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── FEATURES ── */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all .3s}
+.feat-card:hover{border-color:var(--accent)}
+.feat-icon{width:44px;height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.feat-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px}
+html[lang="ar"] .feat-title{font-family:'Noto Sans Arabic',sans-serif}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── CTA FOOTER ── */
+.cta-section{background:linear-gradient(135deg,rgba(123,111,255,.08) 0%,rgba(0,229,160,.05) 100%);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:80px 24px;text-align:center}
+
+/* ── DAILY INSPIRATION ── */
+.insp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.insp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;transition:all .3s;position:relative;overflow:hidden}
+.insp-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.insp-icon{font-size:24px;margin-bottom:10px;display:block}
+.insp-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:8px}
+.insp-body{font-size:14px;line-height:1.6;color:var(--text)}
+.insp-body .hl{font-family:'Syne',sans-serif;font-weight:800;color:var(--text)}
+.insp-meta{font-size:12px;color:var(--muted);margin-top:8px}
+.insp-challenge-btn{margin-top:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s}
+.insp-challenge-btn:hover{background:var(--accent-dark)}
+.insp-challenge-btn.done{background:var(--green);color:#000}
+.insp-date-pill{position:absolute;top:18px;right:18px;font-size:10px;color:var(--muted);font-weight:600}
+.cta-section h2{font-family:'Syne',sans-serif;font-size:clamp(28px,5vw,52px);font-weight:900;margin-bottom:16px;line-height:1.1}
+html[lang="ar"] .cta-section h2{font-family:'Noto Sans Arabic',sans-serif}
+.cta-section p{color:var(--muted);font-size:16px;margin-bottom:36px}
+
+/* ── FOOTER ── */
+footer{padding:32px 24px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+footer a{color:var(--muted);text-decoration:none}
+footer a:hover{color:var(--text)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  nav{padding:0 16px}
+  .nav-link{display:none}
+  .hero{padding:90px 20px 60px}
+  .hero-stats{gap:24px}
+  .hstat .val{font-size:24px}
+  .section{padding:52px 16px}
+  .host-card{flex-direction:column}
+  .host-btn{width:100%;text-align:center}
+  .sessions-header{flex-direction:column;align-items:flex-start}
+  .lang-btn span.lang-name{display:none}
+  /* Prevent dropdown from going off screen on mobile */
+  .lang-dropdown{right:0;left:auto;min-width:140px}
+  /* Bigger tap targets for session cards */
+  .join-mini-btn{padding:10px 18px;font-size:13px}
+  .sessions-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="index.html">Skill<span>Stream</span></a>
+  <div class="nav-right">
+    <a class="nav-link" href="#sessions" data-i18n="nav_browse">Browse</a>
+    <a class="nav-link" href="#how" data-i18n="nav_how">How it works</a>
+    <a class="user-pill" id="userPill" href="skillstream-signup.html">
+      <div class="user-av" id="navAv">?</div>
+      <span class="uname" id="navName">My Account</span>
+    </a>
+    <a class="nav-cta" id="navSignin" href="skillstream-signup.html" data-i18n="nav_cta">Get Started →</a>
+
+    <!-- LANGUAGE SWITCHER -->
+    <div class="lang-switcher" id="langSwitcher">
+      <button class="lang-btn" onclick="toggleLangMenu()" id="langBtn">
+        <span class="lang-flag" id="langFlag">🌐</span>
+        <span class="lang-name" id="langName">EN</span>
+        <span>▾</span>
+      </button>
+      <div class="lang-dropdown" id="langDropdown">
+        <button class="lang-option" onclick="setLang('en')"><span class="flag">🇬🇧</span> English</button>
+        <button class="lang-option" onclick="setLang('ar')"><span class="flag">🇸🇦</span> العربية</button>
+        <button class="lang-option" onclick="setLang('fr')"><span class="flag">🇫🇷</span> Français</button>
+        <button class="lang-option" onclick="setLang('es')"><span class="flag">🇪🇸</span> Español</button>
+        <button class="lang-option" onclick="setLang('zh')"><span class="flag">🇨🇳</span> 中文</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="live-badge"><span class="live-dot"></span> <span data-i18n="hero_live_badge">Sessions happening right now</span></div>
+  <h1>
+    <span data-i18n="hero_h1_line1">Learn anything.</span><br>
+    <span class="line2" data-i18n="hero_h1_line2">Teach anyone. Live.</span>
+  </h1>
+  <p class="hero-sub" data-i18n="hero_sub">Join live classrooms taught by real people and an AI teacher — or host your own session in seconds.</p>
+  <div class="hero-btns">
+    <a class="btn-hero btn-hero-primary" href="#sessions" data-i18n="hero_btn_browse">🎥 Browse Live Sessions</a>
+    <a class="btn-hero btn-hero-ghost" href="skillstream-live-session.html" data-i18n="hero_btn_start">🚀 Start a Session</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hstat"><div class="val" id="statLive">12</div><div class="lbl" data-i18n="stat_live">Live Now</div></div>
+    <div class="hstat"><div class="val" id="statUsers">2.4k</div><div class="lbl" data-i18n="stat_learners">Learners Today</div></div>
+    <div class="hstat"><div class="val">50+</div><div class="lbl" data-i18n="stat_topics">Topics</div></div>
+    <div class="hstat"><div class="val">🤖</div><div class="lbl" data-i18n="stat_ai">AI Teacher</div></div>
+  </div>
+  <div class="scroll-hint"><span class="scroll-arrow">↓</span><span data-i18n="scroll_hint">Live Sessions</span></div>
+</section>
+
+<!-- LIVE SESSIONS -->
+<div style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+<div class="section" id="sessions">
+  <div class="sessions-header">
+    <div>
+      <div class="section-eyebrow">🔴 <span data-i18n="sessions_eyebrow">Live Now</span></div>
+      <div class="section-title" style="margin-bottom:0" data-i18n="sessions_title">Pick a session to join</div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterSessions('all',this)" data-i18n="filter_all">All</button>
+      <button class="filter-btn" onclick="filterSessions('tech',this)">💻 Tech</button>
+      <button class="filter-btn" onclick="filterSessions('math',this)">📐 Math</button>
+      <button class="filter-btn" onclick="filterSessions('design',this)">🎨 Design</button>
+      <button class="filter-btn" onclick="filterSessions('language',this)">🗣️ <span data-i18n="filter_language">Language</span></button>
+      <button class="filter-btn" onclick="filterSessions('ai',this)">🤖 <span data-i18n="filter_ai">AI Only</span></button>
+    </div>
+  </div>
+
+  <!-- Host prompt -->
+  <div class="host-card">
+    <div class="host-card-text">
+      <h3 data-i18n="host_title">Start your own live session</h3>
+      <p data-i18n="host_desc">Teach a topic you know, or use the built-in AI teacher to guide your students — no prep needed.</p>
+    </div>
+    <a class="host-btn" href="skillstream-live-session.html" data-i18n="host_btn">🎙 Host a Session</a>
+  </div>
+
+  <div class="sessions-grid" id="sessionsGrid"></div>
+</div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section" id="how">
+  <div class="section-eyebrow">✨ <span data-i18n="how_eyebrow">Simple by design</span></div>
+  <div class="section-title" data-i18n="how_title">Up in 30 seconds</div>
+  <div class="section-sub" data-i18n="how_sub">No downloads, no setup. Just open and learn.</div>
+  <div class="steps-grid">
+    <div class="step-card"><div class="step-num">1</div><div class="step-icon">👤</div><div class="step-title" data-i18n="step1_title">Create your account</div><div class="step-desc" data-i18n="step1_desc">Sign up with your phone number or email. Your profile is saved permanently on your device.</div></div>
+    <div class="step-card"><div class="step-num">2</div><div class="step-icon">🎥</div><div class="step-title" data-i18n="step2_title">Join or host a session</div><div class="step-desc" data-i18n="step2_desc">Browse live sessions and jump in with one tap, or start your own classroom in seconds.</div></div>
+    <div class="step-card"><div class="step-num">3</div><div class="step-icon">🤖</div><div class="step-title" data-i18n="step3_title">Learn with AI</div><div class="step-desc" data-i18n="step3_desc">Your AI teacher can guide a full step-by-step lesson or answer any question live during the session.</div></div>
+    <div class="step-card"><div class="step-num">4</div><div class="step-icon">🚀</div><div class="step-title" data-i18n="step4_title">Grow your skills</div><div class="step-desc" data-i18n="step4_desc">Track sessions, build your skill profile, and connect with other learners and teachers.</div></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div style="background:var(--surface);border-top:1px solid var(--border)">
+<div class="section">
+  <div class="section-eyebrow">⚡ <span data-i18n="feat_eyebrow">Everything you need</span></div>
+  <div class="section-title" data-i18n="feat_title">Built for real learning</div>
+  <div class="features-grid">
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(123,111,255,.12)">🤖</div><div class="feat-title" data-i18n="feat1_title">AI Teacher</div><div class="feat-desc" data-i18n="feat1_desc">Generates full step-by-step lessons on any topic and answers questions live in every session.</div></div>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(75,158,255,.12)">🎥</div><div class="feat-title" data-i18n="feat2_title">Live Video</div><div class="feat-desc" data-i18n="feat2_desc">Real-time camera and mic — join with one tap, no downloads or installs needed.</div></div>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(0,229,160,.12)">💬</div><div class="feat-title" data-i18n="feat3_title">Live Chat</div><div class="feat-desc" data-i18n="feat3_desc">Real-time class chat with emoji reactions so students can engage without interrupting.</div></div>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(255,185,48,.12)">👥</div><div class="feat-title" data-i18n="feat4_title">Participants</div><div class="feat-desc" data-i18n="feat4_desc">See who's in the room, manage participants, and know when someone wants to speak.</div></div>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(255,61,90,.12)">🔑</div><div class="feat-title" data-i18n="feat5_title">Room Codes</div><div class="feat-desc" data-i18n="feat5_desc">Share a simple room code and anyone can join your live session instantly from any device.</div></div>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(123,111,255,.12)">👤</div><div class="feat-title" data-i18n="feat6_title">Saved Profile</div><div class="feat-desc" data-i18n="feat6_desc">Your name, photo, and skills are saved permanently — pick up right where you left off.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- DAILY INSPIRATION -->
+<div class="section" id="inspiration">
+  <div class="section-eyebrow">✨ <span data-i18n="insp_eyebrow">Fresh every day</span></div>
+  <div class="section-title" data-i18n="insp_title">Daily Inspiration</div>
+  <div class="section-sub" data-i18n="insp_sub">A little something to learn, think about, and try — new every day.</div>
+  <div class="insp-grid" id="inspirationGrid"></div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2 data-i18n="cta_title">Ready to learn something today?</h2>
+  <p data-i18n="cta_sub">Join a live session now or create your free account in 30 seconds.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a class="btn-hero btn-hero-primary" href="#sessions" data-i18n="cta_btn1">Browse Live Sessions</a>
+    <a class="btn-hero btn-hero-ghost" href="skillstream-signup.html" data-i18n="cta_btn2">Create Account →</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="margin-bottom:12px">
+    <a href="skillstream-classrooms.html" style="margin:0 12px" data-i18n="footer_classroom">Classroom</a>
+    <a href="skillstream-signup.html" style="margin:0 12px" data-i18n="footer_account">My Account</a>
+  </div>
+  © 2026 SkillStream — Live Learning Platform
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="skillstream-auth.js"></script>
+<script>
+// ════════════════════════════════════════════
+// TRANSLATIONS
+// ════════════════════════════════════════════
+const I18N = {
+  en: {
+    nav_browse:'Browse', nav_how:'How it works', nav_cta:'Get Started →',
+    hero_live_badge:'Sessions happening right now',
+    hero_h1_line1:'Learn anything.', hero_h1_line2:'Teach anyone. Live.',
+    hero_sub:'Join live classrooms taught by real people and an AI teacher — or host your own session in seconds.',
+    hero_btn_browse:'🎥 Browse Live Sessions', hero_btn_start:'🚀 Start a Session',
+    stat_live:'Live Now', stat_learners:'Learners Today', stat_topics:'Topics', stat_ai:'AI Teacher',
+    scroll_hint:'Live Sessions',
+    sessions_eyebrow:'Live Now', sessions_title:'Pick a session to join',
+    filter_all:'All', filter_language:'Language', filter_ai:'AI Only',
+    host_title:'Start your own live session',
+    host_desc:'Teach a topic you know, or use the built-in AI teacher to guide your students — no prep needed.',
+    host_btn:'🎙 Host a Session', join_btn:'Join →',
+    how_eyebrow:'Simple by design', how_title:'Up in 30 seconds',
+    how_sub:'No downloads, no setup. Just open and learn.',
+    step1_title:'Create your account', step1_desc:'Sign up with your phone number or email. Your profile is saved permanently on your device.',
+    step2_title:'Join or host a session', step2_desc:'Browse live sessions and jump in with one tap, or start your own classroom in seconds.',
+    step3_title:'Learn with AI', step3_desc:'Your AI teacher can guide a full step-by-step lesson or answer any question live during the session.',
+    step4_title:'Grow your skills', step4_desc:'Track sessions, build your skill profile, and connect with other learners and teachers.',
+    feat_eyebrow:'Everything you need', feat_title:'Built for real learning',
+    feat1_title:'AI Teacher', feat1_desc:'Generates full step-by-step lessons on any topic and answers questions live in every session.',
+    feat2_title:'Live Video', feat2_desc:'Real-time camera and mic — join with one tap, no downloads or installs needed.',
+    feat3_title:'Live Chat', feat3_desc:'Real-time class chat with emoji reactions so students can engage without interrupting.',
+    feat4_title:'Participants', feat4_desc:'See who\'s in the room, manage participants, and know when someone wants to speak.',
+    feat5_title:'Room Codes', feat5_desc:'Share a simple room code and anyone can join your live session instantly from any device.',
+    feat6_title:'Saved Profile', feat6_desc:'Your name, photo, and skills are saved permanently — pick up right where you left off.',
+    cta_title:'Ready to learn something today?', cta_sub:'Join a live session now or create your free account in 30 seconds.',
+    cta_btn1:'Browse Live Sessions', cta_btn2:'Create Account →',
+    footer_classroom:'Classroom', footer_account:'My Account',
+  },
+  ar: {
+    nav_browse:'تصفح', nav_how:'كيف يعمل', nav_cta:'ابدأ الآن →',
+    hero_live_badge:'جلسات تعقد الآن',
+    hero_h1_line1:'تعلّم أي شيء.', hero_h1_line2:'علّم أي شخص. مباشرة.',
+    hero_sub:'انضم إلى فصول دراسية مباشرة يديرها معلمون حقيقيون وذكاء اصطناعي — أو أنشئ جلستك الخاصة في ثوانٍ.',
+    hero_btn_browse:'🎥 تصفح الجلسات المباشرة', hero_btn_start:'🚀 ابدأ جلسة',
+    stat_live:'مباشر الآن', stat_learners:'متعلمون اليوم', stat_topics:'موضوع', stat_ai:'معلم ذكاء اصطناعي',
+    scroll_hint:'الجلسات المباشرة',
+    sessions_eyebrow:'مباشر الآن', sessions_title:'اختر جلسة للانضمام',
+    filter_all:'الكل', filter_language:'اللغات', filter_ai:'ذكاء اصطناعي فقط',
+    host_title:'ابدأ جلستك المباشرة',
+    host_desc:'علّم موضوعاً تعرفه، أو استخدم المعلم الذكاء الاصطناعي لإرشاد طلابك — لا تحضير مسبق.',
+    host_btn:'🎙 استضف جلسة', join_btn:'انضم →',
+    how_eyebrow:'بسيط بالتصميم', how_title:'جاهز في 30 ثانية',
+    how_sub:'لا تنزيلات، لا إعداد. فقط افتح وتعلّم.',
+    step1_title:'أنشئ حسابك', step1_desc:'سجّل برقم هاتفك أو بريدك الإلكتروني. يُحفظ ملفك الشخصي على جهازك.',
+    step2_title:'انضم أو استضف جلسة', step2_desc:'تصفح الجلسات المباشرة وانضم بنقرة واحدة، أو أنشئ فصلك في ثوانٍ.',
+    step3_title:'تعلّم مع الذكاء الاصطناعي', step3_desc:'يمكن للمعلم الذكاء الاصطناعي إرشادك خطوة بخطوة أو الإجابة على أي سؤال مباشرة.',
+    step4_title:'طوّر مهاراتك', step4_desc:'تتبع جلساتك، وابنِ ملف مهاراتك، وتواصل مع المتعلمين والمعلمين.',
+    feat_eyebrow:'كل ما تحتاجه', feat_title:'مصمم للتعلم الحقيقي',
+    feat1_title:'معلم ذكاء اصطناعي', feat1_desc:'يولّد دروساً تفصيلية خطوة بخطوة في أي موضوع ويجيب على الأسئلة مباشرة.',
+    feat2_title:'فيديو مباشر', feat2_desc:'كاميرا وميكروفون في الوقت الفعلي — انضم بنقرة واحدة دون تنزيل.',
+    feat3_title:'دردشة مباشرة', feat3_desc:'دردشة فصل دراسي مع ردود فعل إيموجي حتى يتفاعل الطلاب دون مقاطعة.',
+    feat4_title:'المشاركون', feat4_desc:'اعرف من في الغرفة وأدر المشاركين واعرف من يريد التحدث.',
+    feat5_title:'رموز الغرفة', feat5_desc:'شارك رمزاً بسيطاً وينضم أي شخص فوراً من أي جهاز.',
+    feat6_title:'ملف محفوظ', feat6_desc:'اسمك وصورتك ومهاراتك محفوظة دائماً — استكمل من حيث توقفت.',
+    cta_title:'هل أنت مستعد للتعلم اليوم؟', cta_sub:'انضم إلى جلسة مباشرة أو أنشئ حسابك المجاني في 30 ثانية.',
+    cta_btn1:'تصفح الجلسات المباشرة', cta_btn2:'أنشئ حساباً →',
+    footer_classroom:'الفصل الدراسي', footer_account:'حسابي',
+  },
+  fr: {
+    nav_browse:'Explorer', nav_how:'Comment ça marche', nav_cta:'Commencer →',
+    hero_live_badge:'Des sessions en cours maintenant',
+    hero_h1_line1:'Apprenez n\'importe quoi.', hero_h1_line2:'Enseignez à tous. En direct.',
+    hero_sub:'Rejoignez des classes en direct animées par des personnes et une IA — ou créez votre propre session en quelques secondes.',
+    hero_btn_browse:'🎥 Voir les sessions en direct', hero_btn_start:'🚀 Démarrer une session',
+    stat_live:'En direct', stat_learners:'Apprenants aujourd\'hui', stat_topics:'Sujets', stat_ai:'IA Enseignant',
+    scroll_hint:'Sessions en direct',
+    sessions_eyebrow:'En direct maintenant', sessions_title:'Choisissez une session',
+    filter_all:'Tout', filter_language:'Langue', filter_ai:'IA seulement',
+    host_title:'Démarrez votre propre session',
+    host_desc:'Enseignez un sujet que vous maîtrisez, ou utilisez l\'enseignant IA pour guider vos élèves.',
+    host_btn:'🎙 Héberger une session', join_btn:'Rejoindre →',
+    how_eyebrow:'Simple par conception', how_title:'Prêt en 30 secondes',
+    how_sub:'Pas de téléchargement, pas de configuration. Ouvrez et apprenez.',
+    step1_title:'Créez votre compte', step1_desc:'Inscrivez-vous avec votre numéro de téléphone ou votre e-mail. Votre profil est sauvegardé en permanence.',
+    step2_title:'Rejoignez ou hébergez', step2_desc:'Parcourez les sessions en direct et rejoignez d\'un seul tap, ou créez votre propre classe en secondes.',
+    step3_title:'Apprenez avec l\'IA', step3_desc:'Votre enseignant IA peut guider une leçon complète ou répondre à toute question en direct.',
+    step4_title:'Développez vos compétences', step4_desc:'Suivez vos sessions, construisez votre profil et connectez-vous avec d\'autres apprenants.',
+    feat_eyebrow:'Tout ce qu\'il vous faut', feat_title:'Conçu pour l\'apprentissage réel',
+    feat1_title:'Enseignant IA', feat1_desc:'Génère des leçons détaillées sur n\'importe quel sujet et répond aux questions en direct.',
+    feat2_title:'Vidéo en direct', feat2_desc:'Caméra et micro en temps réel — rejoignez d\'un tap, sans installation.',
+    feat3_title:'Chat en direct', feat3_desc:'Chat de classe en temps réel avec des réactions emoji pour que les élèves puissent s\'engager.',
+    feat4_title:'Participants', feat4_desc:'Voyez qui est dans la salle et gérez les participants.',
+    feat5_title:'Codes de salle', feat5_desc:'Partagez un code simple et n\'importe qui peut rejoindre instantanément depuis n\'importe quel appareil.',
+    feat6_title:'Profil sauvegardé', feat6_desc:'Votre nom, photo et compétences sont sauvegardés en permanence.',
+    cta_title:'Prêt à apprendre quelque chose aujourd\'hui ?', cta_sub:'Rejoignez une session ou créez votre compte gratuit en 30 secondes.',
+    cta_btn1:'Voir les sessions en direct', cta_btn2:'Créer un compte →',
+    footer_classroom:'Classe', footer_account:'Mon compte',
+  },
+  es: {
+    nav_browse:'Explorar', nav_how:'Cómo funciona', nav_cta:'Comenzar →',
+    hero_live_badge:'Sesiones en curso ahora mismo',
+    hero_h1_line1:'Aprende cualquier cosa.', hero_h1_line2:'Enseña a todos. En vivo.',
+    hero_sub:'Únete a clases en vivo impartidas por personas reales y una IA — o crea tu propia sesión en segundos.',
+    hero_btn_browse:'🎥 Ver sesiones en vivo', hero_btn_start:'🚀 Iniciar una sesión',
+    stat_live:'En vivo', stat_learners:'Estudiantes hoy', stat_topics:'Temas', stat_ai:'Profesor IA',
+    scroll_hint:'Sesiones en vivo',
+    sessions_eyebrow:'En vivo ahora', sessions_title:'Elige una sesión para unirte',
+    filter_all:'Todo', filter_language:'Idioma', filter_ai:'Solo IA',
+    host_title:'Inicia tu propia sesión en vivo',
+    host_desc:'Enseña un tema que conoces o usa el profesor IA para guiar a tus alumnos — sin preparación.',
+    host_btn:'🎙 Organizar sesión', join_btn:'Unirse →',
+    how_eyebrow:'Simple por diseño', how_title:'Listo en 30 segundos',
+    how_sub:'Sin descargas, sin configuración. Solo abre y aprende.',
+    step1_title:'Crea tu cuenta', step1_desc:'Regístrate con tu número de teléfono o correo. Tu perfil se guarda permanentemente en tu dispositivo.',
+    step2_title:'Únete o crea una sesión', step2_desc:'Explora sesiones en vivo y únete con un toque, o crea tu propia clase en segundos.',
+    step3_title:'Aprende con IA', step3_desc:'Tu profesor IA puede guiar una lección completa o responder cualquier pregunta en vivo.',
+    step4_title:'Desarrolla tus habilidades', step4_desc:'Sigue tus sesiones, construye tu perfil y conéctate con otros estudiantes y profesores.',
+    feat_eyebrow:'Todo lo que necesitas', feat_title:'Hecho para el aprendizaje real',
+    feat1_title:'Profesor IA', feat1_desc:'Genera lecciones detalladas paso a paso sobre cualquier tema y responde preguntas en vivo.',
+    feat2_title:'Video en vivo', feat2_desc:'Cámara y micrófono en tiempo real — únete con un toque, sin instalaciones.',
+    feat3_title:'Chat en vivo', feat3_desc:'Chat de clase en tiempo real con reacciones emoji para que los alumnos participen sin interrumpir.',
+    feat4_title:'Participantes', feat4_desc:'Ve quién está en la sala, gestiona participantes y sabe cuándo alguien quiere hablar.',
+    feat5_title:'Códigos de sala', feat5_desc:'Comparte un código simple y cualquiera puede unirse al instante desde cualquier dispositivo.',
+    feat6_title:'Perfil guardado', feat6_desc:'Tu nombre, foto y habilidades se guardan permanentemente — continúa donde lo dejaste.',
+    cta_title:'¿Listo para aprender algo hoy?', cta_sub:'Únete a una sesión en vivo o crea tu cuenta gratis en 30 segundos.',
+    cta_btn1:'Ver sesiones en vivo', cta_btn2:'Crear cuenta →',
+    footer_classroom:'Aula', footer_account:'Mi cuenta',
+  },
+  zh: {
+    nav_browse:'浏览', nav_how:'如何使用', nav_cta:'立即开始 →',
+    hero_live_badge:'现在正在进行的课程',
+    hero_h1_line1:'学习任何知识。', hero_h1_line2:'实时教授任何人。',
+    hero_sub:'加入由真实教师和AI共同主持的直播课堂，或在几秒钟内创建您自己的课程。',
+    hero_btn_browse:'🎥 浏览直播课程', hero_btn_start:'🚀 开始课程',
+    stat_live:'实时在线', stat_learners:'今日学员', stat_topics:'课题', stat_ai:'AI教师',
+    scroll_hint:'直播课程',
+    sessions_eyebrow:'正在直播', sessions_title:'选择一个课程加入',
+    filter_all:'全部', filter_language:'语言', filter_ai:'仅AI',
+    host_title:'开始您自己的直播课程',
+    host_desc:'教授您熟悉的主题，或使用AI教师引导学生——无需提前准备。',
+    host_btn:'🎙 主持课程', join_btn:'加入 →',
+    how_eyebrow:'简单设计', how_title:'30秒内准备就绪',
+    how_sub:'无需下载，无需设置。打开即学。',
+    step1_title:'创建账户', step1_desc:'使用手机号或邮箱注册。您的个人资料永久保存在设备上。',
+    step2_title:'加入或主持课程', step2_desc:'浏览直播课程一键加入，或在几秒内创建自己的教室。',
+    step3_title:'与AI一起学习', step3_desc:'AI教师可以逐步引导完整课程，或在直播中回答任何问题。',
+    step4_title:'提升技能', step4_desc:'跟踪课程，建立技能档案，与其他学习者和教师联系。',
+    feat_eyebrow:'一切所需', feat_title:'为真实学习而建',
+    feat1_title:'AI教师', feat1_desc:'生成任何主题的逐步课程，并在每次课程中实时回答问题。',
+    feat2_title:'直播视频', feat2_desc:'实时摄像头和麦克风——一键加入，无需安装。',
+    feat3_title:'实时聊天', feat3_desc:'实时课堂聊天，配有表情符号反应，让学生在不打断的情况下参与。',
+    feat4_title:'参与者', feat4_desc:'查看房间中的人员，管理参与者，了解谁想发言。',
+    feat5_title:'房间代码', feat5_desc:'分享简单代码，任何人都可以从任何设备立即加入。',
+    feat6_title:'保存的档案', feat6_desc:'您的姓名、照片和技能永久保存——从上次离开的地方继续。',
+    cta_title:'准备好今天学点新东西了吗？', cta_sub:'立即加入直播课程或在30秒内创建免费账户。',
+    cta_btn1:'浏览直播课程', cta_btn2:'创建账户 →',
+    footer_classroom:'教室', footer_account:'我的账户',
+  }
+};
+
+const LANG_META = {
+  en:{ flag:'🇬🇧', name:'EN', dir:'ltr' },
+  ar:{ flag:'🇸🇦', name:'عر', dir:'rtl' },
+  fr:{ flag:'🇫🇷', name:'FR', dir:'ltr' },
+  es:{ flag:'🇪🇸', name:'ES', dir:'ltr' },
+  zh:{ flag:'🇨🇳', name:'中文', dir:'ltr' },
+};
+
+let currentLang = localStorage.getItem('ss_lang') || 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('ss_lang', lang);
+  const meta = LANG_META[lang];
+  const t = I18N[lang];
+
+  // Set HTML dir + lang
+  document.documentElement.lang = lang;
+  document.documentElement.dir = meta.dir;
+
+  // Update lang button
+  document.getElementById('langFlag').textContent = meta.flag;
+  document.getElementById('langName').textContent = meta.name;
+
+  // Mark active option
+  document.querySelectorAll('.lang-option').forEach(opt => {
+    opt.classList.toggle('active', opt.getAttribute('onclick') === `setLang('${lang}')`);
+  });
+
+  // Translate all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+
+  // Re-render sessions with translated join button
+  renderSessions();
+  closeLangMenu();
+}
+
+function toggleLangMenu() {
+  document.getElementById('langDropdown').classList.toggle('open');
+}
+function closeLangMenu() {
+  document.getElementById('langDropdown').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!document.getElementById('langSwitcher').contains(e.target)) closeLangMenu();
+});
+
+// ════════════════════════════════════════════
+// SESSIONS
+// ════════════════════════════════════════════
+const SESSIONS = [
+  { id:'s1', title:'React Workshop — Hooks & State Live Coding', host:'Amir K.', hostColor:'#7B6FFF', hostInit:'A', category:'tech', viewers:14, icon:'⚛️', tag:'Beginner', ai:true, room:'react123', session:'React Workshop' },
+  { id:'s2', title:'Python 101 — Variables, Loops & Functions', host:'Sara L.', hostColor:'#00E5A0', hostInit:'S', category:'tech', viewers:8, icon:'🐍', tag:'Beginner', ai:true, room:'python101', session:'Python 101' },
+  { id:'s3', title:'UX Design Fundamentals — Live Critique Session', host:'Mia J.', hostColor:'#4B9EFF', hostInit:'M', category:'design', viewers:22, icon:'🎨', tag:'All levels', ai:true, room:'uxdesign', session:'UX Design' },
+  { id:'s4', title:'Calculus Crash Course: Derivatives Explained', host:'AI Teacher 🤖', hostColor:'#FFB930', hostInit:'🤖', category:'math', viewers:6, icon:'📐', tag:'Intermediate', ai:true, room:'calc101', session:'Calculus 101' },
+  { id:'s5', title:'Arabic for Beginners: Alphabet & Greetings', host:'Omar F.', hostColor:'#FF3D5A', hostInit:'O', category:'language', viewers:11, icon:'🗣️', tag:'Beginner', ai:false, room:'arabic101', session:'Arabic for Beginners' },
+  { id:'s6', title:'Machine Learning with Python — Live Walkthrough', host:'Lin P.', hostColor:'#7B6FFF', hostInit:'L', category:'tech', viewers:31, icon:'🧠', tag:'Advanced', ai:true, room:'ml-live', session:'Machine Learning' },
+  { id:'s7', title:'AI Prompt Engineering Masterclass', host:'AI Teacher 🤖', hostColor:'#4B9EFF', hostInit:'🤖', category:'ai', viewers:19, icon:'🤖', tag:'All levels', ai:true, room:'ai-prompts', session:'AI Prompt Engineering' },
+  { id:'s8', title:'Public Speaking Confidence — Live Workshop', host:'Priya R.', hostColor:'#00E5A0', hostInit:'P', category:'language', viewers:9, icon:'🎤', tag:'All levels', ai:false, room:'speak101', session:'Public Speaking' },
+];
+
+let activeFilter = 'all';
+
+function filterSessions(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSessions();
+}
+
+function joinRoom(room, session) {
+  window.location = `skillstream-live-session.html?room=${encodeURIComponent(room)}&session=${encodeURIComponent(session)}`;
+}
+
+function renderSessions() {
+  const grid = document.getElementById('sessionsGrid');
+  const t = I18N[currentLang];
+  const filtered = activeFilter === 'all' ? SESSIONS
+    : activeFilter === 'ai' ? SESSIONS.filter(s => s.ai)
+    : SESSIONS.filter(s => s.category === activeFilter);
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div style="color:var(--muted);font-size:14px;padding:40px;text-align:center;grid-column:1/-1">${t.sessions_title}</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(s => `
+    <div class="session-card" onclick="joinRoom('${s.room}','${s.session}')">
+      <div class="sc-thumb">
+        <span class="thumb-icon">${s.icon}</span>
+        <div class="sc-live-badge"><span style="width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;animation:blink 1.2s infinite"></span> LIVE</div>
+        ${s.ai ? '<div class="sc-ai-badge">🤖 AI</div>' : ''}
+        <div class="sc-viewers" id="viewers-${s.id}">👁 ${s.viewers}</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-category">${s.category.toUpperCase()}</div>
+        <div class="sc-title">${s.title}</div>
+        <div class="sc-host">
+          <div class="sc-av" style="background:${s.hostColor}">${s.hostInit}</div>
+          <span class="sc-host-name">${s.host}</span>
+        </div>
+        <div class="sc-footer">
+          <span class="sc-tag">${s.tag}</span>
+          <button class="join-mini-btn" onclick="event.stopPropagation();joinRoom('${s.room}','${s.session}')">${t.join_btn||'Join →'}</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// Animate viewer counts
+setInterval(() => {
+  SESSIONS.forEach(s => {
+    const el = document.getElementById('viewers-' + s.id);
+    if (!el) return;
+    const cur = parseInt(el.textContent.replace(/\D/g,''));
+    const next = Math.max(1, cur + (Math.random() > 0.5 ? 1 : -1));
+    s.viewers = next;
+    el.textContent = `👁 ${next}`;
+  });
+}, 4000);
+
+// Nav user state (via shared SSAuth module)
+async function initNav() {
+  const pill = document.getElementById('userPill');
+  const signin = document.getElementById('navSignin');
+
+  await window.SSAuth.ready;
+  const user = window.SSAuth.currentUser();
+
+  if (user && user.name) {
+    pill.style.display = 'flex';
+    signin.style.display = 'none';
+    document.getElementById('navAv').textContent = user.name.charAt(0).toUpperCase();
+    document.getElementById('navName').textContent = user.name.split(' ')[0];
+  }
+}
+
+// Init
+// ════════════════════════════════════════════
+// DAILY INSPIRATION
+// Deterministic "today's pick" per category — same for everyone on a given
+// day, changes automatically at midnight local time. No API, no backend.
+// ════════════════════════════════════════════
+const INSPO = {
+  quotes: [
+    { text: "The beautiful thing about learning is that no one can take it away from you.", author: "B.B. King" },
+    { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", author: "Mahatma Gandhi" },
+    { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
+    { text: "Education is not the filling of a pail, but the lighting of a fire.", author: "W.B. Yeats" },
+    { text: "I am still learning.", author: "Michelangelo" },
+    { text: "Develop a passion for learning. If you do, you will never cease to grow.", author: "Anthony J. D'Angelo" },
+    { text: "The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice.", author: "Brian Herbert" },
+    { text: "Change is the end result of all true learning.", author: "Leo Buscaglia" },
+    { text: "Anyone who stops learning is old, whether at twenty or eighty.", author: "Henry Ford" },
+    { text: "Learning never exhausts the mind.", author: "Leonardo da Vinci" },
+    { text: "The more that you read, the more things you will know.", author: "Dr. Seuss" },
+    { text: "Tell me and I forget. Teach me and I remember. Involve me and I learn.", author: "Benjamin Franklin" },
+    { text: "It is the mark of an educated mind to be able to entertain a thought without accepting it.", author: "Aristotle" },
+    { text: "Curiosity is the wick in the candle of learning.", author: "William Arthur Ward" },
+    { text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
+    { text: "The only person who is educated is the one who has learned how to learn.", author: "Carl Rogers" },
+    { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+    { text: "What we learn with pleasure we never forget.", author: "Alfred Mercier" },
+    { text: "A little learning is a dangerous thing.", author: "Alexander Pope" },
+    { text: "Study while others are sleeping; work while others are loafing.", author: "William A. Ward" }
+  ],
+  words: [
+    { word: "Serendipity", pos: "noun", def: "The occurrence of finding something valuable without looking for it." },
+    { word: "Ephemeral", pos: "adjective", def: "Lasting for a very short time." },
+    { word: "Ubiquitous", pos: "adjective", def: "Present, appearing, or found everywhere." },
+    { word: "Resilience", pos: "noun", def: "The capacity to recover quickly from difficulties." },
+    { word: "Eloquent", pos: "adjective", def: "Fluent or persuasive in speaking or writing." },
+    { word: "Paradigm", pos: "noun", def: "A typical example or pattern of something." },
+    { word: "Meticulous", pos: "adjective", def: "Showing great attention to detail; very careful." },
+    { word: "Cognizant", pos: "adjective", def: "Having knowledge or being aware of something." },
+    { word: "Juxtapose", pos: "verb", def: "To place two things side by side for contrasting effect." },
+    { word: "Pragmatic", pos: "adjective", def: "Dealing with things sensibly, based on practical considerations." },
+    { word: "Ambiguous", pos: "adjective", def: "Open to more than one interpretation; unclear." },
+    { word: "Catalyst", pos: "noun", def: "A person or thing that precipitates an event or change." },
+    { word: "Nuance", pos: "noun", def: "A subtle difference in meaning, expression, or sound." },
+    { word: "Tenacious", pos: "adjective", def: "Persistent and determined; not letting go." },
+    { word: "Elucidate", pos: "verb", def: "To make something clear; explain." },
+    { word: "Empirical", pos: "adjective", def: "Based on observation or experience rather than theory." },
+    { word: "Ostensible", pos: "adjective", def: "Stated or appearing to be true, but perhaps not so." },
+    { word: "Synthesis", pos: "noun", def: "The combination of ideas to form a theory or system." },
+    { word: "Vernacular", pos: "noun", def: "The language or dialect spoken by ordinary people." },
+    { word: "Anomaly", pos: "noun", def: "Something that deviates from what is standard or expected." }
+  ],
+  events: [
+    { year: "1969", text: "Apollo 11 astronauts became the first humans to walk on the Moon." },
+    { year: "1989", text: "The Berlin Wall began to fall, symbolizing the end of the Cold War divide." },
+    { year: "1876", text: "Alexander Graham Bell was granted a patent for the telephone." },
+    { year: "1990", text: "Tim Berners-Lee published the first proposal for the World Wide Web." },
+    { year: "1903", text: "The Wright brothers achieved the first powered, controlled airplane flight." },
+    { year: "1928", text: "Alexander Fleming discovered penicillin, ushering in the age of antibiotics." },
+    { year: "1945", text: "The United Nations was founded to promote international cooperation." },
+    { year: "1957", text: "The Soviet Union launched Sputnik 1, the first artificial satellite." },
+    { year: "1440", text: "Johannes Gutenberg invented the printing press, transforming access to knowledge." },
+    { year: "1969", text: "The first message was sent over ARPANET, a precursor to the internet." },
+    { year: "1804", text: "Lewis and Clark set out to explore and map the American West." },
+    { year: "1994", text: "The first web browser war began as Netscape Navigator gained popularity." },
+    { year: "1912", text: "Alfred Wegener proposed the theory of continental drift." },
+    { year: "1928", text: "The first Mickey Mouse cartoon, Steamboat Willie, premiered." },
+    { year: "1961", text: "Yuri Gagarin became the first human to travel into space." },
+    { year: "1848", text: "The Seneca Falls Convention launched the organized women's rights movement in the US." },
+    { year: "1969", text: "The Woodstock music festival drew hundreds of thousands of attendees." },
+    { year: "1543", text: "Nicolaus Copernicus published his heliocentric model of the solar system." },
+    { year: "1997", text: "IBM's Deep Blue defeated world chess champion Garry Kasparov." },
+    { year: "1859", text: "Charles Darwin published On the Origin of Species." }
+  ],
+  facts: [
+    "A single bolt of lightning contains enough energy to toast about 100,000 slices of bread.",
+    "Octopuses have three hearts and blue blood.",
+    "Honey never spoils — edible honey has been found in tombs thousands of years old.",
+    "Light from the Sun takes about 8 minutes and 20 seconds to reach Earth.",
+    "The human brain generates about 20 watts of electrical power — enough to power a small light bulb.",
+    "Bananas are naturally slightly radioactive due to their potassium content.",
+    "A day on Venus is longer than a year on Venus.",
+    "Water can boil and freeze at the same time under the right pressure — it's called the triple point.",
+    "There are more possible iterations of chess than atoms in the observable universe.",
+    "Sharks existed before trees appeared on Earth.",
+    "The Eiffel Tower can grow taller in summer due to thermal expansion of the metal.",
+    "Neutron stars are so dense that a sugar-cube-sized amount would weigh about a billion tons.",
+    "Some metals are so reactive they explode on contact with water — like cesium and potassium.",
+    "Your body sheds about 500 million skin cells every day.",
+    "The Great Wall of China is not actually visible from space with the naked eye.",
+    "An adult human body contains enough carbon to fill about 9,000 pencils.",
+    "Glass is an amorphous solid — technically it flows, just extremely slowly.",
+    "Tardigrades ('water bears') can survive the vacuum of outer space.",
+    "The average cloud weighs around 1.1 million pounds.",
+    "DNA is so tightly coiled that if unwound, the DNA in all your cells would stretch to the Sun and back over 300 times."
+  ],
+  tips: [
+    "Name variables for what they represent, not their type — `userCount`, not `intVal`.",
+    "Write the test before you fix the bug — it proves the bug exists and that your fix worked.",
+    "Commit small, focused changes. It makes bugs easier to find and revert if needed.",
+    "Read the error message fully before searching online — it usually tells you exactly what's wrong.",
+    "Prefer early returns over deeply nested if/else blocks — it's easier to follow.",
+    "Comment on *why* code does something, not *what* it does — the code already shows the 'what'.",
+    "Learn your editor's keyboard shortcuts for multi-cursor editing — it saves enormous time.",
+    "Never trust user input — always validate and sanitize on the server, not just the client.",
+    "Use version control branches for experiments so you can throw away failed attempts cleanly.",
+    "Cache expensive operations, but always have a plan for invalidating stale cache data.",
+    "Log with context (IDs, timestamps) — a bare 'error occurred' is nearly useless later.",
+    "Keep functions small enough to fit on one screen — if it scrolls, consider splitting it.",
+    "Automate anything you do more than twice — future you will thank present you.",
+    "Read code more than you write it — most of a developer's time is spent understanding, not typing.",
+    "Set up linting and formatting early — arguing about style in code review wastes everyone's time.",
+    "When debugging, change one thing at a time — changing three things makes it unclear what fixed it.",
+    "Prefer composition over inheritance when designing how components share behavior.",
+    "Write your commit message to explain *why*, not just *what changed* — the diff already shows that.",
+    "Rubber duck debugging works — explaining your problem out loud often reveals the answer.",
+    "Always handle the empty/null/zero case explicitly — it's where most bugs hide."
+  ],
+  books: [
+    { title: "Thinking, Fast and Slow", author: "Daniel Kahneman", tag: "Psychology" },
+    { title: "Sapiens", author: "Yuval Noah Harari", tag: "History" },
+    { title: "Atomic Habits", author: "James Clear", tag: "Self-improvement" },
+    { title: "The Pragmatic Programmer", author: "Andrew Hunt & David Thomas", tag: "Software" },
+    { title: "A Brief History of Time", author: "Stephen Hawking", tag: "Science" },
+    { title: "Deep Work", author: "Cal Newport", tag: "Productivity" },
+    { title: "The Design of Everyday Things", author: "Don Norman", tag: "Design" },
+    { title: "Educated", author: "Tara Westover", tag: "Memoir" },
+    { title: "The Selfish Gene", author: "Richard Dawkins", tag: "Biology" },
+    { title: "Mindset", author: "Carol S. Dweck", tag: "Psychology" },
+    { title: "Cosmos", author: "Carl Sagan", tag: "Science" },
+    { title: "Clean Code", author: "Robert C. Martin", tag: "Software" },
+    { title: "Guns, Germs, and Steel", author: "Jared Diamond", tag: "History" },
+    { title: "The Art of Learning", author: "Josh Waitzkin", tag: "Learning" },
+    { title: "How to Win Friends and Influence People", author: "Dale Carnegie", tag: "Communication" },
+    { title: "The Innovator's Dilemma", author: "Clayton Christensen", tag: "Business" },
+    { title: "Silent Spring", author: "Rachel Carson", tag: "Environment" },
+    { title: "The Structure of Scientific Revolutions", author: "Thomas Kuhn", tag: "Philosophy of Science" },
+    { title: "Man's Search for Meaning", author: "Viktor Frankl", tag: "Psychology" },
+    { title: "Grit", author: "Angela Duckworth", tag: "Self-improvement" }
+  ],
+  challenges: [
+    "Explain a topic you're learning to someone else in 3 sentences or less.",
+    "Learn 5 new words in a language you don't speak and use them in a sentence.",
+    "Write down one thing you assumed was true this week and check if it actually is.",
+    "Read one Wikipedia article outside your usual interests, start to finish.",
+    "Teach yourself one keyboard shortcut you've never used before and use it 5 times today.",
+    "Summarize your favorite book in exactly one tweet's worth of characters.",
+    "Ask someone a question you'd normally be embarrassed to ask.",
+    "Solve one small coding or math puzzle without looking anything up.",
+    "Write a 2-minute explanation of how something you use daily actually works.",
+    "Find one counterargument to an opinion you strongly hold, and consider it seriously.",
+    "Watch or read something in a genre you normally avoid.",
+    "Practice a skill for 15 focused minutes with your phone in another room.",
+    "Write down 3 questions you don't know the answer to, and look up just one.",
+    "Explain today's Scientific Fact of the Day to a friend or family member.",
+    "Try to recall yesterday's Word of the Day without scrolling back."
+  ]
+};
+
+// Day-of-year, stable across a given calendar day for everyone.
+function dayOfYear(d) {
+  const start = new Date(d.getFullYear(), 0, 0);
+  const diff = d - start;
+  return Math.floor(diff / 86400000);
+}
+
+function pickToday(arr, offset) {
+  const doy = dayOfYear(new Date()) + offset;
+  return arr[doy % arr.length];
+}
+
+function renderInspiration() {
+  const grid = document.getElementById('inspirationGrid');
+  if (!grid) return;
+
+  const q = pickToday(INSPO.quotes, 0);
+  const w = pickToday(INSPO.words, 1);
+  const ev = pickToday(INSPO.events, 2);
+  const fact = pickToday(INSPO.facts, 3);
+  const tip = pickToday(INSPO.tips, 4);
+  const book = pickToday(INSPO.books,5);
+  const challenge = pickToday(INSPO.challenges, 6);
+
+  window._todayChallengeText = challenge;
+  window._localChallengeKey = 'skillstream_challenge_done_' + new Date().toDateString();
+  const isDone = localStorage.getItem(window._localChallengeKey) === '1'; // fast initial paint, guest default
+
+  grid.innerHTML = `
+    <div class="insp-card">
+      <span class="insp-icon">📖</span>
+      <div class="insp-label">Quote of the Day</div>
+      <div class="insp-body">"${q.text}"</div>
+      <div class="insp-meta">— ${q.author}</div>
+    </div>
+    <div class="insp-card">
+      <span class="insp-icon">🧠</span>
+      <div class="insp-label">Word of the Day</div>
+      <div class="insp-body"><span class="hl">${w.word}</span> <span style="color:var(--muted);font-size:12px">(${w.pos})</span><br>${w.def}</div>
+    </div>
+    <div class="insp-card">
+      <span class="insp-icon">🌍</span>
+      <div class="insp-label">Historical Event of the Day</div>
+      <div class="insp-body"><span class="hl">${ev.year}</span> — ${ev.text}</div>
+    </div>
+    <div class="insp-card">
+      <span class="insp-icon">🔬</span>
+      <div class="insp-label">Scientific Fact of the Day</div>
+      <div class="insp-body">${fact}</div>
+    </div>
+    <div class="insp-card">
+      <span class="insp-icon">💻</span>
+      <div class="insp-label">Programming Tip of the Day</div>
+      <div class="insp-body">${tip}</div>
+    </div>
+    <div class="insp-card">
+      <span class="insp-icon">📚</span>
+      <div class="insp-label">Book Recommendation</div>
+      <div class="insp-body"><span class="hl">${book.title}</span><br>by ${book.author}</div>
+      <div class="insp-meta">${book.tag}</div>
+    </div>
+    <div class="insp-card">
+      <span class="insp-icon">🎯</span>
+      <div class="insp-label">Daily Learning Challenge</div>
+      <div class="insp-body">${challenge}</div>
+      <div class="insp-meta" id="streakLine"></div>
+      <button class="insp-challenge-btn ${isDone ? 'done' : ''}" id="challengeBtn" onclick="toggleChallengeDone()">
+        ${isDone ? '✓ Completed today' : 'Mark as done'}
+      </button>
+    </div>
+  `;
+
+  // Once logged-in state resolves, replace the guest/local view with the
+  // real synced state from Supabase (and show the streak).
+  loadChallengeState();
+}
+
+function todayDateStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+async function getLoggedInUser() {
+  if (!window.SSAuth) return null;
+  try {
+    await window.SSAuth.ready;
+    return window.SSAuth.currentUser();
+  } catch (e) {
+    return null;
+  }
+}
+
+async function loadChallengeState() {
+  const user = await getLoggedInUser();
+  const btn = document.getElementById('challengeBtn');
+  const streakLine = document.getElementById('streakLine');
+  if (!btn) return; // section already re-rendered/removed
+
+  if (!user) {
+    // Guest — local-only, no streak across devices to show.
+    streakLine.textContent = 'Sign in to track your streak across devices.';
+    return;
+  }
+
+  try {
+    const { data, error } = await window.SSAuth.client
+      .from('challenge_completions')
+      .select('completed_date')
+      .eq('user_id', user.id)
+      .order('completed_date', { ascending: false })
+      .limit(60);
+    if (error) throw error;
+
+    const doneDates = new Set((data || []).map(r => r.completed_date));
+    const isDoneToday = doneDates.has(todayDateStr());
+
+    btn.classList.toggle('done', isDoneToday);
+    btn.textContent = isDoneToday ? '✓ Completed today' : 'Mark as done';
+
+    const streak = computeStreak(doneDates);
+    streakLine.textContent = streak > 0
+      ? `🔥 ${streak} day streak`
+      : 'Complete today\'s challenge to start a streak!';
+  } catch (err) {
+    console.warn('Could not load challenge streak:', err);
+    streakLine.textContent = '';
+  }
+}
+
+// Counts consecutive days (ending today or yesterday, so missing "today"
+// before you've done it yet doesn't zero out an active streak) with a
+// completion logged.
+function computeStreak(doneDatesSet) {
+  let streak = 0;
+  let cursor = new Date();
+  // If today isn't done yet, start counting from yesterday instead —
+  // otherwise an unbroken streak would show as 0 right before you click.
+  if (!doneDatesSet.has(todayDateStr())) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  while (true) {
+    const key = cursor.getFullYear() + '-' + String(cursor.getMonth() + 1).padStart(2, '0') + '-' + String(cursor.getDate()).padStart(2, '0');
+    if (doneDatesSet.has(key)) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+async function toggleChallengeDone() {
+  const btn = document.getElementById('challengeBtn');
+  const streakLine = document.getElementById('streakLine');
+  const user = await getLoggedInUser();
+
+  if (!user) {
+    // Guest fallback — local-only, single browser.
+    const nowDone = localStorage.getItem(window._localChallengeKey) !== '1';
+    localStorage.setItem(window._localChallengeKey, nowDone ? '1' : '0');
+    btn.classList.toggle('done', nowDone);
+    btn.textContent = nowDone ? '✓ Completed today' : 'Mark as done';
+    return;
+  }
+
+  const today = todayDateStr();
+  const isCurrentlyDone = btn.classList.contains('done');
+  btn.disabled = true;
+
+  try {
+    if (isCurrentlyDone) {
+      const { error } = await window.SSAuth.client
+        .from('challenge_completions')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('completed_date', today);
+      if (error) throw error;
+    } else {
+      const { error } = await window.SSAuth.client
+        .from('challenge_completions')
+        .upsert({ user_id: user.id, completed_date: today, challenge_text: window._todayChallengeText }, { onConflict: 'user_id,completed_date' });
+      if (error) throw error;
+    }
+    await loadChallengeState();
+  } catch (err) {
+    console.error('Could not update challenge completion:', err);
+    streakLine.textContent = 'Could not save — please try again.';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+setLang(currentLang);
+initNav();
+renderInspiration();
+</script>
+</body>
+</html>
