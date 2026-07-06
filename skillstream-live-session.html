@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>SkillStream — Live Session</title>
+<meta name="theme-color" content="#7B6FFF"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
+  --accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
+  --yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
+  --radius:14px;--radius-sm:8px;--radius-full:9999px;--shadow:0 8px 40px rgba(0,0,0,.7)
+}
+html,body{height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);overflow:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.hidden{display:none !important}
+
+/* ── JOIN SCREEN ── */
+#joinScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px}
+.join-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:100%;max-width:420px;text-align:center}
+.join-card h1{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px}
+.join-card .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+.preview-box{width:100%;aspect-ratio:4/3;background:#000;border-radius:var(--radius-sm);overflow:hidden;position:relative;margin-bottom:16px;border:1px solid var(--border)}
+.preview-box video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.preview-off{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--muted);font-size:13px}
+.preview-off .av{width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:22px}
+.device-row{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
+.dev-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:17px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.dev-btn.off{background:var(--live);border-color:var(--live)}
+.name-field{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:11px 14px;font-size:14px;margin-bottom:14px;font-family:'Inter',sans-serif}
+.name-field:focus{outline:none;border-color:var(--accent)}
+.btn-join{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s}
+.btn-join:hover{background:var(--accent-dark)}
+.btn-join:disabled{opacity:.5;cursor:not-allowed}
+.perm-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5}
+
+/* ── ROOM SCREEN ── */
+#roomScreen{height:100vh;display:flex;flex-direction:column}
+.room-topbar{display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:56px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.room-title{font-family:'Syne',sans-serif;font-weight:800;font-size:14px}
+.room-meta{font-size:11px;color:var(--muted)}
+.live-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,61,90,.1);border:1px solid rgba(255,61,90,.25);color:var(--live);border-radius:var(--radius-full);padding:4px 12px;font-size:11px;font-weight:700}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--live);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.room-body{flex:1;display:flex;min-height:0}
+.video-area{flex:1;padding:16px;display:flex;align-items:center;justify-content:center;min-width:0}
+.video-grid{display:grid;gap:12px;width:100%;height:100%}
+.video-grid.solo{grid-template-columns:1fr;max-width:640px;margin:0 auto}
+.video-grid.duo{grid-template-columns:1fr 1fr}
+.tile{background:#000;border-radius:var(--radius);overflow:hidden;position:relative;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.tile video{width:100%;height:100%;object-fit:cover}
+.tile.self video{transform:scaleX(-1)}
+.tile-label{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.6);border-radius:var(--radius-sm);padding:4px 10px;font-size:12px;font-weight:600;z-index:1}
+.tile-off{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted)}
+.tile-off .av{width:64px;height:64px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:24px}
+.ai-tile{background:linear-gradient(160deg,#14103a,#0a0c18)}
+.ai-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--blue));display:flex;align-items:center;justify-content:center;font-size:30px}
+.ai-avatar.thinking{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* ── AI TEACHER SIDE PANEL ── */
+.side-panel{width:320px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border)}
+.panel-tab{flex:1;text-align:center;padding:12px 0;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+.panel-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.panel-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5}
+.msg.ai{background:var(--card);align-self:flex-start;border:1px solid var(--border)}
+.msg.me{background:var(--accent);color:#fff;align-self:flex-end}
+.msg.sys{align-self:center;color:var(--muted);font-size:11px;background:none}
+.panel-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
+.panel-input-row input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px}
+.panel-input-row input:focus{outline:none;border-color:var(--accent)}
+.panel-send{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 16px;font-weight:700;cursor:pointer;font-size:13px}
+.panel-send:disabled{opacity:.5;cursor:not-allowed}
+.key-note{padding:10px 14px;font-size:11px;color:var(--muted);background:var(--card);border-top:1px solid var(--border);line-height:1.5}
+.key-note a{color:var(--accent);text-decoration:none;font-weight:700}
+
+/* ── CONTROL BAR ── */
+.control-bar{display:flex;align-items:center;justify-content:center;gap:14px;padding:16px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+.ctrl-btn{width:48px;height:48px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.ctrl-btn:hover{border-color:var(--accent)}
+.ctrl-btn.off{background:var(--live);border-color:var(--live)}
+.ctrl-btn.leave{background:var(--live);border-color:var(--live);width:auto;padding:0 24px;border-radius:var(--radius-full);font-family:'Syne',sans-serif;font-weight:700;font-size:14px;gap:8px}
+
+@media(max-width:760px){
+  .side-panel{position:fixed;inset:0 0 72px 0;top:56px;z-index:50;width:100%;transform:translateY(100%);transition:transform .3s}
+  .side-panel.open{transform:translateY(0)}
+  .video-grid.duo{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- JOIN SCREEN -->
+<div id="joinScreen">
+  <div class="join-card">
+    <h1 id="joinTitle">Join Session</h1>
+    <div class="sub" id="joinSub">Check your camera and mic before joining</div>
+    <div class="preview-box">
+      <video id="previewVideo" autoplay muted playsinline></video>
+      <div class="preview-off hidden" id="previewOff">
+        <div class="av" id="previewAv">?</div>
+        <span>Camera is off</span>
+      </div>
+    </div>
+    <div class="device-row">
+      <button class="dev-btn" id="camToggle" onclick="toggleCam()" title="Toggle camera">🎥</button>
+      <button class="dev-btn" id="micToggle" onclick="toggleMic()" title="Toggle mic">🎙️</button>
+    </div>
+    <input type="text" class="name-field" id="nameInput" placeholder="Your name"/>
+    <button class="btn-join" id="joinBtn" onclick="joinRoomNow()">Join Now →</button>
+    <div class="perm-note" id="permNote"></div>
+  </div>
+</div>
+
+<!-- ROOM SCREEN -->
+<div id="roomScreen" class="hidden">
+  <div class="room-topbar">
+    <div>
+      <div class="room-title" id="roomTitleText">Session</div>
+      <div class="room-meta" id="roomMetaText">Room</div>
+    </div>
+    <div class="live-chip"><span class="live-dot"></span> LIVE</div>
+  </div>
+
+  <div class="room-body">
+    <div class="video-area">
+      <div class="video-grid solo" id="videoGrid">
+        <div class="tile self" id="selfTile">
+          <video id="selfVideo" autoplay muted playsinline></video>
+          <div class="preview-off hidden" id="selfOff"><div class="av" id="selfAv">?</div></div>
+          <div class="tile-label" id="selfLabel">You</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-panel" id="sidePanel">
+      <div class="panel-tabs">
+        <div class="panel-tab active" data-tab="ai" onclick="switchPanel('ai')">🤖 AI Teacher</div>
+        <div class="panel-tab" data-tab="chat" onclick="switchPanel('chat')">💬 Chat</div>
+      </div>
+      <div class="panel-body" id="aiPanelBody">
+        <div class="msg sys">Ask the AI teacher anything about this session's topic.</div>
+      </div>
+      <div class="panel-body hidden" id="chatPanelBody">
+        <div class="msg sys">Room chat — messages are only visible to you in this browser tab (no backend wired up yet).</div>
+      </div>
+      <div class="panel-input-row">
+        <input type="text" id="panelInput" placeholder="Ask a question…" onkeydown="if(event.key==='Enter')sendPanelMessage()"/>
+        <button class="panel-send" id="panelSendBtn" onclick="sendPanelMessage()">Send</button>
+      </div>
+      <div class="key-note" id="keyNote"></div>
+    </div>
+  </div>
+
+  <div class="control-bar">
+    <button class="ctrl-btn" id="roomCamBtn" onclick="toggleCam(true)" title="Camera">🎥</button>
+    <button class="ctrl-btn" id="roomMicBtn" onclick="toggleMic(true)" title="Mic">🎙️</button>
+    <button class="ctrl-btn" onclick="togglePanelMobile()" title="AI Teacher / Chat">💬</button>
+    <button class="ctrl-btn leave" onclick="leaveRoom()">✕ Leave</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="skillstream-auth.js"></script>
+<script>
+// ── State ──
+const params = new URLSearchParams(location.search);
+const roomId = params.get('room') || 'general';
+const sessionName = params.get('session') || 'Live Session';
+let localStream = null;
+let camOn = true, micOn = true;
+let displayName = 'You';
+
+document.getElementById('joinTitle').textContent = decodeURIComponent(sessionName);
+document.getElementById('roomTitleText').textContent = decodeURIComponent(sessionName);
+document.getElementById('roomMetaText').textContent = 'Room: ' + roomId;
+
+// Prefill name from SSAuth if logged in
+(async () => {
+  try {
+    if (window.SSAuth) {
+      await window.SSAuth.ready;
+      const u = window.SSAuth.currentUser();
+      if (u && u.name) {
+        displayName = u.name;
+        document.getElementById('nameInput').value = u.name;
+      }
+    }
+  } catch (e) { /* not logged in — that's fine, name field stays editable */ }
+})();
+
+// ── Camera/mic setup on join screen ──
+async function initPreview() {
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    document.getElementById('previewVideo').srcObject = localStream;
+  } catch (err) {
+    console.warn('Media permission denied or unavailable:', err);
+    document.getElementById('permNote').textContent =
+      'Camera/mic access was blocked or unavailable. You can still join with camera and mic off.';
+    camOn = false; micOn = false;
+    updateDeviceButtons();
+    showPreviewOff();
+  }
+}
+initPreview();
+
+function showPreviewOff() {
+  document.getElementById('previewVideo').classList.toggle('hidden', !camOn);
+  document.getElementById('previewOff').classList.toggle('hidden', camOn);
+  const nameForAv = (document.getElementById('nameInput').value || displayName || '?').charAt(0).toUpperCase();
+  document.getElementById('previewAv').textContent = nameForAv;
+}
+
+function toggleCam(inRoom) {
+  camOn = !camOn;
+  if (localStream) {
+    localStream.getVideoTracks().forEach(t => t.enabled = camOn);
+  }
+  updateDeviceButtons();
+  if (inRoom) {
+    document.getElementById('selfVideo').classList.toggle('hidden', !camOn);
+    document.getElementById('selfOff').classList.toggle('hidden', camOn);
+    document.getElementById('selfAv').textContent = (displayName || '?').charAt(0).toUpperCase();
+  } else {
+    showPreviewOff();
+  }
+}
+
+function toggleMic(inRoom) {
+  micOn = !micOn;
+  if (localStream) {
+    localStream.getAudioTracks().forEach(t => t.enabled = micOn);
+  }
+  updateDeviceButtons();
+}
+
+function updateDeviceButtons() {
+  document.getElementById('camToggle')?.classList.toggle('off', !camOn);
+  document.getElementById('micToggle')?.classList.toggle('off', !micOn);
+  document.getElementById('roomCamBtn')?.classList.toggle('off', !camOn);
+  document.getElementById('roomMicBtn')?.classList.toggle('off', !micOn);
+}
+
+// ── Join room ──
+function joinRoomNow() {
+  const nameVal = document.getElementById('nameInput').value.trim();
+  if (nameVal) displayName = nameVal;
+
+  document.getElementById('joinScreen').classList.add('hidden');
+  document.getElementById('roomScreen').classList.remove('hidden');
+
+  document.getElementById('selfLabel').textContent = displayName;
+  document.getElementById('selfAv').textContent = displayName.charAt(0).toUpperCase();
+
+  const selfVideo = document.getElementById('selfVideo');
+  if (localStream) {
+    selfVideo.srcObject = localStream;
+  }
+  document.getElementById('selfVideo').classList.toggle('hidden', !camOn);
+  document.getElementById('selfOff').classList.toggle('hidden', camOn);
+
+  // NOTE: This is currently a solo room (you + the AI Teacher panel).
+  // There's no signaling/peer-connection backend wired up yet, so other
+  // real participants won't appear here even if they join the same room
+  // id — that would need a WebRTC signaling layer (e.g. a Supabase
+  // Realtime channel exchanging SDP offers/answers) as a follow-up.
+}
+
+function leaveRoom() {
+  if (localStream) localStream.getTracks().forEach(t => t.stop());
+  window.location.href = 'index.html';
+}
+
+// ── Side panel (AI Teacher / Chat) ──
+function switchPanel(tab) {
+  document.querySelectorAll('.panel-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('aiPanelBody').classList.toggle('hidden', tab !== 'ai');
+  document.getElementById('chatPanelBody').classList.toggle('hidden', tab !== 'chat');
+  document.getElementById('panelInput').placeholder = tab === 'ai' ? 'Ask a question…' : 'Message the room…';
+  window._activePanel = tab;
+}
+window._activePanel = 'ai';
+
+function togglePanelMobile() {
+  document.getElementById('sidePanel').classList.toggle('open');
+}
+
+function addMsg(container, text, cls) {
+  const el = document.createElement('div');
+  el.className = 'msg ' + cls;
+  el.textContent = text;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+  return el;
+}
+
+// AI Teacher — direct browser call to Anthropic API using a key saved in
+// localStorage. Update the key name below if your existing pages use a
+// different localStorage key for it.
+const CLAUDE_KEY_STORAGE = 'skillstream_anthropic_key';
+
+function getClaudeKey() {
+  return localStorage.getItem(CLAUDE_KEY_STORAGE) || '';
+}
+
+function renderKeyNote() {
+  const note = document.getElementById('keyNote');
+  if (getClaudeKey()) {
+    note.textContent = 'AI Teacher connected.';
+  } else {
+    note.innerHTML = 'No API key set yet. <a href="javascript:promptForKey()">Add your Anthropic API key</a> to enable the AI Teacher.';
+  }
+}
+renderKeyNote();
+
+function promptForKey() {
+  const key = prompt('Paste your Anthropic API key (starts with sk-ant-...)');
+  if (key) {
+    localStorage.setItem(CLAUDE_KEY_STORAGE, key.trim());
+    renderKeyNote();
+  }
+}
+
+async function askAiTeacher(question) {
+  const key = getClaudeKey();
+  const body = document.getElementById('aiPanelBody');
+  if (!key) {
+    addMsg(body, 'No API key set. Tap "Add your Anthropic API key" below to enable the AI Teacher.', 'sys');
+    return;
+  }
+
+  const thinkingEl = addMsg(body, '…thinking', 'ai');
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        system: `You are a friendly, encouraging AI teacher helping a student in a live session called "${decodeURIComponent(sessionName)}". Keep answers clear and concise, suitable for a chat panel.`,
+        messages: [{ role: 'user', content: question }]
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      thinkingEl.textContent = 'Error: ' + (data.error?.message || 'Could not reach the AI teacher.');
+      return;
+    }
+    const text = (data.content || []).map(b => b.text || '').join('\n').trim();
+    thinkingEl.textContent = text || '(no response)';
+  } catch (err) {
+    thinkingEl.textContent = 'Connection error — please try again.';
+    console.error('AI Teacher request failed:', err);
+  }
+}
+
+function sendPanelMessage() {
+  const input = document.getElementById('panelInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  if (window._activePanel === 'ai') {
+    addMsg(document.getElementById('aiPanelBody'), text, 'me');
+    askAiTeacher(text);
+  } else {
+    addMsg(document.getElementById('chatPanelBody'), text, 'me');
+  }
+}
+</script>
+</body>
+</html>
