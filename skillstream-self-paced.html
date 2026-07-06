@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Paradise of Eternal Learners — Self-Paced Learning</title>
+<meta name="theme-color" content="#7B6FFF"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
+--accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
+--yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
+--pill:#1A1D28;--radius:14px;--radius-sm:8px;--radius-full:9999px;--shadow:0 8px 40px rgba(0,0,0,.7)
+}
+html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.hidden{display:none !important}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:60px;background:rgba(15,17,24,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:16px;color:var(--text);text-decoration:none;max-width:180px;line-height:1.15}
+.logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-btn{background:var(--pill);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.nav-btn:hover{border-color:var(--accent);color:var(--text)}
+.page{max-width:800px;margin:0 auto;padding:26px 18px 60px}
+h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+.course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.course-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s}
+.course-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.course-cover{height:110px;background:linear-gradient(135deg,#14103a,#0a1020);display:flex;align-items:center;justify-content:center;font-size:36px}
+.course-cover img{width:100%;height:100%;object-fit:cover}
+.course-body{padding:14px}
+.course-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px}
+.course-meta{font-size:12px;color:var(--muted)}
+.progress-bar{height:5px;background:var(--pill);border-radius:99px;margin-top:10px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent)}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:24px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius)}
+.back-link{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:13px;text-decoration:none;margin-bottom:14px;cursor:pointer}
+.back-link:hover{color:var(--text)}
+.course-header{background:linear-gradient(160deg,#14103a 0%,#0a0c18 100%);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+.course-header .name{font-family:'Syne',sans-serif;font-size:19px;font-weight:800}
+.course-header .desc{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5}
+.lesson-list-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s}
+.lesson-list-item:hover{border-color:var(--accent)}
+.lesson-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
+.lesson-check.done{background:var(--green);border-color:var(--green);color:#000}
+.lesson-list-title{font-weight:600;font-size:13px;flex:1}
+.video-wrap{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.video-wrap iframe{width:100%;height:100%;border:0}
+.reading-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px;line-height:1.7;font-size:14px;white-space:pre-wrap}
+.file-link{display:inline-flex;align-items:center;gap:6px;background:var(--pill);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-size:13px;color:var(--blue);text-decoration:none;margin-bottom:16px}
+.btn{padding:12px 22px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;border:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.cert-banner{background:linear-gradient(135deg,rgba(0,229,160,.12),rgba(75,158,255,.08));border:1px solid rgba(0,229,160,.3);border-radius:var(--radius);padding:20px;text-align:center;margin-top:20px}
+.cert-banner h2{font-family:'Syne',sans-serif;font-size:18px;margin-bottom:6px}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#000;border-radius:var(--radius-full);padding:12px 28px;font-weight:800;font-size:14px;z-index:600;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:all .4s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="topbar">
+<a class="logo" href="index.html">Paradise of <span>Eternal Learners</span></a>
+<a class="nav-btn" href="index.html">← Home</a>
+</div>
+
+<div class="page">
+
+  <!-- BROWSE VIEW -->
+  <div id="browseView">
+    <h1>📖 Self-Paced Learning</h1>
+    <div class="sub">Learn at your own pace, whenever you want.</div>
+    <div class="course-grid" id="courseGrid"></div>
+  </div>
+
+  <!-- COURSE DETAIL VIEW -->
+  <div id="courseView" class="hidden">
+    <div class="back-link" onclick="showBrowse()">← All courses</div>
+    <div class="course-header">
+      <div class="name" id="cvName"></div>
+      <div class="desc" id="cvDesc"></div>
+    </div>
+    <div id="lessonList"></div>
+    <div id="certBanner" class="cert-banner hidden">
+      <h2>🎓 Certificate Earned!</h2>
+      <div>You've completed every lesson in this course.</div>
+    </div>
+  </div>
+
+  <!-- LESSON VIEW -->
+  <div id="lessonView" class="hidden">
+    <div class="back-link" onclick="showCourseFromLesson()">← Back to course</div>
+    <h1 id="lvTitle"></h1>
+    <div id="lvVideoWrap" class="video-wrap hidden"><iframe id="lvVideo" allowfullscreen></iframe></div>
+    <div id="lvReading" class="reading-block hidden"></div>
+    <a id="lvFile" class="file-link hidden" target="_blank">📎 Download lesson file</a>
+    <button class="btn btn-primary" id="completeBtn" onclick="markLessonComplete()">Mark Lesson Complete</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="skillstream-auth.js"></script>
+<script>
+let courses = [];
+let currentCourse = null;
+let currentLessons = [];
+let currentLesson = null;
+let completedLessonIds = new Set();
+
+function db() { return window.SSAuth.client; }
+function showToast(msg, error) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (error ? ' error' : '') + ' show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+/* ---------- BROWSE ---------- */
+async function renderBrowse() {
+  await window.SSAuth.ready;
+  const user = window.SSAuth.currentUser();
+  const grid = document.getElementById('courseGrid');
+
+  try {
+    const { data, error } = await db()
+      .from('courses')
+      .select('*, lessons(count)')
+      .eq('published', true)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    courses = data || [];
+
+    let progressByCourse = {};
+    if (user) {
+      // Pull the user's completed lesson ids, then bucket by course after we
+      // know each course's lesson list (kept simple: fetch all lessons once).
+      const { data: lessonsAll } = await db().from('lessons').select('id, course_id');
+      const { data: progressAll } = await db().from('lesson_progress').select('lesson_id').eq('user_id', user.id);
+      const doneSet = new Set((progressAll || []).map(p => p.lesson_id));
+      (lessonsAll || []).forEach(l => {
+        progressByCourse[l.course_id] = progressByCourse[l.course_id] || { total: 0, done: 0 };
+        progressByCourse[l.course_id].total++;
+        if (doneSet.has(l.id)) progressByCourse[l.course_id].done++;
+      });
+    }
+
+    grid.innerHTML = courses.length ? courses.map(c => {
+      const prog = progressByCourse[c.id];
+      const pct = prog && prog.total ? Math.round((prog.done / prog.total) * 100) : 0;
+      return `
+        <div class="course-card" onclick="openCourse('${c.id}')">
+          <div class="course-cover">${c.cover_image_url ? `<img src="${c.cover_image_url}"/>` : '📚'}</div>
+          <div class="course-body">
+            <div class="course-name">${escapeHtml(c.title)}</div>
+            <div class="course-meta">${c.lessons?.[0]?.count || 0} lessons · ${escapeHtml(c.subject || 'General')}</div>
+            ${prog ? `<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>` : ''}
+          </div>
+        </div>`;
+    }).join('') : '<div class="empty">No published courses yet — check back soon!</div>';
+  } catch (err) {
+    console.error('renderBrowse error:', err);
+    grid.innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error: ${err.message}</div>`;
+  }
+}
+
+function showBrowse() {
+  document.getElementById('lessonView').classList.add('hidden');
+  document.getElementById('courseView').classList.add('hidden');
+  document.getElementById('browseView').classList.remove('hidden');
+  renderBrowse();
+}
+
+/* ---------- COURSE DETAIL ---------- */
+async function openCourse(id) {
+  const user = window.SSAuth.currentUser();
+  currentCourse = courses.find(c => c.id === id);
+  if (!currentCourse) return;
+
+  document.getElementById('browseView').classList.add('hidden');
+  document.getElementById('courseView').classList.remove('hidden');
+  document.getElementById('cvName').textContent = currentCourse.title;
+  document.getElementById('cvDesc').textContent = currentCourse.description || '';
+
+  try {
+    const { data, error } = await db().from('lessons').select('*').eq('course_id', id).order('order_index', { ascending: true });
+    if (error) throw error;
+    currentLessons = data || [];
+
+    completedLessonIds = new Set();
+    if (user) {
+      const ids = currentLessons.map(l => l.id);
+      if (ids.length) {
+        const { data: prog } = await db().from('lesson_progress').select('lesson_id').eq('user_id', user.id).in('lesson_id', ids);
+        completedLessonIds = new Set((prog || []).map(p => p.lesson_id));
+      }
+    }
+
+    renderLessonList();
+    await checkAndIssueCertificate();
+  } catch (err) {
+    console.error('openCourse error:', err);
+    showToast('Error loading course: ' + err.message, true);
+  }
+}
+
+function renderLessonList() {
+  const el = document.getElementById('lessonList');
+  el.innerHTML = currentLessons.length ? currentLessons.map((l, i) => `
+    <div class="lesson-list-item" onclick="openLesson('${l.id}')">
+      <div class="lesson-check ${completedLessonIds.has(l.id) ? 'done' : ''}">${completedLessonIds.has(l.id) ? '✓' : (i + 1)}</div>
+      <div class="lesson-list-title">${escapeHtml(l.title)}</div>
+    </div>
+  `).join('') : '<div class="empty">This course has no lessons yet.</div>';
+}
+
+/* ---------- LESSON VIEW ---------- */
+function openLesson(lessonId) {
+  currentLesson = currentLessons.find(l => l.id === lessonId);
+  if (!currentLesson) return;
+
+  document.getElementById('courseView').classList.add('hidden');
+  document.getElementById('lessonView').classList.remove('hidden');
+  document.getElementById('lvTitle').textContent = currentLesson.title;
+
+  const videoWrap = document.getElementById('lvVideoWrap');
+  const video = document.getElementById('lvVideo');
+  if (currentLesson.video_url) {
+    video.src = `https://www.youtube.com/embed/${currentLesson.video_url}`;
+    videoWrap.classList.remove('hidden');
+  } else {
+    videoWrap.classList.add('hidden');
+    video.src = '';
+  }
+
+  const reading = document.getElementById('lvReading');
+  if (currentLesson.reading_content) {
+    reading.textContent = currentLesson.reading_content;
+    reading.classList.remove('hidden');
+  } else {
+    reading.classList.add('hidden');
+  }
+
+  const fileLink = document.getElementById('lvFile');
+  if (currentLesson.file_url) {
+    fileLink.href = currentLesson.file_url;
+    fileLink.classList.remove('hidden');
+  } else {
+    fileLink.classList.add('hidden');
+  }
+
+  const btn = document.getElementById('completeBtn');
+  const isDone = completedLessonIds.has(currentLesson.id);
+  btn.textContent = isDone ? '✓ Lesson Completed' : 'Mark Lesson Complete';
+  btn.disabled = isDone;
+}
+
+function showCourseFromLesson() {
+  document.getElementById('lessonView').classList.add('hidden');
+  document.getElementById('courseView').classList.remove('hidden');
+  renderLessonList();
+}
+
+async function markLessonComplete() {
+  await window.SSAuth.ready;
+  const user = window.SSAuth.currentUser();
+  if (!user) {
+    showToast('Please log in to track your progress.', true);
+    return;
+  }
+  const btn = document.getElementById('completeBtn');
+  btn.disabled = true;
+
+  try {
+    const { error } = await db().from('lesson_progress').upsert(
+      { user_id: user.id, lesson_id: currentLesson.id },
+      { onConflict: 'user_id,lesson_id' }
+    );
+    if (error) throw error;
+
+    completedLessonIds.add(currentLesson.id);
+    btn.textContent = '✓ Lesson Completed';
+    showToast('✅ Lesson marked complete');
+
+    await checkAndIssueCertificate();
+  } catch (err) {
+    console.error('markLessonComplete error:', err);
+    btn.disabled = false;
+    showToast('Could not save progress: ' + err.message, true);
+  }
+}
+
+/* ---------- CERTIFICATE ---------- */
+async function checkAndIssueCertificate() {
+  const user = window.SSAuth.currentUser();
+  const banner = document.getElementById('certBanner');
+  if (!user || !currentCourse || !currentLessons.length) { banner.classList.add('hidden'); return; }
+
+  const allDone = currentLessons.every(l => completedLessonIds.has(l.id));
+  if (!allDone) { banner.classList.add('hidden'); return; }
+
+  try {
+    // upsert so this is safe to call every time without creating duplicates
+    const { error } = await db().from('certificates').upsert(
+      { user_id: user.id, course_id: currentCourse.id },
+      { onConflict: 'user_id,course_id' }
+    );
+    if (error) throw error;
+    banner.classList.remove('hidden');
+  } catch (err) {
+    console.warn('Could not issue certificate:', err);
+  }
+}
+
+renderBrowse();
+</script>
+</body>
+</html>
