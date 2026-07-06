@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SkillStream — Live Learning, Right Now</title>
+<title>Paradise of Eternal Learners — Where Learning Never Ends</title>
 <meta name="description" content="Join live classrooms taught by real people and an AI teacher — or host your own session in seconds. Free, no download needed."/>
-<meta property="og:title" content="SkillStream — Live Learning, Right Now"/>
+<meta property="og:title" content="Paradise of Eternal Learners — Where Learning Never Ends"/>
 <meta property="og:description" content="Learn anything. Teach anyone. Live."/>
 <meta property="og:type" content="website"/>
 <meta name="theme-color" content="#7B6FFF"/>
@@ -27,7 +27,8 @@ html[lang="ar"] body{font-family:'Noto Sans Arabic','Inter',sans-serif}
 
 /* ── NAV ── */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;background:var(--glass);border-bottom:1px solid var(--border);backdrop-filter:blur(24px)}
-.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:24px;text-decoration:none;color:var(--text)}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:18px;text-decoration:none;color:var(--text);line-height:1.15;max-width:200px}
+@media(min-width:480px){.logo{font-size:22px;max-width:none}}
 .logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .nav-right{display:flex;align-items:center;gap:10px}
 .nav-link{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;border-radius:var(--radius-sm);transition:all .2s}
@@ -136,6 +137,7 @@ html[lang="ar"] .step-title{font-family:'Noto Sans Arabic',sans-serif}
 .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
 .feat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all .3s}
 .feat-card:hover{border-color:var(--accent)}
+a.feat-card{display:block;text-decoration:none;color:inherit;cursor:pointer}
 .feat-icon{width:44px;height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
 .feat-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px}
 html[lang="ar"] .feat-title{font-family:'Noto Sans Arabic',sans-serif}
@@ -190,9 +192,10 @@ footer a:hover{color:var(--text)}
 
 <!-- NAV -->
 <nav>
-  <a class="logo" href="index.html">Skill<span>Stream</span></a>
+  <a class="logo" href="index.html">Paradise of <span>Eternal Learners</span></a>
   <div class="nav-right">
     <a class="nav-link" href="#sessions" data-i18n="nav_browse">Browse</a>
+    <a class="nav-link" href="skillstream-self-paced.html" data-i18n="nav_selfpaced">Self-Paced</a>
     <a class="nav-link" href="#how" data-i18n="nav_how">How it works</a>
     <a class="user-pill" id="userPill" href="skillstream-signup.html">
       <div class="user-av" id="navAv">?</div>
@@ -294,12 +297,12 @@ footer a:hover{color:var(--text)}
   <div class="section-eyebrow">⚡ <span data-i18n="feat_eyebrow">Everything you need</span></div>
   <div class="section-title" data-i18n="feat_title">Built for real learning</div>
   <div class="features-grid">
-    <div class="feat-card"><div class="feat-icon" style="background:rgba(123,111,255,.12)">🤖</div><div class="feat-title" data-i18n="feat1_title">AI Teacher</div><div class="feat-desc" data-i18n="feat1_desc">Generates full step-by-step lessons on any topic and answers questions live in every session.</div></div>
-    <div class="feat-card"><div class="feat-icon" style="background:rgba(75,158,255,.12)">🎥</div><div class="feat-title" data-i18n="feat2_title">Live Video</div><div class="feat-desc" data-i18n="feat2_desc">Real-time camera and mic — join with one tap, no downloads or installs needed.</div></div>
-    <div class="feat-card"><div class="feat-icon" style="background:rgba(0,229,160,.12)">💬</div><div class="feat-title" data-i18n="feat3_title">Live Chat</div><div class="feat-desc" data-i18n="feat3_desc">Real-time class chat with emoji reactions so students can engage without interrupting.</div></div>
-    <div class="feat-card"><div class="feat-icon" style="background:rgba(255,185,48,.12)">👥</div><div class="feat-title" data-i18n="feat4_title">Participants</div><div class="feat-desc" data-i18n="feat4_desc">See who's in the room, manage participants, and know when someone wants to speak.</div></div>
-    <div class="feat-card"><div class="feat-icon" style="background:rgba(255,61,90,.12)">🔑</div><div class="feat-title" data-i18n="feat5_title">Room Codes</div><div class="feat-desc" data-i18n="feat5_desc">Share a simple room code and anyone can join your live session instantly from any device.</div></div>
-    <div class="feat-card"><div class="feat-icon" style="background:rgba(123,111,255,.12)">👤</div><div class="feat-title" data-i18n="feat6_title">Saved Profile</div><div class="feat-desc" data-i18n="feat6_desc">Your name, photo, and skills are saved permanently — pick up right where you left off.</div></div>
+    <a class="feat-card" href="skillstream-live-session.html"><div class="feat-icon" style="background:rgba(123,111,255,.12)">🤖</div><div class="feat-title" data-i18n="feat1_title">AI Teacher</div><div class="feat-desc" data-i18n="feat1_desc">Generates full step-by-step lessons on any topic and answers questions live in every session.</div></a>
+    <a class="feat-card" href="skillstream-live-session.html"><div class="feat-icon" style="background:rgba(75,158,255,.12)">🎥</div><div class="feat-title" data-i18n="feat2_title">Live Video</div><div class="feat-desc" data-i18n="feat2_desc">Real-time camera and mic — join with one tap, no downloads or installs needed.</div></a>
+    <a class="feat-card" href="skillstream-classrooms.html"><div class="feat-icon" style="background:rgba(0,229,160,.12)">💬</div><div class="feat-title" data-i18n="feat3_title">Live Chat</div><div class="feat-desc" data-i18n="feat3_desc">Real-time class chat so students can ask questions and engage without interrupting.</div></a>
+    <a class="feat-card" href="skillstream-classrooms.html"><div class="feat-icon" style="background:rgba(255,185,48,.12)">👥</div><div class="feat-title" data-i18n="feat4_title">Class Roster</div><div class="feat-desc" data-i18n="feat4_desc">See everyone enrolled in your class, right from the People tab.</div></a>
+    <a class="feat-card" href="skillstream-classrooms.html"><div class="feat-icon" style="background:rgba(255,61,90,.12)">🔑</div><div class="feat-title" data-i18n="feat5_title">Room Codes</div><div class="feat-desc" data-i18n="feat5_desc">Share a simple class code and anyone can join your classroom instantly from any device.</div></a>
+    <div class="feat-card"><div class="feat-icon" style="background:rgba(123,111,255,.12)">👤</div><div class="feat-title" data-i18n="feat6_title">Saved Profile</div><div class="feat-desc" data-i18n="feat6_desc">Your name and account are saved permanently — pick up right where you left off.</div></div>
   </div>
 </div>
 </div>
@@ -328,7 +331,7 @@ footer a:hover{color:var(--text)}
     <a href="skillstream-classrooms.html" style="margin:0 12px" data-i18n="footer_classroom">Classroom</a>
     <a href="skillstream-signup.html" style="margin:0 12px" data-i18n="footer_account">My Account</a>
   </div>
-  © 2026 SkillStream — Live Learning Platform
+  © 2026 Paradise of Eternal Learners — Where Learning Never Ends
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
