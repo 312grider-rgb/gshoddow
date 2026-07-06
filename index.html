@@ -309,6 +309,8 @@ footer a:hover{color:var(--text)}
   © 2026 SkillStream — Live Learning Platform
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="skillstream-auth.js"></script>
 <script>
 // ════════════════════════════════════════════
 // TRANSLATIONS
@@ -590,12 +592,15 @@ setInterval(() => {
   });
 }, 4000);
 
-// Nav user state
-function initNav() {
-  const user = JSON.parse(localStorage.getItem('skillstream_user') || 'null');
+// Nav user state (via shared SSAuth module)
+async function initNav() {
   const pill = document.getElementById('userPill');
   const signin = document.getElementById('navSignin');
-  if (user) {
+
+  await window.SSAuth.ready;
+  const user = window.SSAuth.currentUser();
+
+  if (user && user.name) {
     pill.style.display = 'flex';
     signin.style.display = 'none';
     document.getElementById('navAv').textContent = user.name.charAt(0).toUpperCase();
