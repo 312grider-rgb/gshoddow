@@ -1,362 +1,518 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Paradise of Eternal Learners — My Courses</title>
-<meta name="theme-color" content="#7B6FFF"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Courses — Paradise of Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
---accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
---yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
---pill:#1A1D28;--radius:14px;--radius-sm:8px;--radius-full:9999px;--shadow:0 8px 40px rgba(0,0,0,.7)
-}
-html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
-.hidden{display:none !important}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:60px;background:rgba(15,17,24,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
-.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:16px;color:var(--text);text-decoration:none;max-width:180px;line-height:1.15}
-.logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.nav-btn{background:var(--pill);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
-.nav-btn:hover{border-color:var(--accent);color:var(--text)}
-.page{max-width:760px;margin:0 auto;padding:26px 18px 60px}
-h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px}
-.sub{color:var(--muted);font-size:13px;margin-bottom:20px}
-.btn{padding:11px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;border:none;transition:all .2s}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-dark)}
-.btn-ghost{background:var(--pill);color:var(--text);border:1px solid var(--border)}
-.btn-ghost:hover{border-color:var(--accent)}
-.btn-danger{background:none;color:var(--live);border:1px solid rgba(255,61,90,.3)}
-.course-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:all .2s}
-.course-card:hover{border-color:var(--accent)}
-.course-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px}
-.course-meta{font-size:12px;color:var(--muted);margin-top:3px}
-.status-pill{display:inline-block;border-radius:var(--radius-full);padding:3px 10px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-top:6px}
-.status-pill.published{background:rgba(0,229,160,.12);color:var(--green)}
-.status-pill.draft{background:rgba(255,185,48,.12);color:var(--yellow)}
-.empty{color:var(--muted);font-size:13px;text-align:center;padding:24px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius)}
-label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;margin-top:14px}
-input[type=text],input[type=url],textarea,select{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:'Inter',sans-serif}
-input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
-textarea{resize:vertical;min-height:70px}
-.back-link{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:13px;text-decoration:none;margin-bottom:14px;cursor:pointer}
-.back-link:hover{color:var(--text)}
-.lesson-row{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px}
-.lesson-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.lesson-title{font-weight:700;font-size:13px}
-.remove-lesson{background:none;border:none;color:var(--live);cursor:pointer;font-size:12px;font-weight:700}
-.action-row{display:flex;gap:10px;margin:18px 0;flex-wrap:wrap}
-.error-msg{background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.2);color:var(--live);border-radius:var(--radius-sm);padding:9px 11px;font-size:12px;margin-top:12px;display:none}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#000;border-radius:var(--radius-full);padding:12px 28px;font-weight:800;font-size:14px;z-index:600;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:all .4s;white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.error{background:var(--live);color:#fff}
-.field-hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4}
+  :root{
+    --ink:#1B2A4A;
+    --gold:#C99A44;
+    --cream:#FBF8F2;
+    --sage:#6B8F71;
+    --charcoal:#2B2B2B;
+    --line:#E4DFD3;
+    --danger:#B5533C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--cream);
+    color:var(--charcoal);
+    padding-bottom:80px;
+  }
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  header.top{
+    background:var(--ink);
+    color:var(--cream);
+    padding:20px 18px 26px;
+  }
+  header.top .eyebrow{
+    font-size:12px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:4px;
+  }
+  header.top h1{
+    margin:0;
+    font-size:26px;
+    font-weight:700;
+  }
+  header.top p{
+    margin:6px 0 0;
+    font-size:14px;
+    opacity:0.85;
+  }
+  .wrap{padding:18px;}
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    padding:12px 18px;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+  }
+  .btn.gold{background:var(--gold); color:var(--ink);}
+  .btn.outline{background:transparent; color:var(--ink); border:1.5px solid var(--ink);}
+  .btn.danger{background:var(--danger); color:#fff;}
+  .btn.small{padding:8px 12px; font-size:13px; border-radius:8px;}
+  .btn-full{width:100%; justify-content:center;}
+  .fab{
+    position:fixed;
+    bottom:22px;
+    right:18px;
+    z-index:20;
+    box-shadow:0 6px 18px rgba(27,42,74,0.3);
+  }
+  .course-card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .course-card .row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .course-card h3{margin:0 0 4px; font-size:19px;}
+  .course-card .meta{font-size:13px; color:#666; margin-bottom:10px;}
+  .badge{
+    display:inline-block;
+    font-size:11px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:20px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+  .badge.live{background:#E7F0E8; color:var(--sage);}
+  .badge.draft{background:#F3EEE3; color:#8a7748;}
+  .card-actions{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+    flex-wrap:wrap;
+  }
+  .empty{
+    text-align:center;
+    padding:50px 20px;
+    color:#777;
+  }
+  .empty .display{font-size:20px; color:var(--ink); margin-bottom:6px;}
+  /* Modal */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(27,42,74,0.45);
+    display:none;
+    align-items:flex-end;
+    z-index:50;
+  }
+  .overlay.show{display:flex;}
+  .sheet{
+    background:#fff;
+    width:100%;
+    max-height:92vh;
+    overflow-y:auto;
+    border-radius:20px 20px 0 0;
+    padding:22px 18px 30px;
+  }
+  .sheet h2{margin:0 0 16px; font-size:22px;}
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    margin:14px 0 6px;
+    color:var(--ink);
+  }
+  input, textarea, select{
+    width:100%;
+    padding:11px 12px;
+    border:1.5px solid var(--line);
+    border-radius:9px;
+    font-size:15px;
+    font-family:'Inter',sans-serif;
+    background:#fdfcfa;
+  }
+  textarea{min-height:70px; resize:vertical;}
+  .sheet-actions{
+    display:flex;
+    gap:10px;
+    margin-top:22px;
+  }
+  .lesson-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .lesson-row:last-child{border-bottom:none;}
+  .lesson-row .l-title{font-weight:600; font-size:14.5px;}
+  .lesson-row .l-meta{font-size:12px; color:#777;}
+  .lesson-actions{display:flex; gap:6px;}
+  .icon-btn{
+    background:none; border:none; font-size:16px; cursor:pointer; padding:4px;
+  }
+  .toast{
+    position:fixed; top:16px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff; padding:11px 18px; border-radius:30px;
+    font-size:14px; z-index:100; display:none;
+  }
+  .close-x{position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; color:#999;}
+  .sheet{position:relative;}
+  .loading{text-align:center; padding:40px; color:#888;}
 </style>
 </head>
 <body>
-<div class="topbar">
-<a class="logo" href="index.html">Paradise of <span>Eternal Learners</span></a>
-<a class="nav-btn" href="index.html">← Home</a>
+
+<header class="top">
+  <div class="eyebrow">Paradise of Eternal Learners</div>
+  <h1>My Courses</h1>
+  <p>Learn. Grow. Live Better. — build your self-paced curriculum.</p>
+</header>
+
+<div class="wrap">
+  <div id="courseList"><div class="loading">Loading your courses…</div></div>
 </div>
 
-<div class="page">
+<button class="btn gold fab" onclick="openCourseModal()">+ New Course</button>
 
-  <!-- LIST VIEW -->
-  <div id="listView">
-    <h1>My Courses</h1>
-    <div class="sub">Create and manage your self-paced courses.</div>
-    <button class="btn btn-primary" onclick="showEditor()">+ New Course</button>
-    <div id="courseList" style="margin-top:18px"></div>
-  </div>
-
-  <!-- EDITOR VIEW -->
-  <div id="editorView" class="hidden">
-    <div class="back-link" onclick="showList()">← My Courses</div>
-    <h1 id="editorHeading">New Course</h1>
-    <div class="error-msg" id="courseError"></div>
-
-    <label>Course Title</label>
-    <input type="text" id="cTitle" placeholder="e.g. Intro to Python"/>
-
-    <label>Subject</label>
-    <input type="text" id="cSubject" placeholder="e.g. Programming"/>
-
+<!-- Course Create/Edit Modal -->
+<div class="overlay" id="courseOverlay">
+  <div class="sheet">
+    <button class="close-x" onclick="closeModal('courseOverlay')">&times;</button>
+    <h2 id="courseModalTitle" class="display">New Course</h2>
+    <input type="hidden" id="courseId">
+    <label>Title</label>
+    <input type="text" id="courseTitle" placeholder="e.g. Intro to Digital Photography">
     <label>Description</label>
-    <textarea id="cDesc" placeholder="What will students learn in this course?"></textarea>
-
-    <label>Cover Image URL (optional)</label>
-    <input type="url" id="cCover" placeholder="https://..."/>
-
-    <div style="display:flex;align-items:center;gap:8px;margin-top:16px">
-      <input type="checkbox" id="cPublished" style="width:auto"/>
-      <label style="margin:0;text-transform:none;font-size:13px;color:var(--text);letter-spacing:0">Published (visible to students)</label>
+    <textarea id="courseDesc" placeholder="What will students learn?"></textarea>
+    <label>Category</label>
+    <input type="text" id="courseCategory" placeholder="e.g. Photography, Business, Language">
+    <label>Thumbnail image URL (optional)</label>
+    <input type="text" id="courseThumb" placeholder="https://...">
+    <label style="display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="coursePublished" style="width:auto;"> Publish (visible to students)
+    </label>
+    <div class="sheet-actions">
+      <button class="btn outline" style="flex:1" onclick="closeModal('courseOverlay')">Cancel</button>
+      <button class="btn gold" style="flex:1" onclick="saveCourse()">Save Course</button>
     </div>
+  </div>
+</div>
 
-    <div class="action-row">
-      <button class="btn btn-primary" onclick="saveCourse()" id="saveCourseBtn">Save Course</button>
-      <button class="btn btn-ghost" onclick="showList()">Cancel</button>
-    </div>
+<!-- Lessons Manager Modal -->
+<div class="overlay" id="lessonsOverlay">
+  <div class="sheet">
+    <button class="close-x" onclick="closeModal('lessonsOverlay')">&times;</button>
+    <h2 class="display" id="lessonsModalTitle">Lessons</h2>
+    <div id="lessonsList"></div>
+    <button class="btn outline btn-full" style="margin-top:14px;" onclick="openLessonModal()">+ Add Lesson</button>
+  </div>
+</div>
 
-    <div id="lessonsSection" class="hidden">
-      <h1 style="font-size:16px;margin-top:24px">Lessons</h1>
-      <div class="sub" style="margin-bottom:12px">Add lessons in the order students should take them.</div>
-      <div id="lessonsList"></div>
-      <button class="btn btn-ghost" style="width:100%" onclick="addLessonRow()">+ Add Lesson</button>
+<!-- Lesson Create/Edit Modal -->
+<div class="overlay" id="lessonOverlay">
+  <div class="sheet">
+    <button class="close-x" onclick="closeModal('lessonOverlay')">&times;</button>
+    <h2 class="display" id="lessonModalTitle">New Lesson</h2>
+    <input type="hidden" id="lessonId">
+    <label>Lesson Title</label>
+    <input type="text" id="lessonTitle" placeholder="e.g. Understanding Aperture">
+    <label>YouTube Video URL</label>
+    <input type="text" id="lessonVideo" placeholder="https://youtube.com/watch?v=...">
+    <label>Description / Notes</label>
+    <textarea id="lessonContent" placeholder="Optional notes for students"></textarea>
+    <label>Duration (minutes)</label>
+    <input type="number" id="lessonDuration" placeholder="e.g. 12">
+    <label>Order</label>
+    <input type="number" id="lessonOrder" placeholder="1, 2, 3...">
+    <div class="sheet-actions">
+      <button class="btn outline" style="flex:1" onclick="closeModal('lessonOverlay')">Cancel</button>
+      <button class="btn gold" style="flex:1" onclick="saveLesson()">Save Lesson</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="skillstream-auth.js"></script>
 <script>
-let myCourses = [];
-let currentCourseId = null;
-let lessonRows = []; // { id (db id or temp), title, videoUrl, readingContent, fileUrl, orderIndex, _dbId }
+/* ====================================================================
+   CONFIG — REQUIRED
+   Paste your Supabase project URL + anon key below.
+   (Grab these from index.html, skillstream-auth.js, or any other
+   SkillStream page that already connects to Supabase.)
+   ==================================================================== */
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-function showToast(msg, error = false) {
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let courses = [];
+let activeCourseId = null;
+
+function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast' + (error ? ' error' : '') + ' show';
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 2600);
+  t.style.display = 'block';
+  setTimeout(()=> t.style.display='none', 2200);
 }
 
-function db() { return window.SSAuth.client; }
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
-async function requireLogin() {
-  await window.SSAuth.ready;
-  const user = window.SSAuth.currentUser();
-  if (!user) {
+/* ---------- AUTH ----------
+   Uses Supabase auth directly so this page doesn't depend on the
+   exact shape of skillstream-auth.js (which we didn't have on hand
+   when building this). If you want it to match your shared auth
+   module's session handling exactly, swap the block below for a
+   call into that module instead. */
+async function initAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){
     window.location.href = 'skillstream-login.html';
-    return null;
-  }
-  return user;
-}
-
-/* ---------- LIST VIEW ---------- */
-async function renderCourseList() {
-  const user = await requireLogin();
-  if (!user) return;
-  const listEl = document.getElementById('courseList');
-
-  try {
-    const { data, error } = await db()
-      .from('courses')
-      .select('*, lessons(count)')
-      .eq('teacher_id', user.id)
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-
-    myCourses = data || [];
-
-    listEl.innerHTML = myCourses.length ? myCourses.map(c => `
-      <div class="course-card" onclick="openCourse('${c.id}')">
-        <div class="course-name">${escapeHtml(c.title)}</div>
-        <div class="course-meta">${c.lessons?.[0]?.count || 0} lesson${(c.lessons?.[0]?.count||0)===1?'':'s'} · ${escapeHtml(c.subject || 'General')}</div>
-        <span class="status-pill ${c.published ? 'published' : 'draft'}">${c.published ? 'Published' : 'Draft'}</span>
-      </div>
-    `).join('') : '<div class="empty">You haven\'t created any courses yet.</div>';
-  } catch (err) {
-    console.error('renderCourseList error:', err);
-    listEl.innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error loading courses: ${err.message}</div>`;
-  }
-}
-
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str || '';
-  return div.innerHTML;
-}
-
-function showList() {
-  document.getElementById('editorView').classList.add('hidden');
-  document.getElementById('listView').classList.remove('hidden');
-  renderCourseList();
-}
-
-function showEditor() {
-  currentCourseId = null;
-  lessonRows = [];
-  document.getElementById('editorHeading').textContent = 'New Course';
-  document.getElementById('cTitle').value = '';
-  document.getElementById('cSubject').value = '';
-  document.getElementById('cDesc').value = '';
-  document.getElementById('cCover').value = '';
-  document.getElementById('cPublished').checked = false;
-  document.getElementById('courseError').style.display = 'none';
-  document.getElementById('lessonsSection').classList.add('hidden'); // only after first save (need course id for lessons)
-  document.getElementById('listView').classList.add('hidden');
-  document.getElementById('editorView').classList.remove('hidden');
-}
-
-/* ---------- OPEN EXISTING COURSE ---------- */
-async function openCourse(id) {
-  currentCourseId = id;
-  const course = myCourses.find(c => c.id === id);
-  if (!course) return;
-
-  document.getElementById('editorHeading').textContent = 'Edit Course';
-  document.getElementById('cTitle').value = course.title || '';
-  document.getElementById('cSubject').value = course.subject || '';
-  document.getElementById('cDesc').value = course.description || '';
-  document.getElementById('cCover').value = course.cover_image_url || '';
-  document.getElementById('cPublished').checked = !!course.published;
-  document.getElementById('courseError').style.display = 'none';
-
-  document.getElementById('listView').classList.add('hidden');
-  document.getElementById('editorView').classList.remove('hidden');
-  document.getElementById('lessonsSection').classList.remove('hidden');
-
-  await loadLessons(id);
-}
-
-async function loadLessons(courseId) {
-  try {
-    const { data, error } = await db()
-      .from('lessons')
-      .select('*')
-      .eq('course_id', courseId)
-      .order('order_index', { ascending: true });
-    if (error) throw error;
-
-    lessonRows = (data || []).map(l => ({
-      _dbId: l.id, title: l.title, videoUrl: l.video_url || '',
-      readingContent: l.reading_content || '', fileUrl: l.file_url || '',
-      orderIndex: l.order_index
-    }));
-    renderLessonRows();
-  } catch (err) {
-    console.error('loadLessons error:', err);
-    showToast('Could not load lessons: ' + err.message, true);
-  }
-}
-
-function renderLessonRows() {
-  const el = document.getElementById('lessonsList');
-  if (!lessonRows.length) {
-    el.innerHTML = '<div class="empty">No lessons yet — add your first one below.</div>';
     return;
   }
-  el.innerHTML = lessonRows.map((l, i) => `
-    <div class="lesson-row">
-      <div class="lesson-row-head">
-        <span class="lesson-title">Lesson ${i + 1}</span>
-        <button class="remove-lesson" onclick="removeLessonRow(${i})">Remove</button>
+  currentUser = session.user;
+  loadCourses();
+
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(!session){ window.location.href = 'skillstream-login.html'; }
+  });
+}
+
+/* ---------- LOAD COURSES ---------- */
+async function loadCourses(){
+  const { data, error } = await sb
+    .from('courses')
+    .select('*, lessons(count)')
+    .eq('teacher_id', currentUser.id)
+    .order('created_at', { ascending:false });
+
+  if(error){
+    document.getElementById('courseList').innerHTML =
+      `<div class="empty">Couldn't load courses.<br><small>${error.message}</small></div>`;
+    return;
+  }
+  courses = data || [];
+  renderCourses();
+}
+
+function renderCourses(){
+  const el = document.getElementById('courseList');
+  if(courses.length === 0){
+    el.innerHTML = `<div class="empty">
+      <div class="display">No courses yet</div>
+      Tap "+ New Course" below to build your first self-paced course.
+    </div>`;
+    return;
+  }
+  el.innerHTML = courses.map(c => {
+    const lessonCount = c.lessons?.[0]?.count ?? 0;
+    return `
+    <div class="course-card">
+      <div class="row">
+        <div>
+          <h3>${escapeHtml(c.title)}</h3>
+          <div class="meta">${escapeHtml(c.category || 'General')} · ${lessonCount} lesson${lessonCount===1?'':'s'}</div>
+        </div>
+        <span class="badge ${c.is_published ? 'live' : 'draft'}">${c.is_published ? 'Published' : 'Draft'}</span>
       </div>
-      <label>Title</label>
-      <input type="text" value="${escapeHtml(l.title)}" oninput="lessonRows[${i}].title=this.value"/>
-      <label>YouTube Video ID (optional)</label>
-      <input type="text" value="${escapeHtml(l.videoUrl)}" placeholder="e.g. dQw4w9WgXcQ" oninput="lessonRows[${i}].videoUrl=this.value"/>
-      <div class="field-hint">From a YouTube URL like youtube.com/watch?v=<b>dQw4w9WgXcQ</b> — copy just that part. Upload as Unlisted in the YouTube app.</div>
-      <label>Reading Content (optional)</label>
-      <textarea oninput="lessonRows[${i}].readingContent=this.value">${escapeHtml(l.readingContent)}</textarea>
-      <label>Downloadable File URL (optional)</label>
-      <input type="url" value="${escapeHtml(l.fileUrl)}" placeholder="https://..." oninput="lessonRows[${i}].fileUrl=this.value"/>
+      <div class="card-actions">
+        <button class="btn small outline" onclick="manageLessons('${c.id}', '${escapeAttr(c.title)}')">Manage Lessons</button>
+        <button class="btn small outline" onclick="editCourse('${c.id}')">Edit</button>
+        <button class="btn small danger" onclick="deleteCourse('${c.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeAttr(s){ return escapeHtml(s).replace(/'/g,"\\'"); }
+
+/* ---------- COURSE CRUD ---------- */
+function openCourseModal(){
+  document.getElementById('courseModalTitle').textContent = 'New Course';
+  document.getElementById('courseId').value = '';
+  document.getElementById('courseTitle').value = '';
+  document.getElementById('courseDesc').value = '';
+  document.getElementById('courseCategory').value = '';
+  document.getElementById('courseThumb').value = '';
+  document.getElementById('coursePublished').checked = false;
+  openModal('courseOverlay');
+}
+
+function editCourse(id){
+  const c = courses.find(x => x.id === id);
+  if(!c) return;
+  document.getElementById('courseModalTitle').textContent = 'Edit Course';
+  document.getElementById('courseId').value = c.id;
+  document.getElementById('courseTitle').value = c.title || '';
+  document.getElementById('courseDesc').value = c.description || '';
+  document.getElementById('courseCategory').value = c.category || '';
+  document.getElementById('courseThumb').value = c.thumbnail_url || '';
+  document.getElementById('coursePublished').checked = !!c.is_published;
+  openModal('courseOverlay');
+}
+
+async function saveCourse(){
+  const id = document.getElementById('courseId').value;
+  const title = document.getElementById('courseTitle').value.trim();
+  if(!title){ toast('Please enter a title'); return; }
+
+  const payload = {
+    title,
+    description: document.getElementById('courseDesc').value.trim(),
+    category: document.getElementById('courseCategory').value.trim(),
+    thumbnail_url: document.getElementById('courseThumb').value.trim(),
+    is_published: document.getElementById('coursePublished').checked,
+    teacher_id: currentUser.id
+  };
+
+  let error;
+  if(id){
+    ({ error } = await sb.from('courses').update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from('courses').insert(payload));
+  }
+
+  if(error){ toast('Error: ' + error.message); return; }
+  toast(id ? 'Course updated' : 'Course created');
+  closeModal('courseOverlay');
+  loadCourses();
+}
+
+async function deleteCourse(id){
+  if(!confirm('Delete this course and all its lessons? This cannot be undone.')) return;
+  const { error } = await sb.from('courses').delete().eq('id', id);
+  if(error){ toast('Error: ' + error.message); return; }
+  toast('Course deleted');
+  loadCourses();
+}
+
+/* ---------- LESSONS ---------- */
+let activeLessons = [];
+
+async function manageLessons(courseId, title){
+  activeCourseId = courseId;
+  document.getElementById('lessonsModalTitle').textContent = title;
+  document.getElementById('lessonsList').innerHTML = '<div class="loading">Loading lessons…</div>';
+  openModal('lessonsOverlay');
+  await loadLessons();
+}
+
+async function loadLessons(){
+  const { data, error } = await sb
+    .from('lessons')
+    .select('*')
+    .eq('course_id', activeCourseId)
+    .order('order_index', { ascending: true });
+
+  if(error){
+    document.getElementById('lessonsList').innerHTML = `<div class="empty">${error.message}</div>`;
+    return;
+  }
+  activeLessons = data || [];
+  renderLessons();
+}
+
+function renderLessons(){
+  const el = document.getElementById('lessonsList');
+  if(activeLessons.length === 0){
+    el.innerHTML = '<div class="empty">No lessons yet. Add your first one below.</div>';
+    return;
+  }
+  el.innerHTML = activeLessons.map(l => `
+    <div class="lesson-row">
+      <div>
+        <div class="l-title">${l.order_index ?? ''}. ${escapeHtml(l.title)}</div>
+        <div class="l-meta">${l.duration_minutes ? l.duration_minutes + ' min' : ''}</div>
+      </div>
+      <div class="lesson-actions">
+        <button class="icon-btn" onclick="editLesson('${l.id}')">✏️</button>
+        <button class="icon-btn" onclick="deleteLesson('${l.id}')">🗑️</button>
+      </div>
     </div>
   `).join('');
 }
 
-function addLessonRow() {
-  lessonRows.push({ title: '', videoUrl: '', readingContent: '', fileUrl: '', orderIndex: lessonRows.length, _dbId: null });
-  renderLessonRows();
+function openLessonModal(){
+  document.getElementById('lessonModalTitle').textContent = 'New Lesson';
+  document.getElementById('lessonId').value = '';
+  document.getElementById('lessonTitle').value = '';
+  document.getElementById('lessonVideo').value = '';
+  document.getElementById('lessonContent').value = '';
+  document.getElementById('lessonDuration').value = '';
+  document.getElementById('lessonOrder').value = (activeLessons.length + 1);
+  openModal('lessonOverlay');
 }
 
-function removeLessonRow(i) {
-  lessonRows.splice(i, 1);
-  renderLessonRows();
+function editLesson(id){
+  const l = activeLessons.find(x => x.id === id);
+  if(!l) return;
+  document.getElementById('lessonModalTitle').textContent = 'Edit Lesson';
+  document.getElementById('lessonId').value = l.id;
+  document.getElementById('lessonTitle').value = l.title || '';
+  document.getElementById('lessonVideo').value = l.video_url || '';
+  document.getElementById('lessonContent').value = l.content || '';
+  document.getElementById('lessonDuration').value = l.duration_minutes || '';
+  document.getElementById('lessonOrder').value = l.order_index || '';
+  openModal('lessonOverlay');
 }
 
-/* ---------- SAVE ---------- */
-async function saveCourse() {
-  const user = await requireLogin();
-  if (!user) return;
+async function saveLesson(){
+  const id = document.getElementById('lessonId').value;
+  const title = document.getElementById('lessonTitle').value.trim();
+  if(!title){ toast('Please enter a lesson title'); return; }
 
-  const title = document.getElementById('cTitle').value.trim();
-  const subject = document.getElementById('cSubject').value.trim();
-  const description = document.getElementById('cDesc').value.trim();
-  const coverUrl = document.getElementById('cCover').value.trim();
-  const published = document.getElementById('cPublished').checked;
-  const err = document.getElementById('courseError');
-  const btn = document.getElementById('saveCourseBtn');
+  const payload = {
+    course_id: activeCourseId,
+    title,
+    video_url: document.getElementById('lessonVideo').value.trim(),
+    content: document.getElementById('lessonContent').value.trim(),
+    duration_minutes: parseInt(document.getElementById('lessonDuration').value) || null,
+    order_index: parseInt(document.getElementById('lessonOrder').value) || null
+  };
 
-  if (!title) {
-    err.textContent = 'Course title is required.';
-    err.style.display = 'block';
-    return;
+  let error;
+  if(id){
+    ({ error } = await sb.from('lessons').update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from('lessons').insert(payload));
   }
 
-  btn.textContent = 'Saving…'; btn.disabled = true;
-  err.style.display = 'none';
-
-  try {
-    let courseId = currentCourseId;
-
-    if (courseId) {
-      const { error } = await db().from('courses').update({
-        title, subject: subject || null, description: description || null,
-        cover_image_url: coverUrl || null, published
-      }).eq('id', courseId);
-      if (error) throw error;
-    } else {
-      const { data, error } = await db().from('courses').insert({
-        teacher_id: user.id, title, subject: subject || null,
-        description: description || null, cover_image_url: coverUrl || null, published
-      }).select().single();
-      if (error) throw error;
-      courseId = data.id;
-      currentCourseId = courseId;
-    }
-
-    // Save lessons: upsert existing (by db id), insert new ones, and delete
-    // any that were removed from lessonRows since load.
-    const keepIds = [];
-    for (let i = 0; i < lessonRows.length; i++) {
-      const l = lessonRows[i];
-      if (!l.title.trim()) continue; // skip empty rows
-      const payload = {
-        course_id: courseId, title: l.title.trim(), video_url: l.videoUrl.trim() || null,
-        reading_content: l.readingContent.trim() || null, file_url: l.fileUrl.trim() || null,
-        order_index: i
-      };
-      if (l._dbId) {
-        const { error } = await db().from('lessons').update(payload).eq('id', l._dbId);
-        if (error) throw error;
-        keepIds.push(l._dbId);
-      } else {
-        const { data, error } = await db().from('lessons').insert(payload).select().single();
-        if (error) throw error;
-        l._dbId = data.id;
-        keepIds.push(data.id);
-      }
-    }
-
-    // Remove lessons deleted from the UI but still in the DB
-    const { data: existing, error: exErr } = await db().from('lessons').select('id').eq('course_id', courseId);
-    if (!exErr && existing) {
-      const toDelete = existing.filter(e => !keepIds.includes(e.id)).map(e => e.id);
-      if (toDelete.length) await db().from('lessons').delete().in('id', toDelete);
-    }
-
-    btn.textContent = 'Save Course'; btn.disabled = false;
-    document.getElementById('lessonsSection').classList.remove('hidden');
-    document.getElementById('editorHeading').textContent = 'Edit Course';
-    showToast('✅ Course saved');
-    await loadLessons(courseId);
-  } catch (e) {
-    btn.textContent = 'Save Course'; btn.disabled = false;
-    console.error('saveCourse error:', e);
-    err.textContent = 'Error: ' + (e && e.message ? e.message : String(e));
-    err.style.display = 'block';
-  }
+  if(error){ toast('Error: ' + error.message); return; }
+  toast(id ? 'Lesson updated' : 'Lesson added');
+  closeModal('lessonOverlay');
+  loadLessons();
+  loadCourses(); // refresh lesson counts
 }
 
-renderCourseList();
+async function deleteLesson(id){
+  if(!confirm('Delete this lesson?')) return;
+  const { error } = await sb.from('lessons').delete().eq('id', id);
+  if(error){ toast('Error: ' + error.message); return; }
+  toast('Lesson deleted');
+  loadLessons();
+  loadCourses();
+}
+
+initAuth();
 </script>
 </body>
 </html>
