@@ -160,6 +160,27 @@
       cachedUser = null;
     },
 
+    // Sends a password reset email. The link in that email brings the user
+    // back to redirectPage (default: skillstream-reset-password.html) with
+    // a temporary recovery session already active.
+    async requestPasswordReset(email, redirectPage) {
+      if (!email) return { ok: false, error: 'Enter your email address.' };
+      const redirectTo = new URL(redirectPage || 'skillstream-reset-password.html', window.location.href).toString();
+      const { error } = await client.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo });
+      if (error) return { ok: false, error: error.message };
+      return { ok: true };
+    },
+
+    // Called on the reset-password page once the user has clicked the
+    // emailed link (Supabase automatically establishes a recovery session
+    // when that link is opened, so no token handling is needed here).
+    async updatePassword(newPassword) {
+      if (!newPassword || newPassword.length < 6) return { ok: false, error: 'Password must be at least 6 characters.' };
+      const { error } = await client.auth.updateUser({ password: newPassword });
+      if (error) return { ok: false, error: error.message };
+      return { ok: true };
+    },
+
     // Synchronous read of the last-known user (populated after `ready` resolves,
     // and kept fresh automatically). Returns null if nobody's logged in.
     currentUser() {

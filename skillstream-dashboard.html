@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>SkillStream — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Paradise of Eternal Learners — Dashboard</title>
 <meta name="theme-color" content="#7B6FFF"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
@@ -12,66 +12,219 @@
 --bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
 --accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
 --yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
---pill:#1A1D28;--shadow:0 8px 40px rgba(0,0,0,0.7);
---radius:14px;--radius-sm:8px;--radius-full:9999px
+--pill:#1A1D28;--radius:14px;--radius-sm:8px;--radius-full:9999px
 }
 html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;background:rgba(15,17,24,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
-.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:22px;color:var(--text);text-decoration:none}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.hidden{display:none !important}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:60px;background:rgba(15,17,24,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:16px;color:var(--text);text-decoration:none;max-width:180px;line-height:1.15}
 .logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.nav-btn{background:var(--pill);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+.nav-right{display:flex;gap:8px;align-items:center}
+.nav-btn{background:var(--pill);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
 .nav-btn:hover{border-color:var(--accent);color:var(--text)}
-.page{max-width:720px;margin:0 auto;padding:32px 20px 60px}
-.hero{background:linear-gradient(160deg,#14103a 0%,#0a0c18 100%);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;margin-bottom:20px}
-.hero-greet{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px}
-.hero-sub{color:var(--muted);font-size:13px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
-@media(max-width:520px){.grid{grid-template-columns:1fr}}
-.tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-decoration:none;color:var(--text);display:block;transition:all .2s}
-.tile:hover{border-color:var(--accent)}
-.tile-icon{font-size:26px;margin-bottom:10px}
-.tile-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px}
-.tile-sub{font-size:12px;color:var(--muted)}
+.page{max-width:820px;margin:0 auto;padding:26px 18px 60px}
+h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:2px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:24px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:26px 0 12px}
+.section-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:800}
+.pill-link{font-size:12px;color:var(--accent);text-decoration:none;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block}
+.item-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.item-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px}
+.item-meta{font-size:12px;color:var(--muted)}
+.progress-bar{height:5px;background:var(--pill);border-radius:99px;margin-top:10px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent)}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:20px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius)}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:6px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:900;color:var(--accent)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.cert-card{background:linear-gradient(135deg,rgba(0,229,160,.1),rgba(75,158,255,.06));border:1px solid rgba(0,229,160,.25)}
+.cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.btn{padding:10px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;border:none;text-decoration:none;display:inline-block}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-ghost{background:var(--pill);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--accent)}
+.loading{text-align:center;color:var(--muted);padding:30px;font-size:13px}
 </style>
 </head>
 <body>
 <div class="topbar">
-<a class="logo" href="skillstream-dashboard.html">Skill<span>Stream</span></a>
-<a class="nav-btn" href="skillstream-profile.html">My Account</a>
+<a class="logo" href="index.html">Paradise of <span>Eternal Learners</span></a>
+<div class="nav-right">
+  <a class="nav-btn" href="index.html">Home</a>
 </div>
+</div>
+
 <div class="page">
-  <div class="hero">
-    <div class="hero-greet" id="greet">Welcome back</div>
-    <div class="hero-sub">Here's where you left off.</div>
-  </div>
+  <h1 id="greeting">Dashboard</h1>
+  <div class="sub" id="roleLine"></div>
 
-  <div class="grid">
-    <a class="tile" href="skillstream-classrooms.html">
-      <div class="tile-icon">🏫</div>
-      <div class="tile-title">Classrooms</div>
-      <div class="tile-sub">Create, join, and manage your classes</div>
-    </a>
-    <a class="tile" href="skillstream-calendar.html">
-      <div class="tile-icon">📅</div>
-      <div class="tile-title">Calendar</div>
-      <div class="tile-sub">Assignment due dates & announcements</div>
-    </a>
-    <a class="tile" href="skillstream-profile.html">
-      <div class="tile-icon">👤</div>
-      <div class="tile-title">My Account</div>
-      <div class="tile-sub">Profile, skills, and settings</div>
-    </a>
+  <div id="loadingMsg" class="loading">Loading your dashboard…</div>
+
+  <div id="content" class="hidden">
+    <div class="cta-row" id="ctaRow"></div>
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="section-head"><div class="section-title">🏫 Classes You Teach</div></div>
+    <div class="grid" id="teachingGrid"></div>
+
+    <div class="section-head"><div class="section-title">📘 Classes You're Enrolled In</div></div>
+    <div class="grid" id="enrolledGrid"></div>
+
+    <div class="section-head"><div class="section-title">📚 Self-Paced Courses In Progress</div></div>
+    <div class="grid" id="coursesGrid"></div>
+
+    <div class="section-head"><div class="section-title">🎓 Certificates Earned</div></div>
+    <div class="grid" id="certsGrid"></div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="skillstream-auth.js"></script>
+<script src="skillstream-classrooms.js"></script>
 <script>
-(async () => {
-  const user = await SSAuth.requireAuth();
-  if (!user) return;
-  document.getElementById('greet').textContent = 'Welcome back, ' + (user.name || 'there') + '!';
-})();
+function db() { return window.SSAuth.client; }
+function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+
+async function loadDashboard() {
+  const me = await window.SSAuth.requireAuth('skillstream-login.html?redirect=skillstream-dashboard.html');
+  if (!me) return;
+
+  document.getElementById('greeting').textContent = `Welcome back, ${me.name || 'there'} 👋`;
+  const isTeacher = me.role === 'teacher' || me.role === 'both' || me.role === 'admin';
+  document.getElementById('roleLine').textContent = isTeacher ? 'Teacher account' : 'Student account';
+
+  const ctaRow = document.getElementById('ctaRow');
+  ctaRow.innerHTML = isTeacher
+    ? `<a class="btn btn-primary" href="skillstream-classrooms.html">+ Create Classroom</a>
+       <a class="btn btn-ghost" href="skillstream-courses.html">+ Create Course</a>`
+    : `<a class="btn btn-primary" href="skillstream-classrooms.html">🔑 Join with Code</a>
+       <a class="btn btn-ghost" href="skillstream-self-paced.html">📖 Browse Courses</a>`;
+
+  try {
+    const [{ teaching, enrolled }, courseProgress, certs] = await Promise.all([
+      SSClass.myClasses(),
+      loadCourseProgress(me.id),
+      loadCertificates(me.id)
+    ]);
+
+    // Stats row
+    const totalStreak = await getChallengeStreakForDashboard();
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-val">${teaching.length + enrolled.length}</div><div class="stat-lbl">Classes</div></div>
+      <div class="stat-card"><div class="stat-val">${courseProgress.length}</div><div class="stat-lbl">Courses In Progress</div></div>
+      <div class="stat-card"><div class="stat-val">${certs.length}</div><div class="stat-lbl">Certificates</div></div>
+      ${totalStreak !== null ? `<div class="stat-card"><div class="stat-val">🔥 ${totalStreak}</div><div class="stat-lbl">Day Streak</div></div>` : ''}
+    `;
+
+    // Teaching
+    const teachEl = document.getElementById('teachingGrid');
+    document.querySelector('#teachingGrid').parentElement; // no-op, keep section always visible if teacher
+    if (isTeacher) {
+      teachEl.innerHTML = teaching.length ? teaching.map(c => `
+        <a class="item-card" href="skillstream-classrooms.html">
+          <div class="item-name">${escapeHtml(c.name)}</div>
+          <div class="item-meta">${c.students.length} student${c.students.length===1?'':'s'} · Code: ${c.code}</div>
+        </a>`).join('') : '<div class="empty">You\'re not teaching any classes yet.</div>';
+    } else {
+      teachEl.closest('.section-head') && (teachEl.previousElementSibling.style.display = 'none');
+      teachEl.style.display = 'none';
+    }
+
+    // Enrolled
+    const enrEl = document.getElementById('enrolledGrid');
+    enrEl.innerHTML = enrolled.length ? enrolled.map(c => `
+      <a class="item-card" href="skillstream-classrooms.html">
+        <div class="item-name">${escapeHtml(c.name)}</div>
+        <div class="item-meta">Taught by ${escapeHtml(c.teacherName)}</div>
+      </a>`).join('') : '<div class="empty">You haven\'t joined any classes yet.</div>';
+
+    // Self-paced course progress
+    const coursesEl = document.getElementById('coursesGrid');
+    coursesEl.innerHTML = courseProgress.length ? courseProgress.map(c => `
+      <a class="item-card" href="skillstream-self-paced.html">
+        <div class="item-name">${escapeHtml(c.title)}</div>
+        <div class="item-meta">${c.done}/${c.total} lessons complete</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${c.pct}%"></div></div>
+      </a>`).join('') : '<div class="empty">No self-paced courses started yet.</div>';
+
+    // Certificates
+    const certsEl = document.getElementById('certsGrid');
+    certsEl.innerHTML = certs.length ? certs.map(c => `
+      <div class="item-card cert-card">
+        <div class="item-name">🎓 ${escapeHtml(c.title)}</div>
+        <div class="item-meta">Earned ${new Date(c.issuedAt).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}</div>
+      </div>`).join('') : '<div class="empty">No certificates yet — finish a self-paced course to earn one!</div>';
+
+    document.getElementById('loadingMsg').classList.add('hidden');
+    document.getElementById('content').classList.remove('hidden');
+  } catch (err) {
+    console.error('Dashboard load error:', err);
+    document.getElementById('loadingMsg').textContent = 'Error loading dashboard: ' + err.message;
+  }
+}
+
+async function loadCourseProgress(userId) {
+  const { data: lessonsAll, error: e1 } = await db().from('lessons').select('id, course_id, courses(title)');
+  if (e1) throw e1;
+  const { data: progressAll, error: e2 } = await db().from('lesson_progress').select('lesson_id').eq('user_id', userId);
+  if (e2) throw e2;
+  const doneSet = new Set((progressAll || []).map(p => p.lesson_id));
+
+  const byCourse = {};
+  (lessonsAll || []).forEach(l => {
+    if (!l.course_id) return;
+    byCourse[l.course_id] = byCourse[l.course_id] || { title: l.courses?.title || 'Untitled course', total: 0, done: 0 };
+    byCourse[l.course_id].total++;
+    if (doneSet.has(l.id)) byCourse[l.course_id].done++;
+  });
+
+  return Object.values(byCourse)
+    .filter(c => c.done > 0 && c.done < c.total) // "in progress" — started but not finished
+    .map(c => ({ ...c, pct: c.total ? Math.round((c.done / c.total) * 100) : 0 }));
+}
+
+async function loadCertificates(userId) {
+  const { data, error } = await db()
+    .from('certificates')
+    .select('issued_at, courses(title)')
+    .eq('user_id', userId)
+    .order('issued_at', { ascending: false });
+  if (error) throw error;
+  return (data || []).map(c => ({ title: c.courses?.title || 'Untitled course', issuedAt: c.issued_at }));
+}
+
+async function getChallengeStreakForDashboard() {
+  try {
+    const user = window.SSAuth.currentUser();
+    if (!user) return null;
+    const { data, error } = await db()
+      .from('challenge_completions')
+      .select('completed_date')
+      .eq('user_id', user.id)
+      .order('completed_date', { ascending: false })
+      .limit(60);
+    if (error) return null;
+    const doneDates = new Set((data || []).map(r => r.completed_date));
+    let streak = 0;
+    let cursor = new Date();
+    const todayStr = cursor.getFullYear() + '-' + String(cursor.getMonth()+1).padStart(2,'0') + '-' + String(cursor.getDate()).padStart(2,'0');
+    if (!doneDates.has(todayStr)) cursor.setDate(cursor.getDate() - 1);
+    while (true) {
+      const key = cursor.getFullYear() + '-' + String(cursor.getMonth()+1).padStart(2,'0') + '-' + String(cursor.getDate()).padStart(2,'0');
+      if (doneDates.has(key)) { streak++; cursor.setDate(cursor.getDate() - 1); } else break;
+    }
+    return streak;
+  } catch (e) {
+    return null;
+  }
+}
+
+loadDashboard();
 </script>
 </body>
 </html>
