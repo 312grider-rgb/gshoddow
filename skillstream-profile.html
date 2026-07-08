@@ -1,421 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>SkillStream — My Account</title>
-<meta name="description" content="Manage your SkillStream profile, skills, and session history."/>
-<meta name="theme-color" content="#7B6FFF"/>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237B6FFF'/><text y='.9em' font-size='80' x='10'>🎓</text></svg>"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-html[lang="ar"] body{font-family:'Noto Sans Arabic','Inter',sans-serif}
-.lang-switcher{position:relative}
-.lang-btn{display:flex;align-items:center;gap:5px;background:var(--pill);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer}
-.lang-btn:hover{border-color:var(--accent)}
-.lang-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);min-width:150px;box-shadow:var(--shadow);display:none;z-index:999;overflow:hidden}
-html[dir="rtl"] .lang-dropdown{right:auto;left:0}
-.lang-dropdown.open{display:block}
-.lang-option{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:500;border:none;background:none;color:var(--text);width:100%;text-align:left;transition:all .15s}
-html[dir="rtl"] .lang-option{text-align:right}
-.lang-option:hover{background:rgba(123,111,255,.08);color:var(--accent)}
-.lang-option.active{color:var(--accent);font-weight:700}
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
---accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
---yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
---pill:#1A1D28;--glass:rgba(15,17,24,0.92);--shadow:0 8px 40px rgba(0,0,0,0.7);
---radius:14px;--radius-sm:8px;--radius-full:9999px
-}
-html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:var(--radius-full)}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;background:var(--glass);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
-.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:22px;color:var(--text);text-decoration:none}
-.logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.nav-links{display:flex;gap:8px;align-items:center}
-.nav-btn{background:var(--pill);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
-.nav-btn:hover{border-color:var(--accent);color:var(--text)}
-.nav-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.nav-btn.danger{background:rgba(255,61,90,.08);border-color:rgba(255,61,90,.2);color:var(--live)}
-.nav-btn.danger:hover{background:var(--live);color:#fff}
-.page{max-width:700px;margin:0 auto;padding:32px 20px 60px}
-.profile-hero{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 24px 32px;background:linear-gradient(160deg,#14103a 0%,#0a0c18 100%);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:24px;position:relative;overflow:hidden}
-.profile-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(123,111,255,.12) 0%,transparent 70%);pointer-events:none}
-.avatar-wrap{position:relative;cursor:pointer}
-.avatar-img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);background:var(--card);display:block}
-.avatar-placeholder{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--blue));display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:#fff;border:3px solid rgba(123,111,255,.4);flex-shrink:0}
-.avatar-edit{position:absolute;bottom:2px;right:2px;width:28px;height:28px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px}
-.hero-name{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;text-align:center}
-.hero-role{display:inline-flex;align-items:center;gap:6px;background:rgba(123,111,255,.12);border:1px solid rgba(123,111,255,.25);border-radius:var(--radius-full);padding:5px 14px;font-size:12px;font-weight:700;color:var(--accent)}
-.hero-contact{font-size:13px;color:var(--muted);text-align:center}
-.hero-bio{font-size:13px;color:var(--muted);text-align:center;max-width:400px;line-height:1.6;font-style:italic}
-.hero-stats{display:flex;gap:24px;margin-top:4px}
-.stat{text-align:center}
-.stat .val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text)}
-.stat .lbl{font-size:11px;color:var(--muted);margin-top:2px}
-.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
-.section-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
-.section-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
-.section-body{padding:20px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.form-row.full{grid-template-columns:1fr}
-.form-group{display:flex;flex-direction:column;gap:5px}
-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-input[type=text],input[type=tel],input[type=email],textarea,select{
-background:var(--card);border:1px solid var(--border);color:var(--text);
-border-radius:var(--radius-sm);padding:11px 14px;font-size:14px;
-outline:none;transition:all .2s;font-family:'Inter',sans-serif;width:100%
-}
-input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(123,111,255,.1)}
-textarea{resize:vertical;min-height:80px;line-height:1.5}
-select option{background:var(--card)}
-.role-toggle{display:flex;background:var(--card);border-radius:var(--radius-sm);padding:4px;gap:4px;border:1px solid var(--border)}
-.role-opt{flex:1;padding:10px;text-align:center;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:none;color:var(--muted);transition:all .2s;font-family:'Inter',sans-serif}
-.role-opt.active{background:var(--accent);color:#fff}
-.tags-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.tag{display:flex;align-items:center;gap:6px;background:rgba(123,111,255,.1);border:1px solid rgba(123,111,255,.2);color:var(--accent);border-radius:var(--radius-full);padding:5px 12px;font-size:12px;font-weight:600}
-.tag .remove{cursor:pointer;opacity:.6;font-size:14px;line-height:1}
-.tag .remove:hover{opacity:1}
-.tag-input-row{display:flex;gap:8px;margin-top:10px}
-.tag-input-row input{flex:1}
-.add-tag-btn{background:var(--accent);border:none;color:#fff;border-radius:var(--radius-sm);padding:0 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
-.save-bar{display:flex;gap:10px;justify-content:flex-end;padding-top:16px;border-top:1px solid var(--border);margin-top:16px}
-.btn{padding:11px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;border:none;transition:all .25s}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-dark);transform:scale(1.02)}
-.btn-ghost{background:var(--pill);color:var(--muted);border:1px solid var(--border)}
-.btn-ghost:hover{border-color:var(--accent);color:var(--text)}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#000;border-radius:var(--radius-full);padding:12px 28px;font-weight:800;font-size:14px;z-index:300;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:all .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.error{background:var(--live);color:#fff}
-.danger-zone{border-color:rgba(255,61,90,.2)}
-.danger-zone .section-header{border-color:rgba(255,61,90,.15);background:rgba(255,61,90,.03)}
-.danger-zone .section-title{color:var(--live)}
-.session-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
-.session-item:last-child{border-bottom:none}
-.session-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex-shrink:0}
-.session-info{flex:1}
-.session-name{font-size:13px;font-weight:600}
-.session-meta{font-size:11px;color:var(--muted);margin-top:2px}
-.session-dur{font-size:12px;color:var(--muted);font-family:'Syne',sans-serif;font-weight:700}
-@media(max-width:600px){
-.form-row{grid-template-columns:1fr}
-.hero-stats{gap:16px}
-.topbar{padding:0 16px}
-.page{padding:20px 14px 60px}
-}
+  :root{
+    --ink:#1B2A4A; --gold:#C99A44; --cream:#FBF8F2; --sage:#6B8F71;
+    --charcoal:#2B2B2B; --line:#E4DFD3; --danger:#B5533C;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:60px;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+
+  header.top{background:var(--ink); color:var(--cream); padding:22px 18px 60px; position:relative;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:25px;}
+
+  .wrap{padding:0 18px;}
+
+  .avatar-card{
+    background:#fff; border-radius:18px; padding:20px;
+    margin-top:-42px; box-shadow:0 6px 18px rgba(27,42,74,0.08);
+    text-align:center; margin-bottom:22px;
+  }
+  .avatar{
+    width:78px; height:78px; border-radius:50%; background:var(--gold);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 12px;
+    font-family:'Fraunces',serif; font-size:28px; font-weight:700; color:var(--ink);
+    overflow:hidden; border:3px solid #fff; box-shadow:0 0 0 3px var(--line);
+  }
+  .avatar img{width:100%; height:100%; object-fit:cover;}
+  .name{font-size:19px; font-weight:700; color:var(--ink);}
+  .role-badge{
+    display:inline-block; margin-top:6px; font-size:11px; font-weight:700;
+    letter-spacing:0.5px; text-transform:uppercase; padding:4px 12px; border-radius:20px;
+  }
+  .role-badge.student{background:#EAF0EC; color:var(--sage);}
+  .role-badge.teacher{background:#F5EAD6; color:var(--gold);}
+  .bio-text{font-size:13.5px; color:#666; margin-top:10px; line-height:1.5;}
+
+  .stats-row{display:flex; gap:10px; margin-bottom:22px;}
+  .stat{flex:1; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 8px; text-align:center;}
+  .stat .val{font-family:'Fraunces',serif; font-size:22px; font-weight:700; color:var(--ink);}
+  .stat .lbl{font-size:11px; color:#777; margin-top:2px;}
+
+  .section-title{
+    font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
+    font-weight:700; margin-bottom:12px;
+  }
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:20px;}
+
+  label{display:block; font-size:13px; font-weight:600; margin:14px 0 6px; color:var(--ink);}
+  label:first-child{margin-top:0;}
+  input, textarea{
+    width:100%; padding:11px 12px; border:1.5px solid var(--line); border-radius:9px;
+    font-size:15px; font-family:'Inter',sans-serif; background:#fdfcfa;
+  }
+  textarea{min-height:80px; resize:vertical;}
+
+  .btn{
+    display:block; width:100%; text-align:center; background:var(--ink); color:#fff;
+    border:none; padding:13px 18px; border-radius:10px; font-size:15px; font-weight:700;
+    cursor:pointer; margin-top:16px;
+  }
+  .btn.outline{background:transparent; color:var(--danger); border:1.5px solid var(--danger);}
+
+  .toast{
+    position:fixed; top:16px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff; padding:11px 18px; border-radius:30px;
+    font-size:14px; z-index:100; display:none;
+  }
+  .loading{text-align:center; padding:30px; color:#888;}
 </style>
 </head>
 <body>
-<div class="topbar">
-<a class="logo" href="skillstream-dashboard.html">Skill<span>Stream</span></a>
-<div class="nav-links">
-<a class="nav-btn" href="skillstream-classrooms.html" id="spJoinBtn">🎥 Join Session</a>
-<div class="lang-switcher" id="spLangSwitcher">
-<button class="lang-btn" onclick="toggleSPLang()">🌐 <span id="spLangName">EN</span> ▾</button>
-<div class="lang-dropdown" id="spLangDropdown">
-<button class="lang-option" onclick="setSPLang('en')">🇬🇧 English</button>
-<button class="lang-option" onclick="setSPLang('ar')">🇸🇦 العربية</button>
-<button class="lang-option" onclick="setSPLang('fr')">🇫🇷 Français</button>
-<button class="lang-option" onclick="setSPLang('es')">🇪🇸 Español</button>
-<button class="lang-option" onclick="setSPLang('zh')">🇨🇳 中文</button>
+
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>My Profile</h1>
+</header>
+
+<div class="wrap">
+  <div class="avatar-card" id="avatarCard"><div class="loading">Loading profile…</div></div>
+
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="section-title">Edit Profile</div>
+  <div class="card">
+    <label>Full Name</label>
+    <input type="text" id="fullName" placeholder="Your name">
+    <label>Bio</label>
+    <textarea id="bio" placeholder="A short line about you — your interests, what you teach or want to learn"></textarea>
+    <label>Avatar Image URL</label>
+    <input type="text" id="avatarUrl" placeholder="https://...">
+    <button class="btn" onclick="saveProfile()">Save Changes</button>
+  </div>
+
+  <div class="section-title">Account</div>
+  <div class="card">
+    <button class="btn outline" onclick="signOut()">Log Out</button>
+  </div>
 </div>
-</div>
-<button class="nav-btn danger" onclick="signOut()" id="spSignOutBtn">Sign Out</button>
-</div>
-</div>
-<div class="page" id="page">
-<div class="profile-hero" id="profileHero">
-<div class="avatar-wrap" onclick="document.getElementById('avatarInput').click()" title="Change photo">
-<div class="avatar-placeholder" id="avatarPlaceholder">?</div>
-<img class="avatar-img" id="avatarImg" src="" alt="Avatar" style="display:none"/>
-<div class="avatar-edit">✏️</div>
-</div>
-<input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatar(this)"/>
-<div class="hero-name" id="heroName">Your Name</div>
-<div class="hero-role" id="heroRole">👤 Student</div>
-<div class="hero-contact" id="heroContact"></div>
-<div class="hero-bio" id="heroBio" style="display:none"></div>
-<div class="hero-stats">
-<div class="stat"><div class="val" id="statSessions">0</div><div class="lbl">Sessions</div></div>
-<div class="stat"><div class="val" id="statHours">0h</div><div class="lbl">Hours</div></div>
-<div class="stat"><div class="val" id="statSkills">0</div><div class="lbl">Skills</div></div>
-</div>
-</div><div class="section">
-<div class="section-header"><div class="section-title">👤 Personal Info</div></div>
-<div class="section-body">
-<div class="form-row">
-<div class="form-group"><label>Full Name</label><input type="text" id="fName" placeholder="Your full name"/></div>
-<div class="form-group"><label>Username</label><input type="text" id="fUsername" placeholder="@handle"/></div>
-</div>
-<div class="form-row full">
-<div class="form-group"><label>Bio</label><textarea id="fBio" placeholder="Tell others a bit about yourself…"></textarea></div>
-</div>
-<div class="form-row full">
-<div class="form-group">
-<label>I am a</label>
-<div class="role-toggle">
-<button class="role-opt active" id="roleStudent" onclick="setRole('student')">🎓 Student</button>
-<button class="role-opt" id="roleTeacher" onclick="setRole('teacher')">📚 Teacher</button>
-<button class="role-opt" id="roleBoth" onclick="setRole('both')">⚡ Both</button>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="section">
-<div class="section-header"><div class="section-title">📬 Contact</div></div>
-<div class="section-body">
-<div class="form-row">
-<div class="form-group"><label>Phone Number</label><input type="tel" id="fPhone" placeholder="+1 234 567 8900"/></div>
-<div class="form-group"><label>Email Address</label><input type="email" id="fEmail" disabled/></div>
-</div>
-<div class="form-row">
-<div class="form-group"><label>Country</label><input type="text" id="fCountry" placeholder="e.g. United States"/></div>
-<div class="form-group">
-<label>Timezone</label>
-<select id="fTimezone">
-<option value="">Select timezone…</option>
-<option>UTC-12:00</option><option>UTC-11:00</option><option>UTC-10:00</option>
-<option>UTC-09:00</option><option>UTC-08:00 (PST)</option><option>UTC-07:00 (MST)</option>
-<option>UTC-06:00 (CST)</option><option>UTC-05:00 (EST)</option><option>UTC-04:00</option>
-<option>UTC-03:00</option><option>UTC-02:00</option><option>UTC-01:00</option>
-<option>UTC+00:00 (GMT)</option><option>UTC+01:00 (CET)</option><option>UTC+02:00 (EET)</option>
-<option>UTC+03:00 (EAT/AST)</option><option>UTC+04:00 (GST)</option><option>UTC+05:00</option>
-<option>UTC+05:30 (IST)</option><option>UTC+06:00</option><option>UTC+07:00 (WIB)</option>
-<option>UTC+08:00 (CST/HKT)</option><option>UTC+09:00 (JST)</option><option>UTC+10:00 (AEST)</option>
-<option>UTC+11:00</option><option>UTC+12:00 (NZST)</option>
-</select>
-</div>
-</div>
-</div>
-</div>
-<div class="section">
-<div class="section-header"><div class="section-title">⚡ Skills & Subjects</div></div>
-<div class="section-body">
-<div style="font-size:13px;color:var(--muted);margin-bottom:8px">Add the topics you teach or want to learn.</div>
-<div class="tags-wrap" id="tagsWrap"></div>
-<div class="tag-input-row">
-<input type="text" id="tagInput" placeholder="e.g. Python, Calculus, Design…" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag();}"/>
-<button class="add-tag-btn" onclick="addTag()">+ Add</button>
-</div>
-</div>
-</div>
-<div class="section">
-<div class="section-header"><div class="section-title">🕒 Recent Sessions</div></div>
-<div class="section-body" id="sessionHistory">
-<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px 0">No sessions yet — join your first one!</div>
-</div>
-</div>
-<div class="save-bar" style="padding-top:0;border-top:none;margin-top:0">
-<button class="btn btn-ghost" onclick="resetForm()">Discard</button>
-<button class="btn btn-primary" onclick="saveProfile()">💾 Save Account</button>
-</div>
-<div class="section danger-zone" style="margin-top:32px">
-<div class="section-header"><div class="section-title">⚠️ Danger Zone</div></div>
-<div class="section-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-<div>
-<div style="font-size:14px;font-weight:600">Delete Account</div>
-<div style="font-size:12px;color:var(--muted);margin-top:3px">Permanently remove your profile and all saved data.</div>
-</div>
-<button class="btn" style="background:rgba(255,61,90,.1);border:1px solid rgba(255,61,90,.25);color:var(--live)" onclick="deleteAccount()">🗑️ Delete Account</button>
-</div>
-</div>
-</div>
+
 <div class="toast" id="toast"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="skillstream-auth.js"></script>
+
 <script>
-let skills = [];
-let currentRole = 'student';
-let avatarData = null;
+/* ====================================================================
+   CONFIG — REQUIRED — same project as your other SkillStream pages
+   ==================================================================== */
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-async function loadProfile() {
-  const saved = SSAuth.currentUser();
-  if (!saved) return;
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let currentProfile = null;
 
-  document.getElementById('heroName').textContent = saved.name || 'Your Name';
-  const roleLabel = saved.role === 'teacher' ? '📚 Teacher' : saved.role === 'both' ? '⚡ Teacher & Student' : '🎓 Student';
-  document.getElementById('heroRole').textContent = roleLabel;
-  const contacts = [saved.phone, saved.email].filter(Boolean).join(' · ');
-  document.getElementById('heroContact').textContent = contacts;
-  if (saved.bio) {
-    document.getElementById('heroBio').textContent = saved.bio;
-    document.getElementById('heroBio').style.display = '';
-  } else {
-    document.getElementById('heroBio').style.display = 'none';
-  }
-  if (saved.avatar) {
-    document.getElementById('avatarImg').src = saved.avatar;
-    document.getElementById('avatarImg').style.display = 'block';
-    document.getElementById('avatarPlaceholder').style.display = 'none';
-  } else {
-    document.getElementById('avatarPlaceholder').textContent = (saved.name || 'Y').charAt(0).toUpperCase();
-    document.getElementById('avatarPlaceholder').style.display = 'flex';
-    document.getElementById('avatarImg').style.display = 'none';
-  }
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(()=> t.style.display='none', 2200);
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-  document.getElementById('statSessions').textContent = saved.sessions || 0;
-  document.getElementById('statHours').textContent = (saved.hours || 0) + 'h';
-  document.getElementById('statSkills').textContent = (saved.skills || []).length;
+async function initAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  currentUser = session.user;
+  loadProfile();
 
-  document.getElementById('fName').value = saved.name || '';
-  document.getElementById('fUsername').value = saved.username || '';
-  document.getElementById('fBio').value = saved.bio || '';
-  document.getElementById('fPhone').value = saved.phone || '';
-  document.getElementById('fEmail').value = saved.email || '';
-  document.getElementById('fCountry').value = saved.country || '';
-  document.getElementById('fTimezone').value = saved.timezone || '';
-  avatarData = saved.avatar || null;
-
-  setRole(saved.role || 'student');
-  skills = saved.skills || [];
-  renderTags();
-  renderSessions(saved.sessionHistory || []);
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(!session){ window.location.href = 'skillstream-login.html'; }
+  });
 }
 
-function renderSessions(history) {
-  const el = document.getElementById('sessionHistory');
-  if (!history.length) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px 0">No sessions yet — join your first one!</div>';
+async function loadProfile(){
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+  if(error){
+    document.getElementById('avatarCard').innerHTML = `<div class="loading">Couldn't load profile.<br><small>${error.message}</small></div>`;
     return;
   }
-  el.innerHTML = history.slice(-5).reverse().map(s => `
-    <div class="session-item">
-      <div class="session-dot"></div>
-      <div class="session-info">
-        <div class="session-name">${s.name}</div>
-        <div class="session-meta">${s.date}</div>
-      </div>
-      <div class="session-dur">${s.duration}</div>
-    </div>`).join('');
+  currentProfile = profile || { id: currentUser.id, full_name: currentUser.email, role: 'student' };
+  renderProfile();
+  loadStats();
+
+  document.getElementById('fullName').value = currentProfile.full_name || '';
+  document.getElementById('bio').value = currentProfile.bio || '';
+  document.getElementById('avatarUrl').value = currentProfile.avatar_url || '';
 }
 
-function setRole(role) {
-  currentRole = role;
-  ['student', 'teacher', 'both'].forEach(r => {
-    document.getElementById('role' + r.charAt(0).toUpperCase() + r.slice(1)).classList.toggle('active', r === role);
-  });
+function renderProfile(){
+  const initials = (currentProfile.full_name || currentUser.email || '?').trim().charAt(0).toUpperCase();
+  const role = currentProfile.role || 'student';
+  document.getElementById('avatarCard').innerHTML = `
+    <div class="avatar">
+      ${currentProfile.avatar_url ? `<img src="${currentProfile.avatar_url}">` : initials}
+    </div>
+    <div class="name">${escapeHtml(currentProfile.full_name || currentUser.email)}</div>
+    <span class="role-badge ${role}">${role === 'teacher' ? 'Teacher' : 'Student'}</span>
+    ${currentProfile.bio ? `<div class="bio-text">${escapeHtml(currentProfile.bio)}</div>` : ''}
+  `;
 }
 
-function handleAvatar(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    avatarData = e.target.result;
-    document.getElementById('avatarImg').src = avatarData;
-    document.getElementById('avatarImg').style.display = 'block';
-    document.getElementById('avatarPlaceholder').style.display = 'none';
-    showToast('📷 Photo updated — save to keep it');
+async function loadStats(){
+  const role = currentProfile.role || 'student';
+  const statsEl = document.getElementById('statsRow');
+
+  if(role === 'teacher'){
+    const { data: courses } = await sb.from('courses').select('id, is_published').eq('teacher_id', currentUser.id);
+    const total = (courses || []).length;
+    const published = (courses || []).filter(c => c.is_published).length;
+    statsEl.innerHTML = `
+      <div class="stat"><div class="val">${total}</div><div class="lbl">Courses</div></div>
+      <div class="stat"><div class="val">${published}</div><div class="lbl">Published</div></div>
+    `;
+  } else {
+    const [{ data: progress }, { data: certs }] = await Promise.all([
+      sb.from('lesson_progress').select('lesson_id, completed').eq('user_id', currentUser.id).eq('completed', true),
+      sb.from('certificates').select('id').eq('user_id', currentUser.id)
+    ]);
+    statsEl.innerHTML = `
+      <div class="stat"><div class="val">${(progress||[]).length}</div><div class="lbl">Lessons Done</div></div>
+      <div class="stat"><div class="val">${(certs||[]).length}</div><div class="lbl">Certificates</div></div>
+    `;
+  }
+}
+
+async function saveProfile(){
+  const payload = {
+    id: currentUser.id,
+    full_name: document.getElementById('fullName').value.trim(),
+    bio: document.getElementById('bio').value.trim(),
+    avatar_url: document.getElementById('avatarUrl').value.trim(),
+    role: currentProfile.role || 'student'
   };
-  reader.readAsDataURL(file);
+  const { error } = await sb.from('profiles').upsert(payload, { onConflict: 'id' });
+  if(error){ toast('Error: ' + error.message); return; }
+  currentProfile = { ...currentProfile, ...payload };
+  renderProfile();
+  toast('Profile updated');
 }
 
-function renderTags() {
-  document.getElementById('tagsWrap').innerHTML = skills.map((s, i) =>
-    `<div class="tag">${s}<span class="remove" onclick="removeTag(${i})">×</span></div>`
-  ).join('');
-  document.getElementById('statSkills').textContent = skills.length;
-}
-function addTag() {
-  const inp = document.getElementById('tagInput');
-  const val = inp.value.trim();
-  if (!val) return;
-  if (!skills.includes(val)) { skills.push(val); renderTags(); }
-  inp.value = '';
-  inp.focus();
-}
-function removeTag(i) { skills.splice(i, 1); renderTags(); }
-
-function saveProfile() {
-  const name = document.getElementById('fName').value.trim();
-  if (!name) { showToast('Please enter your name', true); return; }
-  (async () => {
-    const result = await SSAuth.updateProfile({
-      name,
-      username: document.getElementById('fUsername').value.trim(),
-      bio: document.getElementById('fBio').value.trim(),
-      phone: document.getElementById('fPhone').value.trim(),
-      country: document.getElementById('fCountry').value.trim(),
-      timezone: document.getElementById('fTimezone').value,
-      role: currentRole,
-      skills,
-      avatar: avatarData
-    });
-    if (!result.ok) { showToast(result.error || 'Could not save', true); return; }
-    showToast('✅ Account saved!');
-    await loadProfile();
-  })();
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
 }
 
-function resetForm() { loadProfile(); showToast('Changes discarded'); }
-
-async function signOut() {
-  if (!confirm('Sign out of SkillStream?')) return;
-  await SSAuth.logout();
-  window.location.href = 'skillstream-login.html';
-}
-
-function deleteAccount() {
-  if (!confirm('Delete your account permanently? This cannot be undone.')) return;
-  if (!confirm('Are you sure? All your profile data will be removed.')) return;
-  (async () => {
-    await SSAuth.deleteAccount();
-    showToast('Account deleted');
-    setTimeout(() => window.location.href = 'skillstream-login.html', 1200);
-  })();
-}
-
-function showToast(msg, error = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (error ? ' error' : '') + ' show';
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-const SP_I18N = {
-  en:{ join:'🎥 Join Session', signout:'Sign Out', personal_info:'👤 Personal Info', contact:'📬 Contact', skills:'⚡ Skills & Subjects', sessions:'🕒 Recent Sessions', save:'💾 Save Account', discard:'Discard', stat_sessions:'Sessions', stat_hours:'Hours', stat_skills:'Skills' },
-  ar:{ join:'🎥 انضم إلى جلسة', signout:'تسجيل الخروج', personal_info:'👤 المعلومات الشخصية', contact:'📬 التواصل', skills:'⚡ المهارات والمواضيع', sessions:'🕒 الجلسات الأخيرة', save:'💾 حفظ الحساب', discard:'تجاهل', stat_sessions:'جلسات', stat_hours:'ساعات', stat_skills:'مهارات' },
-  fr:{ join:'🎥 Rejoindre', signout:'Déconnexion', personal_info:'👤 Infos personnelles', contact:'📬 Contact', skills:'⚡ Compétences', sessions:'🕒 Sessions récentes', save:'💾 Sauvegarder', discard:'Annuler', stat_sessions:'Sessions', stat_hours:'Heures', stat_skills:'Compétences' },
-  es:{ join:'🎥 Unirse', signout:'Cerrar sesión', personal_info:'👤 Información personal', contact:'📬 Contacto', skills:'⚡ Habilidades', sessions:'🕒 Sesiones recientes', save:'💾 Guardar cuenta', discard:'Descartar', stat_sessions:'Sesiones', stat_hours:'Horas', stat_skills:'Habilidades' },
-  zh:{ join:'🎥 加入课程', signout:'退出登录', personal_info:'👤 个人信息', contact:'📬 联系方式', skills:'⚡ 技能与科目', sessions:'🕒 最近课程', save:'💾 保存账户', discard:'放弃', stat_sessions:'课程', stat_hours:'小时', stat_skills:'技能' },
-};
-function setSPLang(lang) {
-  localStorage.setItem('ss_lang', lang);
-  document.documentElement.lang = lang;
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  const t = SP_I18N[lang];
-  const names = {en:'EN',ar:'عر',fr:'FR',es:'ES',zh:'中文'};
-  document.getElementById('spLangName').textContent = names[lang];
-  document.querySelectorAll('#spLangDropdown .lang-option').forEach(o => o.classList.toggle('active', o.getAttribute('onclick') === `setSPLang('${lang}')`));
-  const el = (id) => document.getElementById(id);
-  if (el('spJoinBtn')) el('spJoinBtn').textContent = t.join;
-  if (el('spSignOutBtn')) el('spSignOutBtn').textContent = t.signout;
-  document.querySelectorAll('.section-title').forEach((s, i) => {
-    const keys = ['personal_info', 'contact', 'skills', 'sessions'];
-    if (t[keys[i]]) s.textContent = t[keys[i]];
-  });
-  const saveBtn = document.querySelector('.btn-primary'); if (saveBtn) saveBtn.textContent = t.save;
-  const discardBtn = document.querySelector('.btn-ghost'); if (discardBtn) discardBtn.textContent = t.discard;
-  const statLbls = document.querySelectorAll('.stat .lbl');
-  if (statLbls[0]) statLbls[0].textContent = t.stat_sessions;
-  if (statLbls[1]) statLbls[1].textContent = t.stat_hours;
-  if (statLbls[2]) statLbls[2].textContent = t.stat_skills;
-  closeSPLangMenu();
-}
-function toggleSPLang() { document.getElementById('spLangDropdown').classList.toggle('open'); }
-function closeSPLangMenu() { document.getElementById('spLangDropdown').classList.remove('open'); }
-document.addEventListener('click', e => { const sw = document.getElementById('spLangSwitcher'); if (sw && !sw.contains(e.target)) closeSPLangMenu(); });
-
-(async () => {
-  const user = await SSAuth.requireAuth();
-  if (!user) return;
-  await loadProfile();
-  setSPLang(localStorage.getItem('ss_lang') || 'en');
-})();
+initAuth();
 </script>
 </body>
-  </html>
+</html>

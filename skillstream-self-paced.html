@@ -36,6 +36,16 @@
   header.top h1{margin:0; font-size:26px;}
   header.top p{margin:6px 0 0; font-size:14px; opacity:0.85;}
   .wrap{padding:18px;}
+  .search-wrap{
+    position:relative; margin-bottom:14px;
+  }
+  .search-wrap input{
+    width:100%; padding:12px 14px 12px 40px; border:1.5px solid var(--line);
+    border-radius:12px; font-size:15px; font-family:'Inter',sans-serif; background:#fff;
+  }
+  .search-wrap .icon{
+    position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:16px; color:#999;
+  }
   .filters{
     display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px;
   }
@@ -55,7 +65,15 @@
   .grid{display:flex; flex-direction:column; gap:14px;}
   .course-card{
     background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; cursor:pointer;
+    position:relative;
   }
+  .save-btn{
+    position:absolute; top:10px; right:10px; z-index:2;
+    width:34px; height:34px; border-radius:50%; border:none;
+    background:rgba(255,255,255,0.92); font-size:17px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .save-btn.saved{color:var(--gold);}
   .course-card .thumb{
     height:120px; background:linear-gradient(135deg, var(--ink), #33456e);
     background-size:cover; background-position:center;
@@ -189,6 +207,10 @@
 
 <div id="browseView">
   <div class="wrap">
+    <div class="search-wrap">
+      <span class="icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search courses..." oninput="onSearchInput()">
+    </div>
     <div class="filters" id="filters"></div>
     <div class="grid" id="courseGrid"><div class="loading">Loading courses…</div></div>
   </div>
@@ -245,6 +267,8 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let allCourses = [];
 let activeCategory = 'All';
+let searchTerm = '';
+let savedCourseIds = new Set();
 let activeCourse = null;
 let activeLessons = [];
 let completedLessonIds = new Set();
@@ -279,25 +303,25 @@ async function initAuth(){
 
 /* ---------- BROWSE ---------- */
 async function loadCourses(){
-  const { data, error } = await sb
-    .from('courses')
-    .select('*, lessons(count)')
-    .eq('is_published', true)
-    .order('created_at', { ascending:false });
+  const [{ data, error }, { data: saved }] = await Promise.all([
+    sb.from('courses').select('*, lessons(count)').eq('is_published', true).order('created_at', { ascending:false }),
+    sb.from('saved_courses').select('course_id').eq('user_id', currentUser.id)
+  ]);
 
   if(error){
     document.getElementById('courseGrid').innerHTML = `<div class="empty">Couldn't load courses.<br><small>${error.message}</small></div>`;
     return;
   }
   allCourses = data || [];
+  savedCourseIds = new Set((saved || []).map(s => s.course_id));
   renderFilters();
   renderGrid();
 }
 
 function renderFilters(){
-  const cats = ['All', ...new Set(allCourses.map(c => c.category).filter(Boolean))];
+  const cats = ['All', 'Saved', ...new Set(allCourses.map(c => c.category).filter(Boolean))];
   document.getElementById('filters').innerHTML = cats.map(cat => `
-    <button class="chip ${cat === activeCategory ? 'active' : ''}" onclick="setCategory('${escapeHtml(cat).replace(/'/g,"\\'")}')">${escapeHtml(cat)}</button>
+    <button class="chip ${cat === activeCategory ? 'active' : ''}" onclick="setCategory('${escapeHtml(cat).replace(/'/g,"\\'")}')">${cat === 'Saved' ? '★ Saved' : escapeHtml(cat)}</button>
   `).join('');
 }
 
@@ -307,20 +331,39 @@ function setCategory(cat){
   renderGrid();
 }
 
+function onSearchInput(){
+  searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+  renderGrid();
+}
+
 function renderGrid(){
   const el = document.getElementById('courseGrid');
-  const list = activeCategory === 'All' ? allCourses : allCourses.filter(c => c.category === activeCategory);
+  let list = allCourses;
+  if(activeCategory === 'Saved') list = list.filter(c => savedCourseIds.has(c.id));
+  else if(activeCategory !== 'All') list = list.filter(c => c.category === activeCategory);
+
+  if(searchTerm){
+    list = list.filter(c =>
+      (c.title || '').toLowerCase().includes(searchTerm) ||
+      (c.description || '').toLowerCase().includes(searchTerm) ||
+      (c.category || '').toLowerCase().includes(searchTerm)
+    );
+  }
 
   if(list.length === 0){
-    el.innerHTML = `<div class="empty"><div class="display">No courses here yet</div>Check back soon — new courses are added regularly.</div>`;
+    let msg = searchTerm ? `No courses match "${escapeHtml(searchTerm)}".` : 'Check back soon — new courses are added regularly.';
+    if(activeCategory === 'Saved' && !searchTerm) msg = 'Tap the star on any course to save it for later.';
+    el.innerHTML = `<div class="empty"><div class="display">No courses found</div>${msg}</div>`;
     return;
   }
 
   el.innerHTML = list.map(c => {
     const lessonCount = c.lessons?.[0]?.count ?? 0;
     const bg = c.thumbnail_url ? `background-image:url('${c.thumbnail_url}');` : '';
+    const isSaved = savedCourseIds.has(c.id);
     return `
     <div class="course-card" onclick="openCourse('${c.id}')">
+      <button class="save-btn ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleSave('${c.id}')">${isSaved ? '★' : '☆'}</button>
       <div class="thumb" style="${bg}"><span class="cat">${escapeHtml(c.category || 'General')}</span></div>
       <div class="body">
         <h3>${escapeHtml(c.title)}</h3>
@@ -329,6 +372,18 @@ function renderGrid(){
       </div>
     </div>`;
   }).join('');
+}
+
+async function toggleSave(courseId){
+  const isSaved = savedCourseIds.has(courseId);
+  if(isSaved){
+    savedCourseIds.delete(courseId);
+    await sb.from('saved_courses').delete().eq('user_id', currentUser.id).eq('course_id', courseId);
+  } else {
+    savedCourseIds.add(courseId);
+    await sb.from('saved_courses').insert({ user_id: currentUser.id, course_id: courseId });
+  }
+  renderGrid();
 }
 
 function showBrowse(){
@@ -479,6 +534,13 @@ async function issueCertificate(){
     }).select().single();
     if(error){ toast('Error: ' + error.message); return; }
     cert = data;
+
+    await sb.from('notifications').insert({
+      user_id: currentUser.id,
+      title: 'Certificate earned!',
+      body: `You completed "${activeCourse.title}" — nice work.`,
+      is_read: false
+    });
   }
 
   const { data: profile } = await sb.from('profiles').select('full_name').eq('id', currentUser.id).maybeSingle();

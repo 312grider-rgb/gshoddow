@@ -1,230 +1,317 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Paradise of Eternal Learners — Dashboard</title>
-<meta name="theme-color" content="#7B6FFF"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
---accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
---yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
---pill:#1A1D28;--radius:14px;--radius-sm:8px;--radius-full:9999px
-}
-html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
-.hidden{display:none !important}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:60px;background:rgba(15,17,24,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
-.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:16px;color:var(--text);text-decoration:none;max-width:180px;line-height:1.15}
-.logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.nav-right{display:flex;gap:8px;align-items:center}
-.nav-btn{background:var(--pill);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
-.nav-btn:hover{border-color:var(--accent);color:var(--text)}
-.page{max-width:820px;margin:0 auto;padding:26px 18px 60px}
-h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:2px}
-.sub{color:var(--muted);font-size:13px;margin-bottom:24px}
-.section-head{display:flex;justify-content:space-between;align-items:center;margin:26px 0 12px}
-.section-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:800}
-.pill-link{font-size:12px;color:var(--accent);text-decoration:none;font-weight:700}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-.item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block}
-.item-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.item-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px}
-.item-meta{font-size:12px;color:var(--muted)}
-.progress-bar{height:5px;background:var(--pill);border-radius:99px;margin-top:10px;overflow:hidden}
-.progress-fill{height:100%;background:var(--accent)}
-.empty{color:var(--muted);font-size:13px;text-align:center;padding:20px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius)}
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:6px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
-.stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:900;color:var(--accent)}
-.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
-.cert-card{background:linear-gradient(135deg,rgba(0,229,160,.1),rgba(75,158,255,.06));border:1px solid rgba(0,229,160,.25)}
-.cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}
-.btn{padding:10px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;border:none;text-decoration:none;display:inline-block}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-dark)}
-.btn-ghost{background:var(--pill);color:var(--text);border:1px solid var(--border)}
-.btn-ghost:hover{border-color:var(--accent)}
-.loading{text-align:center;color:var(--muted);padding:30px;font-size:13px}
+  :root{
+    --ink:#1B2A4A; --gold:#C99A44; --cream:#FBF8F2; --sage:#6B8F71;
+    --charcoal:#2B2B2B; --line:#E4DFD3;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:50px;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  a{text-decoration:none;}
+
+  header.top{background:var(--ink); color:var(--cream); padding:22px 18px 28px; position:relative;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:25px;}
+  header.top p{margin:6px 0 0; font-size:14px; opacity:0.85;}
+
+  .bell-btn{
+    position:absolute; top:20px; right:18px; background:rgba(255,255,255,0.12); border:none;
+    width:40px; height:40px; border-radius:50%; font-size:18px; color:#fff; cursor:pointer;
+  }
+  .bell-dot{
+    position:absolute; top:16px; right:14px; width:9px; height:9px; border-radius:50%;
+    background:var(--gold); border:2px solid var(--ink); display:none;
+  }
+  .notif-overlay{
+    position:fixed; inset:0; background:rgba(27,42,74,0.4); display:none; align-items:flex-start;
+    justify-content:center; z-index:60; padding-top:70px;
+  }
+  .notif-overlay.show{display:flex;}
+  .notif-panel{
+    background:#fff; width:92%; max-width:400px; border-radius:16px; max-height:70vh;
+    overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  }
+  .notif-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 16px; border-bottom:1px solid var(--line);
+  }
+  .notif-head h3{font-size:15px; margin:0;}
+  .notif-head button{background:none; border:none; font-size:18px; color:#999;}
+  .notif-item{
+    padding:13px 16px; border-bottom:1px solid var(--line); font-size:13.5px;
+  }
+  .notif-item:last-child{border-bottom:none;}
+  .notif-item.unread{background:#FBF6EC;}
+  .notif-item .n-title{font-weight:600; color:var(--ink); margin-bottom:2px;}
+  .notif-item .n-time{font-size:11.5px; color:#999; margin-top:4px;}
+  .notif-empty{padding:30px 16px; text-align:center; color:#888; font-size:13.5px;}
+
+  .wrap{padding:18px;}
+
+  .stats-row{
+    display:flex; gap:10px; margin-bottom:24px;
+  }
+  .stat{
+    flex:1; background:#fff; border:1px solid var(--line); border-radius:14px;
+    padding:14px 10px; text-align:center;
+  }
+  .stat .val{font-family:'Fraunces',serif; font-size:24px; font-weight:700; color:var(--ink);}
+  .stat .lbl{font-size:11.5px; color:#777; margin-top:2px;}
+
+  .section-title{
+    font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
+    font-weight:700; margin-bottom:12px;
+  }
+  .section{margin-bottom:30px;}
+
+  .course-row{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px;
+  }
+  .course-row h3{font-size:16px; margin:0 0 8px; color:var(--ink);}
+  .progress-track{height:7px; background:var(--line); border-radius:4px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--sage);}
+  .progress-label{font-size:12px; color:#777; margin-top:6px; display:flex; justify-content:space-between;}
+  .resume-btn{
+    display:inline-block; margin-top:12px; background:var(--ink); color:#fff;
+    padding:10px 16px; border-radius:9px; font-size:13.5px; font-weight:600;
+  }
+
+  .cert-grid{display:flex; flex-direction:column; gap:10px;}
+  .cert-card{
+    background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .cert-card .title{font-size:14.5px; font-weight:600; color:var(--ink);}
+  .cert-card .date{font-size:12px; color:#888; margin-top:2px;}
+  .cert-icon{font-size:20px;}
+
+  .empty{
+    background:#fff; border:1px dashed var(--line); border-radius:14px; padding:26px 18px;
+    text-align:center; color:#777; font-size:14px;
+  }
+  .empty a{color:var(--ink); font-weight:700;}
+
+  .browse-cta{
+    display:block; text-align:center; background:var(--gold); color:var(--ink);
+    padding:14px; border-radius:12px; font-weight:700; font-size:15px; margin-top:8px;
+  }
+  .loading{text-align:center; padding:30px; color:#888;}
 </style>
 </head>
 <body>
-<div class="topbar">
-<a class="logo" href="index.html">Paradise of <span>Eternal Learners</span></a>
-<div class="nav-right">
-  <a class="nav-btn" href="index.html">Home</a>
-</div>
-</div>
 
-<div class="page">
-  <h1 id="greeting">Dashboard</h1>
-  <div class="sub" id="roleLine"></div>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1 id="greeting">Welcome back</h1>
+  <p>Paradise Of The Eternal Learners — pick up where you left off.</p>
+  <button class="bell-btn" onclick="openNotifications()">🔔</button>
+  <span class="bell-dot" id="bellDot"></span>
+</header>
 
-  <div id="loadingMsg" class="loading">Loading your dashboard…</div>
-
-  <div id="content" class="hidden">
-    <div class="cta-row" id="ctaRow"></div>
-    <div class="stats-row" id="statsRow"></div>
-
-    <div class="section-head"><div class="section-title">🏫 Classes You Teach</div></div>
-    <div class="grid" id="teachingGrid"></div>
-
-    <div class="section-head"><div class="section-title">📘 Classes You're Enrolled In</div></div>
-    <div class="grid" id="enrolledGrid"></div>
-
-    <div class="section-head"><div class="section-title">📚 Self-Paced Courses In Progress</div></div>
-    <div class="grid" id="coursesGrid"></div>
-
-    <div class="section-head"><div class="section-title">🎓 Certificates Earned</div></div>
-    <div class="grid" id="certsGrid"></div>
+<div class="notif-overlay" id="notifOverlay" onclick="if(event.target===this) closeNotifications()">
+  <div class="notif-panel">
+    <div class="notif-head">
+      <h3>Notifications</h3>
+      <button onclick="closeNotifications()">&times;</button>
+    </div>
+    <div id="notifList"><div class="loading">Loading…</div></div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="skillstream-auth.js"></script>
-<script src="skillstream-classrooms.js"></script>
+<div class="wrap">
+  <div class="stats-row" id="statsRow">
+    <div class="stat"><div class="val">–</div><div class="lbl">Courses Started</div></div>
+    <div class="stat"><div class="val">–</div><div class="lbl">Lessons Done</div></div>
+    <div class="stat"><div class="val">–</div><div class="lbl">Certificates</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Continue Learning</div>
+    <div id="inProgressList"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">My Certificates</div>
+    <div id="certList"></div>
+  </div>
+
+  <a class="browse-cta" href="skillstream-self-paced.html">Browse All Courses</a>
+</div>
+
 <script>
-function db() { return window.SSAuth.client; }
-function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+/* ====================================================================
+   CONFIG — REQUIRED — same project as your other SkillStream pages
+   ==================================================================== */
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-async function loadDashboard() {
-  const me = await window.SSAuth.requireAuth('skillstream-login.html?redirect=skillstream-dashboard.html');
-  if (!me) return;
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
 
-  document.getElementById('greeting').textContent = `Welcome back, ${me.name || 'there'} 👋`;
-  const isTeacher = me.role === 'teacher' || me.role === 'both' || me.role === 'admin';
-  document.getElementById('roleLine').textContent = isTeacher ? 'Teacher account' : 'Student account';
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-  const ctaRow = document.getElementById('ctaRow');
-  ctaRow.innerHTML = isTeacher
-    ? `<a class="btn btn-primary" href="skillstream-classrooms.html">+ Create Classroom</a>
-       <a class="btn btn-ghost" href="skillstream-courses.html">+ Create Course</a>`
-    : `<a class="btn btn-primary" href="skillstream-classrooms.html">🔑 Join with Code</a>
-       <a class="btn btn-ghost" href="skillstream-self-paced.html">📖 Browse Courses</a>`;
+async function initAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  currentUser = session.user;
 
-  try {
-    const [{ teaching, enrolled }, courseProgress, certs] = await Promise.all([
-      SSClass.myClasses(),
-      loadCourseProgress(me.id),
-      loadCertificates(me.id)
-    ]);
+  const { data: profile } = await sb.from('profiles').select('full_name').eq('id', currentUser.id).maybeSingle();
+  document.getElementById('greeting').textContent = 'Welcome back' + (profile?.full_name ? ', ' + profile.full_name.split(' ')[0] : '');
 
-    // Stats row
-    const totalStreak = await getChallengeStreakForDashboard();
-    document.getElementById('statsRow').innerHTML = `
-      <div class="stat-card"><div class="stat-val">${teaching.length + enrolled.length}</div><div class="stat-lbl">Classes</div></div>
-      <div class="stat-card"><div class="stat-val">${courseProgress.length}</div><div class="stat-lbl">Courses In Progress</div></div>
-      <div class="stat-card"><div class="stat-val">${certs.length}</div><div class="stat-lbl">Certificates</div></div>
-      ${totalStreak !== null ? `<div class="stat-card"><div class="stat-val">🔥 ${totalStreak}</div><div class="stat-lbl">Day Streak</div></div>` : ''}
-    `;
+  loadDashboard();
+  checkUnreadNotifications();
 
-    // Teaching
-    const teachEl = document.getElementById('teachingGrid');
-    document.querySelector('#teachingGrid').parentElement; // no-op, keep section always visible if teacher
-    if (isTeacher) {
-      teachEl.innerHTML = teaching.length ? teaching.map(c => `
-        <a class="item-card" href="skillstream-classrooms.html">
-          <div class="item-name">${escapeHtml(c.name)}</div>
-          <div class="item-meta">${c.students.length} student${c.students.length===1?'':'s'} · Code: ${c.code}</div>
-        </a>`).join('') : '<div class="empty">You\'re not teaching any classes yet.</div>';
-    } else {
-      teachEl.closest('.section-head') && (teachEl.previousElementSibling.style.display = 'none');
-      teachEl.style.display = 'none';
-    }
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(!session){ window.location.href = 'skillstream-login.html'; }
+  });
+}
 
-    // Enrolled
-    const enrEl = document.getElementById('enrolledGrid');
-    enrEl.innerHTML = enrolled.length ? enrolled.map(c => `
-      <a class="item-card" href="skillstream-classrooms.html">
-        <div class="item-name">${escapeHtml(c.name)}</div>
-        <div class="item-meta">Taught by ${escapeHtml(c.teacherName)}</div>
-      </a>`).join('') : '<div class="empty">You haven\'t joined any classes yet.</div>';
+/* ---------- NOTIFICATIONS ---------- */
+async function checkUnreadNotifications(){
+  const { count } = await sb.from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', currentUser.id)
+    .eq('is_read', false);
+  document.getElementById('bellDot').style.display = (count && count > 0) ? 'block' : 'none';
+}
 
-    // Self-paced course progress
-    const coursesEl = document.getElementById('coursesGrid');
-    coursesEl.innerHTML = courseProgress.length ? courseProgress.map(c => `
-      <a class="item-card" href="skillstream-self-paced.html">
-        <div class="item-name">${escapeHtml(c.title)}</div>
-        <div class="item-meta">${c.done}/${c.total} lessons complete</div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${c.pct}%"></div></div>
-      </a>`).join('') : '<div class="empty">No self-paced courses started yet.</div>';
+function openNotifications(){
+  document.getElementById('notifOverlay').classList.add('show');
+  loadNotifications();
+}
+function closeNotifications(){
+  document.getElementById('notifOverlay').classList.remove('show');
+}
 
-    // Certificates
-    const certsEl = document.getElementById('certsGrid');
-    certsEl.innerHTML = certs.length ? certs.map(c => `
-      <div class="item-card cert-card">
-        <div class="item-name">🎓 ${escapeHtml(c.title)}</div>
-        <div class="item-meta">Earned ${new Date(c.issuedAt).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}</div>
-      </div>`).join('') : '<div class="empty">No certificates yet — finish a self-paced course to earn one!</div>';
+async function loadNotifications(){
+  const el = document.getElementById('notifList');
+  const { data, error } = await sb.from('notifications')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending:false })
+    .limit(30);
 
-    document.getElementById('loadingMsg').classList.add('hidden');
-    document.getElementById('content').classList.remove('hidden');
-  } catch (err) {
-    console.error('Dashboard load error:', err);
-    document.getElementById('loadingMsg').textContent = 'Error loading dashboard: ' + err.message;
+  if(error){ el.innerHTML = `<div class="notif-empty">Couldn't load notifications.</div>`; return; }
+
+  if(!data || data.length === 0){
+    el.innerHTML = `<div class="notif-empty">You're all caught up — nothing here yet.</div>`;
+    return;
+  }
+
+  el.innerHTML = data.map(n => `
+    <div class="notif-item ${n.is_read ? '' : 'unread'}">
+      <div class="n-title">${escapeHtml(n.title)}</div>
+      <div>${escapeHtml(n.body || '')}</div>
+      <div class="n-time">${new Date(n.created_at).toLocaleString()}</div>
+    </div>
+  `).join('');
+
+  const unreadIds = data.filter(n => !n.is_read).map(n => n.id);
+  if(unreadIds.length > 0){
+    await sb.from('notifications').update({ is_read: true }).in('id', unreadIds);
+    document.getElementById('bellDot').style.display = 'none';
   }
 }
 
-async function loadCourseProgress(userId) {
-  const { data: lessonsAll, error: e1 } = await db().from('lessons').select('id, course_id, courses(title)');
-  if (e1) throw e1;
-  const { data: progressAll, error: e2 } = await db().from('lesson_progress').select('lesson_id').eq('user_id', userId);
-  if (e2) throw e2;
-  const doneSet = new Set((progressAll || []).map(p => p.lesson_id));
+async function loadDashboard(){
+  // Pull all lesson_progress rows for this user, plus lesson->course mapping, plus certificates
+  const [{ data: progress, error: pErr }, { data: certs, error: cErr }] = await Promise.all([
+    sb.from('lesson_progress')
+      .select('lesson_id, completed, lessons(course_id, courses(id, title, description))')
+      .eq('user_id', currentUser.id),
+    sb.from('certificates')
+      .select('*, courses(title)')
+      .eq('user_id', currentUser.id)
+      .order('issued_at', { ascending:false })
+  ]);
 
+  if(pErr || cErr){
+    document.getElementById('inProgressList').innerHTML = `<div class="empty">Couldn't load your progress.<br><small>${(pErr||cErr).message}</small></div>`;
+    return;
+  }
+
+  renderStats(progress || [], certs || []);
+  renderInProgress(progress || []);
+  renderCertificates(certs || []);
+}
+
+function renderStats(progress, certs){
+  const courseIds = new Set(progress.map(p => p.lessons?.course_id).filter(Boolean));
+  const lessonsDone = progress.filter(p => p.completed).length;
+
+  const stats = document.getElementById('statsRow');
+  stats.innerHTML = `
+    <div class="stat"><div class="val">${courseIds.size}</div><div class="lbl">Courses Started</div></div>
+    <div class="stat"><div class="val">${lessonsDone}</div><div class="lbl">Lessons Done</div></div>
+    <div class="stat"><div class="val">${certs.length}</div><div class="lbl">Certificates</div></div>
+  `;
+}
+
+async function renderInProgress(progress){
+  const el = document.getElementById('inProgressList');
+
+  // Group progress by course
   const byCourse = {};
-  (lessonsAll || []).forEach(l => {
-    if (!l.course_id) return;
-    byCourse[l.course_id] = byCourse[l.course_id] || { title: l.courses?.title || 'Untitled course', total: 0, done: 0 };
-    byCourse[l.course_id].total++;
-    if (doneSet.has(l.id)) byCourse[l.course_id].done++;
+  progress.forEach(p => {
+    const course = p.lessons?.courses;
+    if(!course) return;
+    if(!byCourse[course.id]) byCourse[course.id] = { course, done:0, total:0 };
+    byCourse[course.id].total += 1;
+    if(p.completed) byCourse[course.id].done += 1;
   });
 
-  return Object.values(byCourse)
-    .filter(c => c.done > 0 && c.done < c.total) // "in progress" — started but not finished
-    .map(c => ({ ...c, pct: c.total ? Math.round((c.done / c.total) * 100) : 0 }));
-}
-
-async function loadCertificates(userId) {
-  const { data, error } = await db()
-    .from('certificates')
-    .select('issued_at, courses(title)')
-    .eq('user_id', userId)
-    .order('issued_at', { ascending: false });
-  if (error) throw error;
-  return (data || []).map(c => ({ title: c.courses?.title || 'Untitled course', issuedAt: c.issued_at }));
-}
-
-async function getChallengeStreakForDashboard() {
-  try {
-    const user = window.SSAuth.currentUser();
-    if (!user) return null;
-    const { data, error } = await db()
-      .from('challenge_completions')
-      .select('completed_date')
-      .eq('user_id', user.id)
-      .order('completed_date', { ascending: false })
-      .limit(60);
-    if (error) return null;
-    const doneDates = new Set((data || []).map(r => r.completed_date));
-    let streak = 0;
-    let cursor = new Date();
-    const todayStr = cursor.getFullYear() + '-' + String(cursor.getMonth()+1).padStart(2,'0') + '-' + String(cursor.getDate()).padStart(2,'0');
-    if (!doneDates.has(todayStr)) cursor.setDate(cursor.getDate() - 1);
-    while (true) {
-      const key = cursor.getFullYear() + '-' + String(cursor.getMonth()+1).padStart(2,'0') + '-' + String(cursor.getDate()).padStart(2,'0');
-      if (doneDates.has(key)) { streak++; cursor.setDate(cursor.getDate() - 1); } else break;
-    }
-    return streak;
-  } catch (e) {
-    return null;
+  const courseIds = Object.keys(byCourse);
+  if(courseIds.length === 0){
+    el.innerHTML = `<div class="empty">You haven't started a course yet.<br><a href="skillstream-self-paced.html">Browse courses to get started &rarr;</a></div>`;
+    return;
   }
+
+  // total lesson counts might be higher than "attempted" total above, so fetch real lesson counts per course
+  const { data: allLessons } = await sb.from('lessons').select('id, course_id').in('course_id', courseIds);
+  const totalByCourse = {};
+  (allLessons || []).forEach(l => { totalByCourse[l.course_id] = (totalByCourse[l.course_id] || 0) + 1; });
+
+  el.innerHTML = courseIds.map(cid => {
+    const entry = byCourse[cid];
+    const total = totalByCourse[cid] || entry.total;
+    const pct = total > 0 ? Math.round((entry.done / total) * 100) : 0;
+    const finished = total > 0 && entry.done >= total;
+    return `
+    <div class="course-row">
+      <h3>${escapeHtml(entry.course.title)}</h3>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+      <div class="progress-label"><span>${entry.done} of ${total} lessons</span><span>${pct}%</span></div>
+      <a class="resume-btn" href="skillstream-self-paced.html">${finished ? 'Review Course' : 'Resume Course'}</a>
+    </div>`;
+  }).join('');
 }
 
-loadDashboard();
+function renderCertificates(certs){
+  const el = document.getElementById('certList');
+  if(certs.length === 0){
+    el.innerHTML = `<div class="empty">No certificates yet — finish a course to earn your first one.</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="cert-grid">` + certs.map(c => `
+    <div class="cert-card">
+      <div>
+        <div class="title">${escapeHtml(c.courses?.title || 'Course')}</div>
+        <div class="date">Issued ${new Date(c.issued_at).toLocaleDateString()}</div>
+      </div>
+      <span class="cert-icon">🏆</span>
+    </div>
+  `).join('') + `</div>`;
+}
+
+initAuth();
 </script>
 </body>
 </html>
