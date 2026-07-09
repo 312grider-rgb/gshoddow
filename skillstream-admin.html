@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --ink:#1B2A4A; --gold:#C99A44; --cream:#FBF8F2; --sage:#6B8F71;
+    --charcoal:#2B2B2B; --line:#E4DFD3; --danger:#B5533C;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:60px;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+
+  header.top{background:var(--ink); color:var(--cream); padding:22px 18px 26px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px;}
+
+  .wrap{padding:18px;}
+
+  .stats-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:26px;
+  }
+  .stat{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 8px; text-align:center;
+  }
+  .stat .val{font-family:'Fraunces',serif; font-size:22px; font-weight:700; color:var(--ink);}
+  .stat .lbl{font-size:11px; color:#777; margin-top:2px;}
+
+  .tabs{display:flex; gap:8px; margin-bottom:16px;}
+  .tab-btn{
+    flex:1; background:#fff; border:1.5px solid var(--line); padding:11px; border-radius:10px;
+    font-size:13.5px; font-weight:700; color:var(--ink); cursor:pointer;
+  }
+  .tab-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  .section-title{
+    font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
+    font-weight:700; margin-bottom:12px;
+  }
+
+  .row-card{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px;
+  }
+  .row-card .rc-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .row-card h3{font-size:15.5px; margin:0 0 3px; color:var(--ink);}
+  .row-card .meta{font-size:12.5px; color:#777;}
+  .badge{
+    display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;
+    text-transform:uppercase; letter-spacing:0.5px;
+  }
+  .badge.live{background:#E7F0E8; color:var(--sage);}
+  .badge.draft{background:#F3EEE3; color:#8a7748;}
+  .badge.role-admin{background:#F0E4E9; color:#8a3f5c;}
+  .badge.role-teacher{background:#F5EAD6; color:var(--gold);}
+  .badge.role-student{background:#EAF0EC; color:var(--sage);}
+
+  .row-actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .btn{
+    padding:9px 14px; border-radius:8px; font-size:13px; font-weight:600; border:none; cursor:pointer;
+  }
+  .btn.outline{background:transparent; color:var(--ink); border:1.5px solid var(--ink);}
+  .btn.danger{background:var(--danger); color:#fff;}
+  .btn.gold{background:var(--gold); color:var(--ink);}
+  select.role-select{
+    padding:8px 10px; border:1.5px solid var(--line); border-radius:8px; font-size:13px; font-family:'Inter',sans-serif;
+  }
+
+  .empty{text-align:center; padding:40px 20px; color:#777;}
+  .loading{text-align:center; padding:30px; color:#888;}
+  .locked{text-align:center; padding:60px 20px;}
+  .locked .display{font-size:20px; color:var(--ink); margin-bottom:8px;}
+
+  .toast{
+    position:fixed; top:16px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff; padding:11px 18px; border-radius:30px;
+    font-size:14px; z-index:100; display:none;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Admin Dashboard</h1>
+</header>
+
+<div id="lockedView" style="display:none;">
+  <div class="locked">
+    <div class="display">Admins only</div>
+    <p>This area is restricted to platform admins.</p>
+  </div>
+</div>
+
+<div id="adminView" style="display:none;">
+  <div class="wrap">
+    <div class="stats-grid" id="statsGrid"></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" id="tabCoursesBtn" onclick="switchTab('courses')">Courses</button>
+      <button class="tab-btn" id="tabUsersBtn" onclick="switchTab('users')">Users</button>
+    </div>
+
+    <div id="coursesTab">
+      <div class="section-title">All Courses</div>
+      <div id="courseList"><div class="loading">Loading…</div></div>
+    </div>
+
+    <div id="usersTab" style="display:none;">
+      <div class="section-title">All Users</div>
+      <div id="userList"><div class="loading">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====================================================================
+   CONFIG — REQUIRED — same project as your other SkillStream pages
+   ==================================================================== */
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let allCourses = [];
+let allUsers = [];
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(()=> t.style.display='none', 2200);
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* ---------- AUTH + ADMIN GATE ---------- */
+async function initAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', currentUser.id).maybeSingle();
+  if(!profile || profile.role !== 'admin'){
+    document.getElementById('lockedView').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('adminView').style.display = 'block';
+  loadStats();
+  loadCourses();
+  loadUsers();
+
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(!session){ window.location.href = 'skillstream-login.html'; }
+  });
+}
+
+function switchTab(tab){
+  document.getElementById('coursesTab').style.display = tab === 'courses' ? 'block' : 'none';
+  document.getElementById('usersTab').style.display = tab === 'users' ? 'block' : 'none';
+  document.getElementById('tabCoursesBtn').classList.toggle('active', tab === 'courses');
+  document.getElementById('tabUsersBtn').classList.toggle('active', tab === 'users');
+}
+
+/* ---------- STATS ---------- */
+async function loadStats(){
+  const [
+    { count: userCount },
+    { count: courseCount },
+    { count: publishedCount },
+    { count: certCount },
+    { count: reviewCount }
+  ] = await Promise.all([
+    sb.from('profiles').select('id', { count:'exact', head:true }),
+    sb.from('courses').select('id', { count:'exact', head:true }),
+    sb.from('courses').select('id', { count:'exact', head:true }).eq('is_published', true),
+    sb.from('certificates').select('id', { count:'exact', head:true }),
+    sb.from('course_reviews').select('id', { count:'exact', head:true })
+  ]);
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat"><div class="val">${userCount ?? 0}</div><div class="lbl">Users</div></div>
+    <div class="stat"><div class="val">${courseCount ?? 0}</div><div class="lbl">Courses</div></div>
+    <div class="stat"><div class="val">${publishedCount ?? 0}</div><div class="lbl">Published</div></div>
+    <div class="stat"><div class="val">${certCount ?? 0}</div><div class="lbl">Certificates</div></div>
+    <div class="stat"><div class="val">${reviewCount ?? 0}</div><div class="lbl">Reviews</div></div>
+  `;
+}
+
+/* ---------- COURSES TAB ---------- */
+async function loadCourses(){
+  const { data, error } = await sb
+    .from('courses')
+    .select('*, profiles(full_name)')
+    .order('created_at', { ascending:false });
+
+  const el = document.getElementById('courseList');
+  if(error){ el.innerHTML = `<div class="empty">${error.message}</div>`; return; }
+
+  allCourses = data || [];
+  if(allCourses.length === 0){ el.innerHTML = '<div class="empty">No courses yet.</div>'; return; }
+
+  el.innerHTML = allCourses.map(c => `
+    <div class="row-card">
+      <div class="rc-top">
+        <div>
+          <h3>${escapeHtml(c.title)}</h3>
+          <div class="meta">by ${escapeHtml(c.profiles?.full_name || 'Unknown teacher')} · ${escapeHtml(c.category || 'General')}</div>
+        </div>
+        <span class="badge ${c.is_published ? 'live' : 'draft'}">${c.is_published ? 'Published' : 'Draft'}</span>
+      </div>
+      <div class="row-actions">
+        <button class="btn outline" onclick="toggleCoursePublish('${c.id}', ${!c.is_published})">${c.is_published ? 'Unpublish' : 'Publish'}</button>
+        <button class="btn danger" onclick="deleteCourseAdmin('${c.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function toggleCoursePublish(id, newState){
+  const { error } = await sb.from('courses').update({ is_published: newState }).eq('id', id);
+  if(error){ toast('Error: ' + error.message); return; }
+  toast(newState ? 'Course published' : 'Course unpublished');
+  loadCourses();
+  loadStats();
+}
+
+async function deleteCourseAdmin(id){
+  if(!confirm('Delete this course and all its lessons? This cannot be undone.')) return;
+  const { error } = await sb.from('courses').delete().eq('id', id);
+  if(error){ toast('Error: ' + error.message); return; }
+  toast('Course deleted');
+  loadCourses();
+  loadStats();
+}
+
+/* ---------- USERS TAB ---------- */
+async function loadUsers(){
+  const { data, error } = await sb.from('profiles').select('*').order('full_name', { ascending:true });
+  const el = document.getElementById('userList');
+  if(error){ el.innerHTML = `<div class="empty">${error.message}</div>`; return; }
+
+  allUsers = data || [];
+  if(allUsers.length === 0){ el.innerHTML = '<div class="empty">No users yet.</div>'; return; }
+
+  el.innerHTML = allUsers.map(u => `
+    <div class="row-card">
+      <div class="rc-top">
+        <div>
+          <h3>${escapeHtml(u.full_name || 'Unnamed')}</h3>
+          <div class="meta">${u.id === currentUser.id ? '(you)' : ''}</div>
+        </div>
+        <span class="badge role-${u.role || 'student'}">${u.role || 'student'}</span>
+      </div>
+      <div class="row-actions">
+        <select class="role-select" onchange="changeUserRole('${u.id}', this.value)">
+          <option value="student" ${u.role==='student'?'selected':''}>Student</option>
+          <option value="teacher" ${u.role==='teacher'?'selected':''}>Teacher</option>
+          <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
+        </select>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function changeUserRole(userId, newRole){
+  const { error } = await sb.from('profiles').update({ role: newRole }).eq('id', userId);
+  if(error){ toast('Error: ' + error.message); return; }
+  toast('Role updated to ' + newRole);
+  loadUsers();
+}
+
+initAuth();
+</script>
+</body>
+</html>
