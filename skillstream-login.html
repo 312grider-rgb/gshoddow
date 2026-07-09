@@ -1,90 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Paradise of Eternal Learners — Log In</title>
-<meta name="theme-color" content="#7B6FFF"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
---accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--text:#ECEDF5;--muted:#5A5E75;
---radius:14px;--radius-sm:8px
-}
-html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);display:flex;align-items:center;justify-content:center;padding:24px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px 28px;width:100%;max-width:400px}
-.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:18px;text-align:center;margin-bottom:6px;display:block;text-decoration:none;color:var(--text)}
-.logo span{background:linear-gradient(135deg,var(--accent),#4B9EFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-h1{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;text-align:center;margin-bottom:22px}
-label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;margin-top:14px}
-input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:11px 14px;font-size:14px;font-family:'Inter',sans-serif}
-input:focus{outline:none;border-color:var(--accent)}
-.btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;margin-top:20px;transition:all .2s}
-.btn:hover{background:var(--accent-dark)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.error-msg{background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.2);color:var(--live);border-radius:var(--radius-sm);padding:9px 11px;font-size:12px;margin-top:14px;display:none}
-.switch-link{text-align:center;font-size:13px;color:var(--muted);margin-top:18px}
-.switch-link a{color:var(--accent);text-decoration:none;font-weight:700}
+  :root{
+    --ink:#1B2A4A; --gold:#C99A44; --cream:#FBF8F2; --sage:#6B8F71;
+    --charcoal:#2B2B2B; --line:#E4DFD3; --danger:#B5533C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; font-family:'Inter',sans-serif; background:var(--ink);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  h1,.display{font-family:'Fraunces',serif;}
+  .card{
+    background:var(--cream); width:100%; max-width:380px; border-radius:20px; padding:28px 24px;
+  }
+  .eyebrow{font-size:11.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:6px; text-align:center;}
+  h1{font-size:22px; color:var(--ink); text-align:center; margin:0 0 4px;}
+  .sub{font-size:13.5px; color:#777; text-align:center; margin:0 0 22px;}
+
+  .mode-toggle{
+    display:flex; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:4px; margin-bottom:20px;
+  }
+  .mode-toggle button{
+    flex:1; background:none; border:none; padding:10px; border-radius:9px; font-size:13.5px;
+    font-weight:700; color:#888; cursor:pointer;
+  }
+  .mode-toggle button.active{background:var(--ink); color:#fff;}
+
+  label{display:block; font-size:13px; font-weight:600; color:var(--ink); margin:14px 0 6px;}
+  label:first-of-type{margin-top:0;}
+  input{
+    width:100%; padding:12px 13px; border:1.5px solid var(--line); border-radius:10px;
+    font-size:15px; font-family:'Inter',sans-serif; background:#fff;
+  }
+  input:focus{outline:none; border-color:var(--gold);}
+
+  .role-picker{display:flex; gap:8px; margin-top:6px;}
+  .role-btn{
+    flex:1; background:#fff; border:1.5px solid var(--line); padding:12px 8px; border-radius:10px;
+    font-size:13.5px; font-weight:700; color:var(--ink); cursor:pointer; text-align:center;
+  }
+  .role-btn.active{background:var(--gold); border-color:var(--gold);}
+
+  .submit-btn{
+    width:100%; background:var(--ink); color:#fff; border:none; padding:14px; border-radius:11px;
+    font-size:15.5px; font-weight:700; margin-top:20px; cursor:pointer;
+  }
+  .submit-btn:disabled{opacity:0.6;}
+
+  .msg{
+    margin-top:14px; padding:11px 13px; border-radius:9px; font-size:13.5px; display:none; line-height:1.4;
+  }
+  .msg.error{background:#FBEAE6; color:var(--danger); display:block;}
+  .msg.success{background:#EAF0EC; color:var(--sage); display:block;}
+
+  .foot-link{text-align:center; margin-top:18px; font-size:13px; color:#888;}
+  .foot-link a{color:var(--ink); font-weight:700; text-decoration:none;}
 </style>
 </head>
 <body>
+
 <div class="card">
-  <a class="logo" href="index.html">Paradise of <span>Eternal Learners</span></a>
-  <h1>Welcome back</h1>
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1 id="cardTitle">Welcome Back</h1>
+  <p class="sub">Paradise Of The Eternal Learners</p>
+
+  <div class="mode-toggle">
+    <button id="loginTabBtn" class="active" onclick="setMode('login')">Log In</button>
+    <button id="signupTabBtn" onclick="setMode('signup')">Sign Up</button>
+  </div>
+
+  <div id="signupFields" style="display:none;">
+    <label>Full Name</label>
+    <input type="text" id="fullName" placeholder="Your name">
+
+    <label>I want to...</label>
+    <div class="role-picker">
+      <button type="button" class="role-btn active" id="roleStudentBtn" onclick="setRole('student')">Learn</button>
+      <button type="button" class="role-btn" id="roleTeacherBtn" onclick="setRole('teacher')">Teach</button>
+    </div>
+  </div>
 
   <label>Email</label>
-  <input type="email" id="email" placeholder="you@example.com"/>
+  <input type="email" id="email" placeholder="you@example.com">
 
-  <label style="display:flex;justify-content:space-between;align-items:center">
-    <span>Password</span>
-    <a href="skillstream-forgot-password.html" style="color:var(--accent);text-transform:none;font-weight:600;font-size:12px;letter-spacing:0">Forgot?</a>
-  </label>
-  <input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+  <label>Password</label>
+  <input type="password" id="password" placeholder="••••••••">
 
-  <button class="btn" id="loginBtn" onclick="doLogin()">Log In</button>
-  <div class="error-msg" id="errorMsg"></div>
+  <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">Log In</button>
 
-  <div class="switch-link">Don't have an account? <a href="skillstream-signup.html">Sign up</a></div>
+  <div class="msg" id="msg"></div>
+
+  <div class="foot-link" id="footLink" style="display:none;">
+    <a href="#" onclick="forgotPassword(); return false;">Forgot password?</a>
+  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="skillstream-auth.js"></script>
 <script>
-// If already logged in, skip straight past the login screen.
-(async () => {
-  await window.SSAuth.ready;
-  if (window.SSAuth.currentUser()) {
-    window.location.href = new URLSearchParams(location.search).get('redirect') || 'index.html';
-  }
-})();
+/* ====================================================================
+   CONFIG — REQUIRED — same project as your other SkillStream pages
+   ==================================================================== */
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-async function doLogin() {
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let mode = 'login';
+let selectedRole = 'student';
+
+// If someone landed here with ?role=teacher from the homepage, jump straight to signup as teacher
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get('role') === 'teacher'){
+  selectedRole = 'teacher';
+}
+
+function setMode(newMode){
+  mode = newMode;
+  document.getElementById('loginTabBtn').classList.toggle('active', mode === 'login');
+  document.getElementById('signupTabBtn').classList.toggle('active', mode === 'signup');
+  document.getElementById('signupFields').style.display = mode === 'signup' ? 'block' : 'none';
+  document.getElementById('footLink').style.display = mode === 'login' ? 'block' : 'none';
+  document.getElementById('cardTitle').textContent = mode === 'login' ? 'Welcome Back' : 'Create Your Account';
+  document.getElementById('submitBtn').textContent = mode === 'login' ? 'Log In' : 'Sign Up';
+  hideMsg();
+  if(mode === 'signup' && urlParams.get('role') === 'teacher'){
+    setRole('teacher');
+  }
+}
+
+function setRole(role){
+  selectedRole = role;
+  document.getElementById('roleStudentBtn').classList.toggle('active', role === 'student');
+  document.getElementById('roleTeacherBtn').classList.toggle('active', role === 'teacher');
+}
+
+// If arriving with ?role=teacher, default straight into signup mode
+if(urlParams.get('role') === 'teacher'){
+  setMode('signup');
+}
+
+function showMsg(text, type){
+  const m = document.getElementById('msg');
+  m.textContent = text;
+  m.className = 'msg ' + type;
+}
+function hideMsg(){
+  const m = document.getElementById('msg');
+  m.className = 'msg';
+  m.textContent = '';
+}
+
+function setLoading(isLoading){
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = isLoading;
+  btn.textContent = isLoading ? 'Please wait...' : (mode === 'login' ? 'Log In' : 'Sign Up');
+}
+
+async function handleSubmit(){
+  hideMsg();
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
-  const err = document.getElementById('errorMsg');
-  const btn = document.getElementById('loginBtn');
 
-  if (!email || !password) {
-    err.textContent = 'Enter your email and password.';
-    err.style.display = 'block';
+  if(!email || !password){
+    showMsg('Please enter your email and password.', 'error');
     return;
   }
 
-  btn.textContent = 'Logging in…'; btn.disabled = true;
-  err.style.display = 'none';
+  setLoading(true);
 
-  const result = await window.SSAuth.login({ email, password });
-  if (!result.ok) {
-    btn.textContent = 'Log In'; btn.disabled = false;
-    err.textContent = result.error;
-    err.style.display = 'block';
-    return;
+  if(mode === 'login'){
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    setLoading(false);
+
+    if(error){
+      if(error.message.toLowerCase().includes('email not confirmed')){
+        showMsg('Please confirm your email first — check your inbox for the confirmation link.', 'error');
+      } else {
+        showMsg(error.message, 'error');
+      }
+      return;
+    }
+
+    window.location.href = 'skillstream-dashboard.html';
+
+  } else {
+    const fullName = document.getElementById('fullName').value.trim();
+    if(!fullName){
+      setLoading(false);
+      showMsg('Please enter your full name.', 'error');
+      return;
+    }
+
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin + '/skillstream-confirm.html'
+      }
+    });
+    setLoading(false);
+
+    if(error){
+      showMsg(error.message, 'error');
+      return;
+    }
+
+    // Create the profile row right away so role/name are set even before email confirmation
+    if(data.user){
+      const { error: profileError } = await sb.from('profiles').upsert({
+        id: data.user.id,
+        full_name: fullName,
+        role: selectedRole
+      }, { onConflict: 'id' });
+
+      if(profileError){
+        showMsg('Account created, but profile setup had an issue: ' + profileError.message, 'error');
+        return;
+      }
+    }
+
+    showMsg('Account created! Check your email for a confirmation link before logging in.', 'success');
   }
-
-  window.location.href = new URLSearchParams(location.search).get('redirect') || 'index.html';
 }
+
+async function forgotPassword(){
+  const email = document.getElementById('email').value.trim();
+  if(!email){
+    showMsg('Enter your email above first, then tap "Forgot password?" again.', 'error');
+    return;
+  }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/skillstream-confirm.html'
+  });
+  if(error){ showMsg(error.message, 'error'); return; }
+  showMsg('Password reset email sent — check your inbox.', 'success');
+}
+
+// Initialize UI state
+setMode(mode);
 </script>
 </body>
 </html>
