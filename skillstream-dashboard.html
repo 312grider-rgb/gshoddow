@@ -104,6 +104,23 @@
     padding:14px; border-radius:12px; font-weight:700; font-size:15px; margin-top:8px;
   }
   .loading{text-align:center; padding:30px; color:#888;}
+
+  .ai-rec-card{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:20px;
+  }
+  .ai-rec-card .ai-title{
+    font-size:12px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gold);
+    font-weight:700; margin-bottom:10px;
+  }
+  .ai-rec-btn{
+    background:var(--ink); color:#fff; border:none; padding:11px 16px; border-radius:9px;
+    font-size:14px; font-weight:600; cursor:pointer; width:100%;
+  }
+  .ai-rec-output{
+    margin-top:12px; background:#FBF8F2; border:1px solid var(--line); border-radius:12px;
+    padding:14px; font-size:14px; line-height:1.6; white-space:pre-wrap; display:none;
+  }
+  .ai-rec-output.loading-text{color:#999; font-style:italic;}
 </style>
 </head>
 <body>
@@ -138,6 +155,12 @@
     <div id="inProgressList"><div class="loading">Loading…</div></div>
   </div>
 
+  <div class="ai-rec-card">
+    <div class="ai-title">AI Study Recommendation</div>
+    <button class="ai-rec-btn" onclick="getRecommendation()">What Should I Study Next?</button>
+    <div class="ai-rec-output" id="recOutput"></div>
+  </div>
+
   <div class="section">
     <div class="section-title">My Certificates</div>
     <div id="certList"></div>
@@ -150,11 +173,13 @@
 /* ====================================================================
    CONFIG — REQUIRED — same project as your other SkillStream pages
    ==================================================================== */
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
+let dashProgress = [];
+let dashCerts = [];
 
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
@@ -241,6 +266,8 @@ async function loadDashboard(){
   renderStats(progress || [], certs || []);
   renderInProgress(progress || []);
   renderCertificates(certs || []);
+  dashProgress = progress || [];
+  dashCerts = certs || [];
 }
 
 function renderStats(progress, certs){
@@ -312,6 +339,71 @@ function renderCertificates(certs){
 }
 
 initAuth();
+
+/* ---------- AI STUDY RECOMMENDATION ----------
+   Same direct-browser-to-Anthropic pattern used in the self-paced
+   lesson AI Tutor and the live-session AI Teacher. Key is stored in
+   localStorage as 'anthropic_api_key'. */
+function getAnthropicKey(){
+  let key = localStorage.getItem('anthropic_api_key');
+  if(!key){
+    key = prompt('Enter your Anthropic API key to enable AI recommendations (stored only on this device):');
+    if(key) localStorage.setItem('anthropic_api_key', key.trim());
+  }
+  return key;
+}
+
+async function getRecommendation(){
+  const key = getAnthropicKey();
+  if(!key) return;
+
+  const output = document.getElementById('recOutput');
+  output.style.display = 'block';
+  output.className = 'ai-rec-output loading-text';
+  output.textContent = 'Thinking…';
+
+  // Build context: completed vs in-progress course titles, plus what's available
+  const courseMap = {};
+  dashProgress.forEach(p => {
+    const c = p.lessons?.courses;
+    if(!c) return;
+    if(!courseMap[c.id]) courseMap[c.id] = { title: c.title, done:0, total:0 };
+    courseMap[c.id].total += 1;
+    if(p.completed) courseMap[c.id].done += 1;
+  });
+  const inProgress = Object.values(courseMap).filter(c => c.done < c.total).map(c => c.title);
+  const completed = dashCerts.map(c => c.courses?.title).filter(Boolean);
+
+  const { data: available } = await sb.from('courses').select('title, category, description').eq('is_published', true).limit(30);
+  const catalog = (available || []).map(c => `${c.title} (${c.category || 'General'})`).join('; ');
+
+  const prompt = `A learner on "Paradise Of The Eternal Learners" has completed these courses: ${completed.join(', ') || 'none yet'}. They currently have these in progress: ${inProgress.join(', ') || 'none'}. Here is the course catalog available to them: ${catalog || 'no other courses available yet'}. Recommend 2-3 next courses or topics for them to study next, with a one-sentence reason for each. Be encouraging and concise (under 120 words total).`;
+
+  try{
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    if(data.error){ throw new Error(data.error.message || 'AI request failed'); }
+    const text = (data.content || []).map(b => b.text || '').join('\n').trim();
+    output.className = 'ai-rec-output';
+    output.textContent = text || 'No recommendation received — try again.';
+  } catch(err){
+    output.className = 'ai-rec-output';
+    output.textContent = 'AI error: ' + err.message;
+  }
+}
 </script>
 </body>
 </html>

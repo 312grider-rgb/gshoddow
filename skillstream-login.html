@@ -107,8 +107,8 @@
 /* ====================================================================
    CONFIG — REQUIRED — same project as your other SkillStream pages
    ==================================================================== */
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -175,58 +175,60 @@ async function handleSubmit(){
 
   setLoading(true);
 
-  if(mode === 'login'){
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    setLoading(false);
+  try{
+    if(mode === 'login'){
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
-    if(error){
-      if(error.message.toLowerCase().includes('email not confirmed')){
-        showMsg('Please confirm your email first — check your inbox for the confirmation link.', 'error');
-      } else {
-        showMsg(error.message, 'error');
-      }
-      return;
-    }
-
-    window.location.href = 'skillstream-dashboard.html';
-
-  } else {
-    const fullName = document.getElementById('fullName').value.trim();
-    if(!fullName){
-      setLoading(false);
-      showMsg('Please enter your full name.', 'error');
-      return;
-    }
-
-    const { data, error } = await sb.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin + '/skillstream-confirm.html'
-      }
-    });
-    setLoading(false);
-
-    if(error){
-      showMsg(error.message, 'error');
-      return;
-    }
-
-    // Create the profile row right away so role/name are set even before email confirmation
-    if(data.user){
-      const { error: profileError } = await sb.from('profiles').upsert({
-        id: data.user.id,
-        full_name: fullName,
-        role: selectedRole
-      }, { onConflict: 'id' });
-
-      if(profileError){
-        showMsg('Account created, but profile setup had an issue: ' + profileError.message, 'error');
+      if(error){
+        if(error.message.toLowerCase().includes('email not confirmed')){
+          showMsg('Please confirm your email first — check your inbox for the confirmation link.', 'error');
+        } else {
+          showMsg(error.message, 'error');
+        }
         return;
       }
-    }
 
-    showMsg('Account created! Check your email for a confirmation link before logging in.', 'success');
+      window.location.href = 'skillstream-dashboard.html';
+
+    } else {
+      const fullName = document.getElementById('fullName').value.trim();
+      if(!fullName){
+        showMsg('Please enter your full name.', 'error');
+        return;
+      }
+
+      const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin + '/skillstream-confirm.html'
+        }
+      });
+
+      if(error){
+        showMsg(error.message, 'error');
+        return;
+      }
+
+      if(data.user){
+        const { error: profileError } = await sb.from('profiles').upsert({
+          id: data.user.id,
+          full_name: fullName,
+          role: selectedRole
+        }, { onConflict: 'id' });
+
+        if(profileError){
+          showMsg('Account created, but profile setup had an issue: ' + profileError.message, 'error');
+          return;
+        }
+      }
+
+      showMsg('Account created! Check your email for a confirmation link before logging in.', 'success');
+    }
+  } catch(err){
+    showMsg('Something went wrong connecting to the server: ' + (err.message || err), 'error');
+  } finally{
+    setLoading(false);
   }
 }
 
