@@ -203,6 +203,15 @@
     <textarea id="courseDesc" placeholder="What will students learn?"></textarea>
     <label>Category</label>
     <input type="text" id="courseCategory" placeholder="e.g. Photography, Business, Language">
+    <label>Academic Level (optional)</label>
+    <select id="courseLevel">
+      <option value="">Not academic / General skill course</option>
+      <option value="kg">Kindergarten</option>
+      <option value="elementary">Elementary School</option>
+      <option value="middle_school">Middle School</option>
+      <option value="high_school">High School</option>
+      <option value="university">University</option>
+    </select>
     <label>Thumbnail image URL (optional)</label>
     <input type="text" id="courseThumb" placeholder="https://...">
     <label style="display:flex; align-items:center; gap:8px;">
@@ -352,6 +361,7 @@ function openCourseModal(){
   document.getElementById('courseTitle').value = '';
   document.getElementById('courseDesc').value = '';
   document.getElementById('courseCategory').value = '';
+  document.getElementById('courseLevel').value = '';
   document.getElementById('courseThumb').value = '';
   document.getElementById('coursePublished').checked = false;
   openModal('courseOverlay');
@@ -365,6 +375,7 @@ function editCourse(id){
   document.getElementById('courseTitle').value = c.title || '';
   document.getElementById('courseDesc').value = c.description || '';
   document.getElementById('courseCategory').value = c.category || '';
+  document.getElementById('courseLevel').value = c.education_level || '';
   document.getElementById('courseThumb').value = c.thumbnail_url || '';
   document.getElementById('coursePublished').checked = !!c.is_published;
   openModal('courseOverlay');
@@ -379,6 +390,7 @@ async function saveCourse(){
     title,
     description: document.getElementById('courseDesc').value.trim(),
     category: document.getElementById('courseCategory').value.trim(),
+    education_level: document.getElementById('courseLevel').value || null,
     thumbnail_url: document.getElementById('courseThumb').value.trim(),
     is_published: document.getElementById('coursePublished').checked,
     teacher_id: currentUser.id
