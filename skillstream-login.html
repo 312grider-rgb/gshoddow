@@ -188,7 +188,12 @@ async function handleSubmit(){
         return;
       }
 
-      window.location.href = 'skillstream-dashboard.html';
+      const { data: profile } = await sb.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+      if(profile?.role === 'teacher'){
+        window.location.href = 'skillstream-courses.html';
+      } else {
+        window.location.href = 'skillstream-dashboard.html';
+      }
 
     } else {
       const fullName = document.getElementById('fullName').value.trim();

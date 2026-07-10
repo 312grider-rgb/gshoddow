@@ -60,7 +60,15 @@ function showSuccess(){
     <h1>Email confirmed!</h1>
     <p>Taking you to your dashboard...</p>
   `;
-  setTimeout(()=> window.location.href = 'skillstream-dashboard.html', 1200);
+  setTimeout(async ()=>{
+    const { data: { session } } = await sb.auth.getSession();
+    let destination = 'skillstream-dashboard.html';
+    if(session){
+      const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+      if(profile?.role === 'teacher') destination = 'skillstream-courses.html';
+    }
+    window.location.href = destination;
+  }, 1200);
 }
 
 async function handleConfirmation(){
