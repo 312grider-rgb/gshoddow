@@ -9,8 +9,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --ink:#1B2A4A; --gold:#C99A44; --cream:#FBF8F2; --sage:#6B8F71;
-    --charcoal:#2B2B2B; --line:#E4DFD3; --danger:#B5533C;
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583; --cream:#FBF7EF; --sage:#6B8F71;
+    --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#B5533C;
   }
   *{box-sizing:border-box;}
   body{
@@ -18,6 +18,8 @@
     display:flex; align-items:center; justify-content:center; padding:24px;
   }
   h1,.display{font-family:'Fraunces',serif;}
+  button, a{ transition:transform 0.18s cubic-bezier(.22,1,.36,1); }
+  button:active{ transform:scale(0.97); }
   .card{
     background:var(--cream); width:100%; max-width:380px; border-radius:20px; padding:28px 24px;
   }

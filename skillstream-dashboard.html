@@ -9,15 +9,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --ink:#1B2A4A; --gold:#C99A44; --cream:#FBF8F2; --sage:#6B8F71;
-    --charcoal:#2B2B2B; --line:#E4DFD3;
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583; --cream:#FBF7EF; --sage:#6B8F71;
+    --charcoal:#2B2B2B; --line:#E9E2D2;
   }
   *{box-sizing:border-box;}
   body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:50px;}
   h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  button, a, .btn, .course-card, .chip{ transition:transform 0.18s cubic-bezier(.22,1,.36,1), box-shadow 0.18s cubic-bezier(.22,1,.36,1); }
+  button:active, a.btn:active, .btn:active, .course-card:active{ transform:scale(0.97); }
   a{text-decoration:none;}
 
-  header.top{background:var(--ink); color:var(--cream); padding:22px 18px 28px; position:relative;}
+  header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:22px 18px 28px; position:relative;}
   header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
   header.top h1{margin:0; font-size:25px;}
   header.top p{margin:6px 0 0; font-size:14px; opacity:0.85;}
@@ -124,7 +126,7 @@
     font-size:14px; font-weight:600; cursor:pointer; width:100%;
   }
   .ai-rec-output{
-    margin-top:12px; background:#FBF8F2; border:1px solid var(--line); border-radius:12px;
+    margin-top:12px; background:#FBF7EF; border:1px solid var(--line); border-radius:12px;
     padding:14px; font-size:14px; line-height:1.6; white-space:pre-wrap; display:none;
   }
   .ai-rec-output.loading-text{color:#999; font-style:italic;}
