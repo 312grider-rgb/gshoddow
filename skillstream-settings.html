@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
+    --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2;
+    --surface:#ffffff;
+    --shadow-soft:0 2px 10px rgba(20,31,56,0.06);
+    --shadow-card:0 8px 24px rgba(20,31,56,0.08);
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  /* Dark theme override — flips every page that includes this same
+     variable block just by toggling data-theme on <html>. Because
+     colors are defined as CSS custom properties (not hardcoded), most
+     UI automatically adapts once a page's hardcoded #fff card
+     backgrounds are also swapped to var(--surface) (see rollout note). */
+  html[data-theme="dark"]{
+    --ink:#EDE9DD;
+    --ink-2:#F5F1E6;
+    --gold:#D9B366;
+    --gold-light:#E9CD8F;
+    --cream:#12172A;
+    --sage:#7FAF88;
+    --charcoal:#EDE9DD;
+    --line:#2A3350;
+    --surface:#1B2138;
+    --shadow-soft:0 2px 10px rgba(0,0,0,0.3);
+    --shadow-card:0 8px 24px rgba(0,0,0,0.4);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal);
+    padding-bottom:40px; -webkit-font-smoothing:antialiased; transition:background 0.25s var(--ease), color 0.25s var(--ease);
+  }
+  h1,h2,h3,.display{font-family:'Fraunces',serif; letter-spacing:-0.01em;}
+  button, a{transition:transform 0.18s var(--ease);}
+  button:active, a:active{transform:scale(0.97);}
+
+  header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:26px 20px 30px;}
+  html[data-theme="dark"] header.top{color:var(--ink);}
+  header.top .eyebrow{font-size:11.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px; font-weight:600;}
+  header.top h1{margin:0; font-size:26px; font-weight:600;}
+  header.top p{margin:8px 0 0; font-size:14px; opacity:0.8;}
+
+  .wrap{padding:20px; max-width:520px; margin:0 auto;}
+  .section-title{font-size:11.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700; margin:24px 0 12px;}
+  .section-title:first-child{margin-top:0;}
+
+  .card{background:var(--surface); border-radius:16px; box-shadow:var(--shadow-card); overflow:hidden; margin-bottom:6px;}
+  .setting-row{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:16px 18px; border-bottom:1px solid var(--line);
+  }
+  .setting-row:last-child{border-bottom:none;}
+  .setting-row .label{font-size:14.5px; font-weight:600; color:var(--ink);}
+  .setting-row .desc{font-size:12px; color:#8a8474; margin-top:2px;}
+
+  /* Toggle switch */
+  .switch{position:relative; width:48px; height:28px; flex:0 0 48px;}
+  .switch input{opacity:0; width:0; height:0;}
+  .switch-track{
+    position:absolute; inset:0; background:var(--line); border-radius:20px; cursor:pointer; transition:background 0.2s var(--ease);
+  }
+  .switch-track:before{
+    content:''; position:absolute; width:22px; height:22px; left:3px; top:3px; background:#fff; border-radius:50%;
+    transition:transform 0.2s var(--ease); box-shadow:0 1px 4px rgba(0,0,0,0.2);
+  }
+  .switch input:checked + .switch-track{background:var(--sage);}
+  .switch input:checked + .switch-track:before{transform:translateX(20px);}
+
+  select{
+    padding:9px 12px; border:1.5px solid var(--line); border-radius:9px; font-size:14px;
+    font-family:'Inter',sans-serif; background:var(--surface); color:var(--charcoal);
+  }
+
+  .lang-preview{
+    background:var(--surface); border-radius:14px; padding:16px 18px; margin-top:10px; box-shadow:var(--shadow-soft);
+  }
+  .lang-preview .k{font-size:11px; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;}
+  .lang-preview .line{font-size:14.5px; margin-bottom:6px; color:var(--charcoal);}
+  .lang-note{font-size:12px; color:#8a8474; line-height:1.5; margin-top:10px; padding:0 4px;}
+
+  .btn-danger{
+    width:100%; background:none; border:none; color:#c0523a; font-weight:600; font-size:14.5px;
+    padding:16px 18px; text-align:left; cursor:pointer;
+  }
+
+  .toast{
+    position:fixed; top:18px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:var(--cream); padding:12px 20px; border-radius:30px;
+    font-size:14px; z-index:100; display:none;
+  }
+  .back-link{display:inline-block; margin-top:20px; font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1 id="pageTitle">Settings</h1>
+</header>
+
+<div class="wrap">
+  <div class="section-title" id="titleAppearance">Appearance</div>
+  <div class="card">
+    <div class="setting-row">
+      <div>
+        <div class="label" id="labelDarkMode">Dark Mode</div>
+        <div class="desc" id="descDarkMode">Easier on the eyes at night</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+        <span class="switch-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="section-title" id="titleLanguage">Language</div>
+  <div class="card">
+    <div class="setting-row">
+      <div>
+        <div class="label" id="labelLanguage">App Language</div>
+        <div class="desc" id="descLanguage">Applies to this Settings page now</div>
+      </div>
+      <select id="languageSelect" onchange="changeLanguage()">
+        <option value="en">English</option>
+        <option value="ar">العربية</option>
+        <option value="fr">Français</option>
+        <option value="es">Español</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+  </div>
+  <div class="lang-note" id="langNote">This page is fully translated as a working example. Full site-wide translation across every page is a larger rollout — ask if you'd like it applied everywhere.</div>
+
+  <div class="section-title" id="titleNotifications">Notifications</div>
+  <div class="card">
+    <div class="setting-row">
+      <div>
+        <div class="label" id="labelInApp">In-App Notifications</div>
+        <div class="desc" id="descInApp">Certificates, replies, and updates</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="notifyInAppToggle" onchange="saveNotificationPrefs()">
+        <span class="switch-track"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="label" id="labelEmail">Email Notifications</div>
+        <div class="desc" id="descEmail">Occasional summaries and reminders</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="notifyEmailToggle" onchange="saveNotificationPrefs()">
+        <span class="switch-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="section-title" id="titleAccount">Account</div>
+  <div class="card">
+    <div class="setting-row">
+      <div>
+        <div class="label" id="labelProfile">Edit Profile</div>
+        <div class="desc" id="descProfile">Name, bio, avatar</div>
+      </div>
+      <a href="skillstream-profile.html" style="font-size:13px; font-weight:700; color:var(--gold);">Open →</a>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="label" id="labelNewProfile">Create Another Profile</div>
+        <div class="desc" id="descNewProfile">Sign out and set up a new account</div>
+      </div>
+      <button onclick="signOutAndCreateNew()" id="btnNewProfile" style="font-size:13px; font-weight:700; color:var(--gold); background:none; border:none;">Add →</button>
+    </div>
+  </div>
+  <div class="card">
+    <button class="btn-danger" onclick="signOut()" id="btnLogout">Log Out</button>
+  </div>
+
+  <a class="back-link" href="skillstream-dashboard.html" id="backLink">&larr; Back to Dashboard</a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====================================================================
+   CONFIG — REQUIRED — same project as your other SkillStream pages
+   ==================================================================== */
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(()=> t.style.display='none', 2000);
+}
+
+/* ---------- DARK MODE ----------
+   Stored in localStorage as 'theme' ('dark' or 'light'). Reading this
+   same key and setting document.documentElement.dataset.theme at the
+   top of any other page's <script> (before body renders) will make
+   that page respect the user's choice too, as long as that page's
+   hardcoded #fff backgrounds are swapped to var(--surface) — that's
+   the "rollout" step for pages beyond this one. */
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('darkModeToggle').checked = (theme === 'dark');
+}
+
+function toggleDarkMode(){
+  const isDark = document.getElementById('darkModeToggle').checked;
+  const theme = isDark ? 'dark' : 'light';
+  localStorage.setItem('theme', theme);
+  applyTheme(theme);
+}
+
+/* ---------- LANGUAGE ----------
+   Lightweight demo translation for this page's own UI strings.
+   Stored in localStorage as 'language'. */
+const TRANSLATIONS = {
+  en: { dir:'ltr', pageTitle:'Settings', titleAppearance:'Appearance', labelDarkMode:'Dark Mode', descDarkMode:'Easier on the eyes at night', titleLanguage:'Language', labelLanguage:'App Language', descLanguage:'Applies to this Settings page now', langNote:"This page is fully translated as a working example. Full site-wide translation across every page is a larger rollout — ask if you'd like it applied everywhere.", titleNotifications:'Notifications', labelInApp:'In-App Notifications', descInApp:'Certificates, replies, and updates', labelEmail:'Email Notifications', descEmail:'Occasional summaries and reminders', titleAccount:'Account', labelProfile:'Edit Profile', descProfile:'Name, bio, avatar', btnLogout:'Log Out', backLink:'← Back to Dashboard' },
+  ar: { dir:'rtl', pageTitle:'الإعدادات', titleAppearance:'المظهر', labelDarkMode:'الوضع الداكن', descDarkMode:'أسهل على العينين ليلاً', titleLanguage:'اللغة', labelLanguage:'لغة التطبيق', descLanguage:'تُطبَّق على صفحة الإعدادات هذه الآن', langNote:'تمت ترجمة هذه الصفحة بالكامل كمثال عملي. الترجمة الكاملة لكل صفحات الموقع تتطلب خطوة أكبر لاحقًا.', titleNotifications:'الإشعارات', labelInApp:'إشعارات داخل التطبيق', descInApp:'الشهادات والردود والتحديثات', labelEmail:'إشعارات البريد الإلكتروني', descEmail:'ملخصات وتذكيرات بين الحين والآخر', titleAccount:'الحساب', labelProfile:'تعديل الملف الشخصي', descProfile:'الاسم، النبذة، الصورة', btnLogout:'تسجيل الخروج', backLink:'→ العودة إلى لوحة التحكم' },
+  fr: { dir:'ltr', pageTitle:'Paramètres', titleAppearance:'Apparence', labelDarkMode:'Mode sombre', descDarkMode:'Plus reposant la nuit', titleLanguage:'Langue', labelLanguage:"Langue de l'application", descLanguage:'S’applique à cette page pour le moment', langNote:"Cette page est entièrement traduite à titre d'exemple. La traduction complète du site est une étape ultérieure plus large.", titleNotifications:'Notifications', labelInApp:"Notifications dans l'application", descInApp:'Certificats, réponses et mises à jour', labelEmail:'Notifications par e-mail', descEmail:'Résumés et rappels occasionnels', titleAccount:'Compte', labelProfile:'Modifier le profil', descProfile:'Nom, bio, avatar', btnLogout:'Se déconnecter', backLink:'← Retour au tableau de bord' },
+  es: { dir:'ltr', pageTitle:'Configuración', titleAppearance:'Apariencia', labelDarkMode:'Modo oscuro', descDarkMode:'Más cómodo por la noche', titleLanguage:'Idioma', labelLanguage:'Idioma de la app', descLanguage:'Se aplica a esta página de ajustes por ahora', langNote:'Esta página está totalmente traducida como ejemplo funcional. La traducción completa del sitio es un paso más amplio a futuro.', titleNotifications:'Notificaciones', labelInApp:'Notificaciones en la app', descInApp:'Certificados, respuestas y novedades', labelEmail:'Notificaciones por correo', descEmail:'Resúmenes y recordatorios ocasionales', titleAccount:'Cuenta', labelProfile:'Editar perfil', descProfile:'Nombre, bio, avatar', btnLogout:'Cerrar sesión', backLink:'← Volver al panel' },
+  zh: { dir:'ltr', pageTitle:'设置', titleAppearance:'外观', labelDarkMode:'深色模式', descDarkMode:'夜间使用更护眼', titleLanguage:'语言', labelLanguage:'应用语言', descLanguage:'目前仅应用于此设置页面', langNote:'此页面已完整翻译作为示例。整个网站的完整翻译是后续更大的工作,如需要可以告诉我们。', titleNotifications:'通知', labelInApp:'应用内通知', descInApp:'证书、回复和更新', labelEmail:'邮件通知', descEmail:'偶尔的摘要和提醒', titleAccount:'账户', labelProfile:'编辑资料', descProfile:'姓名、简介、头像', btnLogout:'退出登录', backLink:'← 返回仪表盘' }
+};
+
+function applyLanguage(lang){
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  document.documentElement.setAttribute('lang', lang);
+  document.documentElement.setAttribute('dir', t.dir);
+  Object.keys(t).forEach(key => {
+    if(key === 'dir') return;
+    const el = document.getElementById(key);
+    if(el) el.textContent = t[key];
+  });
+  document.getElementById('languageSelect').value = lang;
+}
+
+function changeLanguage(){
+  const lang = document.getElementById('languageSelect').value;
+  localStorage.setItem('language', lang);
+  applyLanguage(lang);
+}
+
+/* ---------- NOTIFICATION PREFERENCES ---------- */
+async function saveNotificationPrefs(){
+  const notifyInApp = document.getElementById('notifyInAppToggle').checked;
+  const notifyEmail = document.getElementById('notifyEmailToggle').checked;
+
+  const { error } = await sb.from('profiles').update({
+    notify_inapp: notifyInApp,
+    notify_email: notifyEmail
+  }).eq('id', currentUser.id);
+
+  if(error){ toast('Error saving: ' + error.message); return; }
+  toast('Preferences saved');
+}
+
+/* ---------- AUTH + INIT ---------- */
+async function initAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('notify_inapp, notify_email').eq('id', currentUser.id).maybeSingle();
+  document.getElementById('notifyInAppToggle').checked = profile?.notify_inapp !== false;
+  document.getElementById('notifyEmailToggle').checked = profile?.notify_email !== false;
+
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(!session){ window.location.href = 'skillstream-login.html'; }
+  });
+}
+
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+async function signOutAndCreateNew(){
+  await sb.auth.signOut();
+  window.location.href = 'skillstream-login.html?mode=signup';
+}
+
+// Apply saved preferences immediately on load
+applyTheme(localStorage.getItem('theme') || 'light');
+applyLanguage(localStorage.getItem('language') || 'en');
+initAuth();
+</script>
+</body>
+</html>

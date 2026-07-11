@@ -143,8 +143,8 @@ function setRole(role){
   document.getElementById('roleTeacherBtn').classList.toggle('active', role === 'teacher');
 }
 
-// If arriving with ?role=teacher, default straight into signup mode
-if(urlParams.get('role') === 'teacher'){
+// If arriving with ?role=teacher OR ?mode=signup, default straight into signup mode
+if(urlParams.get('role') === 'teacher' || urlParams.get('mode') === 'signup'){
   setMode('signup');
 }
 
