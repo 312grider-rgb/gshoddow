@@ -201,6 +201,30 @@
     font-weight:600; font-size:14px; width:100%; box-shadow:var(--shadow-soft);
   }
 
+  /* Discussion Room */
+  .discussion-section{padding:0 20px 40px;}
+  .discussion-section .reviews-header{margin-bottom:14px;}
+  .comment-form{
+    background:#fff; border-radius:16px; padding:16px; margin-bottom:16px; box-shadow:var(--shadow-card);
+    display:flex; gap:8px; align-items:flex-end;
+  }
+  .comment-form textarea{
+    flex:1; border:1.5px solid var(--line); border-radius:11px; padding:11px 13px;
+    font-size:14px; min-height:44px; max-height:120px; resize:vertical; font-family:'Inter',sans-serif;
+  }
+  .comment-form textarea:focus{outline:none; border-color:var(--gold-light);}
+  .comment-form button{
+    background:var(--ink); color:#fff; border:none; padding:12px 16px; border-radius:11px;
+    font-weight:600; font-size:13.5px; white-space:nowrap; box-shadow:var(--shadow-soft);
+  }
+  .comment-card{
+    background:#fff; border-radius:14px; padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow-soft);
+  }
+  .comment-card .c-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;}
+  .comment-card .c-name{font-weight:600; font-size:13.5px; color:var(--ink);}
+  .comment-card .c-time{font-size:11px; color:#a8a094;}
+  .comment-card .c-body{font-size:13.5px; color:#5c5648; line-height:1.55;}
+
   /* Player */
   .overlay{
     position:fixed; inset:0; background:rgba(20,31,56,0.55);
@@ -312,6 +336,7 @@
   <div id="certBanner"></div>
   <div class="trail" id="trail"></div>
   <div class="reviews-section" id="reviewsSection"></div>
+  <div class="discussion-section" id="discussionSection"></div>
 </div>
 
 <!-- Lesson Player -->
@@ -563,6 +588,7 @@ async function openCourse(courseId){
   renderTrail();
   checkCertificateEligibility();
   loadReviews(courseId);
+  loadDiscussion(courseId);
 }
 
 function renderTrail(){
@@ -641,6 +667,11 @@ async function toggleComplete(){
   if(newState) completedLessonIds.add(activeLesson.id);
   else completedLessonIds.delete(activeLesson.id);
 
+  // Keep a public lessons_completed_count on the profile in sync, used by
+  // the Leaderboard (which can't read other users' private lesson_progress
+  // rows directly due to row-level security).
+  await sb.rpc('adjust_lessons_completed_count', { delta: newState ? 1 : -1 }).catch(() => {});
+
   updateCompleteBtn();
   renderTrail();
   checkCertificateEligibility();
@@ -688,6 +719,8 @@ async function issueCertificate(){
       body: `You completed "${activeCourse.title}" — nice work.`,
       is_read: false
     });
+
+    await sb.rpc('adjust_certificates_count', { delta: 1 }).catch(() => {});
   }
 
   const { data: profile } = await sb.from('profiles').select('full_name').eq('id', currentUser.id).maybeSingle();
@@ -742,6 +775,63 @@ async function askAI(mode){
 }
 
 initAuth();
+
+/* ---------- COURSE DISCUSSION ROOM ---------- */
+async function loadDiscussion(courseId){
+  const el = document.getElementById('discussionSection');
+  el.innerHTML = '<div class="loading">Loading discussion…</div>';
+
+  const { data, error } = await sb
+    .from('course_comments')
+    .select('*, profiles(full_name)')
+    .eq('course_id', courseId)
+    .order('created_at', { ascending:false });
+
+  if(error){
+    el.innerHTML = `<div class="empty">Couldn't load discussion.</div>`;
+    return;
+  }
+
+  const comments = data || [];
+  let html = `
+    <div class="reviews-header"><div class="avg"><span style="font-size:12.5px; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:1.2px;">Discussion</span></div></div>
+    <div class="comment-form">
+      <textarea id="commentInput" placeholder="Ask a question or share a thought about this course..."></textarea>
+      <button onclick="postComment('${courseId}')">Post</button>
+    </div>
+  `;
+
+  if(comments.length === 0){
+    html += `<div class="empty">No discussion yet — be the first to ask a question or share a thought.</div>`;
+  } else {
+    html += comments.map(c => `
+      <div class="comment-card">
+        <div class="c-top">
+          <span class="c-name">${escapeHtml(c.profiles?.full_name || 'Learner')}</span>
+          <span class="c-time">${new Date(c.created_at).toLocaleDateString()}</span>
+        </div>
+        <div class="c-body">${escapeHtml(c.message)}</div>
+      </div>
+    `).join('');
+  }
+
+  el.innerHTML = html;
+}
+
+async function postComment(courseId){
+  const input = document.getElementById('commentInput');
+  const message = input.value.trim();
+  if(!message){ toast('Write something first'); return; }
+
+  const { error } = await sb.from('course_comments').insert({
+    course_id: courseId,
+    user_id: currentUser.id,
+    message
+  });
+
+  if(error){ toast('Error: ' + error.message); return; }
+  loadDiscussion(courseId);
+}
 
 /* ---------- REVIEWS ---------- */
 async function loadReviews(courseId){

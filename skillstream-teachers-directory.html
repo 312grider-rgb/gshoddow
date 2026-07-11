@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Teachers — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
+    --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2;
+    --shadow-soft:0 2px 10px rgba(20,31,56,0.06);
+    --shadow-card:0 8px 24px rgba(20,31,56,0.08);
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:40px; -webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif; letter-spacing:-0.01em;}
+  button, a{transition:transform 0.18s var(--ease);}
+  button:active, a:active{transform:scale(0.97);}
+
+  header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:26px 20px 30px;}
+  header.top .eyebrow{font-size:11.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px; font-weight:600;}
+  header.top h1{margin:0; font-size:26px; font-weight:600;}
+  header.top p{margin:8px 0 0; font-size:14px; opacity:0.8;}
+
+  .wrap{padding:20px;}
+  .teacher-card{
+    display:flex; gap:14px; align-items:flex-start;
+    background:#fff; border-radius:18px; padding:18px; margin-bottom:14px; box-shadow:var(--shadow-card);
+  }
+  .avatar{
+    width:54px; height:54px; border-radius:50%; background:var(--gold-light);
+    display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--ink);
+    flex:0 0 54px; overflow:hidden; font-family:'Fraunces',serif; font-size:20px;
+  }
+  .avatar img{width:100%; height:100%; object-fit:cover;}
+  .info{flex:1; min-width:0;}
+  .info .name{font-weight:600; font-size:17px; color:var(--ink); font-family:'Fraunces',serif;}
+  .info .bio{font-size:13px; color:#7a7568; line-height:1.5; margin-top:4px;}
+  .info .count{font-size:12px; color:var(--gold); font-weight:700; margin-top:8px;}
+
+  .empty{text-align:center; padding:60px 20px; color:#a8a094;}
+  .loading{text-align:center; padding:30px; color:#a8a094;}
+  .back-link{display:inline-block; margin-top:14px; font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Our Teachers</h1>
+  <p>Meet the people sharing what they know.</p>
+</header>
+
+<div class="wrap">
+  <div id="teacherList"><div class="loading">Loading teachers…</div></div>
+  <a class="back-link" href="index.html">&larr; Back to Home</a>
+</div>
+
+<script>
+/* ====================================================================
+   CONFIG — REQUIRED — same project as your other SkillStream pages
+   ==================================================================== */
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+async function loadTeachers(){
+  const el = document.getElementById('teacherList');
+
+  const { data: teachers, error } = await sb
+    .from('profiles')
+    .select('id, full_name, bio, avatar_url')
+    .eq('role', 'teacher');
+
+  if(error){
+    el.innerHTML = `<div class="empty">Couldn't load teachers.<br><small>${error.message}</small></div>`;
+    return;
+  }
+
+  if(!teachers || teachers.length === 0){
+    el.innerHTML = `<div class="empty">No teachers have joined yet.</div>`;
+    return;
+  }
+
+  // Get published course counts per teacher
+  const { data: courses } = await sb.from('courses').select('teacher_id').eq('is_published', true);
+  const counts = {};
+  (courses || []).forEach(c => { counts[c.teacher_id] = (counts[c.teacher_id] || 0) + 1; });
+
+  el.innerHTML = teachers.map(t => {
+    const initials = (t.full_name || '?').trim().charAt(0).toUpperCase();
+    const courseCount = counts[t.id] || 0;
+    return `
+    <div class="teacher-card">
+      <div class="avatar">${t.avatar_url ? `<img src="${t.avatar_url}">` : initials}</div>
+      <div class="info">
+        <div class="name">${escapeHtml(t.full_name || 'Teacher')}</div>
+        <div class="bio">${escapeHtml(t.bio || 'No bio yet.')}</div>
+        <div class="count">${courseCount} published course${courseCount===1?'':'s'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+loadTeachers();
+</script>
+</body>
+</html>

@@ -50,6 +50,18 @@
   .stat .val{font-family:'Fraunces',serif; font-size:22px; font-weight:700; color:var(--ink);}
   .stat .lbl{font-size:11px; color:#777; margin-top:2px;}
 
+  .badge-grid{
+    display:flex; flex-wrap:wrap; gap:10px; margin-bottom:22px;
+  }
+  .achievement-badge{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    background:#fff; border-radius:14px; padding:12px 10px; width:78px; text-align:center;
+    box-shadow:0 2px 10px rgba(20,31,56,0.06);
+  }
+  .achievement-badge.locked{opacity:0.35;}
+  .achievement-badge .icon{font-size:24px;}
+  .achievement-badge .label{font-size:10px; font-weight:600; color:var(--ink); line-height:1.2;}
+
   .section-title{
     font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
     font-weight:700; margin-bottom:12px;
@@ -90,6 +102,9 @@
   <div class="avatar-card" id="avatarCard"><div class="loading">Loading profile…</div></div>
 
   <div class="stats-row" id="statsRow"></div>
+
+  <div class="section-title" id="achievementsTitle" style="display:none;">Achievements</div>
+  <div class="badge-grid" id="achievementsGrid"></div>
 
   <div class="section-title">Edit Profile</div>
   <div class="card">
@@ -184,11 +199,35 @@ async function loadStats(){
       sb.from('lesson_progress').select('lesson_id, completed').eq('user_id', currentUser.id).eq('completed', true),
       sb.from('certificates').select('id').eq('user_id', currentUser.id)
     ]);
+    const lessonsDone = (progress||[]).length;
+    const certsEarned = (certs||[]).length;
     statsEl.innerHTML = `
-      <div class="stat"><div class="val">${(progress||[]).length}</div><div class="lbl">Lessons Done</div></div>
-      <div class="stat"><div class="val">${(certs||[]).length}</div><div class="lbl">Certificates</div></div>
+      <div class="stat"><div class="val">${lessonsDone}</div><div class="lbl">Lessons Done</div></div>
+      <div class="stat"><div class="val">${certsEarned}</div><div class="lbl">Certificates</div></div>
     `;
+    renderAchievements(lessonsDone, certsEarned);
   }
+}
+
+function renderAchievements(lessonsDone, certsEarned){
+  const badges = [
+    { icon: '🌱', label: 'First Lesson', unlocked: lessonsDone >= 1 },
+    { icon: '📚', label: '10 Lessons', unlocked: lessonsDone >= 10 },
+    { icon: '🔥', label: '25 Lessons', unlocked: lessonsDone >= 25 },
+    { icon: '🏅', label: 'First Certificate', unlocked: certsEarned >= 1 },
+    { icon: '🎓', label: '3 Certificates', unlocked: certsEarned >= 3 },
+    { icon: '👑', label: '5 Certificates', unlocked: certsEarned >= 5 }
+  ];
+
+  const anyUnlocked = badges.some(b => b.unlocked);
+  document.getElementById('achievementsTitle').style.display = anyUnlocked ? 'block' : 'none';
+
+  document.getElementById('achievementsGrid').innerHTML = badges.map(b => `
+    <div class="achievement-badge ${b.unlocked ? '' : 'locked'}">
+      <div class="icon">${b.icon}</div>
+      <div class="label">${b.label}</div>
+    </div>
+  `).join('');
 }
 
 async function saveProfile(){
