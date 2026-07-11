@@ -61,13 +61,7 @@ function showSuccess(){
     <p>Taking you to your dashboard...</p>
   `;
   setTimeout(async ()=>{
-    const { data: { session } } = await sb.auth.getSession();
-    let destination = 'skillstream-dashboard.html';
-    if(session){
-      const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
-      if(profile?.role === 'teacher') destination = 'skillstream-courses.html';
-    }
-    window.location.href = destination;
+    window.location.href = 'skillstream-home.html';
   }, 1200);
 }
 

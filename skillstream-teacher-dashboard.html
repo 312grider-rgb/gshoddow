@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Dashboard — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
+    --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2;
+    --shadow-soft:0 2px 10px rgba(20,31,56,0.06);
+    --shadow-card:0 8px 24px rgba(20,31,56,0.08);
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:50px; -webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif; letter-spacing:-0.01em;}
+  button, a, .course-row{ transition:transform 0.18s var(--ease), box-shadow 0.18s var(--ease); }
+  button:active, a:active, .course-row:active{ transform:scale(0.97); }
+
+  header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:22px 18px 28px; position:relative;}
+  header.top .eyebrow{font-size:11.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-light); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:25px;}
+  header.top p{margin:6px 0 0; font-size:14px; opacity:0.85;}
+
+  .bell-btn{
+    position:absolute; top:20px; right:18px; background:rgba(255,255,255,0.12); border:none;
+    width:40px; height:40px; border-radius:50%; font-size:18px; color:#fff; cursor:pointer;
+  }
+  .bell-dot{
+    position:absolute; top:16px; right:14px; width:9px; height:9px; border-radius:50%;
+    background:var(--gold); border:2px solid var(--ink); display:none;
+  }
+  .notif-overlay{
+    position:fixed; inset:0; background:rgba(20,31,56,0.4); display:none; align-items:flex-start;
+    justify-content:center; z-index:60; padding-top:70px;
+  }
+  .notif-overlay.show{display:flex;}
+  .notif-panel{
+    background:#fff; width:92%; max-width:400px; border-radius:16px; max-height:70vh;
+    overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  }
+  .notif-head{display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line);}
+  .notif-head h3{font-size:15px; margin:0;}
+  .notif-head button{background:none; border:none; font-size:18px; color:#999;}
+  .notif-item{padding:13px 16px; border-bottom:1px solid var(--line); font-size:13.5px;}
+  .notif-item:last-child{border-bottom:none;}
+  .notif-item.unread{background:#FBF6EC;}
+  .notif-item .n-title{font-weight:600; color:var(--ink); margin-bottom:2px;}
+  .notif-item .n-time{font-size:11.5px; color:#999; margin-top:4px;}
+  .notif-empty{padding:30px 16px; text-align:center; color:#888; font-size:13.5px;}
+
+  .wrap{padding:18px;}
+
+  .stats-row{display:flex; gap:10px; margin-bottom:24px;}
+  .stat{flex:1; background:#fff; border-radius:14px; padding:14px 10px; text-align:center; box-shadow:var(--shadow-soft);}
+  .stat .val{font-family:'Fraunces',serif; font-size:24px; font-weight:700; color:var(--ink);}
+  .stat .lbl{font-size:11px; color:#8a8474; margin-top:2px;}
+
+  .section-title{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:12px;}
+  .section{margin-bottom:30px;}
+
+  .course-row{
+    background:#fff; border-radius:14px; padding:16px; margin-bottom:12px; box-shadow:var(--shadow-soft);
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .course-row h3{font-size:15.5px; margin:0 0 4px; color:var(--ink);}
+  .course-row .meta{font-size:12px; color:#8a8474;}
+  .badge{display:inline-block; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:20px; text-transform:uppercase; letter-spacing:0.4px; margin-top:6px;}
+  .badge.live{background:#E7F0E8; color:var(--sage);}
+  .badge.draft{background:#F3EEE3; color:#8a7748;}
+
+  .quick-links{display:flex; flex-direction:column; gap:10px;}
+  .quick-link{
+    display:flex; align-items:center; gap:14px; background:#fff; border-radius:14px; padding:16px;
+    box-shadow:var(--shadow-soft); text-decoration:none; color:inherit;
+  }
+  .quick-link .icon{font-size:22px; width:32px; text-align:center;}
+  .quick-link .label{font-weight:600; font-size:14.5px; color:var(--ink);}
+  .quick-link .sub{font-size:12px; color:#8a8474;}
+
+  .empty{background:#fff; border:1px dashed var(--line); border-radius:14px; padding:26px 18px; text-align:center; color:#8a8474; font-size:14px;}
+  .empty a{color:var(--ink); font-weight:700;}
+  .loading{text-align:center; padding:30px; color:#8a8474;}
+
+  footer.site-footer{margin-top:30px; text-align:center; font-size:12.5px; color:#8a8474;}
+  footer.site-footer .foot-links{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:10px;}
+  footer.site-footer a{color:var(--ink); font-weight:600; text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1 id="greeting">Welcome back</h1>
+  <p>Paradise Of The Eternal Learners — your teaching hub.</p>
+  <button class="bell-btn" onclick="openNotifications()">🔔</button>
+  <span class="bell-dot" id="bellDot"></span>
+</header>
+
+<div class="notif-overlay" id="notifOverlay" onclick="if(event.target===this) closeNotifications()">
+  <div class="notif-panel">
+    <div class="notif-head">
+      <h3>Notifications</h3>
+      <button onclick="closeNotifications()">&times;</button>
+    </div>
+    <div id="notifList"><div class="loading">Loading…</div></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="section">
+    <div class="section-title">Your Courses</div>
+    <div id="courseList"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Quick Links</div>
+    <div class="quick-links">
+      <a class="quick-link" href="skillstream-courses.html">
+        <span class="icon">📚</span>
+        <div><div class="label">Manage Courses & Lessons</div><div class="sub">Create, edit, publish</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-profile.html">
+        <span class="icon">👤</span>
+        <div><div class="label">Edit Profile</div><div class="sub">Name, bio, avatar</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-teachers-directory.html">
+        <span class="icon">🧑‍🏫</span>
+        <div><div class="label">Teacher Directory</div><div class="sub">See how you appear publicly</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-settings.html">
+        <span class="icon">⚙️</span>
+        <div><div class="label">Settings</div><div class="sub">Appearance, language, notifications</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-home.html">
+        <span class="icon">🔀</span>
+        <div><div class="label">Switch View</div><div class="sub">Browse as a learner too</div></div>
+      </a>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="foot-links">
+      <a href="skillstream-about.html">About</a>
+      <a href="skillstream-faq.html">FAQ</a>
+      <a href="skillstream-contact.html">Contact</a>
+      <a href="skillstream-privacy.html">Privacy</a>
+      <a href="skillstream-terms.html">Terms</a>
+    </div>
+    <div>© 2026 Paradise Of The Eternal Learners</div>
+  </footer>
+</div>
+
+<script>
+/* ====================================================================
+   CONFIG — REQUIRED — same project as your other SkillStream pages
+   ==================================================================== */
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+async function initAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('full_name').eq('id', currentUser.id).maybeSingle();
+  document.getElementById('greeting').textContent = 'Welcome back' + (profile?.full_name ? ', ' + profile.full_name.split(' ')[0] : '');
+
+  loadDashboard();
+  checkUnreadNotifications();
+
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(!session){ window.location.href = 'skillstream-login.html'; }
+  });
+}
+
+/* ---------- NOTIFICATIONS ---------- */
+async function checkUnreadNotifications(){
+  const { count } = await sb.from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', currentUser.id)
+    .eq('is_read', false);
+  document.getElementById('bellDot').style.display = (count && count > 0) ? 'block' : 'none';
+}
+
+function openNotifications(){
+  document.getElementById('notifOverlay').classList.add('show');
+  loadNotifications();
+}
+function closeNotifications(){
+  document.getElementById('notifOverlay').classList.remove('show');
+}
+
+async function loadNotifications(){
+  const el = document.getElementById('notifList');
+  const { data, error } = await sb.from('notifications')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending:false })
+    .limit(30);
+
+  if(error){ el.innerHTML = `<div class="notif-empty">Couldn't load notifications.</div>`; return; }
+  if(!data || data.length === 0){ el.innerHTML = `<div class="notif-empty">You're all caught up.</div>`; return; }
+
+  el.innerHTML = data.map(n => `
+    <div class="notif-item ${n.is_read ? '' : 'unread'}">
+      <div class="n-title">${escapeHtml(n.title)}</div>
+      <div>${escapeHtml(n.body || '')}</div>
+      <div class="n-time">${new Date(n.created_at).toLocaleString()}</div>
+    </div>
+  `).join('');
+
+  const unreadIds = data.filter(n => !n.is_read).map(n => n.id);
+  if(unreadIds.length > 0){
+    await sb.from('notifications').update({ is_read: true }).in('id', unreadIds);
+    document.getElementById('bellDot').style.display = 'none';
+  }
+}
+
+/* ---------- DASHBOARD DATA ---------- */
+async function loadDashboard(){
+  const { data: courses, error } = await sb
+    .from('courses')
+    .select('*, lessons(count)')
+    .eq('teacher_id', currentUser.id)
+    .order('created_at', { ascending:false });
+
+  if(error){
+    document.getElementById('courseList').innerHTML = `<div class="empty">Couldn't load courses.<br><small>${error.message}</small></div>`;
+    return;
+  }
+
+  const total = courses.length;
+  const published = courses.filter(c => c.is_published).length;
+  const totalLessons = courses.reduce((sum, c) => sum + (c.lessons?.[0]?.count || 0), 0);
+
+  // Certificates issued for this teacher's courses
+  const courseIds = courses.map(c => c.id);
+  let certsIssued = 0;
+  if(courseIds.length > 0){
+    const { count } = await sb.from('certificates').select('id', { count:'exact', head:true }).in('course_id', courseIds);
+    certsIssued = count || 0;
+  }
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat"><div class="val">${total}</div><div class="lbl">Courses</div></div>
+    <div class="stat"><div class="val">${published}</div><div class="lbl">Published</div></div>
+    <div class="stat"><div class="val">${totalLessons}</div><div class="lbl">Lessons</div></div>
+    <div class="stat"><div class="val">${certsIssued}</div><div class="lbl">Certs Issued</div></div>
+  `;
+
+  const el = document.getElementById('courseList');
+  if(total === 0){
+    el.innerHTML = `<div class="empty">You haven't created a course yet.<br><a href="skillstream-courses.html">Create your first course &rarr;</a></div>`;
+    return;
+  }
+
+  el.innerHTML = courses.slice(0, 6).map(c => {
+    const lessonCount = c.lessons?.[0]?.count || 0;
+    return `
+    <div class="course-row">
+      <div>
+        <h3>${escapeHtml(c.title)}</h3>
+        <div class="meta">${lessonCount} lesson${lessonCount===1?'':'s'}</div>
+        <span class="badge ${c.is_published ? 'live' : 'draft'}">${c.is_published ? 'Published' : 'Draft'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+initAuth();
+</script>
+</body>
+</html>
