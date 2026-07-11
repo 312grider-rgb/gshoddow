@@ -700,25 +700,10 @@ async function issueCertificate(){
 }
 
 /* ---------- AI TUTOR ----------
-   Uses the same "direct browser call to Anthropic" pattern as the
-   live-session AI Teacher panel: the API key is stored in
-   localStorage as 'anthropic_api_key' and sent with the
-   anthropic-dangerous-direct-browser-access header. If you'd rather
-   route this through the FastAPI backend on Render, swap the fetch
-   target below. */
-function getAnthropicKey(){
-  let key = localStorage.getItem('anthropic_api_key');
-  if(!key){
-    key = prompt('Enter your Anthropic API key to enable the AI Tutor (this is stored only on this device):');
-    if(key) localStorage.setItem('anthropic_api_key', key.trim());
-  }
-  return key;
-}
-
+   Calls our own /api/ask-ai serverless function (Vercel) instead of
+   Anthropic directly, so the API key stays server-side and is never
+   exposed in the browser. */
 async function askAI(mode){
-  const key = getAnthropicKey();
-  if(!key) return;
-
   const output = document.getElementById('aiOutput');
   const question = document.getElementById('aiQuestion').value.trim();
 
@@ -739,27 +724,17 @@ async function askAI(mode){
   output.textContent = 'Thinking…';
 
   try{
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('/api/ask-ai', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 500,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, maxTokens: 500 })
     });
 
     const data = await response.json();
-    if(data.error){ throw new Error(data.error.message || 'AI request failed'); }
+    if(data.error){ throw new Error(data.error); }
 
-    const text = (data.content || []).map(b => b.text || '').join('\n').trim();
     output.className = 'ai-output';
-    output.textContent = text || 'No response received — try again.';
+    output.textContent = data.text || 'No response received — try again.';
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'AI Tutor error: ' + err.message;
