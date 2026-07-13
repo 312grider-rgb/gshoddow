@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Tools — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -17,7 +17,7 @@
   }
   *{box-sizing:border-box;}
   body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:40px; -webkit-font-smoothing:antialiased;}
-  h1,h2,h3,.display{font-family:'Fraunces',serif; letter-spacing:-0.01em;}
+  h1,h2,h3,.display{font-family:'Syne',sans-serif; letter-spacing:-0.01em;}
   button, a{transition:transform 0.18s var(--ease), box-shadow 0.18s var(--ease);}
   button:active{transform:scale(0.97);}
 
@@ -59,7 +59,7 @@
   .submit-btn:disabled{opacity:0.6;}
 
   .ai-output{
-    margin-top:16px; background:#FBF8F2; border:1px solid var(--line); border-radius:14px; padding:16px;
+    margin-top:16px; background:#FBF7EF; border:1px solid var(--line); border-radius:14px; padding:16px;
     font-size:14.5px; line-height:1.65; white-space:pre-wrap; display:none;
   }
   .ai-output.loading-text{color:#a8a094; font-style:italic;}
@@ -81,12 +81,120 @@
 
 <div class="wrap">
   <div class="tabs">
-    <button class="tab-btn active" id="tabHomeworkBtn" onclick="switchTab('homework')">Homework Helper</button>
+    <button class="tab-btn active" id="tabAskBtn" onclick="switchTab('ask')">Ask & Explain</button>
+    <button class="tab-btn" id="tabSummaryBtn" onclick="switchTab('summary')">Summarize</button>
+    <button class="tab-btn" id="tabQuizBtn" onclick="switchTab('quiz')">Quiz Generator</button>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn" id="tabTranslateBtn" onclick="switchTab('translate')">Translate</button>
+    <button class="tab-btn" id="tabPlanBtn" onclick="switchTab('plan')">Study Plan</button>
+    <button class="tab-btn" id="tabHomeworkBtn" onclick="switchTab('homework')">Homework Helper</button>
+  </div>
+  <div class="tabs">
     <button class="tab-btn" id="tabCareerBtn" onclick="switchTab('career')">Career Coach</button>
   </div>
 
+  <!-- Ask & Explain -->
+  <div class="tool-panel active" id="askPanel">
+    <div class="card">
+      <div class="kicker">Ask & Explain</div>
+      <h3>Ask anything, get a clear answer</h3>
+      <p class="desc">Ask a question about any topic, or paste something you're studying and ask the AI to explain it more simply.</p>
+
+      <label>Your Question</label>
+      <textarea id="askQuestion" placeholder="e.g. Explain how photosynthesis works, or why the stock market crashed in 1929..."></textarea>
+
+      <button class="submit-btn" onclick="askGeneral()">Ask</button>
+      <div class="ai-output" id="askOutput"></div>
+    </div>
+  </div>
+
+  <!-- Summarize -->
+  <div class="tool-panel" id="summaryPanel">
+    <div class="card">
+      <div class="kicker">Summarize</div>
+      <h3>Turn long content into key points</h3>
+      <p class="desc">Paste notes, an article, or lesson content — get a short, clear summary back.</p>
+
+      <label>Content to Summarize</label>
+      <textarea id="summaryText" placeholder="Paste text here..." style="min-height:160px;"></textarea>
+
+      <button class="submit-btn" onclick="askSummarize()">Summarize</button>
+      <div class="ai-output" id="summaryOutput"></div>
+    </div>
+  </div>
+
+  <!-- Quiz Generator -->
+  <div class="tool-panel" id="quizPanel">
+    <div class="card">
+      <div class="kicker">Quiz Generator</div>
+      <h3>Test yourself on any topic</h3>
+      <p class="desc">Enter a topic (or paste notes) and get a short quiz with answers to check your understanding.</p>
+
+      <label>Topic or Notes</label>
+      <textarea id="quizTopic" placeholder="e.g. The French Revolution, or paste your study notes..."></textarea>
+
+      <label>Number of Questions</label>
+      <select id="quizCount">
+        <option value="3">3 questions</option>
+        <option value="5" selected>5 questions</option>
+        <option value="10">10 questions</option>
+      </select>
+
+      <button class="submit-btn" onclick="askQuiz()">Generate Quiz</button>
+      <div class="ai-output" id="quizOutput"></div>
+    </div>
+  </div>
+
+  <!-- Translate -->
+  <div class="tool-panel" id="translatePanel">
+    <div class="card">
+      <div class="kicker">Translate</div>
+      <h3>Translate content instantly</h3>
+      <p class="desc">Paste text and choose a language to translate it into.</p>
+
+      <label>Text to Translate</label>
+      <textarea id="translateText" placeholder="Paste text here..."></textarea>
+
+      <label>Translate To</label>
+      <select id="translateLang">
+        <option value="Spanish">Spanish</option>
+        <option value="French">French</option>
+        <option value="Arabic">Arabic</option>
+        <option value="Chinese">Chinese</option>
+        <option value="English">English</option>
+      </select>
+
+      <button class="submit-btn" onclick="askTranslate()">Translate</button>
+      <div class="ai-output" id="translateOutput"></div>
+    </div>
+  </div>
+
+  <!-- Study Plan -->
+  <div class="tool-panel" id="planPanel">
+    <div class="card">
+      <div class="kicker">Study Plan</div>
+      <h3>Build a plan to reach your goal</h3>
+      <p class="desc">Tell the AI what you're trying to learn and how much time you have — get a structured plan back.</p>
+
+      <label>What do you want to learn?</label>
+      <input type="text" id="planGoal" placeholder="e.g. Learn conversational Spanish">
+
+      <label>Time Available</label>
+      <select id="planTime">
+        <option value="1 week">1 week</option>
+        <option value="1 month" selected>1 month</option>
+        <option value="3 months">3 months</option>
+        <option value="6 months">6 months</option>
+      </select>
+
+      <button class="submit-btn" onclick="askStudyPlan()">Create Study Plan</button>
+      <div class="ai-output" id="planOutput"></div>
+    </div>
+  </div>
+
   <!-- Homework Helper -->
-  <div class="tool-panel active" id="homeworkPanel">
+  <div class="tool-panel" id="homeworkPanel">
     <div class="card">
       <div class="kicker">Homework Helper</div>
       <h3>Stuck on a problem?</h3>
@@ -149,8 +257,15 @@ async function initAuth(){
 }
 
 function switchTab(tab){
-  document.getElementById('homeworkPanel').classList.toggle('active', tab === 'homework');
-  document.getElementById('careerPanel').classList.toggle('active', tab === 'career');
+  const panels = ['ask', 'summary', 'quiz', 'translate', 'plan', 'homework', 'career'];
+  panels.forEach(p => {
+    document.getElementById(p + 'Panel').classList.toggle('active', p === tab);
+  });
+  document.getElementById('tabAskBtn').classList.toggle('active', tab === 'ask');
+  document.getElementById('tabSummaryBtn').classList.toggle('active', tab === 'summary');
+  document.getElementById('tabQuizBtn').classList.toggle('active', tab === 'quiz');
+  document.getElementById('tabTranslateBtn').classList.toggle('active', tab === 'translate');
+  document.getElementById('tabPlanBtn').classList.toggle('active', tab === 'plan');
   document.getElementById('tabHomeworkBtn').classList.toggle('active', tab === 'homework');
   document.getElementById('tabCareerBtn').classList.toggle('active', tab === 'career');
 }
@@ -171,6 +286,119 @@ async function callClaude(prompt, maxTokens){
   const data = await response.json();
   if(data.error) throw new Error(data.error);
   return data.text;
+}
+
+/* ---------- ASK & EXPLAIN ---------- */
+async function askGeneral(){
+  const question = document.getElementById('askQuestion').value.trim();
+  const output = document.getElementById('askOutput');
+  if(!question){ alert('Please type a question first.'); return; }
+
+  output.style.display = 'block';
+  output.className = 'ai-output loading-text';
+  output.textContent = 'Thinking…';
+
+  const prompt = `Answer this question clearly and simply, as if explaining to a curious learner. Keep it under 200 words unless more detail is truly needed.\n\nQuestion: ${question}`;
+
+  try{
+    const text = await callClaude(prompt, 600);
+    output.className = 'ai-output';
+    output.textContent = text;
+  } catch(err){
+    output.className = 'ai-output';
+    output.textContent = 'Error: ' + err.message;
+  }
+}
+
+/* ---------- SUMMARIZE ---------- */
+async function askSummarize(){
+  const text = document.getElementById('summaryText').value.trim();
+  const output = document.getElementById('summaryOutput');
+  if(!text){ alert('Please paste some content to summarize first.'); return; }
+
+  output.style.display = 'block';
+  output.className = 'ai-output loading-text';
+  output.textContent = 'Thinking…';
+
+  const prompt = `Summarize the following content into clear, concise bullet points covering the key takeaways. Keep it under 150 words.\n\nContent:\n${text}`;
+
+  try{
+    const result = await callClaude(prompt, 500);
+    output.className = 'ai-output';
+    output.textContent = result;
+  } catch(err){
+    output.className = 'ai-output';
+    output.textContent = 'Error: ' + err.message;
+  }
+}
+
+/* ---------- QUIZ GENERATOR ---------- */
+async function askQuiz(){
+  const topic = document.getElementById('quizTopic').value.trim();
+  const count = document.getElementById('quizCount').value;
+  const output = document.getElementById('quizOutput');
+  if(!topic){ alert('Please enter a topic or paste some notes first.'); return; }
+
+  output.style.display = 'block';
+  output.className = 'ai-output loading-text';
+  output.textContent = 'Thinking…';
+
+  const prompt = `Create a ${count}-question quiz based on this topic or notes. Show the answer right after each question. Keep questions clear and varied in difficulty.\n\nTopic/Notes: ${topic}`;
+
+  try{
+    const result = await callClaude(prompt, 900);
+    output.className = 'ai-output';
+    output.textContent = result;
+  } catch(err){
+    output.className = 'ai-output';
+    output.textContent = 'Error: ' + err.message;
+  }
+}
+
+/* ---------- TRANSLATE ---------- */
+async function askTranslate(){
+  const text = document.getElementById('translateText').value.trim();
+  const lang = document.getElementById('translateLang').value;
+  const output = document.getElementById('translateOutput');
+  if(!text){ alert('Please paste some text to translate first.'); return; }
+
+  output.style.display = 'block';
+  output.className = 'ai-output loading-text';
+  output.textContent = 'Thinking…';
+
+  const prompt = `Translate the following text into ${lang}. Only return the translation, nothing else.\n\nText: ${text}`;
+
+  try{
+    const result = await callClaude(prompt, 500);
+    output.className = 'ai-output';
+    output.textContent = result;
+  } catch(err){
+    output.className = 'ai-output';
+    output.textContent = 'Error: ' + err.message;
+  }
+}
+
+/* ---------- STUDY PLAN ---------- */
+async function askStudyPlan(){
+  const goal = document.getElementById('planGoal').value.trim();
+  const time = document.getElementById('planTime').value;
+  const output = document.getElementById('planOutput');
+  if(!goal){ alert('Please enter what you want to learn first.'); return; }
+
+  output.style.display = 'block';
+  output.className = 'ai-output loading-text';
+  output.textContent = 'Thinking…';
+
+  const prompt = `Create a structured study plan for someone who wants to "${goal}" within ${time}. Break it into clear phases or weeks with specific focus areas for each. Keep it realistic and under 250 words.`;
+
+  try{
+    const result = await callClaude(prompt, 700);
+    output.className = 'ai-output';
+    output.textContent = result;
+  } catch(err){
+    output.className = 'ai-output';
+    output.textContent = 'Error: ' + err.message;
+  }
 }
 
 /* ---------- HOMEWORK HELPER ---------- */

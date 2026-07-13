@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Paradise Of The Eternal Learners — Learning Never Ends</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#141F38;
@@ -24,7 +24,7 @@
     color:var(--charcoal);
     -webkit-font-smoothing:antialiased;
   }
-  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  h1,h2,h3,.display{font-family:'Syne',sans-serif;}
   button, a, .btn, .course-card, .chip{ transition:transform 0.18s cubic-bezier(.22,1,.36,1), box-shadow 0.18s cubic-bezier(.22,1,.36,1); }
   button:active, a.btn:active, .btn:active, .course-card:active{ transform:scale(0.97); }
   a{text-decoration:none; color:inherit;}
@@ -37,7 +37,7 @@
     background:var(--cream);
   }
   .brand{
-    font-family:'Fraunces',serif; font-weight:700; font-size:16px; color:var(--ink);
+    font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:var(--ink);
     line-height:1.15;
   }
   .brand small{
@@ -97,7 +97,7 @@
     display:flex; gap:16px; align-items:flex-start;
   }
   .step .num{
-    font-family:'Fraunces',serif; font-size:26px; font-weight:700; color:var(--gold);
+    font-family:'Syne',sans-serif; font-size:26px; font-weight:700; color:var(--gold);
     flex:0 0 auto; width:40px;
   }
   .step h3{font-size:16.5px; color:var(--ink); margin-bottom:4px;}
@@ -138,6 +138,68 @@
   }
   .mission-banner .kicker{color:#DCEFE0;}
   .mission-banner h2{color:#fff; font-size:22px; max-width:300px; line-height:1.4;}
+
+  /* ---------- SECTION: Featured Courses ---------- */
+  .course-scroll{display:flex; gap:14px; overflow-x:auto; padding-bottom:8px;}
+  .featured-card{
+    flex:0 0 auto; width:220px; background:#fff; border:1px solid var(--line); border-radius:16px;
+    overflow:hidden; text-decoration:none; color:inherit;
+  }
+  .featured-card .thumb{
+    height:100px; background:linear-gradient(135deg, var(--ink), var(--ink-2));
+    display:flex; align-items:flex-end; padding:10px;
+  }
+  .featured-card .thumb .cat{
+    background:rgba(255,255,255,0.95); color:var(--ink); font-size:10.5px; font-weight:700;
+    padding:3px 10px; border-radius:20px; text-transform:uppercase;
+  }
+  .featured-card .body{padding:14px;}
+  .featured-card h3{font-size:15px; margin:0 0 4px; color:var(--ink);}
+  .featured-card p{font-size:12.5px; color:#7a7568; line-height:1.4;}
+
+  /* ---------- SECTION: Live Classes ---------- */
+  .live-card{
+    background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px;
+    display:flex; align-items:center; gap:14px; margin-bottom:10px;
+  }
+  .live-dot{width:10px; height:10px; border-radius:50%; background:#B5533C; flex:0 0 10px; animation:live-pulse 1.6s ease-in-out infinite;}
+  @keyframes live-pulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .live-card h3{font-size:15px; color:var(--ink); margin-bottom:2px;}
+  .live-card p{font-size:12.5px; color:#7a7568;}
+  .live-empty{
+    background:#fff; border:1px dashed var(--line); border-radius:16px; padding:26px 20px;
+    text-align:center; color:#7a7568; font-size:14px;
+  }
+  .live-empty a{color:var(--ink); font-weight:700;}
+
+  /* ---------- SECTION: AI Tutor Promo ---------- */
+  .ai-promo{
+    background:linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius:20px; padding:26px 22px; color:#fff;
+  }
+  .ai-promo .kicker{color:rgba(255,255,255,0.85);}
+  .ai-promo h2{color:#fff; font-size:22px; max-width:280px;}
+  .ai-promo p{color:rgba(255,255,255,0.9); font-size:14px; line-height:1.55; margin:12px 0 18px; max-width:320px;}
+  .ai-promo .tool-list{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+  .ai-promo .tool-pill{
+    background:rgba(255,255,255,0.18); padding:6px 12px; border-radius:20px; font-size:12px; font-weight:600;
+  }
+  .ai-promo .btn{background:#fff; color:var(--gold); display:inline-flex; width:auto;}
+
+  /* ---------- SECTION: Success Stories ---------- */
+  .story-scroll{display:flex; gap:14px; overflow-x:auto; padding-bottom:8px;}
+  .story-card{
+    flex:0 0 auto; width:250px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px;
+  }
+  .story-card .quote{font-size:14px; color:#4a4638; line-height:1.55; font-style:italic; margin-bottom:14px;}
+  .story-card .person{display:flex; align-items:center; gap:10px;}
+  .story-card .avatar{
+    width:34px; height:34px; border-radius:50%; background:var(--gold-light); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex:0 0 34px;
+  }
+  .story-card .name{font-size:13px; font-weight:700; color:var(--ink);}
+  .story-card .role{font-size:11.5px; color:#8a8474;}
+  .story-note{font-size:11.5px; color:#a8a094; margin-top:4px;}
 
   /* ---------- FOOTER ---------- */
   footer{
@@ -186,60 +248,56 @@
   </div>
 </section>
 
+<section class="section" style="background:#fff;">
+  <div class="kicker">Featured Courses</div>
+  <h2>Popular right now</h2>
+  <div class="course-scroll" id="featuredCourses">
+    <div style="color:#8a8474; font-size:13px;">Loading…</div>
+  </div>
+</section>
+
 <section class="section">
-  <div class="kicker">How It Works</div>
-  <h2>Three steps to your next skill</h2>
-  <div class="steps">
-    <div class="step">
-      <div class="num">01</div>
-      <div><h3>Pick a course or class</h3><p>Browse self-paced courses or join a live session with a real teacher.</p></div>
+  <div class="kicker">Live Now</div>
+  <h2>Live classes happening now</h2>
+  <div id="liveClasses">
+    <div class="live-empty">No live classes are running right now — check back soon, or explore self-paced courses in the meantime.<br><a href="skillstream-self-paced.html">Browse courses →</a></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="ai-promo">
+    <div class="kicker">AI Learning Hub</div>
+    <h2>Your personal AI study companion</h2>
+    <p>Ask questions, summarize lessons, generate quizzes, translate content, and build a study plan — all in one place.</p>
+    <div class="tool-list">
+      <span class="tool-pill">Ask & Explain</span>
+      <span class="tool-pill">Quiz Generator</span>
+      <span class="tool-pill">Summarize</span>
+      <span class="tool-pill">Translate</span>
+      <span class="tool-pill">Study Plan</span>
     </div>
-    <div class="step">
-      <div class="num">02</div>
-      <div><h3>Learn with support</h3><p>Watch lessons, ask your AI tutor questions, and track your progress as you go.</p></div>
-    </div>
-    <div class="step">
-      <div class="num">03</div>
-      <div><h3>Earn your certificate</h3><p>Finish a course and get a certificate that shows what you've learned.</p></div>
-    </div>
+    <a class="btn" href="skillstream-login.html">Try the AI Learning Hub</a>
   </div>
 </section>
 
 <section class="section" style="background:#fff;">
-  <div class="kicker">Two Ways In</div>
-  <h2>Whichever side of the desk you're on</h2>
-  <div class="paths">
-    <div class="path-card learn">
-      <span class="tag">Learners</span>
-      <h3>Start learning today</h3>
-      <p>Explore self-paced courses across every category, learn at your own speed, and build a certificate portfolio.</p>
-      <a class="link-btn" href="skillstream-self-paced.html">Browse courses &rarr;</a>
+  <div class="kicker">Success Stories</div>
+  <h2>What learners are saying</h2>
+  <div class="story-scroll">
+    <div class="story-card">
+      <div class="quote">"I finished my first course in two weeks and actually understood everything, thanks to the AI Tutor explaining things my own way."</div>
+      <div class="person"><div class="avatar">A</div><div><div class="name">Amara</div><div class="role">Self-paced learner</div></div></div>
     </div>
-    <div class="path-card teach">
-      <span class="tag">Teachers</span>
-      <h3>Share what you know</h3>
-      <p>Build courses, run live classes, and reach learners who are ready to grow — no classroom required.</p>
-      <a class="link-btn" href="skillstream-login.html?role=teacher">Become a teacher &rarr;</a>
+    <div class="story-card">
+      <div class="quote">"Publishing my first course took an afternoon. Seeing students actually finish it and leave reviews felt incredible."</div>
+      <div class="person"><div class="avatar">D</div><div><div class="name">Daniel</div><div class="role">Teacher</div></div></div>
+    </div>
+    <div class="story-card">
+      <div class="quote">"The streak feature is what actually got me to show up every day. Small thing, big difference."</div>
+      <div class="person"><div class="avatar">S</div><div><div class="name">Sofia</div><div class="role">Self-paced learner</div></div></div>
     </div>
   </div>
-</section>
-
-<section class="section">
-  <div class="kicker">Explore</div>
-  <h2>Popular categories</h2>
-  <div class="cat-scroll">
-    <div class="cat-pill"><span class="icon">🎨</span>Design</div>
-    <div class="cat-pill"><span class="icon">💻</span>Technology</div>
-    <div class="cat-pill"><span class="icon">📈</span>Business</div>
-    <div class="cat-pill"><span class="icon">🗣️</span>Language</div>
-    <div class="cat-pill"><span class="icon">🎵</span>Music</div>
-    <div class="cat-pill"><span class="icon">🧘</span>Wellness</div>
-  </div>
-</section>
-
-<section class="mission-banner">
-  <div class="kicker">Our Mission</div>
-  <h2>Help everyone learn and live better.</h2>
+  <div class="story-note">Example stories shown while the platform grows its first cohort of learners.</div>
 </section>
 
 <footer>
@@ -259,8 +317,47 @@
     <a href="skillstream-privacy.html">Privacy</a>
     <a href="skillstream-terms.html">Terms</a>
   </div>
+  <div class="copyright">hello@gshoddow.vercel.app</div>
   <div class="copyright">© 2026 Paradise Of The Eternal Learners. Help everyone learn and live better.</div>
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+async function loadFeaturedCourses(){
+  const el = document.getElementById('featuredCourses');
+  const { data, error } = await sb
+    .from('courses')
+    .select('id, title, description, category, thumbnail_url')
+    .eq('is_published', true)
+    .order('created_at', { ascending:false })
+    .limit(8);
+
+  if(error || !data || data.length === 0){
+    el.innerHTML = `<div style="color:#8a8474; font-size:13px;">New courses are being added regularly — check back soon.</div>`;
+    return;
+  }
+
+  el.innerHTML = data.map(c => {
+    const bg = c.thumbnail_url ? `background-image:url('${c.thumbnail_url}'); background-size:cover;` : '';
+    return `
+    <a class="featured-card" href="skillstream-login.html">
+      <div class="thumb" style="${bg}"><span class="cat">${escapeHtml(c.category || 'General')}</span></div>
+      <div class="body">
+        <h3>${escapeHtml(c.title)}</h3>
+        <p>${escapeHtml((c.description || '').slice(0, 70))}</p>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+loadFeaturedCourses();
+</script>
 
 </body>
 </html>
