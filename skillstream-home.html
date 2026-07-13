@@ -42,6 +42,29 @@
   }
 
   .loading{text-align:center; padding:60px 20px; color:#8a8474;}
+
+  .inspiration-card{
+    background:linear-gradient(135deg, var(--ink) 0%, var(--ink-2) 100%);
+    color:var(--cream); border-radius:20px; padding:22px; margin-bottom:20px;
+    box-shadow:var(--shadow-card);
+  }
+  .inspiration-card .kicker{
+    font-size:11px; letter-spacing:1.8px; text-transform:uppercase; color:var(--gold-light);
+    font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px;
+  }
+  .inspiration-card .quote{font-family:'Fraunces',serif; font-size:18px; line-height:1.5; margin-bottom:6px;}
+  .inspiration-card .quote-source{font-size:12px; opacity:0.65; margin-bottom:16px;}
+  .inspiration-row{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .streak-pill{
+    display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); padding:8px 14px;
+    border-radius:20px; font-size:13px; font-weight:600;
+  }
+  .streak-pill .flame{font-size:15px;}
+  .streak-btn{
+    background:var(--gold); color:var(--ink); border:none; padding:10px 18px; border-radius:11px;
+    font-size:13.5px; font-weight:700; cursor:pointer;
+  }
+  .streak-btn:disabled{background:rgba(255,255,255,0.15); color:var(--cream); opacity:0.8;}
 </style>
 </head>
 <body>
@@ -53,7 +76,9 @@
 </header>
 
 <div class="wrap" id="content">
-  <div class="loading">Loading…</div>
+  <div id="inspirationCard"></div>
+  <div class="loading" id="viewsLoading">Loading…</div>
+  <div id="viewCards"></div>
 </div>
 
 <script>
@@ -75,7 +100,8 @@ async function init(){
 
   const role = profile?.role || 'student';
 
-  document.getElementById('content').innerHTML = `
+  document.getElementById('viewsLoading').style.display = 'none';
+  document.getElementById('viewCards').innerHTML = `
     <a class="view-card ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html">
       ${role === 'student' ? '<span class="suggested-tag">Your account</span>' : ''}
       <div class="icon">🎓</div>
@@ -92,9 +118,103 @@ async function init(){
       <div class="go">Go to Teacher Dashboard →</div>
     </a>
   `;
+
+  loadInspiration(session.user.id);
 }
 
 init();
+
+/* ---------- DAILY INSPIRATION + STREAK ----------
+   Uses the challenge_completions table: one row per user per calendar
+   day they mark as done. Streak = consecutive days ending today or
+   yesterday (so it doesn't reset the instant midnight passes). */
+const DAILY_QUOTES = [
+  { text: "The beautiful thing about learning is that no one can take it away from you.", source: "B.B. King" },
+  { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", source: "Mahatma Gandhi" },
+  { text: "An investment in knowledge always pays the best interest.", source: "Benjamin Franklin" },
+  { text: "The expert in anything was once a beginner.", source: "Helen Hayes" },
+  { text: "Learning never exhausts the mind.", source: "Leonardo da Vinci" },
+  { text: "Education is not the filling of a pail, but the lighting of a fire.", source: "William Butler Yeats" },
+  { text: "The more that you read, the more things you will know.", source: "Dr. Seuss" },
+  { text: "You don't have to be great to start, but you have to start to be great.", source: "Zig Ziglar" },
+  { text: "Small daily improvements are the key to staggering long-term results.", source: "James Clear" },
+  { text: "It always seems impossible until it's done.", source: "Nelson Mandela" }
+];
+
+function dayOfYear(date){
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+function todayDateString(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function renderQuote(){
+  const q = DAILY_QUOTES[dayOfYear(new Date()) % DAILY_QUOTES.length];
+  return q;
+}
+
+async function loadInspiration(userId){
+  const el = document.getElementById('inspirationCard');
+  const quote = renderQuote();
+
+  const { data, error } = await sb
+    .from('challenge_completions')
+    .select('completed_date')
+    .eq('user_id', userId)
+    .order('completed_date', { ascending:false })
+    .limit(60);
+
+  let streak = 0;
+  let doneToday = false;
+
+  if(!error && data){
+    const dates = new Set(data.map(r => r.completed_date));
+    const today = todayDateString();
+    doneToday = dates.has(today);
+
+    // Count consecutive days backward from today (or yesterday if today not yet done)
+    let cursor = new Date();
+    if(!doneToday) cursor.setDate(cursor.getDate() - 1);
+
+    while(true){
+      const key = cursor.getFullYear() + '-' + String(cursor.getMonth()+1).padStart(2,'0') + '-' + String(cursor.getDate()).padStart(2,'0');
+      if(dates.has(key)){
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+  }
+
+  el.innerHTML = `
+    <div class="inspiration-card">
+      <div class="kicker">✨ Daily Inspiration</div>
+      <div class="quote">"${quote.text}"</div>
+      <div class="quote-source">— ${quote.source}</div>
+      <div class="inspiration-row">
+        <div class="streak-pill"><span class="flame">🔥</span> ${streak} day${streak===1?'':'s'} streak</div>
+        <button class="streak-btn" id="streakBtn" ${doneToday ? 'disabled' : ''} onclick="markTodayDone('${userId}')">
+          ${doneToday ? '✓ Done Today' : 'Mark Today Done'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function markTodayDone(userId){
+  const { error } = await sb.from('challenge_completions').upsert({
+    user_id: userId,
+    completed_date: todayDateString()
+  }, { onConflict: 'user_id,completed_date' });
+
+  if(error){ alert('Error: ' + error.message); return; }
+  loadInspiration(userId);
+}
 </script>
 </body>
 </html>
