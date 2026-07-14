@@ -1,8 +1,8 @@
 // api/ask-ai.js
-// Vercel serverless function — deploys automatically because it's in /api.
-// Keeps the Anthropic API key server-side (set as ANTHROPIC_API_KEY in
+// Vercel serverless function -- deploys automatically because it's in /api.
+// Calls Groq's API server-side (key set as GROQ_API_KEY in
 // Vercel -> Project Settings -> Environment Variables). The browser only
-// ever talks to this endpoint, never to Anthropic directly.
+// ever talks to this endpoint, never to Groq directly.
 //
 // Written in plain CommonJS (module.exports) since this repo has no
 // package.json / build step, so there's no ambiguity about module type.
@@ -23,9 +23,9 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    res.status(500).json({ error: 'Server is missing ANTHROPIC_API_KEY. Add it in Vercel -> Project Settings -> Environment Variables.' });
+    res.status(500).json({ error: 'Server is missing GROQ_API_KEY. Add it in Vercel -> Project Settings -> Environment Variables.' });
     return;
   }
 
@@ -44,29 +44,38 @@ module.exports = async (req, res) => {
     return;
   }
 
+  const MODEL = 'llama-3.3-70b-versatile';
+
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: Math.min(maxTokens || 500, 1500),
-        messages: [{ role: 'user', content: prompt }]
+        model: MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: Math.min(maxTokens || 500, 2000)
       })
     });
 
     const data = await response.json();
 
     if (data.error) {
-      res.status(500).json({ error: data.error.message || 'Anthropic API error' });
+      res.status(500).json({ error: data.error.message || 'Groq API error' });
       return;
     }
 
-    const text = (data.content || []).map((block) => block.text || '').join('\n').trim();
+    const text = (data.choices && data.choices[0] && data.choices[0].message)
+      ? data.choices[0].message.content.trim()
+      : '';
+
+    if (!text) {
+      res.status(200).json({ text: '', error: 'No content returned from Groq.' });
+      return;
+    }
+
     res.status(200).json({ text: text });
 
   } catch (err) {
