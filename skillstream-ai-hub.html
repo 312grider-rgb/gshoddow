@@ -64,10 +64,22 @@
   }
   .ai-output.loading-text{color:#a8a094; font-style:italic;}
 
+  .chat-bubble{
+    padding:11px 14px; border-radius:14px; font-size:14px; line-height:1.5; margin-bottom:8px; max-width:88%;
+  }
+  .chat-bubble.user{background:var(--ink); color:#fff; margin-left:auto; border-bottom-right-radius:4px;}
+  .chat-bubble.ai{background:#F6ECD8; color:var(--charcoal); margin-right:auto; border-bottom-left-radius:4px;}
+
   .chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;}
   .chip{
     background:#F6ECD8; color:var(--ink); border:none; padding:9px 14px;
     border-radius:20px; font-size:13px; font-weight:600; cursor:pointer;
+  }
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
   }
 </style>
 </head>
@@ -77,25 +89,66 @@
   <div class="eyebrow">Learning Never Ends</div>
   <h1>AI Tools</h1>
   <p>Your study companion — beyond the lesson.</p>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
 </header>
 
 <div class="wrap">
   <div class="tabs">
-    <button class="tab-btn active" id="tabAskBtn" onclick="switchTab('ask')">Ask & Explain</button>
-    <button class="tab-btn" id="tabSummaryBtn" onclick="switchTab('summary')">Summarize</button>
-    <button class="tab-btn" id="tabQuizBtn" onclick="switchTab('quiz')">Quiz Generator</button>
+    <button class="tab-btn active" id="tabTeacherBtn" onclick="switchTab('teacher')">🧑‍🏫 AI Teacher</button>
+    <button class="tab-btn" id="tabAskBtn" onclick="switchTab('ask')">Ask & Explain</button>
+    <button class="tab-btn" id="tabQuizBtn" onclick="switchTab('quiz')">📝 Quiz</button>
   </div>
   <div class="tabs">
+    <button class="tab-btn" id="tabLevelBtn" onclick="switchTab('level')">🎯 Test Your Level</button>
+    <button class="tab-btn" id="tabSummaryBtn" onclick="switchTab('summary')">Summarize</button>
     <button class="tab-btn" id="tabTranslateBtn" onclick="switchTab('translate')">Translate</button>
+  </div>
+  <div class="tabs">
     <button class="tab-btn" id="tabPlanBtn" onclick="switchTab('plan')">Study Plan</button>
     <button class="tab-btn" id="tabHomeworkBtn" onclick="switchTab('homework')">Homework Helper</button>
-  </div>
-  <div class="tabs">
     <button class="tab-btn" id="tabCareerBtn" onclick="switchTab('career')">Career Coach</button>
   </div>
 
+  <!-- AI Teacher (ongoing chat) -->
+  <div class="tool-panel active" id="teacherPanel">
+    <div class="card">
+      <div class="kicker">🧑‍🏫 AI Teacher</div>
+      <h3>Your personal AI teacher</h3>
+      <p class="desc">A running conversation, not just one-off answers — ask a question, follow up, dig deeper. The AI Teacher remembers what you've asked earlier in this session.</p>
+
+      <div id="teacherChatLog" style="margin-bottom:14px;"></div>
+
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="teacherInput" placeholder="Ask your AI Teacher anything..." style="flex:1;">
+        <button class="submit-btn" style="width:auto; margin-top:0; padding:0 18px;" onclick="askTeacher()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Your Level -->
+  <div class="tool-panel" id="levelPanel">
+    <div class="card">
+      <div class="kicker">🎯 Test Your Level</div>
+      <h3>Find out where you stand</h3>
+      <p class="desc">Pick a subject — the AI will generate a short assessment, then tell you your level (Beginner / Intermediate / Advanced) and what to study next.</p>
+
+      <label>Subject</label>
+      <input type="text" id="levelSubject" placeholder="e.g. Spanish, Algebra, JavaScript, Photography">
+
+      <button class="submit-btn" onclick="generateLevelTest()">Generate My Assessment</button>
+      <div class="ai-output" id="levelQuizOutput"></div>
+
+      <div id="levelAnswerSection" style="display:none; margin-top:14px;">
+        <label>Your Answers</label>
+        <textarea id="levelAnswers" placeholder="Write your answers here, one per line..." style="min-height:120px;"></textarea>
+        <button class="submit-btn" onclick="evaluateLevel()">Get My Level</button>
+        <div class="ai-output" id="levelResultOutput"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Ask & Explain -->
-  <div class="tool-panel active" id="askPanel">
+  <div class="tool-panel" id="askPanel">
     <div class="card">
       <div class="kicker">Ask & Explain</div>
       <h3>Ask anything, get a clear answer</h3>
@@ -257,14 +310,16 @@ async function initAuth(){
 }
 
 function switchTab(tab){
-  const panels = ['ask', 'summary', 'quiz', 'translate', 'plan', 'homework', 'career'];
+  const panels = ['teacher', 'ask', 'summary', 'quiz', 'translate', 'level', 'plan', 'homework', 'career'];
   panels.forEach(p => {
     document.getElementById(p + 'Panel').classList.toggle('active', p === tab);
   });
+  document.getElementById('tabTeacherBtn').classList.toggle('active', tab === 'teacher');
   document.getElementById('tabAskBtn').classList.toggle('active', tab === 'ask');
   document.getElementById('tabSummaryBtn').classList.toggle('active', tab === 'summary');
   document.getElementById('tabQuizBtn').classList.toggle('active', tab === 'quiz');
   document.getElementById('tabTranslateBtn').classList.toggle('active', tab === 'translate');
+  document.getElementById('tabLevelBtn').classList.toggle('active', tab === 'level');
   document.getElementById('tabPlanBtn').classList.toggle('active', tab === 'plan');
   document.getElementById('tabHomeworkBtn').classList.toggle('active', tab === 'homework');
   document.getElementById('tabCareerBtn').classList.toggle('active', tab === 'career');
@@ -286,6 +341,93 @@ async function callClaude(prompt, maxTokens){
   const data = await response.json();
   if(data.error) throw new Error(data.error);
   return data.text;
+}
+
+/* ---------- AI TEACHER (ongoing chat) ---------- */
+let teacherHistory = [];
+
+function renderTeacherChat(){
+  const log = document.getElementById('teacherChatLog');
+  if(teacherHistory.length === 0){
+    log.innerHTML = `<div style="font-size:13px; color:#a8a094; text-align:center; padding:10px 0;">Say hello to start the conversation.</div>`;
+    return;
+  }
+  log.innerHTML = teacherHistory.map(m => `<div class="chat-bubble ${m.role}">${m.text}</div>`).join('');
+}
+renderTeacherChat();
+
+async function askTeacher(){
+  const input = document.getElementById('teacherInput');
+  const message = input.value.trim();
+  if(!message) return;
+
+  teacherHistory.push({ role:'user', text: message });
+  renderTeacherChat();
+  input.value = '';
+
+  teacherHistory.push({ role:'ai', text: 'Thinking…' });
+  renderTeacherChat();
+
+  const conversation = teacherHistory.slice(0, -1).map(m => (m.role === 'user' ? 'Student: ' : 'AI Teacher: ') + m.text).join('\n');
+  const prompt = `You are a friendly, patient AI teacher having an ongoing conversation with a student. Continue the conversation naturally, referencing earlier messages when relevant. Keep responses conversational and under 150 words unless more detail is truly needed.\n\nConversation so far:\n${conversation}\n\nAI Teacher:`;
+
+  try{
+    const text = await callClaude(prompt, 500);
+    teacherHistory[teacherHistory.length - 1] = { role:'ai', text: text };
+  } catch(err){
+    teacherHistory[teacherHistory.length - 1] = { role:'ai', text: 'Error: ' + err.message };
+  }
+  renderTeacherChat();
+}
+
+/* ---------- TEST YOUR LEVEL ---------- */
+let levelSubjectCache = '';
+let levelQuestionsCache = '';
+
+async function generateLevelTest(){
+  const subject = document.getElementById('levelSubject').value.trim();
+  const output = document.getElementById('levelQuizOutput');
+  if(!subject){ alert('Please enter a subject first.'); return; }
+
+  levelSubjectCache = subject;
+  output.style.display = 'block';
+  output.className = 'ai-output loading-text';
+  output.textContent = 'Generating your assessment…';
+  document.getElementById('levelAnswerSection').style.display = 'none';
+
+  const prompt = `Create a short 5-question skill assessment for "${subject}", with questions ranging from beginner to more advanced difficulty. Number them 1-5. Do not include the answers. Keep each question concise.`;
+
+  try{
+    const text = await callClaude(prompt, 500);
+    levelQuestionsCache = text;
+    output.className = 'ai-output';
+    output.textContent = text;
+    document.getElementById('levelAnswerSection').style.display = 'block';
+  } catch(err){
+    output.className = 'ai-output';
+    output.textContent = 'Error: ' + err.message;
+  }
+}
+
+async function evaluateLevel(){
+  const answers = document.getElementById('levelAnswers').value.trim();
+  const output = document.getElementById('levelResultOutput');
+  if(!answers){ alert('Please write your answers first.'); return; }
+
+  output.style.display = 'block';
+  output.className = 'ai-output loading-text';
+  output.textContent = 'Evaluating…';
+
+  const prompt = `A student is being assessed on "${levelSubjectCache}". Here are the questions they were asked:\n${levelQuestionsCache}\n\nHere are their answers:\n${answers}\n\nBased on their answers, assess their skill level as Beginner, Intermediate, or Advanced, briefly explain why in 1-2 sentences, and suggest one specific thing they should study next. Keep the whole response under 120 words.`;
+
+  try{
+    const text = await callClaude(prompt, 400);
+    output.className = 'ai-output';
+    output.textContent = text;
+  } catch(err){
+    output.className = 'ai-output';
+    output.textContent = 'Error: ' + err.message;
+  }
 }
 
 /* ---------- ASK & EXPLAIN ---------- */
@@ -454,6 +596,20 @@ async function askCareerCoach(){
 }
 
 initAuth();
+</script>
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
 </script>
 </body>
 </html>
