@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Welcome — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -16,7 +16,7 @@
   }
   *{box-sizing:border-box;}
   body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); min-height:100vh; -webkit-font-smoothing:antialiased;}
-  h1,h2,.display{font-family:'Fraunces',serif; letter-spacing:-0.01em;}
+  h1,h2,.display{font-family:'Syne',sans-serif; letter-spacing:-0.01em;}
   a{transition:transform 0.18s var(--ease);}
   a:active{transform:scale(0.97);}
 
@@ -45,16 +45,23 @@
 
   .inspiration-card{
     background:linear-gradient(135deg, var(--ink) 0%, var(--ink-2) 100%);
-    color:var(--cream); border-radius:20px; padding:22px; margin-bottom:20px;
+    color:var(--cream); border-radius:20px; padding:22px; margin-bottom:16px;
     box-shadow:var(--shadow-card);
   }
   .inspiration-card .kicker{
     font-size:11px; letter-spacing:1.8px; text-transform:uppercase; color:var(--gold-light);
-    font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px;
+    font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px;
   }
-  .inspiration-card .quote{font-family:'Fraunces',serif; font-size:18px; line-height:1.5; margin-bottom:6px;}
-  .inspiration-card .quote-source{font-size:12px; opacity:0.65; margin-bottom:16px;}
-  .inspiration-row{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .insp-tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:14px;}
+  .insp-tab{
+    flex:0 0 auto; background:rgba(255,255,255,0.1); border:none; color:var(--cream);
+    padding:7px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;
+  }
+  .insp-tab.active{background:var(--gold); color:var(--ink);}
+  .insp-body .eyebrow2{font-size:11px; color:var(--gold-light); font-weight:700; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;}
+  .insp-body .main-text{font-family:'Syne',sans-serif; font-size:17px; line-height:1.5; margin-bottom:6px;}
+  .insp-body .sub-text{font-size:12.5px; opacity:0.75; line-height:1.5;}
+  .inspiration-row{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.12);}
   .streak-pill{
     display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); padding:8px 14px;
     border-radius:20px; font-size:13px; font-weight:600;
@@ -65,6 +72,32 @@
     font-size:13.5px; font-weight:700; cursor:pointer;
   }
   .streak-btn:disabled{background:rgba(255,255,255,0.15); color:var(--cream); opacity:0.8;}
+
+  .spotlight-section{margin-bottom:20px;}
+  .section-title-home{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:12px;}
+  .spotlight-tabs{display:flex; gap:8px; margin-bottom:12px;}
+  .spotlight-tab{
+    flex:1; background:#fff; border:none; padding:9px; border-radius:11px;
+    font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; box-shadow:0 2px 8px rgba(20,31,56,0.06);
+  }
+  .spotlight-tab.active{background:var(--ink); color:var(--gold-light);}
+  .spotlight-grid{display:flex; flex-direction:column; gap:10px;}
+  .spotlight-card{
+    display:flex; align-items:center; gap:12px; background:#fff; border-radius:14px; padding:14px 16px;
+    box-shadow:0 2px 10px rgba(20,31,56,0.06);
+  }
+  .spotlight-card .role-icon{font-size:22px;}
+  .spotlight-avatar{
+    width:38px; height:38px; border-radius:50%; background:var(--gold-light); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex:0 0 38px;
+    overflow:hidden; font-family:'Syne',sans-serif;
+  }
+  .spotlight-avatar img{width:100%; height:100%; object-fit:cover;}
+  .spotlight-info{flex:1;}
+  .spotlight-info .s-role{font-size:10.5px; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;}
+  .spotlight-info .s-name{font-size:14.5px; font-weight:700; color:var(--ink);}
+  .spotlight-info .s-stat{font-size:12px; color:#8a8474;}
+  .spotlight-empty{background:#fff; border:1px dashed var(--line); border-radius:14px; padding:20px; text-align:center; color:#8a8474; font-size:13px;}
 </style>
 </head>
 <body>
@@ -77,6 +110,7 @@
 
 <div class="wrap" id="content">
   <div id="inspirationCard"></div>
+  <div class="spotlight-section" id="spotlightSection"></div>
   <div class="loading" id="viewsLoading">Loading…</div>
   <div id="viewCards"></div>
 </div>
@@ -120,15 +154,19 @@ async function init(){
   `;
 
   loadInspiration(session.user.id);
+  renderSpotlightShell();
+  loadSpotlight();
 }
 
 init();
 
-/* ---------- DAILY INSPIRATION + STREAK ----------
-   Uses the challenge_completions table: one row per user per calendar
-   day they mark as done. Streak = consecutive days ending today or
-   yesterday (so it doesn't reset the instant midnight passes). */
-const DAILY_QUOTES = [
+/* ---------- DAILY INSPIRATION (7 categories) ----------
+   Each category rotates through a curated, verified content set based
+   on day-of-year, so every user sees the same pick on a given day.
+   "Historical Event" and similar are honestly framed as a rotating
+   spotlight of real, accurate facts — not a claim that it matches
+   today's exact calendar date. */
+const QUOTES = [
   { text: "The beautiful thing about learning is that no one can take it away from you.", source: "B.B. King" },
   { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", source: "Mahatma Gandhi" },
   { text: "An investment in knowledge always pays the best interest.", source: "Benjamin Franklin" },
@@ -141,10 +179,102 @@ const DAILY_QUOTES = [
   { text: "It always seems impossible until it's done.", source: "Nelson Mandela" }
 ];
 
+const WORDS = [
+  { word: "Ephemeral", pos: "adj.", def: "Lasting for a very short time." },
+  { word: "Ubiquitous", pos: "adj.", def: "Present, appearing, or found everywhere." },
+  { word: "Resilience", pos: "n.", def: "The capacity to recover quickly from difficulties." },
+  { word: "Serendipity", pos: "n.", def: "The occurrence of finding valuable things by chance." },
+  { word: "Meticulous", pos: "adj.", def: "Showing great attention to detail; very careful." },
+  { word: "Eloquent", pos: "adj.", def: "Fluent and persuasive in speaking or writing." },
+  { word: "Pragmatic", pos: "adj.", def: "Dealing with things sensibly and realistically." },
+  { word: "Cognizant", pos: "adj.", def: "Having knowledge or awareness of something." },
+  { word: "Tenacious", pos: "adj.", def: "Tending to keep a firm hold; persistent." },
+  { word: "Lucid", pos: "adj.", def: "Expressed clearly; easy to understand." }
+];
+
+const HISTORY = [
+  { text: "In 1969, Apollo 11 astronauts became the first humans to walk on the Moon.", year: "1969" },
+  { text: "The Eiffel Tower officially opened to the public in Paris.", year: "1889" },
+  { text: "Johannes Gutenberg introduced the printing press to Europe, transforming the spread of information.", year: "c. 1440" },
+  { text: "Alexander Fleming discovered penicillin, the first true antibiotic.", year: "1928" },
+  { text: "The Hubble Space Telescope was launched into orbit.", year: "1990" },
+  { text: "The Bill of Rights was ratified in the United States.", year: "1791" },
+  { text: "Alexander Graham Bell was granted a patent for the telephone.", year: "1876" },
+  { text: "The first message was sent over ARPANET, an early precursor to the modern internet.", year: "1969" },
+  { text: "Lewis and Clark began their expedition across the western United States.", year: "1804" },
+  { text: "The Montgolfier brothers launched the first hot air balloon flight carrying passengers.", year: "1783" }
+];
+
+const SCIENCE = [
+  "Honey never spoils — archaeologists have found edible honey in ancient Egyptian tombs thousands of years old.",
+  "Light from the Sun takes about 8 minutes to reach Earth.",
+  "A bolt of lightning is roughly five times hotter than the surface of the Sun.",
+  "Octopuses have three hearts and blue blood.",
+  "The human brain generates enough electricity to power a small lightbulb.",
+  "Bananas are naturally slightly radioactive due to their potassium content.",
+  "Water can exist as solid, liquid, and gas at the same time at its 'triple point.'",
+  "Sound travels about four times faster in water than in air.",
+  "A day on Venus is longer than its year.",
+  "There are more possible chess games than atoms in the observable universe."
+];
+
+const PROG_TIPS = [
+  "Name variables for what they represent, not how they're used — 'userEmail' beats 'temp1'.",
+  "Write the failing test before the fix — it proves the bug existed and stays green forever after.",
+  "Comments should explain 'why,' not 'what' — the code already shows what it does.",
+  "Small, frequent commits are easier to review and revert than one giant commit.",
+  "Read the error message fully before searching for it online — the answer is often right there.",
+  "Premature optimization can cost more time than it saves — profile before you optimize.",
+  "Consistent formatting matters more than personal preference — follow the project's style.",
+  "A function should do one thing well — if describing it needs 'and,' split it in two.",
+  "Version control isn't just for teams — commit often even solo, it's a free undo button.",
+  "The best debugging tool is often just printing the state at each step."
+];
+
+const BOOKS = [
+  { title: "Atomic Habits", author: "James Clear", note: "A practical framework for building better habits through small changes." },
+  { title: "Sapiens: A Brief History of Humankind", author: "Yuval Noah Harari", note: "A sweeping look at how humans came to shape the world." },
+  { title: "The Pragmatic Programmer", author: "David Thomas & Andrew Hunt", note: "Timeless practical advice for software developers." },
+  { title: "Man's Search for Meaning", author: "Viktor Frankl", note: "A profound reflection on finding purpose through hardship." },
+  { title: "Thinking, Fast and Slow", author: "Daniel Kahneman", note: "Explores the two systems that drive how we think and decide." },
+  { title: "Educated", author: "Tara Westover", note: "A memoir about the transformative power of education." },
+  { title: "The Elements of Style", author: "Strunk & White", note: "A classic, concise guide to clear writing." },
+  { title: "A Short History of Nearly Everything", author: "Bill Bryson", note: "An accessible tour through science and the universe." },
+  { title: "Deep Work", author: "Cal Newport", note: "On the value of focused, distraction-free effort in a noisy world." },
+  { title: "The Alchemist", author: "Paulo Coelho", note: "A fable about following your personal calling." }
+];
+
+const CHALLENGES = [
+  "Complete one full lesson in any course today.",
+  "Write down one new thing you learned yesterday and why it matters.",
+  "Teach someone else something you learned this week — teaching cements learning.",
+  "Read for at least 15 minutes on a topic outside your usual interests.",
+  "Try explaining a concept you're studying in one simple sentence.",
+  "Review your notes from a few days ago — repetition builds memory.",
+  "Ask your AI Tutor one question you've been putting off.",
+  "Set a 25-minute focused study block with no phone distractions.",
+  "Write a one-paragraph summary of something you studied this week.",
+  "Look up the origin of one word you use often."
+];
+
+const INSP_CATEGORIES = [
+  { key:'quote', label:'📖 Quote' },
+  { key:'word', label:'🧠 Word' },
+  { key:'history', label:'🌍 History' },
+  { key:'science', label:'🔬 Science' },
+  { key:'code', label:'💻 Code Tip' },
+  { key:'book', label:'📚 Book' },
+  { key:'challenge', label:'🎯 Challenge' }
+];
+
+let inspCurrentTab = 'quote';
+let inspUserId = null;
+let inspDoneToday = false;
+let inspStreak = 0;
+
 function dayOfYear(date){
   const start = new Date(date.getFullYear(), 0, 0);
-  const diff = date - start;
-  return Math.floor(diff / (1000 * 60 * 60 * 24));
+  return Math.floor((date - start) / (1000 * 60 * 60 * 24));
 }
 
 function todayDateString(){
@@ -152,15 +282,71 @@ function todayDateString(){
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 
-function renderQuote(){
-  const q = DAILY_QUOTES[dayOfYear(new Date()) % DAILY_QUOTES.length];
-  return q;
+function pickOfDay(arr){
+  return arr[dayOfYear(new Date()) % arr.length];
+}
+
+function renderInspContent(){
+  const idx = dayOfYear(new Date());
+  let eyebrow = '', main = '', sub = '';
+
+  if(inspCurrentTab === 'quote'){
+    const q = pickOfDay(QUOTES);
+    eyebrow = 'Quote of the Day'; main = `"${q.text}"`; sub = `— ${q.source}`;
+  } else if(inspCurrentTab === 'word'){
+    const w = pickOfDay(WORDS);
+    eyebrow = 'Word of the Day'; main = `${w.word} (${w.pos})`; sub = w.def;
+  } else if(inspCurrentTab === 'history'){
+    const h = pickOfDay(HISTORY);
+    eyebrow = 'Historical Spotlight'; main = h.text; sub = `Year: ${h.year}`;
+  } else if(inspCurrentTab === 'science'){
+    eyebrow = 'Scientific Fact of the Day'; main = pickOfDay(SCIENCE); sub = '';
+  } else if(inspCurrentTab === 'code'){
+    eyebrow = 'Programming Tip of the Day'; main = pickOfDay(PROG_TIPS); sub = '';
+  } else if(inspCurrentTab === 'book'){
+    const b = pickOfDay(BOOKS);
+    eyebrow = 'Book Recommendation'; main = `${b.title} — ${b.author}`; sub = b.note;
+  } else if(inspCurrentTab === 'challenge'){
+    eyebrow = "Today's Learning Challenge"; main = pickOfDay(CHALLENGES); sub = '';
+  }
+
+  document.getElementById('inspBody').innerHTML = `
+    <div class="eyebrow2">${eyebrow}</div>
+    <div class="main-text">${main}</div>
+    ${sub ? `<div class="sub-text">${sub}</div>` : ''}
+  `;
+}
+
+function switchInspTab(key){
+  inspCurrentTab = key;
+  document.querySelectorAll('.insp-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.key === key);
+  });
+  renderInspContent();
 }
 
 async function loadInspiration(userId){
+  inspUserId = userId;
   const el = document.getElementById('inspirationCard');
-  const quote = renderQuote();
 
+  el.innerHTML = `
+    <div class="inspiration-card">
+      <div class="kicker">✨ Daily Inspiration</div>
+      <div class="insp-tabs" id="inspTabs">
+        ${INSP_CATEGORIES.map(c => `<button class="insp-tab ${c.key==='quote'?'active':''}" data-key="${c.key}" onclick="switchInspTab('${c.key}')">${c.label}</button>`).join('')}
+      </div>
+      <div class="insp-body" id="inspBody"></div>
+      <div class="inspiration-row">
+        <div class="streak-pill"><span class="flame">🔥</span> <span id="streakText">0 days</span> streak</div>
+        <button class="streak-btn" id="streakBtn" onclick="markTodayDone()">Mark Today Done</button>
+      </div>
+    </div>
+  `;
+  renderInspContent();
+  await loadStreak(userId);
+}
+
+async function loadStreak(userId){
   const { data, error } = await sb
     .from('challenge_completions')
     .select('completed_date')
@@ -176,7 +362,6 @@ async function loadInspiration(userId){
     const today = todayDateString();
     doneToday = dates.has(today);
 
-    // Count consecutive days backward from today (or yesterday if today not yet done)
     let cursor = new Date();
     if(!doneToday) cursor.setDate(cursor.getDate() - 1);
 
@@ -185,35 +370,101 @@ async function loadInspiration(userId){
       if(dates.has(key)){
         streak++;
         cursor.setDate(cursor.getDate() - 1);
-      } else {
-        break;
-      }
+      } else break;
     }
   }
 
-  el.innerHTML = `
-    <div class="inspiration-card">
-      <div class="kicker">✨ Daily Inspiration</div>
-      <div class="quote">"${quote.text}"</div>
-      <div class="quote-source">— ${quote.source}</div>
-      <div class="inspiration-row">
-        <div class="streak-pill"><span class="flame">🔥</span> ${streak} day${streak===1?'':'s'} streak</div>
-        <button class="streak-btn" id="streakBtn" ${doneToday ? 'disabled' : ''} onclick="markTodayDone('${userId}')">
-          ${doneToday ? '✓ Done Today' : 'Mark Today Done'}
-        </button>
-      </div>
-    </div>
-  `;
+  inspStreak = streak;
+  inspDoneToday = doneToday;
+  document.getElementById('streakText').textContent = `${streak} day${streak===1?'':'s'}`;
+  const btn = document.getElementById('streakBtn');
+  btn.disabled = doneToday;
+  btn.textContent = doneToday ? '✓ Done Today' : 'Mark Today Done';
 }
 
-async function markTodayDone(userId){
+async function markTodayDone(){
   const { error } = await sb.from('challenge_completions').upsert({
-    user_id: userId,
+    user_id: inspUserId,
     completed_date: todayDateString()
   }, { onConflict: 'user_id,completed_date' });
 
   if(error){ alert('Error: ' + error.message); return; }
-  loadInspiration(userId);
+  loadStreak(inspUserId);
+}
+
+/* ---------- COMMUNITY SPOTLIGHT (Student/Teacher of Day/Week/Month) ---------- */
+let spotlightPeriod = 'day';
+
+function renderSpotlightShell(){
+  const el = document.getElementById('spotlightSection');
+  el.innerHTML = `
+    <div class="section-title-home">🌟 Community Spotlight</div>
+    <div class="spotlight-tabs">
+      <button class="spotlight-tab active" data-period="day" onclick="switchSpotlight('day')">Today</button>
+      <button class="spotlight-tab" data-period="week" onclick="switchSpotlight('week')">This Week</button>
+      <button class="spotlight-tab" data-period="month" onclick="switchSpotlight('month')">This Month</button>
+    </div>
+    <div class="spotlight-grid" id="spotlightGrid"><div class="loading">Loading…</div></div>
+  `;
+}
+
+function switchSpotlight(period){
+  spotlightPeriod = period;
+  document.querySelectorAll('.spotlight-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.period === period);
+  });
+  loadSpotlight();
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+async function loadSpotlight(){
+  const el = document.getElementById('spotlightGrid');
+  el.innerHTML = '<div class="loading">Loading…</div>';
+
+  const [{ data: studentData, error: sErr }, { data: teacherData, error: tErr }] = await Promise.all([
+    sb.rpc('get_top_student', { p_period: spotlightPeriod }),
+    sb.rpc('get_top_teacher', { p_period: spotlightPeriod })
+  ]);
+
+  const student = (!sErr && studentData && studentData[0]) ? studentData[0] : null;
+  const teacher = (!tErr && teacherData && teacherData[0]) ? teacherData[0] : null;
+
+  let html = '';
+
+  if(student && student.lessons_done > 0){
+    const initials = (student.full_name || '?').trim().charAt(0).toUpperCase();
+    html += `
+      <div class="spotlight-card">
+        <span class="role-icon">🎓</span>
+        <div class="spotlight-avatar">${student.avatar_url ? `<img src="${student.avatar_url}">` : initials}</div>
+        <div class="spotlight-info">
+          <div class="s-role">Student Spotlight</div>
+          <div class="s-name">${escapeHtml(student.full_name || 'Learner')}</div>
+          <div class="s-stat">${student.lessons_done} lesson${student.lessons_done===1?'':'s'} completed</div>
+        </div>
+      </div>`;
+  }
+
+  if(teacher && teacher.certs_issued > 0){
+    const initials = (teacher.full_name || '?').trim().charAt(0).toUpperCase();
+    html += `
+      <div class="spotlight-card">
+        <span class="role-icon">🧑‍🏫</span>
+        <div class="spotlight-avatar">${teacher.avatar_url ? `<img src="${teacher.avatar_url}">` : initials}</div>
+        <div class="spotlight-info">
+          <div class="s-role">Teacher Spotlight</div>
+          <div class="s-name">${escapeHtml(teacher.full_name || 'Teacher')}</div>
+          <div class="s-stat">${teacher.certs_issued} certificate${teacher.certs_issued===1?'':'s'} issued</div>
+        </div>
+      </div>`;
+  }
+
+  if(!html){
+    html = `<div class="spotlight-empty">No activity yet for this period — be the first to make the spotlight!</div>`;
+  }
+
+  el.innerHTML = html;
 }
 </script>
 </body>
