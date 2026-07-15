@@ -201,6 +201,19 @@
   .story-card .role{font-size:11.5px; color:#8a8474;}
   .story-note{font-size:11.5px; color:#a8a094; margin-top:4px;}
 
+  /* ---------- Photo Banners ---------- */
+  .photo-banner{
+    position:relative; height:220px; overflow:hidden; background-size:cover; background-position:center;
+  }
+  .photo-banner .overlay{
+    position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,31,56,0.15), rgba(20,31,56,0.75));
+    display:flex; flex-direction:column; justify-content:flex-end; padding:22px 20px;
+  }
+  .photo-banner .overlay .tag{color:var(--gold); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px;}
+  .photo-banner .overlay h2{color:#fff; font-size:21px; margin:0 0 6px; max-width:280px;}
+  .photo-banner .overlay p{color:rgba(255,255,255,0.85); font-size:13.5px; margin:0 0 14px; max-width:300px; line-height:1.5;}
+  .photo-banner .overlay a.btn{width:auto; display:inline-flex; padding:11px 20px;}
+
   /* ---------- FOOTER ---------- */
   footer{
     padding:32px 20px 40px; background:var(--ink); color:#B9C1D6;
@@ -219,6 +232,12 @@
     .paths{flex-direction:row;}
     .path-card{flex:1;}
   }
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
+  }
 </style>
 </head>
 <body>
@@ -231,6 +250,7 @@
 <section class="hero">
   <div class="eyebrow">Learning Never Ends</div>
   <h1>Learn anything.<br>Teach what you<br>know. <span class="accent">Live better.</span></h1>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
   <p class="mission">Paradise Of The Eternal Learners is a place to grow at your own pace — live classes, self-paced courses, and an AI tutor by your side, all in one place.</p>
   <div class="cta-row">
     <a class="btn primary" href="skillstream-self-paced.html">Start Learning</a>
@@ -248,6 +268,14 @@
   </div>
 </section>
 
+<div class="photo-banner" style="background-image:url('https://images.unsplash.com/photo-1758270705290-62b6294dd044?fm=jpg&q=80&w=1600&auto=format&fit=crop');">
+  <div class="overlay">
+    <div class="tag">Real Learning, Real Progress</div>
+    <h2>Learning that fits your life</h2>
+    <p>Whatever your schedule looks like, there's a way to keep growing.</p>
+  </div>
+</div>
+
 <section class="section" style="background:#fff;">
   <div class="kicker">Featured Courses</div>
   <h2>Popular right now</h2>
@@ -264,6 +292,15 @@
   </div>
 </section>
 
+<div class="photo-banner" style="background-image:url('https://images.unsplash.com/photo-1758685848174-e061c6486651?fm=jpg&q=80&w=1600&auto=format&fit=crop');">
+  <div class="overlay">
+    <div class="tag">For Teachers</div>
+    <h2>Share what you know</h2>
+    <p>Build a course, reach real learners, and grow your teaching income — no classroom required.</p>
+    <a class="btn" href="skillstream-login.html?role=teacher" style="background:var(--gold); color:var(--ink);">Become a Teacher</a>
+  </div>
+</div>
+
 <section class="section">
   <div class="ai-promo">
     <div class="kicker">AI Learning Hub</div>
@@ -276,9 +313,17 @@
       <span class="tool-pill">Translate</span>
       <span class="tool-pill">Study Plan</span>
     </div>
-    <a class="btn" href="skillstream-login.html">Try the AI Learning Hub</a>
+    <a class="btn" href="skillstream-ai-hub.html">Try the AI Learning Hub</a>
   </div>
 </section>
+
+<div class="photo-banner" style="background-image:url('https://images.unsplash.com/photo-1695425173758-37e9c23b962a?fm=jpg&q=80&w=1600&auto=format&fit=crop');">
+  <div class="overlay">
+    <div class="tag">Milestones</div>
+    <h2>Every certificate is a milestone</h2>
+    <p>Real learners finishing what they started — one course at a time.</p>
+  </div>
+</div>
 
 <section class="section" style="background:#fff;">
   <div class="kicker">Success Stories</div>
@@ -344,7 +389,9 @@ async function loadFeaturedCourses(){
   }
 
   el.innerHTML = data.map(c => {
-    const bg = c.thumbnail_url ? `background-image:url('${c.thumbnail_url}'); background-size:cover;` : '';
+    const bg = c.thumbnail_url
+      ? `background-image:url('${c.thumbnail_url}'); background-size:cover;`
+      : `background-image:linear-gradient(rgba(20,31,56,0.55), rgba(20,31,56,0.55)), url('https://images.unsplash.com/photo-1758270705290-62b6294dd044?fm=jpg&q=60&w=600&auto=format&fit=crop'); background-size:cover; background-position:center;`;
     return `
     <a class="featured-card" href="skillstream-login.html">
       <div class="thumb" style="${bg}"><span class="cat">${escapeHtml(c.category || 'General')}</span></div>
@@ -359,5 +406,19 @@ async function loadFeaturedCourses(){
 loadFeaturedCourses();
 </script>
 
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
+</script>
 </body>
 </html>

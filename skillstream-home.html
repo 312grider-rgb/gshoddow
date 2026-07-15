@@ -98,6 +98,12 @@
   .spotlight-info .s-name{font-size:14.5px; font-weight:700; color:var(--ink);}
   .spotlight-info .s-stat{font-size:12px; color:#8a8474;}
   .spotlight-empty{background:#fff; border:1px dashed var(--line); border-radius:14px; padding:20px; text-align:center; color:#8a8474; font-size:13px;}
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
+  }
 </style>
 </head>
 <body>
@@ -106,6 +112,7 @@
   <div class="eyebrow">Learning Never Ends</div>
   <h1 id="greeting">Welcome</h1>
   <p>Paradise Of The Eternal Learners</p>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
 </header>
 
 <div class="wrap" id="content">
@@ -150,6 +157,13 @@ async function init(){
       <h2>Continue as Teacher</h2>
       <p>Create and publish courses, manage lessons, and track how learners are engaging with your content.</p>
       <div class="go">Go to Teacher Dashboard →</div>
+    </a>
+
+    <a class="view-card" href="skillstream-ai-hub.html">
+      <div class="icon">🤖</div>
+      <h2>AI Learning Hub</h2>
+      <p>Chat with an AI Teacher, generate quizzes, test your level, summarize, translate, and build study plans.</p>
+      <div class="go">Open AI Learning Hub →</div>
     </a>
   `;
 
@@ -466,6 +480,20 @@ async function loadSpotlight(){
 
   el.innerHTML = html;
 }
+</script>
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
 </script>
 </body>
 </html>
