@@ -288,7 +288,7 @@
   <div class="kicker">Live Now</div>
   <h2>Live classes happening now</h2>
   <div id="liveClasses">
-    <div class="live-empty">No live classes are running right now — check back soon, or explore self-paced courses in the meantime.<br><a href="skillstream-self-paced.html">Browse courses →</a></div>
+    <div class="loading" style="color:#8a8474; font-size:13px;">Checking for live classes…</div>
   </div>
 </section>
 
@@ -404,6 +404,33 @@ async function loadFeaturedCourses(){
 }
 
 loadFeaturedCourses();
+
+async function loadLiveClasses(){
+  const el = document.getElementById('liveClasses');
+  const { data, error } = await sb
+    .from('live_sessions')
+    .select('*, profiles(full_name)')
+    .eq('status', 'live')
+    .order('started_at', { ascending:false });
+
+  if(error || !data || data.length === 0){
+    el.innerHTML = `<div class="live-empty">No live classes are running right now — check back soon, or explore self-paced courses in the meantime.<br><a href="skillstream-self-paced.html">Browse courses →</a></div>`;
+    return;
+  }
+
+  el.innerHTML = data.map(s => `
+    <div class="live-card">
+      <span class="live-dot"></span>
+      <div style="flex:1;">
+        <h3>${escapeHtml(s.title)}</h3>
+        <p>with ${escapeHtml(s.profiles?.full_name || 'a teacher')}</p>
+      </div>
+      <a class="btn gold" style="width:auto; padding:9px 16px; font-size:13px;" href="skillstream-login.html">Join</a>
+    </div>
+  `).join('');
+}
+
+loadLiveClasses();
 </script>
 
 

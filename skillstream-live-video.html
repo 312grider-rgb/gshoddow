@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Class — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@daily-co/daily-js"></script>
+<style>
+  :root{
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
+    --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2;
+  }
+  *{box-sizing:border-box;}
+  html, body{ height:100%; margin:0; }
+  body{font-family:'Inter',sans-serif; background:#0d1120; color:#fff; overflow:hidden;}
+
+  header.top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px; background:var(--ink); position:relative; z-index:20;
+  }
+  header.top .title{font-family:'Syne',sans-serif; font-size:15px; font-weight:600;}
+  header.top .live-chip{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1);
+    color:#ff6b6b; font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px;
+  }
+  .live-dot{width:7px; height:7px; border-radius:50%; background:#ff6b6b; animation:pulse 1.2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.3;}}
+
+  #callContainer{ position:absolute; top:52px; bottom:74px; left:0; right:0; }
+  #callFrame{ width:100%; height:100%; border:none; }
+
+  .control-bar{
+    position:absolute; bottom:0; left:0; right:0; height:74px;
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    background:var(--ink); z-index:20;
+  }
+  .ctrl-btn{
+    width:52px; height:52px; border-radius:50%; border:none; background:rgba(255,255,255,0.1);
+    color:#fff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .ctrl-btn.leave{background:#c0523a; width:auto; padding:0 22px; border-radius:26px; font-weight:700; font-size:14px; font-family:'Syne',sans-serif;}
+  .ctrl-btn.hand{background:var(--gold); color:var(--ink);}
+  .ctrl-btn.hand.raised{background:#ff6b6b; color:#fff;}
+  .hand-count{
+    position:absolute; top:-4px; right:-4px; background:#fff; color:var(--ink);
+    font-size:10px; font-weight:700; border-radius:50%; width:18px; height:18px;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  #raisedHandsBar{
+    position:absolute; top:52px; left:0; right:0; z-index:15; padding:8px 12px;
+    display:flex; gap:8px; overflow-x:auto; background:rgba(0,0,0,0.4);
+  }
+  .hand-badge{
+    background:var(--gold); color:var(--ink); font-size:12px; font-weight:700;
+    padding:5px 12px; border-radius:20px; white-space:nowrap; display:flex; align-items:center; gap:5px;
+  }
+
+  #loading{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:12px; background:#0d1120; z-index:30;
+  }
+  #loading .spinner{
+    width:34px; height:34px; border:3px solid rgba(255,255,255,0.2); border-top-color:var(--gold);
+    border-radius:50%; animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  #loading p{font-size:14px; opacity:0.8;}
+
+  #errorScreen{
+    position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    flex-direction:column; gap:14px; background:#0d1120; z-index:30; padding:24px; text-align:center;
+  }
+  #errorScreen h2{font-family:'Syne',sans-serif; font-size:18px;}
+  #errorScreen p{font-size:13.5px; opacity:0.75; max-width:320px;}
+  #errorScreen a{color:var(--gold); font-weight:700; text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Joining the live class…</p>
+</div>
+
+<div id="errorScreen">
+  <h2>Couldn't join this class</h2>
+  <p id="errorText"></p>
+  <a href="skillstream-dashboard.html">← Back to Dashboard</a>
+</div>
+
+<header class="top">
+  <div class="title" id="sessionTitle">Live Class</div>
+  <div class="live-chip"><span class="live-dot"></span> LIVE</div>
+</header>
+
+<div id="raisedHandsBar" style="display:none;"></div>
+
+<div id="callContainer"></div>
+
+<div class="control-bar">
+  <button class="ctrl-btn hand" id="handBtn" onclick="toggleHand()" title="Raise Hand">
+    ✋
+    <span class="hand-count" id="handCount" style="display:none;"></span>
+  </button>
+  <button class="ctrl-btn leave" onclick="leaveSession()">✕ Leave</button>
+</div>
+
+<script>
+/* ====================================================================
+   CONFIG — REQUIRED — same project as your other SkillStream pages
+   ==================================================================== */
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let currentProfile = null;
+let callFrame = null;
+let handRaised = false;
+const raisedHands = new Map(); // participantId -> name
+
+const params = new URLSearchParams(window.location.search);
+const roomUrl = params.get('room');
+const sessionId = params.get('session');
+const sessionTitle = params.get('title') || 'Live Class';
+document.getElementById('sessionTitle').textContent = decodeURIComponent(sessionTitle);
+
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('full_name').eq('id', currentUser.id).maybeSingle();
+  currentProfile = profile;
+
+  if(!roomUrl){
+    showError('No room link was provided. Go back and try joining again from the dashboard.');
+    return;
+  }
+
+  joinCall();
+}
+
+function showError(msg){
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('errorScreen').style.display = 'flex';
+  document.getElementById('errorText').textContent = msg;
+}
+
+function joinCall(){
+  callFrame = window.DailyIframe.createFrame(document.getElementById('callContainer'), {
+    iframeStyle: { width: '100%', height: '100%', border: '0' },
+    showLeaveButton: false
+  });
+
+  callFrame
+    .on('joined-meeting', () => {
+      document.getElementById('loading').style.display = 'none';
+    })
+    .on('error', (e) => {
+      showError((e && e.errorMsg) || 'Something went wrong connecting to the video call.');
+    })
+    .on('app-message', handleAppMessage);
+
+  callFrame.join({
+    url: roomUrl,
+    userName: currentProfile?.full_name || currentUser.email
+  });
+}
+
+/* ---------- RAISE HAND ----------
+   Uses Daily's sendAppMessage broadcast — a real-time message sent to
+   everyone in the call. Every participant's browser listens for these
+   and updates the shared "raised hands" bar, so this works across
+   real, separate devices, not just locally. */
+function toggleHand(){
+  handRaised = !handRaised;
+  const btn = document.getElementById('handBtn');
+  btn.classList.toggle('raised', handRaised);
+
+  const name = currentProfile?.full_name || currentUser.email;
+  callFrame.sendAppMessage({ type: 'hand', raised: handRaised, name: name }, '*');
+
+  if(handRaised){
+    raisedHands.set('self', name);
+  } else {
+    raisedHands.delete('self');
+  }
+  renderRaisedHands();
+}
+
+function handleAppMessage(event){
+  const msg = event.data;
+  if(!msg || msg.type !== 'hand') return;
+
+  if(msg.raised){
+    raisedHands.set(event.fromId, msg.name);
+  } else {
+    raisedHands.delete(event.fromId);
+  }
+  renderRaisedHands();
+}
+
+function renderRaisedHands(){
+  const bar = document.getElementById('raisedHandsBar');
+  const countEl = document.getElementById('handCount');
+
+  if(raisedHands.size === 0){
+    bar.style.display = 'none';
+    countEl.style.display = 'none';
+    return;
+  }
+
+  bar.style.display = 'flex';
+  countEl.style.display = 'flex';
+  countEl.textContent = raisedHands.size;
+
+  bar.innerHTML = Array.from(raisedHands.values()).map(name => `
+    <span class="hand-badge">✋ ${escapeHtml(name)}</span>
+  `).join('');
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+async function leaveSession(){
+  if(callFrame){
+    await callFrame.leave();
+    callFrame.destroy();
+  }
+  window.location.href = 'skillstream-dashboard.html';
+}
+
+init();
+</script>
+</body>
+</html>
