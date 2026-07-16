@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Profile — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -14,7 +14,7 @@
   }
   *{box-sizing:border-box;}
   body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:60px;}
-  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  h1,h2,h3,.display{font-family:'Syne',sans-serif;}
   button, a, .btn, .course-card, .chip{ transition:transform 0.18s cubic-bezier(.22,1,.36,1), box-shadow 0.18s cubic-bezier(.22,1,.36,1); }
   button:active, a.btn:active, .btn:active, .course-card:active{ transform:scale(0.97); }
 
@@ -32,7 +32,7 @@
   .avatar{
     width:78px; height:78px; border-radius:50%; background:var(--gold);
     display:flex; align-items:center; justify-content:center; margin:0 auto 12px;
-    font-family:'Fraunces',serif; font-size:28px; font-weight:700; color:var(--ink);
+    font-family:'Syne',sans-serif; font-size:28px; font-weight:700; color:var(--ink);
     overflow:hidden; border:3px solid #fff; box-shadow:0 0 0 3px var(--line);
   }
   .avatar img{width:100%; height:100%; object-fit:cover;}
@@ -47,7 +47,7 @@
 
   .stats-row{display:flex; gap:10px; margin-bottom:22px;}
   .stat{flex:1; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 8px; text-align:center;}
-  .stat .val{font-family:'Fraunces',serif; font-size:22px; font-weight:700; color:var(--ink);}
+  .stat .val{font-family:'Syne',sans-serif; font-size:22px; font-weight:700; color:var(--ink);}
   .stat .lbl{font-size:11px; color:#777; margin-top:2px;}
 
   .badge-grid{
@@ -89,6 +89,12 @@
     font-size:14px; z-index:100; display:none;
   }
   .loading{text-align:center; padding:30px; color:#888;}
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
+  }
 </style>
 </head>
 <body>
@@ -96,6 +102,7 @@
 <header class="top">
   <div class="eyebrow">Learning Never Ends</div>
   <h1>My Profile</h1>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
 </header>
 
 <div class="wrap">
@@ -112,8 +119,12 @@
     <input type="text" id="fullName" placeholder="Your name">
     <label>Bio</label>
     <textarea id="bio" placeholder="A short line about you — your interests, what you teach or want to learn"></textarea>
-    <label>Avatar Image URL</label>
-    <input type="text" id="avatarUrl" placeholder="https://...">
+    <label>Profile Photo</label>
+    <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px;">
+      <input type="file" id="avatarFile" accept="image/*" style="flex:1;" onchange="uploadAvatar()">
+    </div>
+    <div id="avatarUploadStatus" style="font-size:12px; color:#8a8474; margin-bottom:10px;"></div>
+    <input type="hidden" id="avatarUrl">
     <button class="btn" onclick="saveProfile()">Save Changes</button>
   </div>
 
@@ -230,6 +241,32 @@ function renderAchievements(lessonsDone, certsEarned){
   `).join('');
 }
 
+/* ---------- AVATAR UPLOAD ----------
+   Uploads directly to Supabase Storage (bucket: "avatars") instead of
+   requiring a pasted URL. Requires the bucket to exist with public
+   read access — see setup note below the code. */
+async function uploadAvatar(){
+  const fileInput = document.getElementById('avatarFile');
+  const file = fileInput.files[0];
+  if(!file) return;
+
+  const status = document.getElementById('avatarUploadStatus');
+  status.textContent = 'Uploading…';
+
+  const path = `avatars/${currentUser.id}/${Date.now()}_${file.name}`;
+
+  try{
+    const { error: uploadError } = await sb.storage.from('skillstream-files').upload(path, file, { upsert: true });
+    if(uploadError) throw uploadError;
+
+    const { data: urlData } = sb.storage.from('skillstream-files').getPublicUrl(path);
+    document.getElementById('avatarUrl').value = urlData.publicUrl;
+    status.textContent = 'Photo ready — tap "Save Changes" below to apply it.';
+  } catch(err){
+    status.textContent = 'Upload failed: ' + err.message;
+  }
+}
+
 async function saveProfile(){
   const payload = {
     id: currentUser.id,
@@ -251,6 +288,20 @@ async function signOut(){
 }
 
 initAuth();
+</script>
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
 </script>
 </body>
 </html>
