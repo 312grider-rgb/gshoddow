@@ -81,6 +81,18 @@
     color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
     margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
   }
+.subject-icon-grid{
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:4px;
+}
+.subject-icon-btn{
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  background:#fdfcfa; border:1.5px solid var(--line); border-radius:12px; padding:10px 6px;
+  cursor:pointer; font-family:'Inter',sans-serif;
+}
+.subject-icon-btn .icon{font-size:22px;}
+.subject-icon-btn .lbl{font-size:10.5px; font-weight:600; color:var(--charcoal); text-align:center; line-height:1.2;}
+.subject-icon-btn.active{background:var(--gold); border-color:var(--gold);}
+.subject-icon-btn.active .lbl{color:var(--ink);}
 </style>
 </head>
 <body>
@@ -133,7 +145,9 @@
       <p class="desc">Pick a subject — the AI will generate a short assessment, then tell you your level (Beginner / Intermediate / Advanced) and what to study next.</p>
 
       <label>Subject</label>
-      <input type="text" id="levelSubject" placeholder="e.g. Spanish, Algebra, JavaScript, Photography">
+      <div class="subject-icon-grid" id="levelSubjectGrid"></div>
+      <input type="hidden" id="levelSubject">
+      <input type="text" id="levelSubjectOther" placeholder="Type your subject..." style="display:none; margin-top:8px;">
 
       <button class="submit-btn" onclick="generateLevelTest()">Generate My Assessment</button>
       <div class="ai-output" id="levelQuizOutput"></div>
@@ -254,7 +268,9 @@
       <p class="desc">Paste your homework question below. The AI Tutor will walk you through how to approach it step by step — helping you understand the method, not just handing you the final answer.</p>
 
       <label>Subject (optional)</label>
-      <input type="text" id="hwSubject" placeholder="e.g. Algebra, Chemistry, Essay Writing">
+      <div class="subject-icon-grid" id="hwSubjectGrid"></div>
+      <input type="hidden" id="hwSubject">
+      <input type="text" id="hwSubjectOther" placeholder="Type your subject..." style="display:none; margin-top:8px;">
 
       <label>Your Question</label>
       <textarea id="hwQuestion" placeholder="Paste or type your homework question here..."></textarea>
@@ -329,6 +345,50 @@ function fillCareerPrompt(text){
   document.getElementById('careerGoal').value = text;
 }
 
+function toggleOtherSubject(gridId, otherId){
+  document.getElementById(otherId).style.display = 'none';
+}
+
+const HUB_SUBJECTS = [
+  { value:'Math', icon:'🔢' },
+  { value:'Science', icon:'🔬' },
+  { value:'English & Language Arts', icon:'📖' },
+  { value:'History & Social Studies', icon:'🌍' },
+  { value:'Foreign Languages', icon:'🗣️' },
+  { value:'Computer Science', icon:'💻' },
+  { value:'Art & Design', icon:'🎨' },
+  { value:'Music', icon:'🎵' },
+  { value:'Business', icon:'💼' },
+  { value:'Other', icon:'➕' }
+];
+
+function renderHubSubjectGrid(gridId, hiddenId, otherId){
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = HUB_SUBJECTS.map(s => `
+    <div class="subject-icon-btn" data-value="${s.value}" onclick="selectHubSubject('${gridId}','${hiddenId}','${otherId}','${s.value.replace(/'/g,"\\'")}')">
+      <div class="icon">${s.icon}</div>
+      <div class="lbl">${s.value === 'Other' ? 'Other' : s.value}</div>
+    </div>
+  `).join('');
+}
+
+function selectHubSubject(gridId, hiddenId, otherId, value){
+  document.getElementById(hiddenId).value = value;
+  document.querySelectorAll(`#${gridId} .subject-icon-btn`).forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.value === value);
+  });
+  document.getElementById(otherId).style.display = (value === 'Other') ? 'block' : 'none';
+}
+
+function getSubjectValue(hiddenId, otherId){
+  const val = document.getElementById(hiddenId).value;
+  if(val === 'Other') return document.getElementById(otherId).value.trim();
+  return val;
+}
+
+renderHubSubjectGrid('levelSubjectGrid', 'levelSubject', 'levelSubjectOther');
+renderHubSubjectGrid('hwSubjectGrid', 'hwSubject', 'hwSubjectOther');
+
 /* ---------- Calls our own /api/ask-ai serverless function instead of
    Anthropic directly — the API key stays server-side in Vercel's
    environment variables, never exposed in the browser. ---------- */
@@ -356,6 +416,26 @@ function renderTeacherChat(){
 }
 renderTeacherChat();
 
+/* ---------- AI TEACHER'S MEMORY OF THE STUDENT ----------
+   Loaded once and cached, so the teacher can reference the student's
+   known level(s) across the whole conversation without a query on
+   every message. */
+let learningProfilesCache = null;
+
+async function getLearningProfilesContext(){
+  if(learningProfilesCache !== null) return learningProfilesCache;
+
+  const { data } = await sb.from('ai_learning_profile').select('subject, level').eq('user_id', currentUser.id);
+  if(!data || data.length === 0){
+    learningProfilesCache = '';
+    return learningProfilesCache;
+  }
+
+  learningProfilesCache = 'What you already know about this student: ' +
+    data.map(p => `${p.subject} — ${p.level} level`).join('; ') + '.';
+  return learningProfilesCache;
+}
+
 async function askTeacher(){
   const input = document.getElementById('teacherInput');
   const message = input.value.trim();
@@ -369,7 +449,8 @@ async function askTeacher(){
   renderTeacherChat();
 
   const conversation = teacherHistory.slice(0, -1).map(m => (m.role === 'user' ? 'Student: ' : 'AI Teacher: ') + m.text).join('\n');
-  const prompt = `You are a friendly, patient AI teacher having an ongoing conversation with a student. Continue the conversation naturally, referencing earlier messages when relevant. Keep responses conversational and under 150 words unless more detail is truly needed.\n\nConversation so far:\n${conversation}\n\nAI Teacher:`;
+  const memoryContext = await getLearningProfilesContext();
+  const prompt = `You are a friendly, patient AI teacher having an ongoing conversation with a student. ${memoryContext} Use this to pitch your explanations at the right level for them when relevant — simpler for a Beginner, more advanced for Advanced — without explicitly stating "since you're a Beginner" unless it naturally fits. Continue the conversation naturally, referencing earlier messages when relevant. Keep responses conversational and under 150 words unless more detail is truly needed.\n\nConversation so far:\n${conversation}\n\nAI Teacher:`;
 
   try{
     const text = await callClaude(prompt, 500);
@@ -385,7 +466,7 @@ let levelSubjectCache = '';
 let levelQuestionsCache = '';
 
 async function generateLevelTest(){
-  const subject = document.getElementById('levelSubject').value.trim();
+  const subject = getSubjectValue('levelSubject', 'levelSubjectOther');
   const output = document.getElementById('levelQuizOutput');
   if(!subject){ alert('Please enter a subject first.'); return; }
 
@@ -418,12 +499,27 @@ async function evaluateLevel(){
   output.className = 'ai-output loading-text';
   output.textContent = 'Evaluating…';
 
-  const prompt = `A student is being assessed on "${levelSubjectCache}". Here are the questions they were asked:\n${levelQuestionsCache}\n\nHere are their answers:\n${answers}\n\nBased on their answers, assess their skill level as Beginner, Intermediate, or Advanced, briefly explain why in 1-2 sentences, and suggest one specific thing they should study next. Keep the whole response under 120 words.`;
+  const prompt = `A student is being assessed on "${levelSubjectCache}". Here are the questions they were asked:\n${levelQuestionsCache}\n\nHere are their answers:\n${answers}\n\nBased on their answers, assess their skill level. Start your response with exactly one word on its own line: Beginner, Intermediate, or Advanced. Then on the next lines, briefly explain why in 1-2 sentences, and suggest one specific thing they should study next. Keep the whole response under 120 words.`;
 
   try{
     const text = await callClaude(prompt, 400);
     output.className = 'ai-output';
     output.textContent = text;
+
+    // Parse out the level word from the first line and save it persistently,
+    // so the AI Teacher chat can remember it in future conversations.
+    const firstLine = text.split('\n')[0].trim();
+    const match = firstLine.match(/Beginner|Intermediate|Advanced/i);
+    if(match){
+      const level = match[0].charAt(0).toUpperCase() + match[0].slice(1).toLowerCase();
+      await sb.from('ai_learning_profile').upsert({
+        user_id: currentUser.id,
+        subject: levelSubjectCache,
+        level: level,
+        notes: text,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,subject' });
+    }
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -545,7 +641,7 @@ async function askStudyPlan(){
 
 /* ---------- HOMEWORK HELPER ---------- */
 async function askHomeworkHelper(){
-  const subject = document.getElementById('hwSubject').value.trim();
+  const subject = getSubjectValue('hwSubject', 'hwSubjectOther');
   const question = document.getElementById('hwQuestion').value.trim();
   const output = document.getElementById('hwOutput');
 

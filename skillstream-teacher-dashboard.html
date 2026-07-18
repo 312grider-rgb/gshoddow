@@ -140,6 +140,10 @@
         <span class="icon">📚</span>
         <div><div class="label">Manage Courses & Lessons</div><div class="sub">Create, edit, publish</div></div>
       </a>
+      <a class="quick-link" href="skillstream-messages.html">
+        <span class="icon">💬</span>
+        <div><div class="label">Messages</div><div class="sub">Chat with students & teachers</div></div>
+      </a>
       <a class="quick-link" href="skillstream-profile.html">
         <span class="icon">👤</span>
         <div><div class="label">Edit Profile</div><div class="sub">Name, bio, avatar</div></div>
@@ -294,33 +298,44 @@ async function loadDashboard(){
 }
 
 /* ---------- START LIVE CLASS ----------
-   Calls our /api/create-room serverless function to create a real
-   Daily.co video room, records it in live_sessions (so students can
-   see it's live), then jumps straight into the video call. */
+   Uses Jitsi Meet (meet.jit.si) — no API key, no account, no payment
+   method required. We just generate a unique room name client-side
+   and record it in live_sessions so students can find and join it. */
 async function startLiveClass(){
   const title = prompt('What should this live class be called?', 'Live Class');
   if(title === null) return; // cancelled
+
+  const isPublic = confirm('Tap OK for a PUBLIC class (anyone can find and join it), or Cancel for a PRIVATE class (only people with the join code can enter).');
+
+  const gradeInput = prompt('Target a specific grade? Type one like "grade_5", "kg", or "university" — or leave blank for all grades/levels.', '');
+  const targetGrade = (gradeInput || '').trim().toLowerCase() || null;
 
   const btn = document.getElementById('startLiveBtn');
   btn.disabled = true;
   btn.textContent = 'Starting…';
 
   try{
-    const response = await fetch('/api/create-room', { method: 'POST' });
-    const data = await response.json();
-    if(data.error) throw new Error(data.error);
+    const roomName = 'paradise-eternal-learners-' + Math.random().toString(36).slice(2, 10);
+    const joinCode = isPublic ? null : Math.random().toString(36).slice(2, 8).toUpperCase();
 
     const { data: sessionRow, error } = await sb.from('live_sessions').insert({
       teacher_id: currentUser.id,
       title: title || 'Live Class',
-      room_url: data.url,
-      room_name: data.name,
-      status: 'live'
+      room_url: `https://meet.jit.si/${roomName}`,
+      room_name: roomName,
+      status: 'live',
+      is_public: isPublic,
+      join_code: joinCode,
+      target_grade_level: targetGrade
     }).select().single();
 
     if(error) throw error;
 
-    window.location.href = `skillstream-live-video.html?room=${encodeURIComponent(data.url)}&session=${sessionRow.id}&title=${encodeURIComponent(title || 'Live Class')}`;
+    if(!isPublic){
+      alert(`Private class created! Share this join code with your students: ${joinCode}`);
+    }
+
+    window.location.href = `skillstream-live-video.html?room=${encodeURIComponent(roomName)}&session=${sessionRow.id}&title=${encodeURIComponent(title || 'Live Class')}&host=1`;
   } catch(err){
     alert('Could not start the live class: ' + err.message);
     btn.disabled = false;

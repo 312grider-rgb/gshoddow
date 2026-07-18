@@ -185,6 +185,18 @@
     color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
     margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
   }
+.subject-icon-grid{
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:4px;
+}
+.subject-icon-btn{
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  background:#fdfcfa; border:1.5px solid var(--line); border-radius:12px; padding:10px 6px;
+  cursor:pointer; font-family:'Inter',sans-serif;
+}
+.subject-icon-btn .icon{font-size:22px;}
+.subject-icon-btn .lbl{font-size:10.5px; font-weight:600; color:var(--charcoal); text-align:center; line-height:1.2;}
+.subject-icon-btn.active{background:var(--gold); border-color:var(--gold);}
+.subject-icon-btn.active .lbl{color:var(--ink);}
 </style>
 </head>
 <body>
@@ -212,8 +224,9 @@
     <input type="text" id="courseTitle" placeholder="e.g. Intro to Digital Photography">
     <label>Description</label>
     <textarea id="courseDesc" placeholder="What will students learn?"></textarea>
-    <label>Category</label>
-    <input type="text" id="courseCategory" placeholder="e.g. Photography, Business, Language">
+    <label>Subject</label>
+    <div class="subject-icon-grid" id="courseSubjectGrid"></div>
+    <input type="hidden" id="courseCategory">
     <label>Academic Level (optional)</label>
     <select id="courseLevel">
       <option value="">Not academic / General skill course</option>
@@ -368,12 +381,50 @@ function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<
 function escapeAttr(s){ return escapeHtml(s).replace(/'/g,"\\'"); }
 
 /* ---------- COURSE CRUD ---------- */
+const SUBJECTS = [
+  { value:'Math', icon:'🔢' },
+  { value:'Science', icon:'🔬' },
+  { value:'English & Language Arts', icon:'📖' },
+  { value:'History & Social Studies', icon:'🌍' },
+  { value:'Foreign Languages', icon:'🗣️' },
+  { value:'Computer Science', icon:'💻' },
+  { value:'Art & Design', icon:'🎨' },
+  { value:'Music', icon:'🎵' },
+  { value:'Physical Education & Health', icon:'⚽' },
+  { value:'Business', icon:'💼' },
+  { value:'Life Skills', icon:'🧠' },
+  { value:'Other', icon:'➕' }
+];
+
+function renderSubjectGrid(selectedValue){
+  const grid = document.getElementById('courseSubjectGrid');
+  // If the current course has a legacy free-text category not in our
+  // standard list, show it too so saving doesn't silently wipe it out.
+  const list = SUBJECTS.slice();
+  if(selectedValue && !list.some(s => s.value === selectedValue)){
+    list.unshift({ value: selectedValue, icon: '⭐' });
+  }
+
+  grid.innerHTML = list.map(s => `
+    <div class="subject-icon-btn ${s.value === selectedValue ? 'active' : ''}" onclick="selectSubject('${s.value.replace(/'/g,"\\'")}')">
+      <div class="icon">${s.icon}</div>
+      <div class="lbl">${s.value}</div>
+    </div>
+  `).join('');
+}
+
+function selectSubject(value){
+  document.getElementById('courseCategory').value = value;
+  renderSubjectGrid(value);
+}
+
 function openCourseModal(){
   document.getElementById('courseModalTitle').textContent = 'New Course';
   document.getElementById('courseId').value = '';
   document.getElementById('courseTitle').value = '';
   document.getElementById('courseDesc').value = '';
   document.getElementById('courseCategory').value = '';
+  renderSubjectGrid('');
   document.getElementById('courseLevel').value = '';
   document.getElementById('courseThumb').value = '';
   document.getElementById('coursePublished').checked = false;
@@ -388,6 +439,7 @@ function editCourse(id){
   document.getElementById('courseTitle').value = c.title || '';
   document.getElementById('courseDesc').value = c.description || '';
   document.getElementById('courseCategory').value = c.category || '';
+  renderSubjectGrid(c.category || '');
   document.getElementById('courseLevel').value = c.education_level || '';
   document.getElementById('courseThumb').value = c.thumbnail_url || '';
   document.getElementById('coursePublished').checked = !!c.is_published;

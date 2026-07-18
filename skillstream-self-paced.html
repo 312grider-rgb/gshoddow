@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Self-Paced Learning — Paradise of Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -31,7 +31,7 @@
     padding-bottom:40px;
     -webkit-font-smoothing:antialiased;
   }
-  h1,h2,h3,.display{font-family:'Fraunces',serif; letter-spacing:-0.01em;}
+  h1,h2,h3,.display{font-family:'Syne',sans-serif; letter-spacing:-0.01em;}
   button, .course-card, .chip, a{ transition:transform 0.18s var(--ease), opacity 0.18s var(--ease), background 0.18s var(--ease), box-shadow 0.18s var(--ease); }
   button:active, .course-card:active, .chip:active{ transform:scale(0.97); }
   header.top{
@@ -308,6 +308,12 @@
   .cert-doc .name{font-size:21px; font-weight:700; margin:16px 0 6px;}
   .cert-doc .course{font-style:italic; color:#6b6558; margin-bottom:16px;}
   .cert-doc .date{font-size:12px; color:#a8a094;}
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
+  }
 </style>
 </head>
 <body>
@@ -316,6 +322,7 @@
   <div class="eyebrow">Paradise Of The Eternal Learners</div>
   <h1>Self-Paced Learning</h1>
   <p>Where Learning Never Ends — go at your own pace.</p>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
 </header>
 
 <div id="browseView">
@@ -443,11 +450,33 @@ async function initAuth(){
     return;
   }
   currentUser = session.user;
+
+  // If the student has registered a grade level and didn't arrive with an
+  // explicit ?level= link, default the filter to match their own grade.
+  if(!urlParams.get('level')){
+    const { data: profile } = await sb.from('profiles').select('grade_level').eq('id', currentUser.id).maybeSingle();
+    const mapped = mapGradeToCourseLevel(profile?.grade_level);
+    if(mapped) activeLevel = mapped;
+  }
+
   loadCourses();
 
   sb.auth.onAuthStateChange((event, session)=>{
     if(!session){ window.location.href = 'skillstream-login.html'; }
   });
+}
+
+// Student profiles register a specific grade (grade_1..grade_12), but
+// courses are tagged with broader bands — map one to the other.
+function mapGradeToCourseLevel(grade){
+  if(!grade) return null;
+  if(grade === 'kg') return 'kg';
+  if(grade === 'university') return 'university';
+  const num = parseInt(grade.replace('grade_', ''), 10);
+  if(isNaN(num)) return null;
+  if(num <= 5) return 'elementary';
+  if(num <= 8) return 'middle_school';
+  return 'high_school';
 }
 
 /* ---------- BROWSE ---------- */
@@ -925,6 +954,20 @@ async function submitReview(){
   toast(myReview ? 'Review updated' : 'Review submitted');
   loadReviews(activeCourse.id);
 }
+</script>
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
 </script>
 </body>
 </html>

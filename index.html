@@ -243,18 +243,27 @@
 <body>
 
 <nav>
-  <div class="brand"><small>Learning Never Ends</small>Paradise Of The Eternal Learners</div>
-  <a class="nav-link" href="skillstream-login.html">Log In</a>
+  <div class="brand"><small id="txt-eyebrow">Learning Never Ends</small>Paradise Of The Eternal Learners</div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <select id="langSwitcher" onchange="changeLandingLanguage()" style="border:1px solid var(--line); border-radius:8px; padding:5px 8px; font-size:12px; background:#fff;">
+      <option value="en">🇬🇧 EN</option>
+      <option value="ar">🇸🇦 AR</option>
+      <option value="fr">🇫🇷 FR</option>
+      <option value="es">🇪🇸 ES</option>
+      <option value="zh">🇨🇳 中文</option>
+    </select>
+    <a class="nav-link" href="skillstream-login.html" id="txt-login">Log In</a>
+  </div>
 </nav>
 
 <section class="hero">
-  <div class="eyebrow">Learning Never Ends</div>
-  <h1>Learn anything.<br>Teach what you<br>know. <span class="accent">Live better.</span></h1>
+  <div class="eyebrow" id="txt-eyebrow2">Learning Never Ends</div>
+  <h1 id="txt-headline">Learn anything.<br>Teach what you<br>know. <span class="accent">Live better.</span></h1>
   <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
-  <p class="mission">Paradise Of The Eternal Learners is a place to grow at your own pace — live classes, self-paced courses, and an AI tutor by your side, all in one place.</p>
+  <p class="mission" id="txt-mission">Paradise Of The Eternal Learners is a place to grow at your own pace — live classes, self-paced courses, and an AI tutor by your side, all in one place.</p>
   <div class="cta-row">
-    <a class="btn primary" href="skillstream-self-paced.html">Start Learning</a>
-    <a class="btn secondary" href="skillstream-login.html?role=teacher">Become a Teacher</a>
+    <a class="btn primary" href="skillstream-self-paced.html" id="txt-start">Start Learning</a>
+    <a class="btn secondary" href="skillstream-login.html?role=teacher" id="txt-teach">Become a Teacher</a>
   </div>
   <div class="path-wrap">
     <svg viewBox="0 0 340 46" preserveAspectRatio="none">
@@ -270,23 +279,23 @@
 
 <div class="photo-banner" style="background-image:url('https://images.unsplash.com/photo-1758270705290-62b6294dd044?fm=jpg&q=80&w=1600&auto=format&fit=crop');">
   <div class="overlay">
-    <div class="tag">Real Learning, Real Progress</div>
-    <h2>Learning that fits your life</h2>
-    <p>Whatever your schedule looks like, there's a way to keep growing.</p>
+    <div class="tag" id="txt-b1tag">Real Learning, Real Progress</div>
+    <h2 id="txt-b1title">Learning that fits your life</h2>
+    <p id="txt-b1desc">Whatever your schedule looks like, there's a way to keep growing.</p>
   </div>
 </div>
 
 <section class="section" style="background:#fff;">
-  <div class="kicker">Featured Courses</div>
-  <h2>Popular right now</h2>
+  <div class="kicker" id="txt-featKicker">Featured Courses</div>
+  <h2 id="txt-featTitle">Popular right now</h2>
   <div class="course-scroll" id="featuredCourses">
     <div style="color:#8a8474; font-size:13px;">Loading…</div>
   </div>
 </section>
 
 <section class="section">
-  <div class="kicker">Live Now</div>
-  <h2>Live classes happening now</h2>
+  <div class="kicker" id="txt-liveKicker">Live Now</div>
+  <h2 id="txt-liveTitle">Live classes happening now</h2>
   <div id="liveClasses">
     <div class="loading" style="color:#8a8474; font-size:13px;">Checking for live classes…</div>
   </div>
@@ -294,76 +303,76 @@
 
 <div class="photo-banner" style="background-image:url('https://images.unsplash.com/photo-1758685848174-e061c6486651?fm=jpg&q=80&w=1600&auto=format&fit=crop');">
   <div class="overlay">
-    <div class="tag">For Teachers</div>
-    <h2>Share what you know</h2>
-    <p>Build a course, reach real learners, and grow your teaching income — no classroom required.</p>
-    <a class="btn" href="skillstream-login.html?role=teacher" style="background:var(--gold); color:var(--ink);">Become a Teacher</a>
+    <div class="tag" id="txt-b2tag">For Teachers</div>
+    <h2 id="txt-b2title">Share what you know</h2>
+    <p id="txt-b2desc">Build a course, reach real learners, and grow your teaching income — no classroom required.</p>
+    <a class="btn" href="skillstream-login.html?role=teacher" style="background:var(--gold); color:var(--ink);" id="txt-b2btn">Become a Teacher</a>
   </div>
 </div>
 
 <section class="section">
   <div class="ai-promo">
-    <div class="kicker">AI Learning Hub</div>
-    <h2>Your personal AI study companion</h2>
-    <p>Ask questions, summarize lessons, generate quizzes, translate content, and build a study plan — all in one place.</p>
+    <div class="kicker" id="txt-aiKicker">AI Learning Hub</div>
+    <h2 id="txt-aiTitle">Your personal AI study companion</h2>
+    <p id="txt-aiDesc">Ask questions, summarize lessons, generate quizzes, translate content, and build a study plan — all in one place.</p>
     <div class="tool-list">
-      <span class="tool-pill">Ask & Explain</span>
-      <span class="tool-pill">Quiz Generator</span>
-      <span class="tool-pill">Summarize</span>
-      <span class="tool-pill">Translate</span>
-      <span class="tool-pill">Study Plan</span>
+      <span class="tool-pill" id="txt-tool1">Ask & Explain</span>
+      <span class="tool-pill" id="txt-tool2">Quiz Generator</span>
+      <span class="tool-pill" id="txt-tool3">Summarize</span>
+      <span class="tool-pill" id="txt-tool4">Translate</span>
+      <span class="tool-pill" id="txt-tool5">Study Plan</span>
     </div>
-    <a class="btn" href="skillstream-ai-hub.html">Try the AI Learning Hub</a>
+    <a class="btn" href="skillstream-ai-hub.html" id="txt-aiBtn">Try the AI Learning Hub</a>
   </div>
 </section>
 
 <div class="photo-banner" style="background-image:url('https://images.unsplash.com/photo-1695425173758-37e9c23b962a?fm=jpg&q=80&w=1600&auto=format&fit=crop');">
   <div class="overlay">
-    <div class="tag">Milestones</div>
-    <h2>Every certificate is a milestone</h2>
-    <p>Real learners finishing what they started — one course at a time.</p>
+    <div class="tag" id="txt-b3tag">Milestones</div>
+    <h2 id="txt-b3title">Every certificate is a milestone</h2>
+    <p id="txt-b3desc">Real learners finishing what they started — one course at a time.</p>
   </div>
 </div>
 
 <section class="section" style="background:#fff;">
-  <div class="kicker">Success Stories</div>
-  <h2>What learners are saying</h2>
+  <div class="kicker" id="txt-storyKicker">Success Stories</div>
+  <h2 id="txt-storyTitle">What learners are saying</h2>
   <div class="story-scroll">
     <div class="story-card">
-      <div class="quote">"I finished my first course in two weeks and actually understood everything, thanks to the AI Tutor explaining things my own way."</div>
-      <div class="person"><div class="avatar">A</div><div><div class="name">Amara</div><div class="role">Self-paced learner</div></div></div>
+      <div class="quote" id="txt-quote1">"I finished my first course in two weeks and actually understood everything, thanks to the AI Tutor explaining things my own way."</div>
+      <div class="person"><div class="avatar">A</div><div><div class="name">Amara</div><div class="role" id="txt-role1">Self-paced learner</div></div></div>
     </div>
     <div class="story-card">
-      <div class="quote">"Publishing my first course took an afternoon. Seeing students actually finish it and leave reviews felt incredible."</div>
-      <div class="person"><div class="avatar">D</div><div><div class="name">Daniel</div><div class="role">Teacher</div></div></div>
+      <div class="quote" id="txt-quote2">"Publishing my first course took an afternoon. Seeing students actually finish it and leave reviews felt incredible."</div>
+      <div class="person"><div class="avatar">D</div><div><div class="name">Daniel</div><div class="role" id="txt-role2">Teacher</div></div></div>
     </div>
     <div class="story-card">
-      <div class="quote">"The streak feature is what actually got me to show up every day. Small thing, big difference."</div>
-      <div class="person"><div class="avatar">S</div><div><div class="name">Sofia</div><div class="role">Self-paced learner</div></div></div>
+      <div class="quote" id="txt-quote3">"The streak feature is what actually got me to show up every day. Small thing, big difference."</div>
+      <div class="person"><div class="avatar">S</div><div><div class="name">Sofia</div><div class="role" id="txt-role3">Self-paced learner</div></div></div>
     </div>
   </div>
-  <div class="story-note">Example stories shown while the platform grows its first cohort of learners.</div>
+  <div class="story-note" id="txt-storyNote">Example stories shown while the platform grows its first cohort of learners.</div>
 </section>
 
 <footer>
-  <div class="brand"><small>Learning Never Ends</small>Paradise Of The Eternal Learners</div>
+  <div class="brand"><small id="txt-eyebrow3">Learning Never Ends</small>Paradise Of The Eternal Learners</div>
   <div class="foot-links">
-    <a href="skillstream-self-paced.html">Courses</a>
-    <a href="skillstream-academic.html">Academic Studies</a>
-    <a href="skillstream-leaderboard.html">Leaderboard</a>
-    <a href="skillstream-teachers-directory.html">Our Teachers</a>
-    <a href="skillstream-login.html">Log In</a>
-    <a href="skillstream-login.html?role=teacher">Teach</a>
+    <a href="skillstream-self-paced.html" id="txt-fCourses">Courses</a>
+    <a href="skillstream-academic.html" id="txt-fAcademic">Academic Studies</a>
+    <a href="skillstream-leaderboard.html" id="txt-fLeaderboard">Leaderboard</a>
+    <a href="skillstream-teachers-directory.html" id="txt-fTeachers">Our Teachers</a>
+    <a href="skillstream-login.html" id="txt-fLogin">Log In</a>
+    <a href="skillstream-login.html?role=teacher" id="txt-fTeach">Teach</a>
   </div>
   <div class="foot-links" style="margin-top:6px;">
-    <a href="skillstream-about.html">About</a>
-    <a href="skillstream-faq.html">FAQ</a>
-    <a href="skillstream-contact.html">Contact</a>
-    <a href="skillstream-privacy.html">Privacy</a>
-    <a href="skillstream-terms.html">Terms</a>
+    <a href="skillstream-about.html" id="txt-fAbout">About</a>
+    <a href="skillstream-faq.html" id="txt-fFaq">FAQ</a>
+    <a href="skillstream-contact.html" id="txt-fContact">Contact</a>
+    <a href="skillstream-privacy.html" id="txt-fPrivacy">Privacy</a>
+    <a href="skillstream-terms.html" id="txt-fTerms">Terms</a>
   </div>
   <div class="copyright">hello@gshoddow.vercel.app</div>
-  <div class="copyright">© 2026 Paradise Of The Eternal Learners. Help everyone learn and live better.</div>
+  <div class="copyright" id="txt-copyright">© 2026 Paradise Of The Eternal Learners. Help everyone learn and live better.</div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -405,16 +414,203 @@ async function loadFeaturedCourses(){
 
 loadFeaturedCourses();
 
+/* ---------- LANGUAGE SWITCHER ----------
+   Translates the hero section (the highest-visibility, first-impression
+   text) into 5 languages. This is a working example on the landing page
+   plus Settings — full site-wide translation across every page is a
+   larger rollout still to come. */
+const LANDING_TRANSLATIONS = {
+  en: { dir:'ltr', eyebrow:'Learning Never Ends', login:'Log In',
+    headline:'Learn anything.<br>Teach what you<br>know. <span class="accent">Live better.</span>',
+    mission:'Paradise Of The Eternal Learners is a place to grow at your own pace — live classes, self-paced courses, and an AI tutor by your side, all in one place.',
+    start:'Start Learning', teach:'Become a Teacher',
+    b1tag:'Real Learning, Real Progress', b1title:'Learning that fits your life', b1desc:"Whatever your schedule looks like, there's a way to keep growing.",
+    featKicker:'Featured Courses', featTitle:'Popular right now',
+    liveKicker:'Live Now', liveTitle:'Live classes happening now',
+    b2tag:'For Teachers', b2title:'Share what you know', b2desc:'Build a course, reach real learners, and grow your teaching income — no classroom required.', b2btn:'Become a Teacher',
+    aiKicker:'AI Learning Hub', aiTitle:'Your personal AI study companion', aiDesc:'Ask questions, summarize lessons, generate quizzes, translate content, and build a study plan — all in one place.',
+    tool1:'Ask & Explain', tool2:'Quiz Generator', tool3:'Summarize', tool4:'Translate', tool5:'Study Plan', aiBtn:'Try the AI Learning Hub',
+    b3tag:'Milestones', b3title:'Every certificate is a milestone', b3desc:'Real learners finishing what they started — one course at a time.',
+    storyKicker:'Success Stories', storyTitle:'What learners are saying',
+    quote1:'"I finished my first course in two weeks and actually understood everything, thanks to the AI Tutor explaining things my own way."', role1:'Self-paced learner',
+    quote2:'"Publishing my first course took an afternoon. Seeing students actually finish it and leave reviews felt incredible."', role2:'Teacher',
+    quote3:'"The streak feature is what actually got me to show up every day. Small thing, big difference."', role3:'Self-paced learner',
+    storyNote:'Example stories shown while the platform grows its first cohort of learners.',
+    fCourses:'Courses', fAcademic:'Academic Studies', fLeaderboard:'Leaderboard', fTeachers:'Our Teachers', fLogin:'Log In', fTeach:'Teach',
+    fAbout:'About', fFaq:'FAQ', fContact:'Contact', fPrivacy:'Privacy', fTerms:'Terms',
+    copyright:'© 2026 Paradise Of The Eternal Learners. Help everyone learn and live better.',
+    liveEmpty:'No live classes are running right now — check back soon, or explore self-paced courses in the meantime.', liveBrowseBtn:'Browse courses →', liveWith:'with', liveATeacher:'a teacher', liveJoinBtn:'Join' },
+  ar: { dir:'rtl', eyebrow:'Learning Never Ends', login:'تسجيل الدخول',
+    headline:'تعلّم أي شيء.<br>علّم ما تعرفه<br><span class="accent">وعِش حياة أفضل.</span>',
+    mission:'"جنة المتعلمين الأبديين" مكان للنمو بالسرعة التي تناسبك — حصص مباشرة، دورات ذاتية الوتيرة، ومعلم ذكاء اصطناعي بجانبك، كل ذلك في مكان واحد.',
+    start:'ابدأ التعلم', teach:'كن معلمًا',
+    b1tag:'تعلّم حقيقي، تقدّم حقيقي', b1title:'تعلّم يناسب حياتك', b1desc:'مهما كان جدولك، هناك طريقة للاستمرار في النمو.',
+    featKicker:'دورات مميزة', featTitle:'الأكثر شعبية الآن',
+    liveKicker:'مباشر الآن', liveTitle:'حصص مباشرة تحدث الآن',
+    b2tag:'للمعلمين', b2title:'شارك ما تعرفه', b2desc:'أنشئ دورة، وتواصل مع متعلمين حقيقيين، ونمِّ دخلك من التدريس — دون الحاجة لفصل دراسي.', b2btn:'كن معلمًا',
+    aiKicker:'مركز الذكاء الاصطناعي التعليمي', aiTitle:'رفيقك الدراسي الذكي الشخصي', aiDesc:'اطرح الأسئلة، لخّص الدروس، أنشئ اختبارات، ترجم المحتوى، وضع خطة دراسية — كل ذلك في مكان واحد.',
+    tool1:'اسأل واشرح', tool2:'منشئ الاختبارات', tool3:'تلخيص', tool4:'ترجمة', tool5:'خطة دراسية', aiBtn:'جرّب مركز الذكاء الاصطناعي',
+    b3tag:'الإنجازات', b3title:'كل شهادة هي إنجاز', b3desc:'متعلمون حقيقيون ينهون ما بدأوه — دورة تلو الأخرى.',
+    storyKicker:'قصص النجاح', storyTitle:'ماذا يقول المتعلمون',
+    quote1:'"أنهيت دورتي الأولى خلال أسبوعين وفهمت كل شيء فعلاً، بفضل معلم الذكاء الاصطناعي الذي شرح لي بطريقتي الخاصة."', role1:'متعلم ذاتي الوتيرة',
+    quote2:'"نشر دورتي الأولى استغرق فترة بعد الظهر فقط. رؤية الطلاب ينهونها فعلاً ويتركون تقييمات كان شعورًا رائعًا."', role2:'معلم',
+    quote3:'"ميزة سلسلة الأيام هي ما جعلني أحضر فعلاً كل يوم. شيء صغير، لكنه فرق كبير."', role3:'متعلم ذاتي الوتيرة',
+    storyNote:'قصص توضيحية بينما تنمو المنصة مع أول مجموعة من المتعلمين.',
+    fCourses:'الدورات', fAcademic:'الدراسة الأكاديمية', fLeaderboard:'لوحة المتصدرين', fTeachers:'معلمونا', fLogin:'تسجيل الدخول', fTeach:'التدريس',
+    fAbout:'من نحن', fFaq:'الأسئلة الشائعة', fContact:'تواصل معنا', fPrivacy:'الخصوصية', fTerms:'الشروط',
+    copyright:'© 2026 جنة المتعلمين الأبديين. ساعد الجميع على التعلم والعيش بشكل أفضل.',
+    liveEmpty:'لا توجد حصص مباشرة الآن — تحقق لاحقًا، أو تصفح الدورات ذاتية الوتيرة في هذه الأثناء.', liveBrowseBtn:'تصفح الدورات ←', liveWith:'مع', liveATeacher:'معلم', liveJoinBtn:'انضم' },
+  fr: { dir:'ltr', eyebrow:'Learning Never Ends', login:'Connexion',
+    headline:'Apprenez tout.<br>Enseignez ce que<br>vous savez. <span class="accent">Vivez mieux.</span>',
+    mission:"Paradise Of The Eternal Learners est un endroit pour progresser à votre rythme — cours en direct, cours à votre rythme, et un tuteur IA à vos côtés, le tout au même endroit.",
+    start:'Commencer à apprendre', teach:'Devenir enseignant',
+    b1tag:'Apprentissage réel, progrès réel', b1title:'Un apprentissage adapté à votre vie', b1desc:"Quel que soit votre emploi du temps, il y a un moyen de continuer à progresser.",
+    featKicker:'Cours en vedette', featTitle:'Populaires en ce moment',
+    liveKicker:'En direct', liveTitle:'Cours en direct en ce moment',
+    b2tag:'Pour les enseignants', b2title:'Partagez ce que vous savez', b2desc:'Créez un cours, touchez de vrais apprenants et développez vos revenus d\'enseignement — sans salle de classe requise.', b2btn:'Devenir enseignant',
+    aiKicker:'Centre IA d\'apprentissage', aiTitle:'Votre compagnon d\'étude IA personnel', aiDesc:'Posez des questions, résumez des leçons, générez des quiz, traduisez du contenu et créez un plan d\'étude — le tout au même endroit.',
+    tool1:'Demander et expliquer', tool2:'Générateur de quiz', tool3:'Résumer', tool4:'Traduire', tool5:'Plan d\'étude', aiBtn:'Essayer le Centre IA',
+    b3tag:'Étapes clés', b3title:'Chaque certificat est une étape clé', b3desc:'De vrais apprenants qui terminent ce qu\'ils ont commencé — un cours à la fois.',
+    storyKicker:'Témoignages', storyTitle:'Ce que disent les apprenants',
+    quote1:'"J\'ai terminé mon premier cours en deux semaines et j\'ai vraiment tout compris, grâce au tuteur IA qui explique à ma façon."', role1:'Apprenant autonome',
+    quote2:'"Publier mon premier cours a pris un après-midi. Voir des étudiants le terminer et laisser des avis était incroyable."', role2:'Enseignant',
+    quote3:'"La fonctionnalité de série est ce qui m\'a vraiment poussé à me présenter chaque jour. Un petit détail, une grande différence."', role3:'Apprenant autonome',
+    storyNote:'Témoignages d\'exemple pendant que la plateforme développe sa première cohorte d\'apprenants.',
+    fCourses:'Cours', fAcademic:'Études académiques', fLeaderboard:'Classement', fTeachers:'Nos enseignants', fLogin:'Connexion', fTeach:'Enseigner',
+    fAbout:'À propos', fFaq:'FAQ', fContact:'Contact', fPrivacy:'Confidentialité', fTerms:'Conditions',
+    copyright:'© 2026 Paradise Of The Eternal Learners. Aider chacun à apprendre et à mieux vivre.',
+    liveEmpty:"Aucun cours en direct pour le moment — revenez bientôt, ou explorez les cours à votre rythme en attendant.", liveBrowseBtn:'Parcourir les cours →', liveWith:'avec', liveATeacher:'un enseignant', liveJoinBtn:'Rejoindre' },
+  es: { dir:'ltr', eyebrow:'Learning Never Ends', login:'Iniciar sesión',
+    headline:'Aprende cualquier cosa.<br>Enseña lo que<br>sabes. <span class="accent">Vive mejor.</span>',
+    mission:'Paradise Of The Eternal Learners es un lugar para crecer a tu propio ritmo — clases en vivo, cursos a tu ritmo, y un tutor de IA a tu lado, todo en un solo lugar.',
+    start:'Empezar a aprender', teach:'Conviértete en profesor',
+    b1tag:'Aprendizaje real, progreso real', b1title:'Un aprendizaje que se adapta a tu vida', b1desc:'Sea cual sea tu horario, hay una forma de seguir creciendo.',
+    featKicker:'Cursos destacados', featTitle:'Populares ahora mismo',
+    liveKicker:'En vivo ahora', liveTitle:'Clases en vivo ahora mismo',
+    b2tag:'Para profesores', b2title:'Comparte lo que sabes', b2desc:'Crea un curso, llega a estudiantes reales y aumenta tus ingresos como profesor — sin necesidad de un aula.', b2btn:'Conviértete en profesor',
+    aiKicker:'Centro de Aprendizaje IA', aiTitle:'Tu compañero de estudio de IA personal', aiDesc:'Haz preguntas, resume lecciones, genera cuestionarios, traduce contenido y crea un plan de estudio — todo en un solo lugar.',
+    tool1:'Preguntar y explicar', tool2:'Generador de cuestionarios', tool3:'Resumir', tool4:'Traducir', tool5:'Plan de estudio', aiBtn:'Probar el Centro de IA',
+    b3tag:'Logros', b3title:'Cada certificado es un logro', b3desc:'Estudiantes reales que terminan lo que empezaron — un curso a la vez.',
+    storyKicker:'Historias de éxito', storyTitle:'Lo que dicen los estudiantes',
+    quote1:'"Terminé mi primer curso en dos semanas y realmente entendí todo, gracias al tutor de IA que explicaba a mi manera."', role1:'Estudiante autodidacta',
+    quote2:'"Publicar mi primer curso tomó solo una tarde. Ver a los estudiantes terminarlo y dejar reseñas fue increíble."', role2:'Profesor',
+    quote3:'"La función de racha es lo que realmente me hizo presentarme todos los días. Algo pequeño, una gran diferencia."', role3:'Estudiante autodidacta',
+    storyNote:'Historias de ejemplo mientras la plataforma hace crecer su primer grupo de estudiantes.',
+    fCourses:'Cursos', fAcademic:'Estudios Académicos', fLeaderboard:'Clasificación', fTeachers:'Nuestros Profesores', fLogin:'Iniciar sesión', fTeach:'Enseñar',
+    fAbout:'Acerca de', fFaq:'Preguntas frecuentes', fContact:'Contacto', fPrivacy:'Privacidad', fTerms:'Términos',
+    copyright:'© 2026 Paradise Of The Eternal Learners. Ayudar a todos a aprender y vivir mejor.',
+    liveEmpty:'No hay clases en vivo en este momento — vuelve pronto, o explora los cursos a tu ritmo mientras tanto.', liveBrowseBtn:'Explorar cursos →', liveWith:'con', liveATeacher:'un profesor', liveJoinBtn:'Unirse' },
+  zh: { dir:'ltr', eyebrow:'Learning Never Ends', login:'登录',
+    headline:'学习任何知识。<br>教授你所知道的。<br><span class="accent">活得更好。</span>',
+    mission:'"永恒学习者的乐园"是一个按自己的节奏成长的地方——直播课程、自定进度课程，还有 AI 导师陪伴左右，一站式体验。',
+    start:'开始学习', teach:'成为教师',
+    b1tag:'真实学习，真实进步', b1title:'适合你生活的学习方式', b1desc:'无论你的日程安排如何，总有办法持续成长。',
+    featKicker:'精选课程', featTitle:'当前热门',
+    liveKicker:'正在直播', liveTitle:'正在进行的直播课程',
+    b2tag:'致教师', b2title:'分享你的知识', b2desc:'创建课程，接触真实学员，增加教学收入——无需教室。', b2btn:'成为教师',
+    aiKicker:'AI 学习中心', aiTitle:'你的专属 AI 学习伙伴', aiDesc:'提问、总结课程、生成测验、翻译内容、制定学习计划——一站式完成。',
+    tool1:'提问与讲解', tool2:'测验生成器', tool3:'总结', tool4:'翻译', tool5:'学习计划', aiBtn:'试用 AI 学习中心',
+    b3tag:'里程碑', b3title:'每一张证书都是一个里程碑', b3desc:'真实学员一步一步完成自己开始的课程。',
+    storyKicker:'成功案例', storyTitle:'学员们怎么说',
+    quote1:'"我两周内完成了第一门课程，并真正理解了所有内容，多亏 AI 导师用适合我的方式讲解。"', role1:'自定进度学员',
+    quote2:'"发布我的第一门课程只花了一个下午。看到学生真正完成课程并留下评价，感觉非常棒。"', role2:'教师',
+    quote3:'"连续打卡功能真正让我做到每天坚持。小小的功能，大大的不同。"', role3:'自定进度学员',
+    storyNote:'平台正在发展第一批学员，以上为示例故事。',
+    fCourses:'课程', fAcademic:'学术课程', fLeaderboard:'排行榜', fTeachers:'我们的教师', fLogin:'登录', fTeach:'教学',
+    fAbout:'关于我们', fFaq:'常见问题', fContact:'联系我们', fPrivacy:'隐私政策', fTerms:'服务条款',
+    copyright:'© 2026 永恒学习者的乐园。帮助每个人学习并生活得更好。',
+    liveEmpty:'目前没有正在进行的直播课程——请稍后再来查看，或先浏览自定进度课程。', liveBrowseBtn:'浏览课程 →', liveWith:'讲师：', liveATeacher:'一位教师', liveJoinBtn:'加入' }
+};
+
+function applyLandingLanguage(lang){
+  const t = LANDING_TRANSLATIONS[lang] || LANDING_TRANSLATIONS.en;
+  document.documentElement.setAttribute('lang', lang);
+  document.documentElement.setAttribute('dir', t.dir);
+  document.getElementById('txt-eyebrow').textContent = t.eyebrow;
+  document.getElementById('txt-eyebrow2').textContent = t.eyebrow;
+  document.getElementById('txt-eyebrow3').textContent = t.eyebrow;
+  document.getElementById('txt-login').textContent = t.login;
+  document.getElementById('txt-headline').innerHTML = t.headline;
+  document.getElementById('txt-mission').textContent = t.mission;
+  document.getElementById('txt-start').textContent = t.start;
+  document.getElementById('txt-teach').textContent = t.teach;
+  document.getElementById('langSwitcher').value = lang;
+
+  document.getElementById('txt-b1tag').textContent = t.b1tag;
+  document.getElementById('txt-b1title').textContent = t.b1title;
+  document.getElementById('txt-b1desc').textContent = t.b1desc;
+
+  document.getElementById('txt-featKicker').textContent = t.featKicker;
+  document.getElementById('txt-featTitle').textContent = t.featTitle;
+
+  document.getElementById('txt-liveKicker').textContent = t.liveKicker;
+  document.getElementById('txt-liveTitle').textContent = t.liveTitle;
+
+  document.getElementById('txt-b2tag').textContent = t.b2tag;
+  document.getElementById('txt-b2title').textContent = t.b2title;
+  document.getElementById('txt-b2desc').textContent = t.b2desc;
+  document.getElementById('txt-b2btn').textContent = t.b2btn;
+
+  document.getElementById('txt-aiKicker').textContent = t.aiKicker;
+  document.getElementById('txt-aiTitle').textContent = t.aiTitle;
+  document.getElementById('txt-aiDesc').textContent = t.aiDesc;
+  document.getElementById('txt-tool1').textContent = t.tool1;
+  document.getElementById('txt-tool2').textContent = t.tool2;
+  document.getElementById('txt-tool3').textContent = t.tool3;
+  document.getElementById('txt-tool4').textContent = t.tool4;
+  document.getElementById('txt-tool5').textContent = t.tool5;
+  document.getElementById('txt-aiBtn').textContent = t.aiBtn;
+
+  document.getElementById('txt-b3tag').textContent = t.b3tag;
+  document.getElementById('txt-b3title').textContent = t.b3title;
+  document.getElementById('txt-b3desc').textContent = t.b3desc;
+
+  document.getElementById('txt-storyKicker').textContent = t.storyKicker;
+  document.getElementById('txt-storyTitle').textContent = t.storyTitle;
+  document.getElementById('txt-quote1').textContent = t.quote1;
+  document.getElementById('txt-role1').textContent = t.role1;
+  document.getElementById('txt-quote2').textContent = t.quote2;
+  document.getElementById('txt-role2').textContent = t.role2;
+  document.getElementById('txt-quote3').textContent = t.quote3;
+  document.getElementById('txt-role3').textContent = t.role3;
+  document.getElementById('txt-storyNote').textContent = t.storyNote;
+
+  document.getElementById('txt-fCourses').textContent = t.fCourses;
+  document.getElementById('txt-fAcademic').textContent = t.fAcademic;
+  document.getElementById('txt-fLeaderboard').textContent = t.fLeaderboard;
+  document.getElementById('txt-fTeachers').textContent = t.fTeachers;
+  document.getElementById('txt-fLogin').textContent = t.fLogin;
+  document.getElementById('txt-fTeach').textContent = t.fTeach;
+  document.getElementById('txt-fAbout').textContent = t.fAbout;
+  document.getElementById('txt-fFaq').textContent = t.fFaq;
+  document.getElementById('txt-fContact').textContent = t.fContact;
+  document.getElementById('txt-fPrivacy').textContent = t.fPrivacy;
+  document.getElementById('txt-fTerms').textContent = t.fTerms;
+  document.getElementById('txt-copyright').textContent = t.copyright;
+}
+
+function changeLandingLanguage(){
+  const lang = document.getElementById('langSwitcher').value;
+  localStorage.setItem('language', lang);
+  applyLandingLanguage(lang);
+  loadLiveClasses();
+}
+
+applyLandingLanguage(localStorage.getItem('language') || 'en');
+
 async function loadLiveClasses(){
   const el = document.getElementById('liveClasses');
+  const t = LANDING_TRANSLATIONS[localStorage.getItem('language') || 'en'] || LANDING_TRANSLATIONS.en;
+
   const { data, error } = await sb
     .from('live_sessions')
     .select('*, profiles(full_name)')
     .eq('status', 'live')
+    .eq('is_public', true)
     .order('started_at', { ascending:false });
 
   if(error || !data || data.length === 0){
-    el.innerHTML = `<div class="live-empty">No live classes are running right now — check back soon, or explore self-paced courses in the meantime.<br><a href="skillstream-self-paced.html">Browse courses →</a></div>`;
+    el.innerHTML = `<div class="live-empty">${t.liveEmpty}<br><a href="skillstream-self-paced.html">${t.liveBrowseBtn}</a></div>`;
     return;
   }
 
@@ -423,9 +619,9 @@ async function loadLiveClasses(){
       <span class="live-dot"></span>
       <div style="flex:1;">
         <h3>${escapeHtml(s.title)}</h3>
-        <p>with ${escapeHtml(s.profiles?.full_name || 'a teacher')}</p>
+        <p>${t.liveWith} ${escapeHtml(s.profiles?.full_name || t.liveATeacher)}</p>
       </div>
-      <a class="btn gold" style="width:auto; padding:9px 16px; font-size:13px;" href="skillstream-login.html">Join</a>
+      <a class="btn gold" style="width:auto; padding:9px 16px; font-size:13px;" href="skillstream-login.html">${t.liveJoinBtn}</a>
     </div>
   `).join('');
 }

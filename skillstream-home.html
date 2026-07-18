@@ -121,9 +121,18 @@
 <body>
 
 <header class="top">
-  <div class="eyebrow">Learning Never Ends</div>
+  <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+    <div class="eyebrow" id="txt-eyebrow">Learning Never Ends</div>
+    <select id="langSwitcher" onchange="changeHomeLanguage()" style="border:none; border-radius:8px; padding:4px 6px; font-size:11px; background:rgba(255,255,255,0.15); color:#fff;">
+      <option value="en" style="color:#000;">🇬🇧 EN</option>
+      <option value="ar" style="color:#000;">🇸🇦 AR</option>
+      <option value="fr" style="color:#000;">🇫🇷 FR</option>
+      <option value="es" style="color:#000;">🇪🇸 ES</option>
+      <option value="zh" style="color:#000;">🇨🇳 中文</option>
+    </select>
+  </div>
   <h1 id="greeting">Welcome</h1>
-  <p>Paradise Of The Eternal Learners</p>
+  <p id="txt-tagline">Paradise Of The Eternal Learners</p>
   <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
 </header>
 
@@ -149,36 +158,11 @@ async function init(){
   if(!session){ window.location.href = 'skillstream-login.html'; return; }
 
   const { data: profile } = await sb.from('profiles').select('full_name, role').eq('id', session.user.id).maybeSingle();
-  const name = profile?.full_name ? profile.full_name.split(' ')[0] : '';
-  document.getElementById('greeting').textContent = name ? `Welcome, ${name}` : 'Welcome';
-
-  const role = profile?.role || 'student';
+  window._homeName = profile?.full_name ? profile.full_name.split(' ')[0] : '';
+  window._homeRole = profile?.role || 'student';
 
   document.getElementById('viewsLoading').style.display = 'none';
-  document.getElementById('viewCards').innerHTML = `
-    <a class="view-card ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html">
-      ${role === 'student' ? '<span class="suggested-tag">Your account</span>' : ''}
-      <div class="icon">🎓</div>
-      <h2>Continue as Student</h2>
-      <p>Browse and take courses, track your progress, chat with your AI Tutor, and earn certificates.</p>
-      <div class="go">Go to Student Dashboard →</div>
-    </a>
-
-    <a class="view-card ${role === 'teacher' ? 'suggested' : ''}" href="skillstream-teacher-dashboard.html">
-      ${role === 'teacher' ? '<span class="suggested-tag">Your account</span>' : ''}
-      <div class="icon">🧑‍🏫</div>
-      <h2>Continue as Teacher</h2>
-      <p>Create and publish courses, manage lessons, and track how learners are engaging with your content.</p>
-      <div class="go">Go to Teacher Dashboard →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-ai-hub.html">
-      <div class="icon">🤖</div>
-      <h2>AI Learning Hub</h2>
-      <p>Chat with an AI Teacher, generate quizzes, test your level, summarize, translate, and build study plans.</p>
-      <div class="go">Open AI Learning Hub →</div>
-    </a>
-  `;
+  applyHomeLanguage(localStorage.getItem('language') || 'en');
 
   loadInspiration(session.user.id);
   loadLiveClasses();
@@ -188,29 +172,141 @@ async function init(){
 
 init();
 
+/* ---------- LANGUAGE SWITCHER ----------
+   Translates the greeting and the three main navigation cards — the
+   highest-visibility text on this page. Working example alongside the
+   landing page and Settings; full site-wide translation is a larger
+   rollout still to come. */
+const HOME_TRANSLATIONS = {
+  en: { dir:'ltr', eyebrow:'Learning Never Ends', tagline:'Paradise Of The Eternal Learners', welcome:'Welcome',
+    yourAccount:'Your account',
+    studentTitle:'Continue as Student', studentDesc:'Browse and take courses, track your progress, chat with your AI Tutor, and earn certificates.', studentGo:'Go to Student Dashboard →',
+    teacherTitle:'Continue as Teacher', teacherDesc:'Create and publish courses, manage lessons, and track how learners are engaging with your content.', teacherGo:'Go to Teacher Dashboard →',
+    aiTitle:'AI Learning Hub', aiDesc:'Chat with an AI Teacher, generate quizzes, test your level, summarize, translate, and build study plans.', aiGo:'Open AI Learning Hub →' },
+  ar: { dir:'rtl', eyebrow:'Learning Never Ends', tagline:'جنة المتعلمين الأبديين', welcome:'مرحبًا',
+    yourAccount:'حسابك',
+    studentTitle:'المتابعة كطالب', studentDesc:'تصفح الدورات وتابعها، وتتبع تقدمك، وتحدث مع معلمك الذكي، واحصل على الشهادات.', studentGo:'الذهاب إلى لوحة الطالب ←',
+    teacherTitle:'المتابعة كمعلم', teacherDesc:'أنشئ الدورات وانشرها، وأدر الدروس، وتابع كيفية تفاعل المتعلمين مع محتواك.', teacherGo:'الذهاب إلى لوحة المعلم ←',
+    aiTitle:'مركز الذكاء الاصطناعي التعليمي', aiDesc:'تحدث مع معلم ذكاء اصطناعي، وأنشئ اختبارات، واختبر مستواك، ولخّص، وترجم، وضع خطط دراسية.', aiGo:'فتح مركز الذكاء الاصطناعي ←' },
+  fr: { dir:'ltr', eyebrow:'Learning Never Ends', tagline:'Paradise Of The Eternal Learners', welcome:'Bienvenue',
+    yourAccount:'Votre compte',
+    studentTitle:'Continuer en tant qu\'étudiant', studentDesc:'Parcourez et suivez des cours, suivez votre progression, discutez avec votre tuteur IA et obtenez des certificats.', studentGo:'Aller au tableau de bord étudiant →',
+    teacherTitle:'Continuer en tant qu\'enseignant', teacherDesc:'Créez et publiez des cours, gérez les leçons et suivez l\'engagement des apprenants avec votre contenu.', teacherGo:'Aller au tableau de bord enseignant →',
+    aiTitle:'Centre IA d\'apprentissage', aiDesc:'Discutez avec un professeur IA, générez des quiz, testez votre niveau, résumez, traduisez et créez des plans d\'étude.', aiGo:'Ouvrir le Centre IA →' },
+  es: { dir:'ltr', eyebrow:'Learning Never Ends', tagline:'Paradise Of The Eternal Learners', welcome:'Bienvenido',
+    yourAccount:'Tu cuenta',
+    studentTitle:'Continuar como estudiante', studentDesc:'Explora y realiza cursos, sigue tu progreso, chatea con tu tutor de IA y obtén certificados.', studentGo:'Ir al panel de estudiante →',
+    teacherTitle:'Continuar como profesor', teacherDesc:'Crea y publica cursos, gestiona lecciones y observa cómo interactúan los alumnos con tu contenido.', teacherGo:'Ir al panel de profesor →',
+    aiTitle:'Centro de Aprendizaje IA', aiDesc:'Chatea con un profesor de IA, genera cuestionarios, evalúa tu nivel, resume, traduce y crea planes de estudio.', aiGo:'Abrir Centro de IA →' },
+  zh: { dir:'ltr', eyebrow:'Learning Never Ends', tagline:'永恒学习者的乐园', welcome:'欢迎',
+    yourAccount:'你的账户',
+    studentTitle:'以学生身份继续', studentDesc:'浏览并学习课程，跟踪你的进度，与 AI 导师聊天，并获得证书。', studentGo:'前往学生仪表盘 →',
+    teacherTitle:'以教师身份继续', teacherDesc:'创建并发布课程，管理课时，跟踪学员对你内容的参与情况。', teacherGo:'前往教师仪表盘 →',
+    aiTitle:'AI 学习中心', aiDesc:'与 AI 教师聊天、生成测验、测试你的水平、总结、翻译并制定学习计划。', aiGo:'打开 AI 学习中心 →' }
+};
+
+function applyHomeLanguage(lang){
+  const t = HOME_TRANSLATIONS[lang] || HOME_TRANSLATIONS.en;
+  document.documentElement.setAttribute('lang', lang);
+  document.documentElement.setAttribute('dir', t.dir);
+  document.getElementById('txt-eyebrow').textContent = t.eyebrow;
+  document.getElementById('txt-tagline').textContent = t.tagline;
+  document.getElementById('greeting').textContent = window._homeName ? `${t.welcome}, ${window._homeName}` : t.welcome;
+  document.getElementById('langSwitcher').value = lang;
+
+  const role = window._homeRole || 'student';
+  document.getElementById('viewCards').innerHTML = `
+    <a class="view-card ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html">
+      ${role === 'student' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
+      <div class="icon">🎓</div>
+      <h2>${t.studentTitle}</h2>
+      <p>${t.studentDesc}</p>
+      <div class="go">${t.studentGo}</div>
+    </a>
+
+    <a class="view-card ${role === 'teacher' ? 'suggested' : ''}" href="skillstream-teacher-dashboard.html">
+      ${role === 'teacher' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
+      <div class="icon">🧑‍🏫</div>
+      <h2>${t.teacherTitle}</h2>
+      <p>${t.teacherDesc}</p>
+      <div class="go">${t.teacherGo}</div>
+    </a>
+
+    <a class="view-card" href="skillstream-ai-hub.html">
+      <div class="icon">🤖</div>
+      <h2>${t.aiTitle}</h2>
+      <p>${t.aiDesc}</p>
+      <div class="go">${t.aiGo}</div>
+    </a>
+  `;
+}
+
+function changeHomeLanguage(){
+  const lang = document.getElementById('langSwitcher').value;
+  localStorage.setItem('language', lang);
+  applyHomeLanguage(lang);
+}
+
 async function loadLiveClasses(){
   const el = document.getElementById('liveClassesSection');
+
+  const { data: myProfile } = await sb.from('profiles').select('grade_level').eq('id', inspUserId).maybeSingle();
+  const myGrade = myProfile?.grade_level || null;
+
   const { data, error } = await sb
     .from('live_sessions')
     .select('*, profiles(full_name)')
     .eq('status', 'live')
+    .eq('is_public', true)
     .order('started_at', { ascending:false });
 
-  if(error || !data || data.length === 0){
-    el.innerHTML = '';
-    return;
+  let html = '';
+
+  if(!error && data && data.length > 0){
+    // Only show classes with no grade target, or ones matching this student's own registered grade
+    const visible = data.filter(s => !s.target_grade_level || s.target_grade_level === myGrade);
+
+    if(visible.length > 0){
+      html += `<div class="section-title-home">🔴 Live Now</div>` + visible.map(s => `
+        <div class="live-class-card">
+          <span class="live-class-dot"></span>
+          <div style="flex:1;">
+            <h3>${escapeHtml(s.title)}</h3>
+            <p>with ${escapeHtml(s.profiles?.full_name || 'a teacher')}${s.target_grade_level ? ' · ' + escapeHtml(s.target_grade_level.replace('_',' ')) : ''}</p>
+          </div>
+          <a class="live-join-btn" href="skillstream-live-video.html?room=${encodeURIComponent(s.room_name)}&session=${s.id}&title=${encodeURIComponent(s.title)}">Join</a>
+        </div>
+      `).join('');
+    }
   }
 
-  el.innerHTML = `<div class="section-title-home">🔴 Live Now</div>` + data.map(s => `
-    <div class="live-class-card">
-      <span class="live-class-dot"></span>
-      <div style="flex:1;">
-        <h3>${escapeHtml(s.title)}</h3>
-        <p>with ${escapeHtml(s.profiles?.full_name || 'a teacher')}</p>
+  html += `
+    <div class="live-class-card" style="flex-direction:column; align-items:stretch; gap:8px;">
+      <div style="font-size:13px; font-weight:700; color:var(--ink);">Have a private class code?</div>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="joinCodeInput" placeholder="e.g. AB12CD" style="flex:1; padding:9px 12px; border:1.5px solid var(--line); border-radius:9px; font-size:14px; text-transform:uppercase;">
+        <button onclick="joinByCode()" style="background:var(--ink); color:#fff; border:none; padding:9px 16px; border-radius:9px; font-weight:700; font-size:13px;">Join</button>
       </div>
-      <a class="live-join-btn" href="skillstream-live-video.html?room=${encodeURIComponent(s.room_url)}&session=${s.id}&title=${encodeURIComponent(s.title)}">Join</a>
     </div>
-  `).join('');
+  `;
+
+  el.innerHTML = html;
+}
+
+async function joinByCode(){
+  const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+  if(!code){ alert('Enter a join code first.'); return; }
+
+  const { data, error } = await sb
+    .from('live_sessions')
+    .select('*')
+    .eq('join_code', code)
+    .eq('status', 'live')
+    .maybeSingle();
+
+  if(error || !data){ alert('No live class found with that code.'); return; }
+
+  window.location.href = `skillstream-live-video.html?room=${encodeURIComponent(data.room_name)}&session=${data.id}&title=${encodeURIComponent(data.title)}`;
 }
 
 /* ---------- DAILY INSPIRATION (7 categories) ----------

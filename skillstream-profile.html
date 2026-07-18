@@ -119,6 +119,28 @@
     <input type="text" id="fullName" placeholder="Your name">
     <label>Bio</label>
     <textarea id="bio" placeholder="A short line about you — your interests, what you teach or want to learn"></textarea>
+
+    <div id="gradeLevelField" style="display:none;">
+      <label>Grade / Class Level</label>
+      <select id="gradeLevel">
+        <option value="">Not set</option>
+        <option value="kg">Kindergarten</option>
+        <option value="grade_1">Grade 1</option>
+        <option value="grade_2">Grade 2</option>
+        <option value="grade_3">Grade 3</option>
+        <option value="grade_4">Grade 4</option>
+        <option value="grade_5">Grade 5</option>
+        <option value="grade_6">Grade 6</option>
+        <option value="grade_7">Grade 7</option>
+        <option value="grade_8">Grade 8</option>
+        <option value="grade_9">Grade 9</option>
+        <option value="grade_10">Grade 10</option>
+        <option value="grade_11">Grade 11</option>
+        <option value="grade_12">Grade 12</option>
+        <option value="university">University</option>
+      </select>
+    </div>
+
     <label>Profile Photo</label>
     <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px;">
       <input type="file" id="avatarFile" accept="image/*" style="flex:1;" onchange="uploadAvatar()">
@@ -178,6 +200,11 @@ async function loadProfile(){
   document.getElementById('fullName').value = currentProfile.full_name || '';
   document.getElementById('bio').value = currentProfile.bio || '';
   document.getElementById('avatarUrl').value = currentProfile.avatar_url || '';
+
+  if((currentProfile.role || 'student') === 'student'){
+    document.getElementById('gradeLevelField').style.display = 'block';
+    document.getElementById('gradeLevel').value = currentProfile.grade_level || '';
+  }
 }
 
 function renderProfile(){
@@ -275,6 +302,9 @@ async function saveProfile(){
     avatar_url: document.getElementById('avatarUrl').value.trim(),
     role: currentProfile.role || 'student'
   };
+  if((currentProfile.role || 'student') === 'student'){
+    payload.grade_level = document.getElementById('gradeLevel').value || null;
+  }
   const { error } = await sb.from('profiles').upsert(payload, { onConflict: 'id' });
   if(error){ toast('Error: ' + error.message); return; }
   currentProfile = { ...currentProfile, ...payload };
