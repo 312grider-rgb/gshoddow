@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Messages — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
+    --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2;
+    --shadow-soft:0 2px 10px rgba(20,31,56,0.06);
+    --shadow-card:0 8px 24px rgba(20,31,56,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); -webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Syne',sans-serif;}
+
+  header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:22px 20px 26px;}
+  header.top .eyebrow{font-size:11.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px; font-weight:600;}
+  header.top h1{margin:0; font-size:24px; font-weight:600;}
+
+  .wrap{padding:18px;}
+
+  /* Inbox list */
+  #inboxView .convo-card{
+    display:flex; align-items:center; gap:12px; background:#fff; border-radius:14px; padding:14px 16px;
+    margin-bottom:10px; box-shadow:var(--shadow-soft); cursor:pointer;
+  }
+  .convo-avatar{
+    width:42px; height:42px; border-radius:50%; background:var(--gold-light); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; font-weight:700; flex:0 0 42px; font-family:'Syne',sans-serif;
+  }
+  .convo-info{flex:1; min-width:0;}
+  .convo-name{font-size:14.5px; font-weight:700; color:var(--ink);}
+  .convo-preview{font-size:12.5px; color:#8a8474; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .convo-time{font-size:11px; color:#a8a094; flex-shrink:0;}
+  .unread-dot{width:9px; height:9px; border-radius:50%; background:var(--gold); flex:0 0 9px;}
+
+  .new-msg-btn{
+    display:block; width:100%; background:var(--ink); color:#fff; border:none; padding:14px;
+    border-radius:12px; font-size:14.5px; font-weight:700; margin-bottom:16px; cursor:pointer;
+  }
+
+  /* New message picker */
+  #newMsgView, #threadView{ display:none; }
+  .back-btn{background:none; border:none; color:var(--gold); font-weight:700; font-size:14px; margin-bottom:14px; cursor:pointer;}
+  .person-card{
+    display:flex; align-items:center; gap:12px; background:#fff; border-radius:12px; padding:12px 14px;
+    margin-bottom:8px; box-shadow:var(--shadow-soft); cursor:pointer;
+  }
+  .person-avatar{
+    width:36px; height:36px; border-radius:50%; background:var(--gold-light); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; font-weight:700; flex:0 0 36px; font-size:13px;
+  }
+  .person-name{font-size:14px; font-weight:600; color:var(--ink);}
+  .person-role{font-size:11.5px; color:#8a8474; text-transform:capitalize;}
+
+  /* Thread view */
+  #threadView{ display:none; }
+  #threadHeader{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  #threadMessages{
+    display:flex; flex-direction:column; gap:8px; margin-bottom:16px; min-height:200px;
+  }
+  .bubble{ max-width:78%; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.5; }
+  .bubble.me{ background:var(--ink); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
+  .bubble.them{ background:#fff; color:var(--charcoal); align-self:flex-start; border-bottom-left-radius:4px; box-shadow:var(--shadow-soft); }
+  .bubble .bubble-time{ font-size:10px; opacity:0.6; margin-top:4px; display:block; }
+
+  .compose-row{ display:flex; gap:8px; position:sticky; bottom:0; background:var(--cream); padding-top:8px; }
+  .compose-row input{
+    flex:1; padding:12px 14px; border:1.5px solid var(--line); border-radius:22px; font-size:14px;
+    font-family:'Inter',sans-serif;
+  }
+  .compose-row button{
+    background:var(--ink); color:#fff; border:none; padding:0 20px; border-radius:22px; font-weight:700; font-size:14px;
+  }
+
+  .empty{ text-align:center; padding:60px 20px; color:#8a8474; font-size:14px; }
+  .loading{ text-align:center; padding:30px; color:#8a8474; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Messages</h1>
+</header>
+
+<div class="wrap">
+
+  <div id="inboxView">
+    <button class="new-msg-btn" onclick="showNewMessage()">+ New Message</button>
+    <div id="convoList"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div id="newMsgView">
+    <button class="back-btn" onclick="showInbox()">&larr; Back</button>
+    <h3 style="margin-bottom:12px;">Start a conversation</h3>
+    <div id="peopleList"><div class="loading">Loading people…</div></div>
+  </div>
+
+  <div id="threadView">
+    <div id="threadHeader">
+      <button class="back-btn" onclick="showInbox()" style="margin:0;">&larr;</button>
+      <h3 id="threadName" style="margin:0;"></h3>
+    </div>
+    <div id="threadMessages"></div>
+    <div class="compose-row">
+      <input type="text" id="composeInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ====================================================================
+   CONFIG — REQUIRED — same project as your other SkillStream pages
+   ==================================================================== */
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let activeThreadUserId = null;
+let profilesCache = {};
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+async function initAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  currentUser = session.user;
+  loadInbox();
+
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(!session){ window.location.href = 'skillstream-login.html'; }
+  });
+}
+
+function showInbox(){
+  document.getElementById('inboxView').style.display = 'block';
+  document.getElementById('newMsgView').style.display = 'none';
+  document.getElementById('threadView').style.display = 'none';
+  loadInbox();
+}
+
+function showNewMessage(){
+  document.getElementById('inboxView').style.display = 'none';
+  document.getElementById('newMsgView').style.display = 'block';
+  document.getElementById('threadView').style.display = 'none';
+  loadPeople();
+}
+
+async function getProfile(userId){
+  if(profilesCache[userId]) return profilesCache[userId];
+  const { data } = await sb.from('profiles').select('full_name, role, avatar_url').eq('id', userId).maybeSingle();
+  profilesCache[userId] = data || { full_name: 'Unknown' };
+  return profilesCache[userId];
+}
+
+/* ---------- INBOX: group messages by conversation partner ---------- */
+async function loadInbox(){
+  const el = document.getElementById('convoList');
+  el.innerHTML = '<div class="loading">Loading…</div>';
+
+  const { data, error } = await sb
+    .from('direct_messages')
+    .select('*')
+    .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+    .order('created_at', { ascending:false });
+
+  if(error){
+    el.innerHTML = `<div class="empty">Couldn't load messages.</div>`;
+    return;
+  }
+
+  if(!data || data.length === 0){
+    el.innerHTML = `<div class="empty">No messages yet — tap "+ New Message" to start a conversation.</div>`;
+    return;
+  }
+
+  // Group by the OTHER person in each message
+  const convos = {};
+  for(const m of data){
+    const otherId = m.sender_id === currentUser.id ? m.receiver_id : m.sender_id;
+    if(!convos[otherId]) convos[otherId] = { lastMessage: m, unread: 0 };
+    if(m.receiver_id === currentUser.id && !m.is_read) convos[otherId].unread++;
+  }
+
+  const entries = await Promise.all(Object.entries(convos).map(async ([otherId, info]) => {
+    const profile = await getProfile(otherId);
+    return { otherId, profile, ...info };
+  }));
+
+  el.innerHTML = entries.map(c => {
+    const initials = (c.profile.full_name || '?').trim().charAt(0).toUpperCase();
+    return `
+    <div class="convo-card" onclick="openThread('${c.otherId}', '${escapeHtml(c.profile.full_name || 'Unknown').replace(/'/g,"\\'")}')">
+      <div class="convo-avatar">${c.profile.avatar_url ? `<img src="${c.profile.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : initials}</div>
+      <div class="convo-info">
+        <div class="convo-name">${escapeHtml(c.profile.full_name || 'Unknown')}</div>
+        <div class="convo-preview">${escapeHtml(c.lastMessage.body)}</div>
+      </div>
+      ${c.unread > 0 ? '<span class="unread-dot"></span>' : ''}
+      <div class="convo-time">${new Date(c.lastMessage.created_at).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- NEW MESSAGE: pick anyone with a profile ---------- */
+async function loadPeople(){
+  const el = document.getElementById('peopleList');
+  const { data, error } = await sb.from('profiles').select('id, full_name, role').neq('id', currentUser.id).limit(100);
+
+  if(error || !data || data.length === 0){
+    el.innerHTML = `<div class="empty">No one else has joined yet.</div>`;
+    return;
+  }
+
+  el.innerHTML = data.map(p => {
+    const initials = (p.full_name || '?').trim().charAt(0).toUpperCase();
+    return `
+    <div class="person-card" onclick="openThread('${p.id}', '${escapeHtml(p.full_name || 'Unknown').replace(/'/g,"\\'")}')">
+      <div class="person-avatar">${initials}</div>
+      <div>
+        <div class="person-name">${escapeHtml(p.full_name || 'Unknown')}</div>
+        <div class="person-role">${escapeHtml(p.role || 'student')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- THREAD ---------- */
+async function openThread(otherUserId, otherName){
+  activeThreadUserId = otherUserId;
+  document.getElementById('inboxView').style.display = 'none';
+  document.getElementById('newMsgView').style.display = 'none';
+  document.getElementById('threadView').style.display = 'block';
+  document.getElementById('threadName').textContent = otherName;
+
+  await loadThread();
+
+  // Mark incoming messages from this person as read
+  await sb.from('direct_messages')
+    .update({ is_read: true })
+    .eq('sender_id', otherUserId)
+    .eq('receiver_id', currentUser.id)
+    .eq('is_read', false);
+}
+
+async function loadThread(){
+  const el = document.getElementById('threadMessages');
+  const { data, error } = await sb
+    .from('direct_messages')
+    .select('*')
+    .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${activeThreadUserId}),and(sender_id.eq.${activeThreadUserId},receiver_id.eq.${currentUser.id})`)
+    .order('created_at', { ascending:true });
+
+  if(error){ el.innerHTML = `<div class="empty">Couldn't load this conversation.</div>`; return; }
+
+  if(!data || data.length === 0){
+    el.innerHTML = `<div class="empty">Say hello 👋</div>`;
+    return;
+  }
+
+  el.innerHTML = data.map(m => {
+    const mine = m.sender_id === currentUser.id;
+    return `<div class="bubble ${mine ? 'me' : 'them'}">${escapeHtml(m.body)}<span class="bubble-time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div>`;
+  }).join('');
+}
+
+async function sendMessage(){
+  const input = document.getElementById('composeInput');
+  const body = input.value.trim();
+  if(!body) return;
+
+  const { error } = await sb.from('direct_messages').insert({
+    sender_id: currentUser.id,
+    receiver_id: activeThreadUserId,
+    body
+  });
+
+  if(error){ alert('Error: ' + error.message); return; }
+  input.value = '';
+  loadThread();
+}
+
+initAuth();
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Mode — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
+    --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2;
+    --shadow-soft:0 2px 10px rgba(20,31,56,0.06);
+    --shadow-card:0 8px 24px rgba(20,31,56,0.08);
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:40px; -webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Syne',sans-serif;}
+  button, a{transition:transform 0.18s var(--ease);}
+  button:active, a:active{transform:scale(0.97);}
+
+  header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:26px 20px 30px; text-align:center;}
+  header.top .eyebrow{font-size:11.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px; font-weight:600;}
+  header.top h1{margin:0; font-size:24px; font-weight:600;}
+
+  .wrap{padding:22px 20px; max-width:480px; margin:0 auto;}
+
+  .clock-card{
+    background:linear-gradient(135deg, var(--ink), var(--ink-2)); color:#fff; border-radius:20px;
+    padding:30px 20px; text-align:center; margin-bottom:20px; box-shadow:var(--shadow-card);
+  }
+  .clock-card .date{font-size:12.5px; opacity:0.7; margin-bottom:6px; letter-spacing:0.5px;}
+  .clock-time{
+    font-family:'Syne',sans-serif; font-size:48px; font-weight:700; letter-spacing:1px;
+    font-variant-numeric:tabular-nums;
+  }
+  .clock-time .secs{font-size:26px; opacity:0.7; margin-left:4px;}
+
+  .section-title{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:12px;}
+
+  .track-list{display:flex; flex-direction:column; gap:10px; margin-bottom:20px;}
+  .track-card{
+    display:flex; align-items:center; gap:14px; background:#fff; border-radius:14px; padding:14px 16px;
+    box-shadow:var(--shadow-soft); cursor:pointer; border:2px solid transparent;
+  }
+  .track-card.active{border-color:var(--gold);}
+  .track-card .t-icon{font-size:22px; width:30px; text-align:center;}
+  .track-card .t-info{flex:1;}
+  .track-card .t-name{font-size:14.5px; font-weight:700; color:var(--ink);}
+  .track-card .t-meta{font-size:12px; color:#8a8474;}
+  .track-card .t-play{font-size:13px; font-weight:700; color:var(--gold);}
+
+  .player-wrap{
+    background:#fff; border-radius:16px; padding:14px; box-shadow:var(--shadow-card); margin-bottom:20px;
+  }
+  .player-wrap .now-playing{font-size:12px; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px;}
+  .video-embed{position:relative; padding-top:56.25%; border-radius:12px; overflow:hidden; background:#000;}
+  .video-embed iframe{position:absolute; top:0; left:0; width:100%; height:100%; border:none;}
+  .player-note{font-size:11.5px; color:#a8a094; margin-top:10px; line-height:1.5;}
+
+  .back-link{display:block; text-align:center; margin-top:10px; font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;}
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Focus Mode</h1>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
+</header>
+
+<div class="wrap">
+  <div class="clock-card">
+    <div class="date" id="focusDate"></div>
+    <div class="clock-time" id="focusClock">00:00<span class="secs">:00</span></div>
+  </div>
+
+  <div class="section-title">Focus Music</div>
+  <div class="track-list" id="trackList"></div>
+
+  <div class="player-wrap" id="playerWrap" style="display:none;">
+    <div class="now-playing" id="nowPlaying"></div>
+    <div class="video-embed" id="videoEmbed"></div>
+    <div class="player-note">Streamed directly from YouTube — these are official, royalty-free NCS (NoCopyrightSounds) releases, safe to play while you study.</div>
+  </div>
+
+  <a class="back-link" href="skillstream-dashboard.html">&larr; Back to Dashboard</a>
+</div>
+
+<script>
+/* ---------- LIVE CLOCK ---------- */
+function updateClock(){
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('focusClock').innerHTML = `${h}:${m}<span class="secs">:${s}</span>`;
+  document.getElementById('focusDate').textContent = now.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ---------- FOCUS MUSIC ----------
+   Curated, properly-licensed tracks embedded via YouTube (same
+   mechanism as lesson videos elsewhere in the app) — these are
+   official NCS (NoCopyrightSounds) uploads, free to stream/use. */
+const TRACKS = [
+  { id: 'OqsMdYqxcUw', name: 'Kozah - Heavens', meta: 'NCS Release · Trap/Chill', icon: '🌤️' },
+  { id: 'EVdNpo8Aneo', name: 'NCS Chill Mix', meta: 'Best of Chill · Study & Relax', icon: '🎧' }
+];
+
+let activeTrackId = null;
+
+function renderTracks(){
+  document.getElementById('trackList').innerHTML = TRACKS.map(t => `
+    <div class="track-card ${activeTrackId === t.id ? 'active' : ''}" onclick="playTrack('${t.id}')">
+      <span class="t-icon">${t.icon}</span>
+      <div class="t-info">
+        <div class="t-name">${t.name}</div>
+        <div class="t-meta">${t.meta}</div>
+      </div>
+      <span class="t-play">${activeTrackId === t.id ? '▶ Playing' : 'Play'}</span>
+    </div>
+  `).join('');
+}
+
+function playTrack(id){
+  activeTrackId = id;
+  const track = TRACKS.find(t => t.id === id);
+  document.getElementById('playerWrap').style.display = 'block';
+  document.getElementById('nowPlaying').textContent = 'Now Playing: ' + track.name;
+  document.getElementById('videoEmbed').innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  renderTracks();
+}
+
+renderTracks();
+</script>
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
+</script>
+</body>
+</html>

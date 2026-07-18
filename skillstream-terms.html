@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141F38; --ink-2:#1F2E52; --gold-light:#E4C583;
+    --cream:#FBF7EF; --charcoal:#2B2B2B; --line:#E9E2D2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:40px; -webkit-font-smoothing:antialiased;}
+  h1,h2,.display{font-family:'Syne',sans-serif;}
+  header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:26px 20px 30px;}
+  header.top .eyebrow{font-size:11.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px; font-weight:600;}
+  header.top h1{margin:0; font-size:25px; font-weight:600;}
+  header.top .updated{font-size:12.5px; opacity:0.7; margin-top:8px;}
+  .wrap{padding:24px 20px; max-width:640px; margin:0 auto;}
+  .notice{
+    background:#FBEAE6; color:#8a3a26; border-radius:12px; padding:14px 16px; font-size:13px;
+    line-height:1.5; margin-bottom:24px;
+  }
+  h2{font-size:17px; color:var(--ink); margin:26px 0 8px;}
+  p, li{font-size:14.5px; line-height:1.65; color:#4a4638;}
+  ul{padding-left:20px; margin:6px 0;}
+  .back-link{display:inline-block; margin-top:26px; font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;}
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Terms of Service</h1>
+  <div class="updated">Last updated: July 2026</div>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
+</header>
+
+<div class="wrap">
+  <div class="notice">
+    This is a starting template, not legal advice. Have a lawyer review and customize this before relying on it — especially the liability, payments, and content-ownership sections once you introduce paid features.
+  </div>
+
+  <h2>1. Acceptance of Terms</h2>
+  <p>By creating an account on Paradise Of The Eternal Learners ("the platform"), you agree to these Terms of Service and our Privacy Policy.</p>
+
+  <h2>2. Accounts</h2>
+  <p>You're responsible for maintaining the confidentiality of your password and for all activity under your account. You may sign up as a Learner or a Teacher; each has different platform capabilities.</p>
+
+  <h2>3. Teacher-Submitted Content</h2>
+  <p>Teachers retain ownership of the courses, lessons, and materials they create. By publishing a course, you grant the platform a license to host and display that content to learners. You're responsible for ensuring your content doesn't infringe on others' copyrights or violate applicable law.</p>
+
+  <h2>4. Acceptable Use</h2>
+  <p>You agree not to:</p>
+  <ul>
+    <li>Upload harmful, illegal, or infringing content</li>
+    <li>Harass, impersonate, or abuse other users</li>
+    <li>Attempt to gain unauthorized access to accounts or systems</li>
+    <li>Use the AI Tutor to generate harmful or abusive content</li>
+  </ul>
+
+  <h2>5. Certificates</h2>
+  <p>Certificates issued upon course completion reflect completion of course material on this platform. They are not accredited academic credentials unless explicitly stated otherwise for a specific course.</p>
+
+  <h2>6. Termination</h2>
+  <p>We may suspend or terminate accounts that violate these terms. You may delete your account at any time by contacting support.</p>
+
+  <h2>7. Disclaimer of Warranties</h2>
+  <p>The platform is provided "as is" without warranties of any kind. We do not guarantee uninterrupted or error-free service.</p>
+
+  <h2>8. Limitation of Liability</h2>
+  <p>To the fullest extent permitted by law, the platform is not liable for indirect, incidental, or consequential damages arising from your use of the service.</p>
+
+  <h2>9. Changes to These Terms</h2>
+  <p>We may update these terms as the platform evolves. Continued use after changes constitutes acceptance of the revised terms.</p>
+
+  <h2>10. Contact</h2>
+  <p>Questions about these terms can be sent through our <a href="skillstream-contact.html">Contact page</a>.</p>
+
+  <a class="back-link" href="index.html">&larr; Back to Home</a>
+</div>
+
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
+</script>
+</body>
+</html>
