@@ -211,6 +211,16 @@ function joinCall(){
     // AI answer, without needing to touch the call's actual audio track.
     jitsiApi.addEventListener('incomingMessage', handleIncomingChatMessage);
 
+    // Safety net: meet.jit.si sometimes shows its own prompt (a sign-in
+    // request, a "waiting for moderator" lobby, etc.) instead of joining
+    // immediately. If our loading overlay never gets a 'joined' signal,
+    // it would otherwise sit on top of that prompt forever, hiding it
+    // from view. Force it out of the way after a few seconds regardless,
+    // so whatever Jitsi is actually showing becomes visible and tappable.
+    setTimeout(() => {
+      document.getElementById('loading').style.display = 'none';
+    }, 4000);
+
   } catch(err){
     showError('Could not load the video call: ' + err.message);
   }
