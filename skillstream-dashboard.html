@@ -19,7 +19,7 @@
   button:active, a.btn:active, .btn:active, .course-card:active{ transform:scale(0.97); }
   a{text-decoration:none;}
 
-  header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:22px 18px 28px; position:relative;}
+  header.top{background:linear-gradient(160deg, rgba(20,31,56,0.88) 0%, rgba(31,46,82,0.88) 100%), url('https://images.unsplash.com/photo-1758270705290-62b6294dd044?fm=jpg&q=60&w=1200&auto=format&fit=crop'); background-size:cover; background-position:center; color:var(--cream); padding:22px 18px 28px; position:relative;}
   header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
   header.top h1{margin:0; font-size:25px;}
   header.top p{margin:6px 0 0; font-size:14px; opacity:0.85;}
@@ -130,6 +130,12 @@
     padding:14px; font-size:14px; line-height:1.6; white-space:pre-wrap; display:none;
   }
   .ai-rec-output.loading-text{color:#999; font-style:italic;}
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
+  }
 </style>
 </head>
 <body>
@@ -140,6 +146,7 @@
   <p>Paradise Of The Eternal Learners — pick up where you left off.</p>
   <button class="bell-btn" onclick="openNotifications()">🔔</button>
   <span class="bell-dot" id="bellDot"></span>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
 </header>
 
 <div class="notif-overlay" id="notifOverlay" onclick="if(event.target===this) closeNotifications()">
@@ -177,8 +184,14 @@
 
   <a class="browse-cta" href="skillstream-self-paced.html">Browse All Courses</a>
 
+  <div style="display:flex; gap:10px; margin-top:12px;">
+    <a href="skillstream-chess.html" style="flex:1; text-align:center; background:#fff; border:1.5px solid var(--line); padding:12px; border-radius:12px; font-weight:700; font-size:13.5px; color:var(--ink); text-decoration:none;">♟️ Chess</a>
+    <a href="skillstream-ludo.html" style="flex:1; text-align:center; background:#fff; border:1.5px solid var(--line); padding:12px; border-radius:12px; font-weight:700; font-size:13.5px; color:var(--ink); text-decoration:none;">🎲 Ludo</a>
+  </div>
+
   <footer class="site-footer">
     <div class="foot-links">
+      <a href="skillstream-messages.html">Messages</a>
       <a href="skillstream-home.html">Switch View</a>
       <a href="skillstream-academic.html">Academic Studies</a>
       <a href="skillstream-leaderboard.html">Leaderboard</a>
@@ -405,6 +418,20 @@ async function getRecommendation(){
     output.textContent = 'AI error: ' + err.message;
   }
 }
+</script>
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
 </script>
 </body>
 </html>

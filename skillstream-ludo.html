@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ludo — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2;
+    --red:#D64545; --green:#3C9D5E; --yellow:#E0B23C; --blue:#3E63C7;
+    --shadow-soft:0 2px 10px rgba(20,31,56,0.06);
+    --shadow-card:0 8px 24px rgba(20,31,56,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:#2B2B2B; -webkit-font-smoothing:antialiased; padding-bottom:30px;}
+  h1,h3{font-family:'Syne',sans-serif;}
+
+  header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:20px; text-align:center;}
+  header.top h1{margin:0; font-size:22px;}
+  header.top p{margin:6px 0 0; font-size:13px; opacity:0.75;}
+
+  .wrap{padding:16px; max-width:460px; margin:0 auto;}
+
+  .mode-card{
+    background:#fff; border-radius:16px; padding:18px; margin-bottom:14px; box-shadow:var(--shadow-card);
+    text-align:center; cursor:pointer;
+  }
+  .mode-card .icon{font-size:30px; margin-bottom:8px;}
+  .mode-card h3{margin:0 0 4px; font-size:16px;}
+  .mode-card p{margin:0; font-size:12.5px; color:#8a8474;}
+
+  #turnBar{
+    background:#fff; border-radius:14px; padding:12px 16px; margin-bottom:12px; box-shadow:var(--shadow-soft);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  #turnLabel{font-size:14px; font-weight:700;}
+  #turnDot{width:14px; height:14px; border-radius:50%; display:inline-block; margin-right:8px; vertical-align:middle;}
+
+  #ludoBoard{
+    position:relative; width:100%; aspect-ratio:1; background:#fff; border-radius:12px;
+    box-shadow:var(--shadow-card); margin-bottom:14px; overflow:hidden;
+  }
+  .cell{ position:absolute; width:6.666%; height:6.666%; box-sizing:border-box; border:0.5px solid rgba(0,0,0,0.05); }
+  .yard{ position:absolute; width:40%; height:40%; border-radius:14px; display:flex; align-items:center; justify-content:center; }
+  .yard-inner{ width:70%; height:70%; background:rgba(255,255,255,0.5); border-radius:10px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6%; padding:8%; }
+  .yard-slot{ border-radius:50%; background:rgba(255,255,255,0.6); }
+
+  .token{
+    position:absolute; width:6%; height:6%; border-radius:50%; border:2px solid #fff;
+    box-shadow:0 2px 4px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center;
+    font-size:9px; color:#fff; font-weight:700; cursor:pointer; z-index:5; transition:left 0.3s, top 0.3s;
+  }
+  .token.movable{ box-shadow:0 0 0 3px rgba(201,162,78,0.7), 0 2px 4px rgba(0,0,0,0.3); animation:token-pulse 1s infinite; }
+  @keyframes token-pulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.15); } }
+
+  .center-home{ position:absolute; left:40%; top:40%; width:20%; height:20%; background:var(--gold); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+
+  .dice-row{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:14px; }
+  #diceBtn{
+    width:64px; height:64px; border-radius:16px; background:#fff; border:2px solid var(--line);
+    font-size:30px; box-shadow:var(--shadow-card); cursor:pointer;
+  }
+  #diceBtn:disabled{ opacity:0.5; }
+  #diceMsg{ font-size:12.5px; color:#8a8474; text-align:center; min-height:16px; }
+
+  .back-link{display:block; text-align:center; margin-top:10px; font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>🎲 Ludo</h1>
+  <p>Play against the AI, or pass and play with friends</p>
+</header>
+
+<div class="wrap">
+
+  <div id="modePicker">
+    <div class="mode-card" onclick="startGame(['red','green','yellow','blue'], ['red'])">
+      <div class="icon">🤖</div>
+      <h3>Solo vs AI</h3>
+      <p>You play Red — three AI opponents fill the other colors</p>
+    </div>
+    <div class="mode-card" onclick="startGame(['red','yellow'], ['red','yellow'])">
+      <div class="icon">👥</div>
+      <h3>Local 2 Players</h3>
+      <p>Pass the phone — Red vs Yellow</p>
+    </div>
+    <div class="mode-card" onclick="startGame(['red','green','yellow','blue'], ['red','green','yellow','blue'])">
+      <div class="icon">👨‍👩‍👧‍👦</div>
+      <h3>Local 4 Players</h3>
+      <p>Pass the phone between all four players</p>
+    </div>
+  </div>
+
+  <div id="gameView" class="hidden">
+    <div id="turnBar">
+      <div><span id="turnDot"></span><span id="turnLabel">Red's turn</span></div>
+      <button onclick="backToMenu()" style="background:none; border:none; color:var(--ink); font-weight:700; font-size:13px;">Exit</button>
+    </div>
+
+    <div id="ludoBoard"></div>
+
+    <div class="dice-row">
+      <button id="diceBtn" onclick="rollDice()">🎲</button>
+      <div id="diceMsg">Tap the dice to roll</div>
+    </div>
+  </div>
+
+  <a class="back-link" href="skillstream-dashboard.html">&larr; Back to Dashboard</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ====================================================================
+   CONFIG — REQUIRED — same project as your other SkillStream pages
+   ==================================================================== */
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; }
+})();
+</script>
+<script>
+const COLORS = ['red','green','yellow','blue'];
+const COLOR_HEX = { red:'var(--red)', green:'var(--green)', yellow:'var(--yellow)', blue:'var(--blue)' };
+const CELL = 100/15; // percent per grid cell
+
+function rotate90(r,c){ return [c, 14-r]; }
+function rotate180(r,c){ return [14-r, 14-c]; }
+function rotate270(r,c){ return [14-c, r]; }
+
+const redArm = [[6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8]];
+const greenArm = redArm.map(([r,c]) => rotate90(r,c));
+const yellowArm = redArm.map(([r,c]) => rotate180(r,c));
+const blueArm = redArm.map(([r,c]) => rotate270(r,c));
+const FULL_PATH = [...redArm, ...greenArm, ...yellowArm, ...blueArm]; // 52 cells, global index 0-51
+
+const redHome = [[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]];
+const HOME_STRETCH = {
+  red: redHome,
+  green: redHome.map(([r,c]) => rotate90(r,c)),
+  yellow: redHome.map(([r,c]) => rotate180(r,c)),
+  blue: redHome.map(([r,c]) => rotate270(r,c))
+};
+
+const START_INDEX = { red:0, green:13, yellow:26, blue:39 };
+const SAFE_INDICES = [0, 13, 26, 39]; // each color's own start square is safe
+
+const YARD_POS = {
+  red: { left:'4%', top:'4%' },
+  green: { left:'56%', top:'4%' },
+  yellow: { left:'56%', top:'56%' },
+  blue: { left:'4%', top:'56%' }
+};
+
+let activeColors = [];
+let humanColors = [];
+let tokens = {}; // color -> array of 4 positions: -1 base, 0-50 shared path relative, 51-56 home stretch, 57 finished
+let turnIndex = 0;
+let diceValue = null;
+let canRoll = true;
+let sixStreak = 0;
+
+function backToMenu(){
+  document.getElementById('gameView').classList.add('hidden');
+  document.getElementById('modePicker').classList.remove('hidden');
+}
+
+function startGame(colors, humans){
+  activeColors = colors;
+  humanColors = humans;
+  tokens = {};
+  colors.forEach(c => { tokens[c] = [-1, -1, -1, -1]; });
+  turnIndex = 0;
+  diceValue = null;
+  canRoll = true;
+  sixStreak = 0;
+
+  document.getElementById('modePicker').classList.add('hidden');
+  document.getElementById('gameView').classList.remove('hidden');
+
+  buildBoardShell();
+  renderBoard();
+  updateTurnBar();
+}
+
+function buildBoardShell(){
+  const board = document.getElementById('ludoBoard');
+  board.innerHTML = '';
+
+  // Colored yards
+  COLORS.forEach(color => {
+    const yard = document.createElement('div');
+    yard.className = 'yard';
+    yard.style.left = YARD_POS[color].left;
+    yard.style.top = YARD_POS[color].top;
+    yard.style.background = COLOR_HEX[color];
+    yard.innerHTML = `<div class="yard-inner">
+      <div class="yard-slot"></div><div class="yard-slot"></div>
+      <div class="yard-slot"></div><div class="yard-slot"></div>
+    </div>`;
+    board.appendChild(yard);
+  });
+
+  // Path cells (visual base)
+  FULL_PATH.forEach(([r,c], i) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.style.left = (c * CELL) + '%';
+    cell.style.top = (r * CELL) + '%';
+    if(SAFE_INDICES.includes(i)) cell.style.background = 'rgba(201,162,78,0.25)';
+    board.appendChild(cell);
+  });
+
+  // Home stretch cells (colored)
+  COLORS.forEach(color => {
+    HOME_STRETCH[color].forEach(([r,c]) => {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.style.left = (c * CELL) + '%';
+      cell.style.top = (r * CELL) + '%';
+      cell.style.background = COLOR_HEX[color];
+      cell.style.opacity = '0.4';
+      board.appendChild(cell);
+    });
+  });
+
+  const center = document.createElement('div');
+  center.className = 'center-home';
+  center.textContent = '🏠';
+  board.appendChild(center);
+}
+
+function getPixelPos(color, relPos){
+  if(relPos <= 50){
+    const globalIndex = (START_INDEX[color] + relPos) % 52;
+    return FULL_PATH[globalIndex];
+  } else if(relPos <= 56){
+    return HOME_STRETCH[color][relPos - 51];
+  }
+  return null; // finished/home
+}
+
+function renderBoard(){
+  document.querySelectorAll('.token').forEach(t => t.remove());
+  const board = document.getElementById('ludoBoard');
+  const currentColor = activeColors[turnIndex];
+  const movable = diceValue ? getMovableTokens(currentColor, diceValue) : [];
+
+  activeColors.forEach(color => {
+    tokens[color].forEach((pos, idx) => {
+      const token = document.createElement('div');
+      token.className = 'token';
+      token.style.background = COLOR_HEX[color];
+      token.textContent = '';
+
+      if(pos === -1){
+        // Sit in base yard, small offset per token index
+        const base = YARD_POS[color];
+        const baseLeft = parseFloat(base.left) + 10 + (idx % 2) * 12;
+        const baseTop = parseFloat(base.top) + 10 + Math.floor(idx / 2) * 12;
+        token.style.left = baseLeft + '%';
+        token.style.top = baseTop + '%';
+      } else if(pos === 57){
+        return; // finished, stays hidden in center
+      } else {
+        const [r,c] = getPixelPos(color, pos);
+        token.style.left = (c * CELL + CELL/2 - 3) + '%';
+        token.style.top = (r * CELL + CELL/2 - 3) + '%';
+      }
+
+      if(color === currentColor && movable.includes(idx)){
+        token.classList.add('movable');
+        token.onclick = () => moveToken(color, idx);
+      }
+
+      board.appendChild(token);
+    });
+  });
+}
+
+function updateTurnBar(){
+  const color = activeColors[turnIndex];
+  document.getElementById('turnDot').style.background = COLOR_HEX[color];
+  const label = color.charAt(0).toUpperCase() + color.slice(1);
+  const isHuman = humanColors.includes(color);
+  document.getElementById('turnLabel').textContent = `${label}'s turn${isHuman ? '' : ' (AI)'}`;
+  document.getElementById('diceBtn').disabled = !isHuman || !canRoll;
+}
+
+function getMovableTokens(color, dice){
+  const moves = [];
+  tokens[color].forEach((pos, idx) => {
+    if(pos === -1){
+      if(dice === 6) moves.push(idx);
+    } else if(pos < 57){
+      if(pos + dice <= 57) moves.push(idx);
+    }
+  });
+  return moves;
+}
+
+function rollDice(){
+  if(!canRoll) return;
+  const color = activeColors[turnIndex];
+  if(!humanColors.includes(color)) return;
+
+  diceValue = Math.floor(Math.random() * 6) + 1;
+  canRoll = false;
+  document.getElementById('diceBtn').textContent = '⚂'.repeat(1);
+  document.getElementById('diceBtn').textContent = '🎲 ' + diceValue;
+  document.getElementById('diceBtn').disabled = true;
+
+  const movable = getMovableTokens(color, diceValue);
+  if(movable.length === 0){
+    document.getElementById('diceMsg').textContent = 'No valid moves — turn passes.';
+    setTimeout(nextTurn, 900);
+    return;
+  }
+
+  document.getElementById('diceMsg').textContent = 'Tap a glowing token to move it.';
+  renderBoard();
+}
+
+function moveToken(color, idx){
+  const oldPos = tokens[color][idx];
+  const newPos = oldPos === -1 ? 0 : oldPos + diceValue;
+  tokens[color][idx] = newPos;
+
+  // Capture check: only on shared path (0-50), not home stretch, not safe squares
+  if(newPos <= 50){
+    const globalIndex = (START_INDEX[color] + newPos) % 52;
+    if(!SAFE_INDICES.includes(globalIndex)){
+      activeColors.forEach(otherColor => {
+        if(otherColor === color) return;
+        tokens[otherColor].forEach((otherPos, otherIdx) => {
+          if(otherPos >= 0 && otherPos <= 50){
+            const otherGlobal = (START_INDEX[otherColor] + otherPos) % 52;
+            if(otherGlobal === globalIndex){
+              tokens[otherColor][otherIdx] = -1; // sent home
+            }
+          }
+        });
+      });
+    }
+  }
+
+  renderBoard();
+  checkWin(color);
+
+  const gotSix = diceValue === 6;
+  const finished = newPos === 57;
+  diceValue = null;
+
+  if(gotSix || finished){
+    // Extra turn for rolling a 6 or getting a token home
+    canRoll = true;
+    document.getElementById('diceBtn').textContent = '🎲';
+    document.getElementById('diceMsg').textContent = 'Nice! Roll again.';
+    updateTurnBar();
+    if(!humanColors.includes(activeColors[turnIndex])){
+      setTimeout(aiTakeTurn, 700);
+    }
+  } else {
+    nextTurn();
+  }
+}
+
+function checkWin(color){
+  if(tokens[color].every(p => p === 57)){
+    setTimeout(() => {
+      alert(`🎉 ${color.charAt(0).toUpperCase() + color.slice(1)} wins!`);
+      backToMenu();
+    }, 300);
+  }
+}
+
+function nextTurn(){
+  turnIndex = (turnIndex + 1) % activeColors.length;
+  diceValue = null;
+  canRoll = true;
+  document.getElementById('diceBtn').textContent = '🎲';
+  document.getElementById('diceMsg').textContent = 'Tap the dice to roll';
+  renderBoard();
+  updateTurnBar();
+
+  const color = activeColors[turnIndex];
+  if(!humanColors.includes(color)){
+    setTimeout(aiTakeTurn, 700);
+  }
+}
+
+/* ---------- SIMPLE AI ----------
+   Rolls automatically, prefers capturing > finishing a token >
+   entering from base > advancing the furthest-along token. */
+function aiTakeTurn(){
+  const color = activeColors[turnIndex];
+  if(humanColors.includes(color)) return;
+
+  const dice = Math.floor(Math.random() * 6) + 1;
+  diceValue = dice;
+  const movable = getMovableTokens(color, dice);
+
+  if(movable.length === 0){
+    document.getElementById('diceMsg').textContent = `AI (${color}) rolled ${dice} — no valid moves.`;
+    setTimeout(nextTurn, 900);
+    return;
+  }
+
+  // Pick the best move using simple priority heuristics
+  let bestIdx = movable[0];
+  let bestScore = -1;
+
+  movable.forEach(idx => {
+    const pos = tokens[color][idx];
+    const newPos = pos === -1 ? 0 : pos + dice;
+    let score = newPos; // prefer advancing further
+
+    if(newPos === 57) score += 100; // finishing is great
+
+    if(newPos <= 50){
+      const globalIndex = (START_INDEX[color] + newPos) % 52;
+      if(!SAFE_INDICES.includes(globalIndex)){
+        activeColors.forEach(other => {
+          if(other === color) return;
+          tokens[other].forEach(otherPos => {
+            if(otherPos >= 0 && otherPos <= 50){
+              const otherGlobal = (START_INDEX[other] + otherPos) % 52;
+              if(otherGlobal === globalIndex) score += 50; // capture bonus
+            }
+          });
+        });
+      }
+    }
+
+    if(score > bestScore){ bestScore = score; bestIdx = idx; }
+  });
+
+  document.getElementById('diceMsg').textContent = `AI (${color}) rolled ${dice}.`;
+  setTimeout(() => moveToken(color, bestIdx), 600);
+}
+</script>
+</body>
+</html>
