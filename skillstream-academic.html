@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Academic Studies — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -17,12 +17,13 @@
   }
   *{box-sizing:border-box;}
   body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:40px; -webkit-font-smoothing:antialiased;}
-  h1,h2,h3,.display{font-family:'Fraunces',serif; letter-spacing:-0.01em;}
+  h1,h2,h3,.display{font-family:'Syne',sans-serif; letter-spacing:-0.01em;}
   a, button{transition:transform 0.18s var(--ease), box-shadow 0.18s var(--ease);}
   a:active, button:active{transform:scale(0.97);}
 
   header.top{
-    background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%);
+    background:linear-gradient(160deg, rgba(20,31,56,0.88) 0%, rgba(31,46,82,0.88) 100%), url('https://images.unsplash.com/photo-1758270705290-62b6294dd044?fm=jpg&q=60&w=1200&auto=format&fit=crop');
+    background-size:cover; background-position:center;
     color:var(--cream); padding:26px 20px 32px;
   }
   header.top .eyebrow{font-size:11.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px; font-weight:600;}
@@ -60,6 +61,12 @@
   .mission-note p{margin:0; font-size:15px; line-height:1.5;}
 
   .loading{text-align:center; padding:20px; color:#a8a094; font-size:13px;}
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
+  }
 </style>
 </head>
 <body>
@@ -68,6 +75,7 @@
   <div class="eyebrow">Learning Never Ends</div>
   <h1>Academic Studies</h1>
   <p>Structured courses for every stage of school — from first letters to advanced degrees.</p>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
 </header>
 
 <div class="wrap">
@@ -77,26 +85,31 @@
       <div class="icon">🧸</div>
       <div><h3>Kindergarten</h3><p>Early learning fundamentals</p></div>
       <span class="count" id="count-kg"></span>
+      <button onclick="event.preventDefault(); event.stopPropagation(); speak('Kindergarten. Early learning fundamentals.');" style="background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:15px; flex-shrink:0;">🔊</button>
     </a>
     <a class="level-card elementary" href="skillstream-self-paced.html?level=elementary">
       <div class="icon">✏️</div>
       <div><h3>Elementary School</h3><p>Core subjects, ages 6–11</p></div>
       <span class="count" id="count-elementary"></span>
+      <button onclick="event.preventDefault(); event.stopPropagation(); speak('Elementary School. Core subjects, ages 6 to 11.');" style="background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:15px; flex-shrink:0;">🔊</button>
     </a>
     <a class="level-card middle" href="skillstream-self-paced.html?level=middle_school">
       <div class="icon">📘</div>
       <div><h3>Middle School</h3><p>Building deeper foundations</p></div>
       <span class="count" id="count-middle_school"></span>
+      <button onclick="event.preventDefault(); event.stopPropagation(); speak('Middle School. Building deeper foundations.');" style="background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:15px; flex-shrink:0;">🔊</button>
     </a>
     <a class="level-card high" href="skillstream-self-paced.html?level=high_school">
       <div class="icon">🎓</div>
       <div><h3>High School</h3><p>College-prep and electives</p></div>
       <span class="count" id="count-high_school"></span>
+      <button onclick="event.preventDefault(); event.stopPropagation(); speak('High School. College prep and electives.');" style="background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:15px; flex-shrink:0;">🔊</button>
     </a>
     <a class="level-card university" href="skillstream-self-paced.html?level=university">
       <div class="icon">🏛️</div>
       <div><h3>University</h3><p>Advanced and professional study</p></div>
       <span class="count" id="count-university"></span>
+      <button onclick="event.preventDefault(); event.stopPropagation(); speak('University. Advanced and professional study.');" style="background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:15px; flex-shrink:0;">🔊</button>
     </a>
   </div>
 
@@ -128,6 +141,30 @@ async function loadCounts(){
 }
 
 loadCounts();
+
+/* ---------- READ ALOUD (accessibility) ---------- */
+function speak(text){
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text.trim());
+  const lang = localStorage.getItem('language') || 'en';
+  const langMap = { en:'en-US', ar:'ar-SA', fr:'fr-FR', es:'es-ES', zh:'zh-CN' };
+  utterance.lang = langMap[lang] || 'en-US';
+  window.speechSynthesis.speak(utterance);
+}
+</script>
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
 </script>
 </body>
 </html>

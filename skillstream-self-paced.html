@@ -561,6 +561,7 @@ function renderGrid(){
     return `
     <div class="course-card" onclick="openCourse('${c.id}')">
       <button class="save-btn ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleSave('${c.id}')">${isSaved ? '★' : '☆'}</button>
+      <button class="save-btn" style="left:12px; right:auto;" onclick="event.stopPropagation(); speak('${escapeHtml(c.title).replace(/'/g,"")}. ${escapeHtml(c.description || '').replace(/'/g,"")}');">🔊</button>
       <div class="thumb" style="${bg}"><span class="cat">${escapeHtml(c.category || 'General')}</span>${levelTag}</div>
       <div class="body">
         <h3>${escapeHtml(c.title)}</h3>
@@ -804,6 +805,16 @@ async function askAI(mode){
 }
 
 initAuth();
+
+/* ---------- READ ALOUD (accessibility) ---------- */
+function speak(text){
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text.trim());
+  const lang = localStorage.getItem('language') || 'en';
+  const langMap = { en:'en-US', ar:'ar-SA', fr:'fr-FR', es:'es-ES', zh:'zh-CN' };
+  utterance.lang = langMap[lang] || 'en-US';
+  window.speechSynthesis.speak(utterance);
+}
 
 /* ---------- COURSE DISCUSSION ROOM ---------- */
 async function loadDiscussion(courseId){

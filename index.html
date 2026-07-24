@@ -261,9 +261,20 @@
   <h1 id="txt-headline">Learn anything.<br>Teach what you<br>know. <span class="accent">Live better.</span></h1>
   <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
   <p class="mission" id="txt-mission">Paradise Of The Eternal Learners is a place to grow at your own pace — live classes, self-paced courses, and an AI tutor by your side, all in one place.</p>
+
+  <button onclick="speakHero()" style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.12); border:none; color:#fff; padding:10px 18px; border-radius:24px; font-size:14px; font-weight:700; margin-top:14px; cursor:pointer;">
+    🔊 <span id="txt-listenBtn">Tap to Listen</span>
+  </button>
+
   <div class="cta-row">
-    <a class="btn primary" href="skillstream-self-paced.html" id="txt-start">Start Learning</a>
-    <a class="btn secondary" href="skillstream-login.html?role=teacher" id="txt-teach">Become a Teacher</a>
+    <a class="btn primary" href="skillstream-self-paced.html" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+      <span onclick="event.preventDefault(); event.stopPropagation(); speak(this.parentElement.textContent);" style="font-size:16px;">🔊</span>
+      <span id="txt-start">Start Learning</span>
+    </a>
+    <a class="btn secondary" href="skillstream-login.html?role=teacher" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+      <span onclick="event.preventDefault(); event.stopPropagation(); speak(this.parentElement.textContent);" style="font-size:16px;">🔊</span>
+      <span id="txt-teach">Become a Teacher</span>
+    </a>
   </div>
   <div class="path-wrap">
     <svg viewBox="0 0 340 46" preserveAspectRatio="none">
@@ -597,6 +608,25 @@ function changeLandingLanguage(){
 }
 
 applyLandingLanguage(localStorage.getItem('language') || 'en');
+
+/* ---------- READ ALOUD (accessibility) ----------
+   Uses the browser's built-in text-to-speech (no API key needed) so
+   the site can be genuinely used by someone who can't read — tap any
+   🔊 icon to hear it, or tap "Listen" to hear the whole intro. */
+function speak(text){
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text.trim());
+  const lang = localStorage.getItem('language') || 'en';
+  const langMap = { en:'en-US', ar:'ar-SA', fr:'fr-FR', es:'es-ES', zh:'zh-CN' };
+  utterance.lang = langMap[lang] || 'en-US';
+  window.speechSynthesis.speak(utterance);
+}
+
+function speakHero(){
+  const headline = document.getElementById('txt-headline').textContent;
+  const mission = document.getElementById('txt-mission').textContent;
+  speak(headline + '. ' + mission);
+}
 
 async function loadLiveClasses(){
   const el = document.getElementById('liveClasses');

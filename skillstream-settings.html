@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Settings — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -39,7 +39,7 @@
     margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal);
     padding-bottom:40px; -webkit-font-smoothing:antialiased; transition:background 0.25s var(--ease), color 0.25s var(--ease);
   }
-  h1,h2,h3,.display{font-family:'Fraunces',serif; letter-spacing:-0.01em;}
+  h1,h2,h3,.display{font-family:'Syne',sans-serif; letter-spacing:-0.01em;}
   button, a{transition:transform 0.18s var(--ease);}
   button:active, a:active{transform:scale(0.97);}
 
@@ -98,6 +98,12 @@
     font-size:14px; z-index:100; display:none;
   }
   .back-link{display:inline-block; margin-top:20px; font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;}
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
+  }
 </style>
 </head>
 <body>
@@ -105,6 +111,7 @@
 <header class="top">
   <div class="eyebrow">Learning Never Ends</div>
   <h1 id="pageTitle">Settings</h1>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
 </header>
 
 <div class="wrap">
@@ -117,6 +124,20 @@
       </div>
       <label class="switch">
         <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+        <span class="switch-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="section-title">🔊 Accessibility</div>
+  <div class="card">
+    <div class="setting-row">
+      <div>
+        <div class="label">Read Aloud Mode</div>
+        <div class="desc">Tap any 🔊 icon to hear buttons and titles spoken out loud — helpful for younger learners or anyone who prefers listening over reading</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="readAloudToggle" onchange="toggleReadAloud()">
         <span class="switch-track"></span>
       </label>
     </div>
@@ -225,6 +246,11 @@ function toggleDarkMode(){
   applyTheme(theme);
 }
 
+function toggleReadAloud(){
+  const enabled = document.getElementById('readAloudToggle').checked;
+  localStorage.setItem('readAloud', enabled ? '1' : '0');
+}
+
 /* ---------- LANGUAGE ----------
    Lightweight demo translation for this page's own UI strings.
    Stored in localStorage as 'language'. */
@@ -295,8 +321,23 @@ async function signOutAndCreateNew(){
 
 // Apply saved preferences immediately on load
 applyTheme(localStorage.getItem('theme') || 'light');
+document.getElementById('readAloudToggle').checked = localStorage.getItem('readAloud') === '1';
 applyLanguage(localStorage.getItem('language') || 'en');
 initAuth();
+</script>
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
 </script>
 </body>
 </html>

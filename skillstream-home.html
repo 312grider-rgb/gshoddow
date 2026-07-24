@@ -29,7 +29,7 @@
 
   .view-card{
     display:block; background:#fff; border-radius:20px; padding:24px; margin-bottom:16px;
-    box-shadow:var(--shadow-card); text-decoration:none; color:inherit;
+    box-shadow:var(--shadow-card); text-decoration:none; color:inherit; position:relative;
   }
   .view-card .icon{font-size:28px; margin-bottom:10px;}
   .view-card h2{margin:0 0 6px; font-size:19px; color:var(--ink);}
@@ -172,6 +172,18 @@ async function init(){
 
 init();
 
+/* ---------- READ ALOUD (accessibility) ----------
+   Same browser-native text-to-speech used on the landing page — no
+   API key needed, works for anyone who can't read comfortably. */
+function speak(text){
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text.trim());
+  const lang = localStorage.getItem('language') || 'en';
+  const langMap = { en:'en-US', ar:'ar-SA', fr:'fr-FR', es:'es-ES', zh:'zh-CN' };
+  utterance.lang = langMap[lang] || 'en-US';
+  window.speechSynthesis.speak(utterance);
+}
+
 /* ---------- LANGUAGE SWITCHER ----------
    Translates the greeting and the three main navigation cards — the
    highest-visibility text on this page. Working example alongside the
@@ -218,6 +230,7 @@ function applyHomeLanguage(lang){
   document.getElementById('viewCards').innerHTML = `
     <a class="view-card ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html">
       ${role === 'student' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
+      <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.studentTitle}. ${t.studentDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
       <div class="icon">🎓</div>
       <h2>${t.studentTitle}</h2>
       <p>${t.studentDesc}</p>
@@ -226,6 +239,7 @@ function applyHomeLanguage(lang){
 
     <a class="view-card ${role === 'teacher' ? 'suggested' : ''}" href="skillstream-teacher-dashboard.html">
       ${role === 'teacher' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
+      <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.teacherTitle}. ${t.teacherDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
       <div class="icon">🧑‍🏫</div>
       <h2>${t.teacherTitle}</h2>
       <p>${t.teacherDesc}</p>
@@ -233,6 +247,7 @@ function applyHomeLanguage(lang){
     </a>
 
     <a class="view-card" href="skillstream-ai-hub.html">
+      <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.aiTitle}. ${t.aiDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
       <div class="icon">🤖</div>
       <h2>${t.aiTitle}</h2>
       <p>${t.aiDesc}</p>
