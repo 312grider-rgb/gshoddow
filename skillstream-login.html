@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Log In — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -17,7 +17,7 @@
     margin:0; min-height:100vh; font-family:'Inter',sans-serif; background:var(--ink);
     display:flex; align-items:center; justify-content:center; padding:24px;
   }
-  h1,.display{font-family:'Fraunces',serif;}
+  h1,.display{font-family:'Syne',sans-serif;}
   button, a{ transition:transform 0.18s cubic-bezier(.22,1,.36,1); }
   button:active{ transform:scale(0.97); }
   .card{
@@ -190,6 +190,7 @@ async function handleSubmit(){
         return;
       }
 
+      await savePendingLevelTest(data.user.id);
       window.location.href = 'skillstream-home.html';
 
     } else {
@@ -248,6 +249,36 @@ async function forgotPassword(){
 }
 
 // Initialize UI state
+/* ---------- SAVE PENDING PUBLIC LEVEL TEST ----------
+   If the person took the free "Test Your Level" on the landing page
+   before logging in, this picks up that result and saves it for real
+   — into ai_learning_profile (so the AI Teacher remembers it), and
+   into their grade_level on profiles if it was an academic-grade test. */
+async function savePendingLevelTest(userId){
+  const raw = localStorage.getItem('pendingLevelTest');
+  if(!raw) return;
+
+  try{
+    const pending = JSON.parse(raw);
+    await sb.from('ai_learning_profile').upsert({
+      user_id: userId,
+      subject: pending.subject,
+      level: pending.level,
+      notes: pending.notes,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,subject' });
+
+    if(pending.grade){
+      await sb.from('profiles').update({ grade_level: pending.grade }).eq('id', userId);
+    }
+
+    localStorage.removeItem('pendingLevelTest');
+  } catch(e){
+    // If anything goes wrong, don't block login over it — just leave
+    // the pending result in place in case it can be retried later.
+  }
+}
+
 setMode(mode);
 </script>
 </body>

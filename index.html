@@ -214,6 +214,41 @@
   .photo-banner .overlay p{color:rgba(255,255,255,0.85); font-size:13.5px; margin:0 0 14px; max-width:300px; line-height:1.5;}
   .photo-banner .overlay a.btn{width:auto; display:inline-flex; padding:11px 20px;}
 
+  /* ---------- SECTION: Test Your Level ---------- */
+  .test-level-card{background:#fff; border-radius:20px; padding:22px; box-shadow:0 8px 24px rgba(20,31,56,0.08);}
+  .test-mode-row{display:flex; gap:10px; margin-bottom:16px;}
+  .test-mode-btn{
+    flex:1; background:var(--cream); border:2px solid var(--line); padding:14px 10px; border-radius:14px;
+    text-align:center; cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .test-mode-btn.active{border-color:var(--gold); background:#FBF3E3;}
+  .test-mode-btn .icon{font-size:24px; margin-bottom:4px;}
+  .test-mode-btn .lbl{font-size:12.5px; font-weight:700; color:var(--ink);}
+
+  .subject-icon-grid-landing{display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:14px;}
+  .subj-btn{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    background:var(--cream); border:1.5px solid var(--line); border-radius:12px; padding:10px 4px;
+    cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .subj-btn .icon{font-size:20px;}
+  .subj-btn .lbl{font-size:9.5px; font-weight:600; color:var(--charcoal); text-align:center; line-height:1.15;}
+  .subj-btn.active{background:var(--gold); border-color:var(--gold);}
+
+  .grade-select-landing{width:100%; padding:12px; border:1.5px solid var(--line); border-radius:11px; font-size:14px; margin-bottom:14px;}
+  .test-level-output{
+    margin-top:14px; background:var(--cream); border:1px solid var(--line); border-radius:14px; padding:16px;
+    font-size:14px; line-height:1.6; white-space:pre-wrap; display:none;
+  }
+  .test-level-cta{
+    margin-top:16px; background:linear-gradient(135deg, var(--ink), var(--ink-2)); color:#fff; border-radius:14px;
+    padding:18px; text-align:center; display:none;
+  }
+  .test-level-cta a{
+    display:inline-block; background:var(--gold); color:var(--ink); padding:12px 22px; border-radius:11px;
+    font-weight:700; text-decoration:none; margin-top:10px; font-size:14px;
+  }
+
   /* ---------- FOOTER ---------- */
   footer{
     padding:32px 20px 40px; background:var(--ink); color:#B9C1D6;
@@ -295,6 +330,59 @@
     <p id="txt-b1desc">Whatever your schedule looks like, there's a way to keep growing.</p>
   </div>
 </div>
+
+<section class="section" style="background:#fff;">
+  <div class="kicker">🎯 Test Your Level</div>
+  <h2>Find out where you stand — free, no login needed</h2>
+  <div class="test-level-card">
+    <div class="test-mode-row">
+      <div class="test-mode-btn active" id="modeAcademicBtn" onclick="setTestMode('academic')">
+        <div class="icon">🎓</div>
+        <div class="lbl">Academic Grade</div>
+      </div>
+      <div class="test-mode-btn" id="modeSkillBtn" onclick="setTestMode('skill')">
+        <div class="icon">✨</div>
+        <div class="lbl">General Skill</div>
+      </div>
+    </div>
+
+    <select class="grade-select-landing" id="testGradeSelect">
+      <option value="">Select your grade…</option>
+      <option value="kg">Kindergarten</option>
+      <option value="grade_1">Grade 1</option>
+      <option value="grade_2">Grade 2</option>
+      <option value="grade_3">Grade 3</option>
+      <option value="grade_4">Grade 4</option>
+      <option value="grade_5">Grade 5</option>
+      <option value="grade_6">Grade 6</option>
+      <option value="grade_7">Grade 7</option>
+      <option value="grade_8">Grade 8</option>
+      <option value="grade_9">Grade 9</option>
+      <option value="grade_10">Grade 10</option>
+      <option value="grade_11">Grade 11</option>
+      <option value="grade_12">Grade 12</option>
+      <option value="university">University</option>
+    </select>
+
+    <div class="subject-icon-grid-landing" id="testSubjectGrid"></div>
+    <input type="text" id="testSubjectOther" placeholder="Type your subject or skill..." style="display:none; width:100%; padding:11px 13px; border:1.5px solid var(--line); border-radius:9px; font-size:14px; margin-bottom:14px;">
+
+    <a class="btn primary" style="width:100%; display:block; text-align:center;" onclick="generatePublicTest()">Generate My Assessment</a>
+    <div class="test-level-output" id="testQuestionsOutput"></div>
+
+    <div id="testAnswerSection" style="display:none; margin-top:14px;">
+      <label style="display:block; font-size:13px; font-weight:600; color:var(--ink); margin-bottom:6px;">Your Answers</label>
+      <textarea id="testAnswers" placeholder="Write your answers here, one per line..." style="width:100%; min-height:110px; padding:12px; border:1.5px solid var(--line); border-radius:11px; font-size:14px; font-family:'Inter',sans-serif;"></textarea>
+      <a class="btn primary" style="width:100%; display:block; text-align:center; margin-top:10px;" onclick="evaluatePublicTest()">Get My Level</a>
+      <div class="test-level-output" id="testResultOutput"></div>
+      <div class="test-level-cta" id="testCta">
+        <div style="font-weight:700; font-size:15px;">🎉 Great! Log in to save this result and start learning</div>
+        <a href="skillstream-login.html?mode=signup">Sign Up Free</a>
+        &nbsp; <a href="skillstream-login.html" style="background:none; color:#fff; border:1.5px solid rgba(255,255,255,0.4);">Log In</a>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="section" style="background:#fff;">
   <div class="kicker" id="txt-featKicker">Featured Courses</div>
@@ -608,6 +696,116 @@ function changeLandingLanguage(){
 }
 
 applyLandingLanguage(localStorage.getItem('language') || 'en');
+
+/* ---------- PUBLIC TEST YOUR LEVEL ----------
+   No login required. Generates a quick AI assessment, then on
+   evaluation, stores the result in localStorage so it can be
+   automatically saved to the user's profile the moment they log in
+   or finish signing up (see skillstream-login.html). */
+const TEST_SUBJECTS = [
+  { value:'Math', icon:'🔢' }, { value:'Science', icon:'🔬' },
+  { value:'English & Language Arts', icon:'📖' }, { value:'History & Social Studies', icon:'🌍' },
+  { value:'Foreign Languages', icon:'🗣️' }, { value:'Computer Science', icon:'💻' },
+  { value:'Art & Design', icon:'🎨' }, { value:'Music', icon:'🎵' },
+  { value:'Business', icon:'💼' }, { value:'Other', icon:'➕' }
+];
+
+let testMode = 'academic';
+let testSubjectValue = '';
+
+function renderTestSubjectGrid(){
+  document.getElementById('testSubjectGrid').innerHTML = TEST_SUBJECTS.map(s => `
+    <div class="subj-btn ${s.value === testSubjectValue ? 'active' : ''}" onclick="selectTestSubject('${s.value}')">
+      <div class="icon">${s.icon}</div>
+      <div class="lbl">${s.value}</div>
+    </div>
+  `).join('');
+}
+renderTestSubjectGrid();
+
+function selectTestSubject(value){
+  testSubjectValue = value;
+  document.getElementById('testSubjectOther').style.display = (value === 'Other') ? 'block' : 'none';
+  renderTestSubjectGrid();
+}
+
+function setTestMode(m){
+  testMode = m;
+  document.getElementById('modeAcademicBtn').classList.toggle('active', m === 'academic');
+  document.getElementById('modeSkillBtn').classList.toggle('active', m === 'skill');
+  document.getElementById('testGradeSelect').style.display = (m === 'academic') ? 'block' : 'none';
+}
+setTestMode('academic');
+
+let testQuestionsCache = '';
+
+async function generatePublicTest(){
+  const subject = testSubjectValue === 'Other' ? document.getElementById('testSubjectOther').value.trim() : testSubjectValue;
+  if(!subject){ alert('Please choose a subject or skill first.'); return; }
+  if(testMode === 'academic' && !document.getElementById('testGradeSelect').value){
+    alert('Please select your grade first.'); return;
+  }
+
+  const output = document.getElementById('testQuestionsOutput');
+  output.style.display = 'block';
+  output.textContent = 'Generating your assessment…';
+  document.getElementById('testAnswerSection').style.display = 'none';
+
+  const gradeContext = testMode === 'academic' ? ` at the ${document.getElementById('testGradeSelect').selectedOptions[0].text} level` : '';
+  const prompt = `Create a short 5-question skill assessment for "${subject}"${gradeContext}, ranging from beginner to more advanced difficulty. Number them 1-5. Do not include the answers. Keep each question concise.`;
+
+  try{
+    const response = await fetch('/api/ask-ai', {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ prompt, maxTokens:500 })
+    });
+    const data = await response.json();
+    if(data.error) throw new Error(data.error);
+    testQuestionsCache = data.text;
+    output.textContent = data.text;
+    document.getElementById('testAnswerSection').style.display = 'block';
+  } catch(err){
+    output.textContent = 'Error: ' + err.message;
+  }
+}
+
+async function evaluatePublicTest(){
+  const answers = document.getElementById('testAnswers').value.trim();
+  if(!answers){ alert('Please write your answers first.'); return; }
+
+  const subject = testSubjectValue === 'Other' ? document.getElementById('testSubjectOther').value.trim() : testSubjectValue;
+  const output = document.getElementById('testResultOutput');
+  output.style.display = 'block';
+  output.textContent = 'Evaluating…';
+
+  const prompt = `A learner is being assessed on "${subject}". Here are the questions they were asked:\n${testQuestionsCache}\n\nHere are their answers:\n${answers}\n\nBased on their answers, assess their skill level. Start your response with exactly one word on its own line: Beginner, Intermediate, or Advanced. Then briefly explain why in 1-2 sentences, and suggest one thing to study next. Keep it under 120 words.`;
+
+  try{
+    const response = await fetch('/api/ask-ai', {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ prompt, maxTokens:400 })
+    });
+    const data = await response.json();
+    if(data.error) throw new Error(data.error);
+
+    output.textContent = data.text;
+
+    const firstLine = data.text.split('\n')[0].trim();
+    const match = firstLine.match(/Beginner|Intermediate|Advanced/i);
+    const level = match ? (match[0].charAt(0).toUpperCase() + match[0].slice(1).toLowerCase()) : null;
+
+    if(level){
+      localStorage.setItem('pendingLevelTest', JSON.stringify({
+        subject, level, notes: data.text,
+        grade: testMode === 'academic' ? document.getElementById('testGradeSelect').value : null,
+        timestamp: Date.now()
+      }));
+      document.getElementById('testCta').style.display = 'block';
+    }
+  } catch(err){
+    output.textContent = 'Error: ' + err.message;
+  }
+}
 
 /* ---------- READ ALOUD (accessibility) ----------
    Uses the browser's built-in text-to-speech (no API key needed) so
