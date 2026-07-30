@@ -433,5 +433,164 @@ async function getRecommendation(){
   updateLiveClock();
   setInterval(updateLiveClock, 1000);
 </script>
+<button id="aiTeacherFab" onclick="toggleAiTeacherPanel()" style="
+  position:fixed; bottom:20px; right:20px; z-index:60; width:60px; height:60px; border-radius:50%;
+  background:linear-gradient(135deg, var(--ink), var(--ink-2)); color:#fff; border:none; font-size:26px;
+  box-shadow:0 8px 24px rgba(20,31,56,0.35); cursor:pointer;">🤖</button>
+
+<div id="aiTeacherPanel" style="
+  position:fixed; bottom:0; left:0; right:0; background:var(--ink); border-radius:22px 22px 0 0;
+  box-shadow:0 -10px 40px rgba(0,0,0,0.35); z-index:70; padding:18px; max-height:65vh; overflow-y:auto; display:none;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <h3 style="font-family:'Fraunces',serif; font-size:15px; margin:0; color:#fff;">🤖 Your AI Teacher</h3>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <button id="handsFreeBtn" onclick="toggleHandsFree()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:11px; font-weight:700; padding:6px 12px; border-radius:20px;">Hands-Free: Off</button>
+      <button onclick="toggleAiTeacherPanel()" style="background:none; border:none; color:#fff; font-size:20px; opacity:0.7;">&times;</button>
+    </div>
+  </div>
+  <div id="dashAiChatLog" style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px; max-height:32vh; overflow-y:auto;"></div>
+  <div style="display:flex; align-items:center; justify-content:center; gap:16px;">
+    <button id="dashMicBtn" onclick="toggleDashListening()" style="
+      width:64px; height:64px; border-radius:50%; border:none; background:var(--gold); color:var(--ink);
+      font-size:26px; cursor:pointer;">🎤</button>
+  </div>
+  <div id="dashMicStatus" style="font-size:12.5px; color:rgba(255,255,255,0.6); text-align:center; margin-top:8px;">Tap the mic and ask a question</div>
+</div>
+
+<script>
+/* ====================================================================
+   VOICE-ENABLED AI TEACHER (Dashboard)
+   Same Web Speech API pattern used in the live video page, plus the
+   AI's persistent memory of the student's level per subject (saved by
+   "Test Your Level" in the AI Learning Hub, and now also by the public
+   landing-page test). Hands-Free mode auto-restarts listening after
+   the AI finishes speaking, where the browser allows it (Chrome/
+   Android) — on browsers that block that (notably Safari/iOS), it
+   falls back to tap-to-talk each time.
+   ==================================================================== */
+let dashRecognition = null;
+let dashIsListening = false;
+let dashHandsFree = false;
+let dashChatHistory = [];
+let dashLearningProfileCache = null;
+
+function toggleAiTeacherPanel(){
+  const panel = document.getElementById('aiTeacherPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleHandsFree(){
+  dashHandsFree = !dashHandsFree;
+  document.getElementById('handsFreeBtn').textContent = 'Hands-Free: ' + (dashHandsFree ? 'On' : 'Off');
+}
+
+function renderDashChat(){
+  const log = document.getElementById('dashAiChatLog');
+  if(dashChatHistory.length === 0){
+    log.innerHTML = '<div style="font-size:13px; color:rgba(255,255,255,0.5); text-align:center; padding:10px 0;">Say hello to start.</div>';
+    return;
+  }
+  log.innerHTML = dashChatHistory.map(m => `
+    <div style="padding:10px 13px; border-radius:12px; font-size:13.5px; line-height:1.5; max-width:88%; ${
+      m.role === 'user'
+        ? 'background:var(--gold); color:var(--ink); align-self:flex-end; margin-left:auto;'
+        : 'background:rgba(255,255,255,0.1); color:#fff;'
+    }">${m.text}</div>
+  `).join('');
+  log.scrollTop = log.scrollHeight;
+}
+
+function initDashSpeechRecognition(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    document.getElementById('dashMicStatus').textContent = "Voice isn't supported in this browser — try Chrome on Android.";
+    document.getElementById('dashMicBtn').disabled = true;
+    return;
+  }
+  dashRecognition = new SpeechRecognition();
+  dashRecognition.continuous = false;
+  dashRecognition.interimResults = false;
+  dashRecognition.lang = 'en-US';
+
+  dashRecognition.onstart = () => {
+    dashIsListening = true;
+    document.getElementById('dashMicBtn').style.background = '#c0523a';
+    document.getElementById('dashMicBtn').style.color = '#fff';
+    document.getElementById('dashMicStatus').textContent = 'Listening…';
+  };
+  dashRecognition.onresult = (event) => {
+    handleDashVoiceQuestion(event.results[0][0].transcript);
+  };
+  dashRecognition.onerror = (event) => {
+    document.getElementById('dashMicStatus').textContent = 'Mic error: ' + event.error + ' — tap to try again.';
+  };
+  dashRecognition.onend = () => {
+    dashIsListening = false;
+    document.getElementById('dashMicBtn').style.background = 'var(--gold)';
+    document.getElementById('dashMicBtn').style.color = 'var(--ink)';
+  };
+}
+
+function toggleDashListening(){
+  if(!dashRecognition){ initDashSpeechRecognition(); if(!dashRecognition) return; }
+  if(dashIsListening){ dashRecognition.stop(); return; }
+  window.speechSynthesis.cancel();
+  try{ dashRecognition.start(); } catch(e){ /* already started, ignore */ }
+}
+
+async function getDashLearningProfileContext(){
+  if(dashLearningProfileCache !== null) return dashLearningProfileCache;
+  const { data } = await sb.from('ai_learning_profile').select('subject, level').eq('user_id', currentUser.id);
+  if(!data || data.length === 0){ dashLearningProfileCache = ''; return dashLearningProfileCache; }
+  dashLearningProfileCache = 'What you already know about this student: ' +
+    data.map(p => `${p.subject} — ${p.level} level`).join('; ') + '.';
+  return dashLearningProfileCache;
+}
+
+async function handleDashVoiceQuestion(transcript){
+  dashChatHistory.push({ role:'user', text: transcript });
+  renderDashChat();
+  document.getElementById('dashMicStatus').textContent = 'Thinking…';
+
+  const conversation = dashChatHistory.map(m => (m.role === 'user' ? 'Student: ' : 'AI Teacher: ') + m.text).join('\n');
+  const memoryContext = await getDashLearningProfileContext();
+  const prompt = `You are a friendly AI teacher talking with a student on their dashboard. ${memoryContext} Pitch your explanation at the right level for them when relevant. Keep responses conversational and under 100 words since this will be spoken aloud.\n\nConversation so far:\n${conversation}\n\nAI Teacher:`;
+
+  try{
+    const response = await fetch('/api/ask-ai', {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ prompt, maxTokens:300 })
+    });
+    const data = await response.json();
+    if(data.error) throw new Error(data.error);
+
+    dashChatHistory.push({ role:'ai', text: data.text });
+    renderDashChat();
+    document.getElementById('dashMicStatus').textContent = 'Tap the mic and ask a question';
+    speakDashAi(data.text);
+  } catch(err){
+    dashChatHistory.push({ role:'ai', text: 'Error: ' + err.message });
+    renderDashChat();
+    document.getElementById('dashMicStatus').textContent = 'Tap the mic and ask a question';
+  }
+}
+
+function speakDashAi(text){
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.onend = () => {
+    // Hands-free: automatically start listening again once the AI
+    // finishes speaking, where the browser allows it.
+    if(dashHandsFree){
+      setTimeout(() => {
+        if(!dashRecognition) initDashSpeechRecognition();
+        try{ dashRecognition.start(); } catch(e){ /* ignore */ }
+      }, 400);
+    }
+  };
+  window.speechSynthesis.speak(utterance);
+}
+</script>
+
 </body>
 </html>
