@@ -63,6 +63,7 @@
     font-size:14.5px; line-height:1.65; white-space:pre-wrap; display:none;
   }
   .ai-output.loading-text{color:#a8a094; font-style:italic;}
+  .ai-output.field-error{color:#B5473F; border-color:#E8B4AE; background:#FBEEEC; font-weight:600;}
 
   .chat-bubble{
     padding:11px 14px; border-radius:14px; font-size:14px; line-height:1.5; margin-bottom:8px; max-width:88%;
@@ -85,14 +86,59 @@
   display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:4px;
 }
 .subject-icon-btn{
-  display:flex; flex-direction:column; align-items:center; gap:4px;
+  display:flex; flex-direction:column; align-items:center; gap:4px; width:100%;
   background:#fdfcfa; border:1.5px solid var(--line); border-radius:12px; padding:10px 6px;
-  cursor:pointer; font-family:'Inter',sans-serif;
+  cursor:pointer; font-family:'Inter',sans-serif; appearance:none; text-align:center;
 }
+.subject-icon-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
 .subject-icon-btn .icon{font-size:22px;}
 .subject-icon-btn .lbl{font-size:10.5px; font-weight:600; color:var(--charcoal); text-align:center; line-height:1.2;}
 .subject-icon-btn.active{background:var(--gold); border-color:var(--gold);}
 .subject-icon-btn.active .lbl{color:var(--ink);}
+.back-link{display:block; text-align:center; margin-top:6px; font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;}
+
+.classroom-progress-track{ width:100%; height:8px; background:var(--line); border-radius:6px; overflow:hidden; margin-bottom:14px; }
+.classroom-progress-fill{ height:100%; background:linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius:6px; transition:width 0.4s var(--ease); }
+
+.classroom-stage-badge{
+  display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase;
+  background:var(--ink); color:var(--gold-light); padding:5px 12px; border-radius:20px;
+}
+
+.classroom-board{
+  margin:14px 0; padding:16px; border-radius:14px; background:#1E3B2E; color:#F4EFE2;
+  box-shadow:inset 0 0 0 6px #2A4A3A, 0 6px 16px rgba(0,0,0,0.25); font-size:14px; line-height:1.6;
+}
+.classroom-board-label{ font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#C9DFC9; margin-bottom:8px; }
+
+.classroom-continue-card{
+  background:#F6ECD8; border:1.5px solid var(--gold-light); border-radius:14px; padding:14px 16px; margin-bottom:16px;
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+}
+.classroom-continue-card .info{ font-size:13.5px; }
+.classroom-continue-card .info strong{ display:block; font-size:14.5px; margin-bottom:2px; }
+.classroom-continue-card button{
+  background:var(--ink); color:#fff; border:none; padding:9px 14px; border-radius:10px;
+  font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+}
+
+#classroomContinueBtn{ display:none; }
+.classroom-thought{ background:#EFEAE0; color:var(--charcoal); }
+
+.classroom-progress-track{ width:100%; height:8px; background:var(--line); border-radius:20px; overflow:hidden; margin-bottom:6px; }
+.classroom-progress-fill{ height:100%; background:linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius:20px; transition:width 0.4s var(--ease); width:0%; }
+.classroom-stage-badge{
+  display:inline-block; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  color:var(--ink); background:var(--gold-light); padding:5px 11px; border-radius:20px;
+}
+.classroom-board{
+  background:#1F3A2E; color:#EAF6EE; border-radius:14px; padding:16px; margin-bottom:14px;
+  box-shadow:inset 0 0 0 6px #16281F, var(--shadow-card); font-family:'Inter',sans-serif;
+}
+.classroom-board-label{ font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9FD4B0; margin-bottom:8px; }
+.classroom-board ul{ margin:6px 0; padding-left:20px; }
+#classroomChatLog .chat-bubble.ai{ max-width:100%; }
+#classroomContinueBox .card{ background:var(--cream); box-shadow:none; border:1.5px solid var(--line); padding:14px; margin-bottom:14px; }
 </style>
 </head>
 <body>
@@ -120,6 +166,9 @@
     <button class="tab-btn" id="tabHomeworkBtn" onclick="switchTab('homework')">Homework Helper</button>
     <button class="tab-btn" id="tabCareerBtn" onclick="switchTab('career')">Career Coach</button>
   </div>
+  <div class="tabs">
+    <button class="tab-btn" id="tabClassroomBtn" onclick="switchTab('classroom')" style="flex:1;">🏫 AI Classroom</button>
+  </div>
 
   <!-- AI Teacher (ongoing chat) -->
   <div class="tool-panel active" id="teacherPanel">
@@ -131,8 +180,8 @@
       <div id="teacherChatLog" style="margin-bottom:14px;"></div>
 
       <div style="display:flex; gap:8px;">
-        <input type="text" id="teacherInput" placeholder="Ask your AI Teacher anything..." style="flex:1;">
-        <button class="submit-btn" style="width:auto; margin-top:0; padding:0 18px;" onclick="askTeacher()">Send</button>
+        <input type="text" id="teacherInput" placeholder="Ask your AI Teacher anything..." style="flex:1;" onkeydown="if(event.key==='Enter'){ event.preventDefault(); withLoadingButton(document.querySelector('#teacherPanel .submit-btn'), askTeacher); }">
+        <button class="submit-btn" style="width:auto; margin-top:0; padding:0 18px;" onclick="withLoadingButton(this, askTeacher)">Send</button>
       </div>
     </div>
   </div>
@@ -149,13 +198,13 @@
       <input type="hidden" id="levelSubject">
       <input type="text" id="levelSubjectOther" placeholder="Type your subject..." style="display:none; margin-top:8px;">
 
-      <button class="submit-btn" onclick="generateLevelTest()">Generate My Assessment</button>
+      <button class="submit-btn" onclick="withLoadingButton(this, generateLevelTest)">Generate My Assessment</button>
       <div class="ai-output" id="levelQuizOutput"></div>
 
       <div id="levelAnswerSection" style="display:none; margin-top:14px;">
         <label>Your Answers</label>
         <textarea id="levelAnswers" placeholder="Write your answers here, one per line..." style="min-height:120px;"></textarea>
-        <button class="submit-btn" onclick="evaluateLevel()">Get My Level</button>
+        <button class="submit-btn" onclick="withLoadingButton(this, evaluateLevel)">Get My Level</button>
         <div class="ai-output" id="levelResultOutput"></div>
       </div>
     </div>
@@ -171,7 +220,7 @@
       <label>Your Question</label>
       <textarea id="askQuestion" placeholder="e.g. Explain how photosynthesis works, or why the stock market crashed in 1929..."></textarea>
 
-      <button class="submit-btn" onclick="askGeneral()">Ask</button>
+      <button class="submit-btn" onclick="withLoadingButton(this, askGeneral)">Ask</button>
       <div class="ai-output" id="askOutput"></div>
     </div>
   </div>
@@ -186,7 +235,7 @@
       <label>Content to Summarize</label>
       <textarea id="summaryText" placeholder="Paste text here..." style="min-height:160px;"></textarea>
 
-      <button class="submit-btn" onclick="askSummarize()">Summarize</button>
+      <button class="submit-btn" onclick="withLoadingButton(this, askSummarize)">Summarize</button>
       <div class="ai-output" id="summaryOutput"></div>
     </div>
   </div>
@@ -208,7 +257,7 @@
         <option value="10">10 questions</option>
       </select>
 
-      <button class="submit-btn" onclick="askQuiz()">Generate Quiz</button>
+      <button class="submit-btn" onclick="withLoadingButton(this, askQuiz)">Generate Quiz</button>
       <div class="ai-output" id="quizOutput"></div>
     </div>
   </div>
@@ -232,7 +281,7 @@
         <option value="English">English</option>
       </select>
 
-      <button class="submit-btn" onclick="askTranslate()">Translate</button>
+      <button class="submit-btn" onclick="withLoadingButton(this, askTranslate)">Translate</button>
       <div class="ai-output" id="translateOutput"></div>
     </div>
   </div>
@@ -255,7 +304,7 @@
         <option value="6 months">6 months</option>
       </select>
 
-      <button class="submit-btn" onclick="askStudyPlan()">Create Study Plan</button>
+      <button class="submit-btn" onclick="withLoadingButton(this, askStudyPlan)">Create Study Plan</button>
       <div class="ai-output" id="planOutput"></div>
     </div>
   </div>
@@ -275,8 +324,67 @@
       <label>Your Question</label>
       <textarea id="hwQuestion" placeholder="Paste or type your homework question here..."></textarea>
 
-      <button class="submit-btn" onclick="askHomeworkHelper()">Get Help</button>
+      <button class="submit-btn" onclick="withLoadingButton(this, askHomeworkHelper)">Get Help</button>
       <div class="ai-output" id="hwOutput"></div>
+    </div>
+  </div>
+
+  <!-- AI Classroom -->
+  <div class="tool-panel" id="classroomPanel">
+    <div class="card" id="classroomSetupCard">
+      <div class="kicker">🏫 AI Classroom</div>
+      <h3>Learn step by step, at your pace</h3>
+      <p class="desc">Start a program on anything you want to learn. Each lesson warms up your mind, sets clear objectives, teaches with examples, re-explains, then checks your understanding before moving on — and repeats itself if you're not there yet. A bigger review test comes every few lessons.</p>
+
+      <div id="classroomContinueBox"></div>
+
+      <label>What do you want to learn?</label>
+      <input type="text" id="classroomGoal" placeholder="e.g. Algebra basics, Spanish for travel, Python fundamentals...">
+
+      <label>Course length</label>
+      <select id="classroomLength">
+        <option value="6">6 lessons — short course</option>
+        <option value="10" selected>10 lessons — standard</option>
+        <option value="16">16 lessons — in-depth</option>
+      </select>
+
+      <button class="submit-btn" onclick="withLoadingButton(this, startNewProgram)">Build My Program</button>
+      <div class="ai-output" id="classroomSetupOutput"></div>
+    </div>
+
+    <div class="card" id="classroomLessonCard" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;">
+        <div>
+          <div class="kicker" style="margin:0 0 4px;" id="classroomProgramLabel">Program</div>
+          <div id="classroomProgressLabel" style="font-size:12.5px; color:#8a8474; font-weight:600;"></div>
+        </div>
+        <button class="chip" style="background:transparent; border:1.5px solid var(--line); padding:6px 12px; white-space:nowrap;" onclick="exitProgram()">Switch program</button>
+      </div>
+      <div class="classroom-progress-track"><div class="classroom-progress-fill" id="classroomProgressFill"></div></div>
+
+      <div class="classroom-stage-badge" id="classroomStageBadge">Warm-up</div>
+      <h3 id="classroomLessonTitle" style="margin:8px 0 14px;"></h3>
+
+      <div id="classroomBoard" class="classroom-board" style="display:none;">
+        <div class="classroom-board-label">📋 On the board</div>
+        <div id="classroomBoardContent"></div>
+      </div>
+
+      <div id="classroomChatLog"></div>
+
+      <div id="classroomTestArea" style="display:none; margin-top:10px;">
+        <label>Your Answers</label>
+        <textarea id="classroomTestAnswers" placeholder="Write your answers here, one per line..." style="min-height:120px;"></textarea>
+        <button class="submit-btn" onclick="withLoadingButton(this, submitClassroomTest)">Submit Answers</button>
+      </div>
+
+      <div id="classroomReplyRow" style="display:flex; gap:8px; margin-top:14px;">
+        <input type="text" id="classroomReplyInput" placeholder="Jot a thought here (optional)..." style="flex:1;" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addClassroomThought(); }">
+        <button class="submit-btn" style="width:auto; margin-top:0; padding:0 16px;" onclick="addClassroomThought()">Add</button>
+      </div>
+      <button class="submit-btn" id="classroomContinueBtn" onclick="withLoadingButton(this, advanceClassroomStage)">Continue</button>
+
+      <div class="ai-output" id="classroomLoadingOutput" style="margin-top:14px;"></div>
     </div>
   </div>
 
@@ -296,10 +404,14 @@
         <button class="chip" onclick="fillCareerPrompt('I want a study plan to reach my career goal.')">Build a study plan</button>
       </div>
 
-      <button class="submit-btn" onclick="askCareerCoach()">Get Guidance</button>
+      <button class="submit-btn" onclick="withLoadingButton(this, askCareerCoach)">Get Guidance</button>
       <div class="ai-output" id="careerOutput"></div>
     </div>
   </div>
+</div>
+
+<div class="wrap" style="padding-top:0;">
+  <a class="back-link" href="skillstream-dashboard.html">&larr; Back to Dashboard</a>
 </div>
 
 <script>
@@ -326,7 +438,7 @@ async function initAuth(){
 }
 
 function switchTab(tab){
-  const panels = ['teacher', 'ask', 'summary', 'quiz', 'translate', 'level', 'plan', 'homework', 'career'];
+  const panels = ['teacher', 'ask', 'summary', 'quiz', 'translate', 'level', 'plan', 'homework', 'career', 'classroom'];
   panels.forEach(p => {
     document.getElementById(p + 'Panel').classList.toggle('active', p === tab);
   });
@@ -339,14 +451,65 @@ function switchTab(tab){
   document.getElementById('tabPlanBtn').classList.toggle('active', tab === 'plan');
   document.getElementById('tabHomeworkBtn').classList.toggle('active', tab === 'homework');
   document.getElementById('tabCareerBtn').classList.toggle('active', tab === 'career');
+  document.getElementById('tabClassroomBtn').classList.toggle('active', tab === 'classroom');
+  if(tab === 'classroom') initClassroomIfNeeded();
 }
 
 function fillCareerPrompt(text){
   document.getElementById('careerGoal').value = text;
 }
 
-function toggleOtherSubject(gridId, otherId){
-  document.getElementById(otherId).style.display = 'none';
+/* ---------- Shared UI helpers ---------- */
+function showFieldError(output, message){
+  output.style.display = 'block';
+  output.className = 'ai-output field-error';
+  output.textContent = '⚠️ ' + message;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// A small, safe markdown-ish renderer: escapes HTML first (so nothing the
+// model returns can inject markup), then re-introduces just **bold**,
+// *italic*, and "- " bullet lists so AI responses read cleanly instead of
+// showing literal asterisks and dashes.
+function renderMarkdown(text){
+  let html = escapeHtml(text);
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/(^|[^*])\*(?!\*)(.+?)\*(?!\*)/g, '$1<em>$2</em>');
+
+  const lines = html.split('\n');
+  let out = [], inList = false;
+  lines.forEach(line => {
+    const bullet = line.match(/^\s*[-•]\s+(.*)/);
+    if(bullet){
+      if(!inList){ out.push('<ul style="margin:6px 0 10px; padding-left:20px;">'); inList = true; }
+      out.push('<li>' + bullet[1] + '</li>');
+    } else {
+      if(inList){ out.push('</ul>'); inList = false; }
+      out.push(line.trim() === '' ? '<div style="height:8px;"></div>' : '<div>' + line + '</div>');
+    }
+  });
+  if(inList) out.push('</ul>');
+  return out.join('');
+}
+
+// Wraps a tool's submit button: disables it (with a temporary label) while
+// the async handler runs, and always restores it afterward — prevents the
+// double-submit/overlapping-request issue on a fast double-tap.
+async function withLoadingButton(btn, fn){
+  if(!btn){ return fn(); }
+  const originalText = btn.textContent;
+  const originalDisabled = btn.disabled;
+  btn.disabled = true;
+  if(btn.classList.contains('submit-btn')) btn.textContent = 'Working…';
+  try{
+    await fn();
+  } finally {
+    btn.disabled = originalDisabled;
+    btn.textContent = originalText;
+  }
 }
 
 const HUB_SUBJECTS = [
@@ -365,17 +528,19 @@ const HUB_SUBJECTS = [
 function renderHubSubjectGrid(gridId, hiddenId, otherId){
   const grid = document.getElementById(gridId);
   grid.innerHTML = HUB_SUBJECTS.map(s => `
-    <div class="subject-icon-btn" data-value="${s.value}" onclick="selectHubSubject('${gridId}','${hiddenId}','${otherId}','${s.value.replace(/'/g,"\\'")}')">
+    <button type="button" class="subject-icon-btn" data-value="${s.value}" aria-pressed="false" onclick="selectHubSubject('${gridId}','${hiddenId}','${otherId}','${s.value.replace(/'/g,"\\'")}')">
       <div class="icon">${s.icon}</div>
       <div class="lbl">${s.value === 'Other' ? 'Other' : s.value}</div>
-    </div>
+    </button>
   `).join('');
 }
 
 function selectHubSubject(gridId, hiddenId, otherId, value){
   document.getElementById(hiddenId).value = value;
   document.querySelectorAll(`#${gridId} .subject-icon-btn`).forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.value === value);
+    const isActive = btn.dataset.value === value;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', String(isActive));
   });
   document.getElementById(otherId).style.display = (value === 'Other') ? 'block' : 'none';
 }
@@ -398,7 +563,12 @@ async function callClaude(prompt, maxTokens){
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt, maxTokens: maxTokens || 500 })
   });
-  const data = await response.json();
+  let data;
+  try{
+    data = await response.json();
+  } catch(err){
+    throw new Error(`Something went wrong reaching the AI (status ${response.status}). Please try again.`);
+  }
   if(data.error) throw new Error(data.error);
   return data.text;
 }
@@ -412,7 +582,7 @@ function renderTeacherChat(){
     log.innerHTML = `<div style="font-size:13px; color:#a8a094; text-align:center; padding:10px 0;">Say hello to start the conversation.</div>`;
     return;
   }
-  log.innerHTML = teacherHistory.map(m => `<div class="chat-bubble ${m.role}">${m.text}</div>`).join('');
+  log.innerHTML = teacherHistory.map(m => `<div class="chat-bubble ${m.role}">${m.role === 'ai' ? renderMarkdown(m.text) : escapeHtml(m.text)}</div>`).join('');
 }
 renderTeacherChat();
 
@@ -468,13 +638,17 @@ let levelQuestionsCache = '';
 async function generateLevelTest(){
   const subject = getSubjectValue('levelSubject', 'levelSubjectOther');
   const output = document.getElementById('levelQuizOutput');
-  if(!subject){ alert('Please enter a subject first.'); return; }
+  if(!subject){ showFieldError(output, 'Please enter a subject first.'); return; }
 
   levelSubjectCache = subject;
   output.style.display = 'block';
   output.className = 'ai-output loading-text';
   output.textContent = 'Generating your assessment…';
   document.getElementById('levelAnswerSection').style.display = 'none';
+  document.getElementById('levelAnswers').value = '';
+  const resultOutput = document.getElementById('levelResultOutput');
+  resultOutput.style.display = 'none';
+  resultOutput.textContent = '';
 
   const prompt = `Create a short 5-question skill assessment for "${subject}", with questions ranging from beginner to more advanced difficulty. Number them 1-5. Do not include the answers. Keep each question concise.`;
 
@@ -482,7 +656,7 @@ async function generateLevelTest(){
     const text = await callClaude(prompt, 500);
     levelQuestionsCache = text;
     output.className = 'ai-output';
-    output.textContent = text;
+    output.innerHTML = renderMarkdown(text);
     document.getElementById('levelAnswerSection').style.display = 'block';
   } catch(err){
     output.className = 'ai-output';
@@ -493,7 +667,7 @@ async function generateLevelTest(){
 async function evaluateLevel(){
   const answers = document.getElementById('levelAnswers').value.trim();
   const output = document.getElementById('levelResultOutput');
-  if(!answers){ alert('Please write your answers first.'); return; }
+  if(!answers){ showFieldError(output, 'Please write your answers first.'); return; }
 
   output.style.display = 'block';
   output.className = 'ai-output loading-text';
@@ -504,7 +678,7 @@ async function evaluateLevel(){
   try{
     const text = await callClaude(prompt, 400);
     output.className = 'ai-output';
-    output.textContent = text;
+    output.innerHTML = renderMarkdown(text);
 
     // Parse out the level word from the first line and save it persistently,
     // so the AI Teacher chat can remember it in future conversations.
@@ -530,7 +704,7 @@ async function evaluateLevel(){
 async function askGeneral(){
   const question = document.getElementById('askQuestion').value.trim();
   const output = document.getElementById('askOutput');
-  if(!question){ alert('Please type a question first.'); return; }
+  if(!question){ showFieldError(output, 'Please type a question first.'); return; }
 
   output.style.display = 'block';
   output.className = 'ai-output loading-text';
@@ -541,7 +715,7 @@ async function askGeneral(){
   try{
     const text = await callClaude(prompt, 600);
     output.className = 'ai-output';
-    output.textContent = text;
+    output.innerHTML = renderMarkdown(text);
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -552,7 +726,7 @@ async function askGeneral(){
 async function askSummarize(){
   const text = document.getElementById('summaryText').value.trim();
   const output = document.getElementById('summaryOutput');
-  if(!text){ alert('Please paste some content to summarize first.'); return; }
+  if(!text){ showFieldError(output, 'Please paste some content to summarize first.'); return; }
 
   output.style.display = 'block';
   output.className = 'ai-output loading-text';
@@ -563,7 +737,7 @@ async function askSummarize(){
   try{
     const result = await callClaude(prompt, 500);
     output.className = 'ai-output';
-    output.textContent = result;
+    output.innerHTML = renderMarkdown(result);
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -575,7 +749,7 @@ async function askQuiz(){
   const topic = document.getElementById('quizTopic').value.trim();
   const count = document.getElementById('quizCount').value;
   const output = document.getElementById('quizOutput');
-  if(!topic){ alert('Please enter a topic or paste some notes first.'); return; }
+  if(!topic){ showFieldError(output, 'Please enter a topic or paste some notes first.'); return; }
 
   output.style.display = 'block';
   output.className = 'ai-output loading-text';
@@ -586,7 +760,7 @@ async function askQuiz(){
   try{
     const result = await callClaude(prompt, 900);
     output.className = 'ai-output';
-    output.textContent = result;
+    output.innerHTML = renderMarkdown(result);
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -598,7 +772,7 @@ async function askTranslate(){
   const text = document.getElementById('translateText').value.trim();
   const lang = document.getElementById('translateLang').value;
   const output = document.getElementById('translateOutput');
-  if(!text){ alert('Please paste some text to translate first.'); return; }
+  if(!text){ showFieldError(output, 'Please paste some text to translate first.'); return; }
 
   output.style.display = 'block';
   output.className = 'ai-output loading-text';
@@ -609,7 +783,7 @@ async function askTranslate(){
   try{
     const result = await callClaude(prompt, 500);
     output.className = 'ai-output';
-    output.textContent = result;
+    output.innerHTML = renderMarkdown(result);
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -621,7 +795,7 @@ async function askStudyPlan(){
   const goal = document.getElementById('planGoal').value.trim();
   const time = document.getElementById('planTime').value;
   const output = document.getElementById('planOutput');
-  if(!goal){ alert('Please enter what you want to learn first.'); return; }
+  if(!goal){ showFieldError(output, 'Please enter what you want to learn first.'); return; }
 
   output.style.display = 'block';
   output.className = 'ai-output loading-text';
@@ -632,7 +806,7 @@ async function askStudyPlan(){
   try{
     const result = await callClaude(prompt, 700);
     output.className = 'ai-output';
-    output.textContent = result;
+    output.innerHTML = renderMarkdown(result);
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -645,7 +819,7 @@ async function askHomeworkHelper(){
   const question = document.getElementById('hwQuestion').value.trim();
   const output = document.getElementById('hwOutput');
 
-  if(!question){ alert('Please enter your homework question first.'); return; }
+  if(!question){ showFieldError(output, 'Please enter your homework question first.'); return; }
 
   output.style.display = 'block';
   output.className = 'ai-output loading-text';
@@ -659,7 +833,7 @@ Question: ${question}`;
     const text = await callClaude(prompt, 600);
     if(text === null) { output.style.display = 'none'; return; }
     output.className = 'ai-output';
-    output.textContent = text;
+    output.innerHTML = renderMarkdown(text);
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -671,7 +845,7 @@ async function askCareerCoach(){
   const goal = document.getElementById('careerGoal').value.trim();
   const output = document.getElementById('careerOutput');
 
-  if(!goal){ alert('Tell the coach a bit about your goal first.'); return; }
+  if(!goal){ showFieldError(output, 'Tell the coach a bit about your goal first.'); return; }
 
   output.style.display = 'block';
   output.className = 'ai-output loading-text';
@@ -684,11 +858,434 @@ async function askCareerCoach(){
     const text = await callClaude(prompt, 500);
     if(text === null) { output.style.display = 'none'; return; }
     output.className = 'ai-output';
-    output.textContent = text;
+    output.innerHTML = renderMarkdown(text);
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
   }
+}
+
+/* ====================================================================
+   AI CLASSROOM
+   A structured, stateful lesson flow: warm-up → objectives →
+   introduction → examples → explanation → test, repeating the
+   explanation+test if the student doesn't pass, with a cumulative
+   review test every few lessons. Progress and a running "learner
+   patterns" note are persisted to Supabase so the AI remembers where
+   the student is and how best to teach them across visits.
+
+   Requires three tables (classroom_programs, classroom_progress,
+   classroom_notes) — see the accompanying schema file. If they don't
+   exist yet, every Supabase call below fails safely and the feature
+   still works for the current session, it just won't persist.
+   ==================================================================== */
+
+let classroomState = {
+  program: null, lessonIndex: 0, stage: 'setup', sections: null,
+  lessonsSinceTest: 0, failCount: 0, notes: '', initialized: false, cumulativeTitles: []
+};
+const STAGE_ORDER = ['warmup','objectives','introduction','examples','explanation'];
+const STAGE_LABELS = {
+  warmup:'Warm-up', objectives:'Objectives', introduction:'Introduction', examples:'Examples',
+  explanation:'Explanation', test:'Check your understanding', cumulative_test:'Review test'
+};
+
+async function safeSb(fn){
+  try{ return await fn(); }
+  catch(err){ console.warn('Classroom Supabase call failed (tables may not be set up yet):', err.message); return null; }
+}
+
+async function initClassroomIfNeeded(){
+  if(classroomState.initialized) return;
+  classroomState.initialized = true;
+  classroomState.notes = await loadClassroomNotes();
+
+  const progressRow = await safeSb(async () => {
+    const { data } = await sb.from('classroom_progress').select('*').eq('user_id', currentUser.id).maybeSingle();
+    return data;
+  });
+  if(!progressRow || !progressRow.program_id) return;
+
+  const programRow = await safeSb(async () => {
+    const { data } = await sb.from('classroom_programs').select('*').eq('id', progressRow.program_id).maybeSingle();
+    return data;
+  });
+  if(!programRow || progressRow.stage === 'complete') return;
+
+  window.__pendingResume = { programRow, progressRow };
+  const lessonTitle = programRow.lesson_titles[progressRow.current_lesson_index] || '';
+  document.getElementById('classroomContinueBox').innerHTML = `<div class="classroom-continue-card">
+    <div class="info"><strong>Continue "${escapeHtml(programRow.goal)}"</strong>Lesson ${progressRow.current_lesson_index + 1} of ${programRow.lesson_titles.length} — ${escapeHtml(lessonTitle)}</div>
+    <button onclick="resumeProgram()">Resume</button>
+  </div>`;
+}
+
+async function resumeProgram(){
+  const pending = window.__pendingResume;
+  if(!pending) return;
+  classroomState.program = pending.programRow;
+  classroomState.lessonIndex = pending.progressRow.current_lesson_index;
+  classroomState.lessonsSinceTest = pending.progressRow.lessons_since_test || 0;
+  classroomState.failCount = pending.progressRow.fail_count || 0;
+
+  document.getElementById('classroomSetupCard').style.display = 'none';
+  document.getElementById('classroomLessonCard').style.display = 'block';
+  document.getElementById('classroomProgramLabel').textContent = pending.programRow.goal;
+  document.getElementById('classroomChatLog').innerHTML = '';
+
+  if(pending.progressRow.stage && pending.progressRow.lesson_content && Object.keys(pending.progressRow.lesson_content).length){
+    classroomState.stage = pending.progressRow.stage;
+    classroomState.sections = pending.progressRow.lesson_content;
+    renderLessonStage();
+  } else {
+    await beginLesson(classroomState.lessonIndex);
+  }
+}
+
+async function startNewProgram(){
+  const goal = document.getElementById('classroomGoal').value.trim();
+  const length = parseInt(document.getElementById('classroomLength').value, 10);
+  const output = document.getElementById('classroomSetupOutput');
+  if(!goal){ showFieldError(output, 'Tell me what you want to learn first.'); return; }
+
+  output.style.display = 'block';
+  output.className = 'ai-output loading-text';
+  output.textContent = 'Designing your program…';
+
+  const prompt = `Design a ${length}-lesson program to teach a student "${goal}", ordered from foundational to more advanced. Respond with ONLY a numbered list of ${length} short lesson titles (3-7 words each), one per line, nothing else — no intro, no explanation.`;
+
+  try{
+    const raw = await callClaude(prompt, 400);
+    const titles = raw.split('\n').map(l => l.replace(/^\s*\d+[\.\)]\s*/, '').trim()).filter(Boolean).slice(0, length);
+    if(titles.length < 2) throw new Error('Could not generate a program — try rephrasing what you want to learn.');
+
+    const programRow = await safeSb(async () => {
+      const { data, error } = await sb.from('classroom_programs').insert({
+        user_id: currentUser.id, goal, lesson_titles: titles, lessons_per_test: 3
+      }).select().maybeSingle();
+      if(error) throw error;
+      return data;
+    }) || { id: 'local-' + Date.now(), goal, lesson_titles: titles, lessons_per_test: 3 };
+
+    classroomState.program = programRow;
+    classroomState.lessonIndex = 0;
+    classroomState.lessonsSinceTest = 0;
+    classroomState.failCount = 0;
+
+    output.style.display = 'none';
+    document.getElementById('classroomSetupCard').style.display = 'none';
+    document.getElementById('classroomLessonCard').style.display = 'block';
+    document.getElementById('classroomProgramLabel').textContent = goal;
+
+    await beginLesson(0);
+  } catch(err){
+    output.className = 'ai-output';
+    output.textContent = 'Error: ' + err.message;
+  }
+}
+
+function buildLessonPrompt(program, lessonTitle, lessonIndex, opts){
+  opts = opts || {};
+  let context = `The student is taking a ${program.lesson_titles.length}-lesson program on "${program.goal}". This is lesson ${lessonIndex + 1}: "${lessonTitle}".`;
+  if(classroomState.notes) context += ` What you know about this student from past sessions, use it to teach in a way that captivates them and keeps them wanting more (without stating it outright): ${classroomState.notes}`;
+  if(opts.repeat) context += ` IMPORTANT: the student did not pass the check last time. Feedback from that attempt: "${opts.failSummary || 'they struggled with the core idea'}". Re-teach the concept with a genuinely different approach — different examples, simpler language, or a different angle — don't just repeat the same explanation.`;
+
+  return `You are a warm, engaging AI teacher. ${context}
+
+Generate the full lesson using EXACTLY this structure — each tag on its own line, no markdown headers:
+
+###WARMUP
+2-3 short warm-up questions or prompts that get the student's mind ready for this topic, connecting to what they likely already know. Inviting, not a quiz.
+
+###OBJECTIVES
+2-4 bullet points ("- ") stating clearly what the student will be able to do by the end of this lesson.
+
+###INTRODUCTION
+A friendly, engaging introduction — why this matters, what it connects to. 2-4 sentences.
+
+###EXAMPLES
+2-3 concrete worked examples illustrating the concept, building in difficulty.
+
+###EXPLANATION
+A clear, thorough explanation of the concept, reinforcing what the examples showed. This is the core teaching content.
+
+###BOARD
+OPTIONAL — only include a simple visual aid (diagram, table, formula layout, number line, timeline — plain text/unicode) if it would genuinely help this specific topic. If not useful, write exactly: NONE
+
+###TEST
+3 short questions checking understanding of THIS lesson only. Number them 1-3.
+
+###ANSWERKEY
+The correct answer or grading guidance for each of the 3 questions, numbered to match.
+
+Keep the tone warm and encouraging, and each section concise — this is a mobile app, not a textbook.`;
+}
+
+function buildCumulativeReviewPrompt(program, lessonTitles){
+  return `You are a warm AI teacher. The student just completed these lessons in their "${program.goal}" program: ${lessonTitles.join(', ')}. Create a short cumulative review covering all of them together. Respond using EXACTLY this structure:
+
+###TEST
+4-6 numbered questions that check whether the concepts connected across these lessons.
+
+###ANSWERKEY
+The correct answer or grading guidance for each, numbered to match.`;
+}
+
+function buildGradingPrompt(questions, answerKey, studentAnswers){
+  return `You are grading a student's short quiz.\n\nQuestions:\n${questions}\n\nAnswer key / grading guidance:\n${answerKey}\n\nStudent's answers:\n${studentAnswers}\n\nJudge whether the student shows a solid overall grasp (they don't need every answer perfect, just genuine understanding). Respond in EXACTLY this format:\nRESULT: PASS\n(or)\nRESULT: FAIL\n— that must be the very first line, exactly. Then 2-3 sentences of warm, specific feedback: what they got right, and if they didn't pass, which idea to focus on when it's re-taught.`;
+}
+
+function buildNotesUpdatePrompt(existingNotes, lessonTitle, passed, feedback){
+  return `You maintain a short running note profiling a student's learning patterns, for an AI teacher to use later — their pace, what kind of examples click for them, their engagement style, common mistake patterns, what motivates them.\n\nExisting notes: ${existingNotes || '(none yet)'}\n\nNew observation from lesson "${lessonTitle}" (result: ${passed ? 'passed' : 'needed a re-teach'}): ${feedback}\n\nWrite the UPDATED notes — merge in anything new and genuinely useful, drop anything stale or redundant. Under 80 words, plain prose, third person, factual.`;
+}
+
+function parseLessonSections(raw){
+  const tags = ['WARMUP','OBJECTIVES','INTRODUCTION','EXAMPLES','EXPLANATION','BOARD','TEST','ANSWERKEY'];
+  const sections = {};
+  for(let i = 0; i < tags.length; i++){
+    const tag = tags[i];
+    const re = new RegExp('###' + tag + '([\\s\\S]*?)(?=###(?:' + tags.slice(i + 1).join('|') + ')|$)');
+    const m = raw.match(re);
+    sections[tag.toLowerCase()] = m ? m[1].trim() : '';
+  }
+  return sections;
+}
+
+async function beginLesson(index, opts){
+  opts = opts || {};
+  classroomState.lessonIndex = index;
+  const program = classroomState.program;
+  const lessonTitle = program.lesson_titles[index];
+
+  showClassroomLoading('Preparing "' + lessonTitle + '"…');
+  const prompt = buildLessonPrompt(program, lessonTitle, index, opts);
+
+  try{
+    const raw = await callClaude(prompt, 1400);
+    classroomState.sections = parseLessonSections(raw);
+    classroomState.stage = opts.repeat ? 'explanation' : 'warmup';
+    document.getElementById('classroomChatLog').innerHTML = '';
+    await persistClassroomProgress();
+    hideClassroomLoading();
+    renderLessonStage();
+  } catch(err){
+    hideClassroomLoading();
+    const output = document.getElementById('classroomLoadingOutput');
+    output.style.display = 'block'; output.className = 'ai-output'; output.textContent = 'Error: ' + err.message;
+  }
+}
+
+function renderLessonStage(){
+  const sections = classroomState.sections;
+  const stage = classroomState.stage;
+  document.getElementById('classroomStageBadge').textContent = STAGE_LABELS[stage] || stage;
+  document.getElementById('classroomLessonTitle').textContent = stage === 'cumulative_test'
+    ? 'Review: ' + classroomState.cumulativeTitles.join(', ')
+    : classroomState.program.lesson_titles[classroomState.lessonIndex];
+
+  updateClassroomProgressUI();
+
+  const board = document.getElementById('classroomBoard');
+  if(sections && sections.board && sections.board.toUpperCase() !== 'NONE' && ['examples','explanation','test'].includes(stage)){
+    board.style.display = 'block';
+    document.getElementById('classroomBoardContent').innerHTML = renderMarkdown(sections.board);
+  } else {
+    board.style.display = 'none';
+  }
+
+  const testArea = document.getElementById('classroomTestArea');
+  const continueBtn = document.getElementById('classroomContinueBtn');
+
+  if(stage === 'test' || stage === 'cumulative_test'){
+    appendClassroomBubble(sections.test, 'ai');
+    testArea.style.display = 'block';
+    continueBtn.style.display = 'none';
+  } else {
+    testArea.style.display = 'none';
+    continueBtn.style.display = 'block';
+    continueBtn.textContent = stage === 'explanation' ? "I've got it — continue" : 'Continue';
+    appendClassroomBubble(sections[stage], 'ai');
+  }
+}
+
+function appendClassroomBubble(text, role, extraClass){
+  if(!text) return;
+  const log = document.getElementById('classroomChatLog');
+  const div = document.createElement('div');
+  div.className = 'chat-bubble ' + role + (extraClass ? ' ' + extraClass : '');
+  div.innerHTML = role === 'ai' ? renderMarkdown(text) : escapeHtml(text);
+  log.appendChild(div);
+}
+
+function addClassroomThought(){
+  const input = document.getElementById('classroomReplyInput');
+  const text = input.value.trim();
+  if(!text) return;
+  appendClassroomBubble(text, 'user', 'classroom-thought');
+  input.value = '';
+}
+
+async function advanceClassroomStage(){
+  const idx = STAGE_ORDER.indexOf(classroomState.stage);
+  classroomState.stage = (idx === -1 || idx === STAGE_ORDER.length - 1) ? 'test' : STAGE_ORDER[idx + 1];
+  await persistClassroomProgress();
+  renderLessonStage();
+}
+
+async function submitClassroomTest(){
+  const answers = document.getElementById('classroomTestAnswers').value.trim();
+  const output = document.getElementById('classroomLoadingOutput');
+  if(!answers){ showFieldError(output, 'Write your answers first.'); return; }
+
+  showClassroomLoading('Checking your answers…');
+  const sections = classroomState.sections;
+
+  try{
+    const result = await callClaude(buildGradingPrompt(sections.test, sections.answerkey, answers), 350);
+    hideClassroomLoading();
+    const lines = result.split('\n');
+    const passed = /RESULT:\s*PASS/i.test(lines[0]);
+    const feedback = lines.slice(1).join(' ').trim() || result;
+
+    appendClassroomBubble(answers, 'user');
+    appendClassroomBubble((passed ? '✅ ' : '📘 ') + feedback, 'ai');
+    document.getElementById('classroomTestArea').value = '';
+    document.getElementById('classroomTestArea').style.display = 'none';
+
+    const lessonTitle = classroomState.stage === 'cumulative_test'
+      ? 'Review of ' + classroomState.cumulativeTitles.join(', ')
+      : classroomState.program.lesson_titles[classroomState.lessonIndex];
+    updateClassroomNotes(lessonTitle, passed, feedback);
+
+    if(passed){
+      classroomState.failCount = 0;
+      if(classroomState.stage === 'cumulative_test'){
+        classroomState.lessonsSinceTest = 0;
+        classroomState.cumulativeTitles = [];
+        await goToNextLesson();
+      } else {
+        classroomState.lessonsSinceTest += 1;
+        const threshold = classroomState.program.lessons_per_test || 3;
+        const isLastLesson = classroomState.lessonIndex >= classroomState.program.lesson_titles.length - 1;
+        if(classroomState.lessonsSinceTest >= threshold && !isLastLesson){
+          await beginCumulativeTest();
+        } else {
+          await goToNextLesson();
+        }
+      }
+    } else {
+      classroomState.failCount += 1;
+      await beginLesson(classroomState.lessonIndex, { repeat: true, failSummary: feedback });
+    }
+  } catch(err){
+    hideClassroomLoading();
+    output.style.display = 'block'; output.className = 'ai-output'; output.textContent = 'Error: ' + err.message;
+  }
+}
+
+async function goToNextLesson(){
+  const nextIndex = classroomState.lessonIndex + 1;
+  if(nextIndex >= classroomState.program.lesson_titles.length){
+    classroomState.stage = 'complete';
+    await persistClassroomProgress();
+    renderProgramComplete();
+    return;
+  }
+  await beginLesson(nextIndex);
+}
+
+async function beginCumulativeTest(){
+  const span = classroomState.program.lessons_per_test || 3;
+  const start = Math.max(0, classroomState.lessonIndex - (span - 1));
+  classroomState.cumulativeTitles = classroomState.program.lesson_titles.slice(start, classroomState.lessonIndex + 1);
+  showClassroomLoading('Building your review test…');
+
+  try{
+    const raw = await callClaude(buildCumulativeReviewPrompt(classroomState.program, classroomState.cumulativeTitles), 500);
+    classroomState.sections = parseLessonSections(raw);
+    classroomState.stage = 'cumulative_test';
+    document.getElementById('classroomChatLog').innerHTML = '';
+    await persistClassroomProgress();
+    hideClassroomLoading();
+    renderLessonStage();
+  } catch(err){
+    hideClassroomLoading();
+    const output = document.getElementById('classroomLoadingOutput');
+    output.style.display = 'block'; output.className = 'ai-output'; output.textContent = 'Error: ' + err.message;
+  }
+}
+
+function renderProgramComplete(){
+  document.getElementById('classroomChatLog').innerHTML = '';
+  document.getElementById('classroomStageBadge').textContent = 'Complete';
+  document.getElementById('classroomLessonTitle').textContent = '🎉 Program complete!';
+  document.getElementById('classroomBoard').style.display = 'none';
+  appendClassroomBubble(`You've finished every lesson in "${classroomState.program.goal}". Nice work — want to start a new program?`, 'ai');
+  document.getElementById('classroomTestArea').style.display = 'none';
+  document.getElementById('classroomContinueBtn').style.display = 'none';
+  updateClassroomProgressUI();
+}
+
+function updateClassroomProgressUI(){
+  const total = classroomState.program.lesson_titles.length;
+  const completed = classroomState.lessonIndex + (classroomState.stage === 'complete' ? 1 : 0);
+  const pct = Math.min(100, Math.round((completed / total) * 100));
+  document.getElementById('classroomProgressFill').style.width = pct + '%';
+  document.getElementById('classroomProgressLabel').textContent = classroomState.stage === 'cumulative_test'
+    ? `Review test — lessons ${classroomState.lessonIndex - classroomState.cumulativeTitles.length + 2}–${classroomState.lessonIndex + 1} of ${total}`
+    : `Lesson ${classroomState.lessonIndex + 1} of ${total}`;
+}
+
+function showClassroomLoading(msg){
+  const el = document.getElementById('classroomLoadingOutput');
+  el.style.display = 'block'; el.className = 'ai-output loading-text'; el.textContent = msg;
+  document.getElementById('classroomContinueBtn').disabled = true;
+}
+function hideClassroomLoading(){
+  document.getElementById('classroomLoadingOutput').style.display = 'none';
+  document.getElementById('classroomContinueBtn').disabled = false;
+}
+
+async function persistClassroomProgress(){
+  await safeSb(async () => {
+    await sb.from('classroom_progress').upsert({
+      user_id: currentUser.id,
+      program_id: classroomState.program.id,
+      current_lesson_index: classroomState.lessonIndex,
+      stage: classroomState.stage,
+      lesson_content: classroomState.sections,
+      lessons_since_test: classroomState.lessonsSinceTest,
+      fail_count: classroomState.failCount,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+  });
+}
+
+async function loadClassroomNotes(){
+  const row = await safeSb(async () => {
+    const { data } = await sb.from('classroom_notes').select('notes').eq('user_id', currentUser.id).maybeSingle();
+    return data;
+  });
+  return row ? row.notes : '';
+}
+
+async function updateClassroomNotes(lessonTitle, passed, feedback){
+  try{
+    const updated = await callClaude(buildNotesUpdatePrompt(classroomState.notes, lessonTitle, passed, feedback), 150);
+    classroomState.notes = updated.trim();
+    await safeSb(async () => {
+      await sb.from('classroom_notes').upsert({
+        user_id: currentUser.id, notes: classroomState.notes, updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+    });
+  } catch(err){
+    console.warn('Could not update classroom notes:', err.message);
+  }
+}
+
+function exitProgram(){
+  document.getElementById('classroomLessonCard').style.display = 'none';
+  document.getElementById('classroomSetupCard').style.display = 'block';
 }
 
 initAuth();
