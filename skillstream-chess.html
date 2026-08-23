@@ -136,14 +136,24 @@
     background:radial-gradient(ellipse at center, rgba(0,0,0,0.35), transparent 72%);
   }
   .sq.white-piece .piece{
-    background:radial-gradient(circle at 35% 25%, #FFFFFF 0%, #F3E8CE 45%, #C9A24E 100%);
+    background:radial-gradient(circle at 32% 22%, #FFFFFF 0%, #FFF6E0 30%, #F0CE7E 65%, #C08A2E 100%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
-    filter:drop-shadow(0 3px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 5px rgba(255,255,255,0.35));
+    text-shadow:
+      1px 1px 0 #A67B2E,
+      2px 2px 0 #8A6423,
+      3px 3px 1px #6E4E18,
+      4px 4px 3px rgba(0,0,0,0.5);
+    filter:drop-shadow(0 4px 3px rgba(0,0,0,0.55)) drop-shadow(0 0 7px rgba(255,255,255,0.45));
   }
   .sq.black-piece .piece{
-    background:radial-gradient(circle at 35% 25%, #5A5A5A 0%, #17110B 55%, #000000 100%);
+    background:radial-gradient(circle at 32% 22%, #7A7A7A 0%, #2A2A2A 40%, #050505 85%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
-    filter:drop-shadow(0 3px 2px rgba(0,0,0,0.7)) drop-shadow(0 0 5px rgba(212,175,106,0.4));
+    text-shadow:
+      1px 1px 0 #000000,
+      2px 2px 0 #000000,
+      3px 3px 1px #000000,
+      4px 4px 3px rgba(0,0,0,0.65);
+    filter:drop-shadow(0 4px 3px rgba(0,0,0,0.75)) drop-shadow(0 0 7px rgba(212,175,106,0.5));
   }
 
   .controls-row{display:flex; gap:8px; margin-bottom:14px;}
