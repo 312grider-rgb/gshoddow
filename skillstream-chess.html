@@ -126,34 +126,34 @@
   }
   .sq .piece{
     line-height:1; position:relative; z-index:2;
-    filter:drop-shadow(0 3px 2px rgba(0,0,0,0.5));
   }
-  /* A soft pedestal disc under each piece — keeps pieces visually grounded
-     and legible regardless of which square color sits beneath them. */
-  .sq .piece::before{
-    content:''; position:absolute; left:50%; bottom:6%; transform:translateX(-50%);
-    width:60%; height:22%; border-radius:50%; z-index:1;
-    background:radial-gradient(ellipse at center, rgba(0,0,0,0.35), transparent 72%);
+  /* A solid contrasting disc behind every piece, so it reads clearly no
+     matter which square color (light or dark) sits underneath it. */
+  .sq.white-piece::before, .sq.black-piece::before{
+    content:''; position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
+    width:64%; height:64%; border-radius:50%; z-index:1;
+  }
+  .sq.white-piece::before{
+    background:radial-gradient(circle at 35% 30%, #2E3555, #12162A 85%);
+    box-shadow:0 3px 5px rgba(0,0,0,0.5), inset 0 0 0 1.5px rgba(212,175,106,0.55);
+  }
+  .sq.black-piece::before{
+    background:radial-gradient(circle at 35% 30%, #FFF7E2, #E9CE8E 85%);
+    box-shadow:0 3px 5px rgba(0,0,0,0.35), inset 0 0 0 1.5px rgba(43,27,16,0.45);
   }
   .sq.white-piece .piece{
-    background:radial-gradient(circle at 32% 22%, #FFFFFF 0%, #FFF6E0 30%, #F0CE7E 65%, #C08A2E 100%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
+    color:#FFFFFF;
     text-shadow:
-      1px 1px 0 #A67B2E,
-      2px 2px 0 #8A6423,
-      3px 3px 1px #6E4E18,
-      4px 4px 3px rgba(0,0,0,0.5);
-    filter:drop-shadow(0 4px 3px rgba(0,0,0,0.55)) drop-shadow(0 0 7px rgba(255,255,255,0.45));
+      -1.5px -1.5px 0 #12172c, 1.5px -1.5px 0 #12172c, -1.5px 1.5px 0 #12172c, 1.5px 1.5px 0 #12172c,
+      0 3px 3px rgba(0,0,0,0.6);
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,0.4));
   }
   .sq.black-piece .piece{
-    background:radial-gradient(circle at 32% 22%, #7A7A7A 0%, #2A2A2A 40%, #050505 85%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
+    color:#0B0B0B;
     text-shadow:
-      1px 1px 0 #000000,
-      2px 2px 0 #000000,
-      3px 3px 1px #000000,
-      4px 4px 3px rgba(0,0,0,0.65);
-    filter:drop-shadow(0 4px 3px rgba(0,0,0,0.75)) drop-shadow(0 0 7px rgba(212,175,106,0.5));
+      -1.5px -1.5px 0 #FFF3D0, 1.5px -1.5px 0 #FFF3D0, -1.5px 1.5px 0 #FFF3D0, 1.5px 1.5px 0 #FFF3D0,
+      0 3px 3px rgba(0,0,0,0.35);
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3));
   }
 
   .controls-row{display:flex; gap:8px; margin-bottom:14px;}
