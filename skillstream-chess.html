@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +15,10 @@
     --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2;
     --shadow-soft:0 2px 10px rgba(20,31,56,0.06);
     --shadow-card:0 8px 24px rgba(20,31,56,0.08);
+    --board-frame-1:#2A1B10; --board-frame-2:#160D07;
+    --sq-light-1:#F3E6C9; --sq-light-2:#E3CE9E;
+    --sq-dark-1:#5C3A22; --sq-dark-2:#3B2214;
+    --board-gold:#D4AF6A;
   }
   *{box-sizing:border-box;}
   body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); -webkit-font-smoothing:antialiased; padding-bottom:30px;}
@@ -47,6 +52,13 @@
     display:flex; justify-content:space-between; align-items:center; font-size:13.5px; font-weight:600; color:var(--ink);
   }
   #gameCode{font-size:11.5px; color:var(--gold); font-weight:700;}
+  .color-badge{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700;
+    padding:4px 9px; border-radius:20px; background:var(--cream); border:1px solid var(--line); color:var(--ink);
+  }
+  .color-badge .dot{width:9px; height:9px; border-radius:50%; box-shadow:0 0 0 1px rgba(0,0,0,0.2);}
+  .color-badge.you-white .dot{background:#FFFDF7;}
+  .color-badge.you-black .dot{background:#17110B;}
   .thinking-dots span{
     display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--gold);
     margin:0 1px; animation:think-bounce 1.2s infinite;
@@ -62,23 +74,31 @@
   .captured-row .cap-label{font-size:10px; font-weight:700; color:#8a8474; text-transform:uppercase; margin-right:4px;}
 
   .board-frame{
-    background:linear-gradient(160deg, #8a6a3f, #6b4f2c); border-radius:16px; padding:10px 10px 4px;
-    box-shadow:var(--shadow-card); margin-bottom:6px;
+    background:linear-gradient(160deg, var(--board-frame-1), var(--board-frame-2));
+    border-radius:18px; padding:12px 12px 6px; position:relative;
+    box-shadow:var(--shadow-card), inset 0 0 0 1px rgba(212,175,106,0.35), inset 0 1px 14px rgba(0,0,0,0.45);
+    margin-bottom:6px; aspect-ratio:auto; box-sizing:border-box;
+  }
+  .board-frame::before{
+    content:''; position:absolute; inset:5px; border-radius:13px; pointer-events:none;
+    border:1px solid rgba(212,175,106,0.25);
   }
   #board{
-    display:grid; grid-template-columns:repeat(8, 1fr); width:100%; aspect-ratio:1;
-    border-radius:8px; overflow:hidden; box-shadow:inset 0 0 0 2px rgba(0,0,0,0.15);
+    display:grid; grid-template-columns:repeat(8, 1fr); grid-template-rows:repeat(8, 1fr);
+    width:100%; aspect-ratio:1; border-radius:8px; overflow:hidden;
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,0.35), 0 0 0 1px rgba(212,175,106,0.4);
+    position:relative;
   }
-  .file-labels{display:grid; grid-template-columns:repeat(8, 1fr); padding:4px 10px 8px; margin-bottom:14px;}
-  .file-labels span{text-align:center; font-size:10px; font-weight:700; color:#8a6a3f;}
+  .file-labels{display:grid; grid-template-columns:repeat(8, 1fr); padding:4px 12px 8px; margin-bottom:14px;}
+  .file-labels span{text-align:center; font-size:10px; font-weight:700; color:var(--board-gold); letter-spacing:0.5px;}
 
   .sq{
     display:flex; align-items:center; justify-content:center; font-size:min(7vw, 32px);
-    position:relative; cursor:pointer; user-select:none;
+    position:relative; cursor:pointer; user-select:none; aspect-ratio:1;
   }
-  .sq.light{background:linear-gradient(160deg, #F6EEDF, #EEDFC4);}
-  .sq.dark{background:linear-gradient(160deg, #BB935F, #9C7648);}
-  .sq.selected{background:#C9A24E !important;}
+  .sq.light{background:linear-gradient(160deg, var(--sq-light-1), var(--sq-light-2));}
+  .sq.dark{background:linear-gradient(160deg, var(--sq-dark-1), var(--sq-dark-2));}
+  .sq.selected{background:linear-gradient(160deg, var(--gold-light), var(--board-gold)) !important;}
   .sq.last-move{box-shadow:inset 0 0 0 3px rgba(201,162,78,0.65);}
   .sq.king-check{background:radial-gradient(circle, rgba(214,69,69,0.65), rgba(214,69,69,0.25)) !important; animation:check-pulse 0.8s infinite;}
   @keyframes check-pulse{0%,100%{box-shadow:inset 0 0 0 0 rgba(214,69,69,0.6);} 50%{box-shadow:inset 0 0 12px 4px rgba(214,69,69,0.6);}}
@@ -88,9 +108,9 @@
   .sq.legal.has-piece::after{
     width:90%; height:90%; border-radius:50%; background:none; border:3px solid rgba(192,82,58,0.6);
   }
-  .sq .piece{ line-height:1; }
-  .sq.white-piece .piece{ color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.5); }
-  .sq.black-piece .piece{ color:#1a1a1a; }
+  .sq .piece{ line-height:1; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.35)); }
+  .sq.white-piece .piece{ color:#FFFDF7; text-shadow:0 1px 1px rgba(0,0,0,0.5), 0 0 8px rgba(255,255,255,0.25); }
+  .sq.black-piece .piece{ color:#17110B; text-shadow:0 1px 1px rgba(0,0,0,0.35), 0 0 6px rgba(212,175,106,0.2); }
 
   .controls-row{display:flex; gap:8px; margin-bottom:14px;}
   .controls-row button{
@@ -160,6 +180,7 @@
   <div id="gameView" class="hidden">
     <div id="gameStatus">
       <span id="statusText">White to move</span>
+      <span id="yourColorBadge" class="color-badge hidden"></span>
       <span id="gameCode"></span>
     </div>
 
@@ -167,7 +188,7 @@
     <div class="board-frame">
       <div id="board"></div>
     </div>
-    <div class="file-labels"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>
+    <div class="file-labels" id="fileLabels"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>
     <div class="captured-row"><span class="cap-label">Opponent captured</span><span id="capturedByBlack"></span></div>
 
     <div class="controls-row">
@@ -213,6 +234,7 @@ let realtimeChannel = null;
 let aiThinking = false;
 let lastMoveFrom = null;
 let lastMoveTo = null;
+let boardOrientation = 'w'; // 'w' = white pieces at the bottom, 'b' = black pieces at the bottom
 
 /* ---------- SOUND EFFECTS ----------
    Simple synthesized tones via Web Audio API — no audio files needed,
@@ -248,6 +270,7 @@ function startVsAI(){
   game = new Chess();
   onlineGameId = null;
   lastMoveFrom = null; lastMoveTo = null;
+  setBoardOrientation('w', false);
   document.getElementById('modePicker').classList.add('hidden');
   document.getElementById('gameView').classList.remove('hidden');
   document.getElementById('gameCode').textContent = '';
@@ -255,6 +278,26 @@ function startVsAI(){
   renderBoard();
   renderCapturedPieces();
   updateStatus();
+}
+
+// Keeps each player's board oriented with their own pieces at the bottom,
+// so the layout stays stable and familiar no matter which color they're
+// assigned. showBadge controls the "You: White/Black" indicator (used for
+// online games where the assignment isn't otherwise obvious).
+function setBoardOrientation(color, showBadge){
+  boardOrientation = color;
+  const fileLabels = document.getElementById('fileLabels').querySelectorAll('span');
+  const files = boardOrientation === 'w' ? 'abcdefgh'.split('') : 'abcdefgh'.split('').reverse();
+  fileLabels.forEach((span, i) => span.textContent = files[i]);
+
+  const badge = document.getElementById('yourColorBadge');
+  if(showBadge){
+    badge.classList.remove('hidden', 'you-white', 'you-black');
+    badge.classList.add(color === 'w' ? 'you-white' : 'you-black');
+    badge.innerHTML = '<span class="dot"></span>You: ' + (color === 'w' ? 'White' : 'Black');
+  } else {
+    badge.classList.add('hidden');
+  }
 }
 
 function resetGame(){
@@ -284,13 +327,18 @@ function renderBoard(){
 
   for(let r = 0; r < 8; r++){
     for(let c = 0; c < 8; c++){
-      const file = 'abcdefgh'[c];
-      const rank = 8 - r;
+      // When orientation is 'b', flip both axes so the board is drawn
+      // from Black's point of view, with Black's pieces near the bottom.
+      const boardR = boardOrientation === 'w' ? r : 7 - r;
+      const boardC = boardOrientation === 'w' ? c : 7 - c;
+
+      const file = 'abcdefgh'[boardC];
+      const rank = 8 - boardR;
       const squareName = file + rank;
-      const piece = position[r][c];
+      const piece = position[boardR][boardC];
 
       const sq = document.createElement('div');
-      sq.className = 'sq ' + (((r + c) % 2 === 0) ? 'light' : 'dark');
+      sq.className = 'sq ' + (((boardR + boardC) % 2 === 0) ? 'light' : 'dark');
       sq.dataset.square = squareName;
 
       if(piece){
@@ -450,130 +498,4 @@ function makeAiMove(){
   if(moves.length === 0) return;
 
   let bestMove = null;
-  let bestScore = -Infinity;
-
-  for(const m of moves){
-    game.move(m);
-    let score = -evaluateBoard(game);
-
-    const replies = game.moves({ verbose:true });
-    if(replies.length > 0){
-      let worstReply = Infinity;
-      for(const r of replies){
-        game.move(r);
-        const replyScore = -evaluateBoard(game);
-        if(replyScore < worstReply) worstReply = replyScore;
-        game.undo();
-      }
-      score = -worstReply;
-    }
-
-    game.undo();
-    score += (Math.random() - 0.5) * 0.5;
-
-    if(score > bestScore){
-      bestScore = score;
-      bestMove = m;
-    }
-  }
-
-  if(bestMove){
-    game.move(bestMove);
-    lastMoveFrom = bestMove.from;
-    lastMoveTo = bestMove.to;
-    if(bestMove.captured) soundCapture(); else soundMove();
-    renderBoard();
-    renderCapturedPieces();
-    updateStatus();
-    if(game.in_check() && !game.in_checkmate()) soundCheck();
-  }
-}
-
-function genCode(){
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for(let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return code;
-}
-
-async function createOnlineGame(){
-  const code = genCode();
-  game = new Chess();
-
-  const { data, error } = await sb.from('chess_games').insert({
-    code,
-    fen: game.fen(),
-    white_player: currentUser.id,
-    black_player: null,
-    status: 'waiting'
-  }).select().single();
-
-  if(error){ alert('Error: ' + error.message); return; }
-
-  onlineGameId = data.id;
-  onlineColor = 'w';
-  mode = 'online';
-
-  document.getElementById('modePicker').classList.add('hidden');
-  document.getElementById('gameView').classList.remove('hidden');
-  document.getElementById('gameCode').textContent = 'Code: ' + code;
-  document.getElementById('undoBtn').classList.add('hidden');
-  document.getElementById('statusText').textContent = 'Waiting for opponent to join…';
-
-  renderBoard();
-  subscribeToGame();
-}
-
-async function joinOnlineGame(){
-  const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
-  if(!code){ alert('Enter a game code first.'); return; }
-
-  const { data, error } = await sb.from('chess_games').select('*').eq('code', code).maybeSingle();
-  if(error || !data){ alert('No game found with that code.'); return; }
-  if(data.black_player){ alert('This game already has two players.'); return; }
-
-  const { error: joinErr } = await sb.from('chess_games').update({
-    black_player: currentUser.id,
-    status: 'active'
-  }).eq('id', data.id);
-  if(joinErr){ alert('Error: ' + joinErr.message); return; }
-
-  onlineGameId = data.id;
-  onlineColor = 'b';
-  mode = 'online';
-  game = new Chess(data.fen);
-
-  document.getElementById('modePicker').classList.add('hidden');
-  document.getElementById('gameView').classList.remove('hidden');
-  document.getElementById('gameCode').textContent = 'Code: ' + code;
-  document.getElementById('undoBtn').classList.add('hidden');
-
-  renderBoard();
-  updateStatus();
-  subscribeToGame();
-}
-
-function subscribeToGame(){
-  realtimeChannel = sb
-    .channel('chess_game_' + onlineGameId)
-    .on('postgres_changes', { event:'UPDATE', schema:'public', table:'chess_games', filter:`id=eq.${onlineGameId}` }, (payload) => {
-      const row = payload.new;
-      if(row.status === 'active' && document.getElementById('statusText').textContent.includes('Waiting')){
-        document.getElementById('statusText').textContent = 'Opponent joined! Game on.';
-      }
-      game = new Chess(row.fen);
-      selectedSquare = null; legalTargets = [];
-      soundMove();
-      renderBoard();
-      renderCapturedPieces();
-      updateStatus();
-    })
-    .subscribe();
-}
-
-async function syncOnlineGame(){
-  await sb.from('chess_games').update({ fen: game.fen() }).eq('id', onlineGameId);
-}
-</script>
-</body>
-</html>
+  let bestScore = -Infin
