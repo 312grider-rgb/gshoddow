@@ -22,16 +22,16 @@
   button:active{transform:scale(0.97);}
 
   header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:26px 20px 30px;}
-  header.top .eyebrow{font-size:11.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px; font-weight:600;}
-  header.top h1{margin:0; font-size:26px; font-weight:600;}
-  header.top p{margin:8px 0 0; font-size:14px; opacity:0.8;}
+  header.top .eyebrow{font-size:12.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px; font-weight:600;}
+  header.top h1{margin:0; font-size:30px; font-weight:600;}
+  header.top p{margin:8px 0 0; font-size:15.5px; opacity:0.8;}
 
   .wrap{padding:20px;}
 
   .tabs{display:flex; gap:8px; margin-bottom:20px;}
   .tab-btn{
-    flex:1; background:#fff; border:none; padding:13px 8px; border-radius:14px;
-    font-size:13.5px; font-weight:700; color:var(--ink); cursor:pointer; box-shadow:var(--shadow-soft);
+    flex:1; background:#fff; border:none; padding:15px 8px; border-radius:14px;
+    font-size:14.5px; font-weight:700; color:var(--ink); cursor:pointer; box-shadow:var(--shadow-soft);
   }
   .tab-btn.active{background:var(--ink); color:var(--gold-light); box-shadow:var(--shadow-card);}
 
@@ -39,34 +39,34 @@
   .tool-panel.active{display:block;}
 
   .card{background:#fff; border-radius:18px; padding:20px; box-shadow:var(--shadow-card); margin-bottom:16px;}
-  .card .kicker{font-size:11.5px; letter-spacing:1.4px; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:6px;}
-  .card h3{margin:0 0 6px; font-size:18px; font-weight:600;}
-  .card .desc{font-size:13.5px; color:#8a8474; line-height:1.5; margin-bottom:16px;}
+  .card .kicker{font-size:12.5px; letter-spacing:1.4px; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:6px;}
+  .card h3{margin:0 0 6px; font-size:20px; font-weight:600;}
+  .card .desc{font-size:15px; color:#8a8474; line-height:1.5; margin-bottom:16px;}
 
-  label{display:block; font-size:13px; font-weight:600; color:var(--ink); margin:12px 0 6px;}
+  label{display:block; font-size:14.5px; font-weight:600; color:var(--ink); margin:12px 0 6px;}
   label:first-of-type{margin-top:0;}
   select, textarea, input{
     width:100%; padding:12px 13px; border:1.5px solid var(--line); border-radius:11px;
-    font-size:14.5px; font-family:'Inter',sans-serif; background:#fdfcfa;
+    font-size:16.5px; font-family:'Inter',sans-serif; background:#fdfcfa;
   }
   textarea{min-height:110px; resize:vertical;}
   select:focus, textarea:focus, input:focus{outline:none; border-color:var(--gold-light);}
 
   .submit-btn{
-    width:100%; background:var(--ink); color:#fff; border:none; padding:14px; border-radius:12px;
-    font-size:15px; font-weight:700; margin-top:16px; cursor:pointer; box-shadow:var(--shadow-soft);
+    width:100%; background:var(--ink); color:#fff; border:none; padding:16px; border-radius:12px;
+    font-size:17px; font-weight:700; margin-top:16px; cursor:pointer; box-shadow:var(--shadow-soft);
   }
   .submit-btn:disabled{opacity:0.6;}
 
   .ai-output{
     margin-top:16px; background:#FBF7EF; border:1px solid var(--line); border-radius:14px; padding:16px;
-    font-size:14.5px; line-height:1.65; white-space:pre-wrap; display:none;
+    font-size:15.5px; line-height:1.7; white-space:pre-wrap; display:none;
   }
   .ai-output.loading-text{color:#a8a094; font-style:italic;}
   .ai-output.field-error{color:#B5473F; border-color:#E8B4AE; background:#FBEEEC; font-weight:600;}
 
   .chat-bubble{
-    padding:11px 14px; border-radius:14px; font-size:14px; line-height:1.5; margin-bottom:8px; max-width:88%;
+    padding:12px 15px; border-radius:14px; font-size:15.5px; line-height:1.55; margin-bottom:8px; max-width:88%;
   }
   .chat-bubble.user{background:var(--ink); color:#fff; margin-left:auto; border-bottom-right-radius:4px;}
   .chat-bubble.ai{background:#F6ECD8; color:var(--charcoal); margin-right:auto; border-bottom-left-radius:4px;}
@@ -74,12 +74,12 @@
   .chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;}
   .chip{
     background:#F6ECD8; color:var(--ink); border:none; padding:9px 14px;
-    border-radius:20px; font-size:13px; font-weight:600; cursor:pointer;
+    border-radius:20px; font-size:14px; font-weight:600; cursor:pointer;
   }
 
   .live-clock-badge{
     display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
-    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    color:var(--gold-light); font-size:13px; font-weight:700; padding:6px 13px; border-radius:20px;
     margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
   }
 .subject-icon-grid{
@@ -92,10 +92,10 @@
 }
 .subject-icon-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
 .subject-icon-btn .icon{font-size:22px;}
-.subject-icon-btn .lbl{font-size:10.5px; font-weight:600; color:var(--charcoal); text-align:center; line-height:1.2;}
+.subject-icon-btn .lbl{font-size:11.5px; font-weight:600; color:var(--charcoal); text-align:center; line-height:1.2;}
 .subject-icon-btn.active{background:var(--gold); border-color:var(--gold);}
 .subject-icon-btn.active .lbl{color:var(--ink);}
-.back-link{display:block; text-align:center; margin-top:6px; font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;}
+.back-link{display:block; text-align:center; margin-top:6px; font-size:15px; font-weight:600; color:var(--ink); text-decoration:none;}
 
 .classroom-progress-track{ width:100%; height:8px; background:var(--line); border-radius:6px; overflow:hidden; margin-bottom:14px; }
 .classroom-progress-fill{ height:100%; background:linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius:6px; transition:width 0.4s var(--ease); }
@@ -126,19 +126,57 @@
 .classroom-thought{ background:#EFEAE0; color:var(--charcoal); }
 
 .classroom-progress-track{ width:100%; height:8px; background:var(--line); border-radius:20px; overflow:hidden; margin-bottom:6px; }
-.classroom-progress-fill{ height:100%; background:linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius:20px; transition:width 0.4s var(--ease); width:0%; }
+.classroom-progress-fill{ height:100%; background:linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius:20px; transition:width 0.5s var(--ease); width:0%; box-shadow:0 0 10px rgba(201,162,78,0.6); }
 .classroom-stage-badge{
-  display:inline-block; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
-  color:var(--ink); background:var(--gold-light); padding:5px 11px; border-radius:20px;
+  display:inline-flex; align-items:center; gap:7px; font-size:13.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+  color:var(--ink); background:linear-gradient(135deg, var(--gold-light), var(--gold)); padding:8px 16px; border-radius:20px;
+  box-shadow:0 4px 12px rgba(201,162,78,0.35);
 }
 .classroom-board{
-  background:#1F3A2E; color:#EAF6EE; border-radius:14px; padding:16px; margin-bottom:14px;
-  box-shadow:inset 0 0 0 6px #16281F, var(--shadow-card); font-family:'Inter',sans-serif;
+  background:#1F3A2E; color:#EAF6EE; border-radius:16px; padding:18px; margin-bottom:16px;
+  box-shadow:inset 0 0 0 6px #16281F, var(--shadow-card); font-family:'Inter',sans-serif; font-size:15.5px;
 }
-.classroom-board-label{ font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9FD4B0; margin-bottom:8px; }
+.classroom-board-label{ font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9FD4B0; margin-bottom:8px; }
 .classroom-board ul{ margin:6px 0; padding-left:20px; }
-#classroomChatLog .chat-bubble.ai{ max-width:100%; }
+#classroomChatLog .chat-bubble.ai{ max-width:100%; font-size:16.5px; line-height:1.65; }
+#classroomChatLog .chat-bubble.ai div{ margin-bottom:4px; }
 #classroomContinueBox .card{ background:var(--cream); box-shadow:none; border:1.5px solid var(--line); padding:14px; margin-bottom:14px; }
+
+#classroomLessonTitle{ font-size:24px; font-weight:800; line-height:1.25; }
+#classroomLessonCard .card, #classroomLessonCard{ font-size:16px; }
+.classroom-header-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:12px; }
+.classroom-streak-badge{
+  display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:800; color:#B5473F;
+  background:#FDEDE9; padding:6px 12px; border-radius:20px; transition:transform 0.25s var(--ease);
+}
+.classroom-streak-badge.pop{ animation:streak-pop 0.5s var(--ease); }
+@keyframes streak-pop{ 0%{ transform:scale(1); } 40%{ transform:scale(1.35); } 100%{ transform:scale(1); } }
+
+.speak-toggle-btn{
+  display:inline-flex; align-items:center; gap:6px; background:var(--ink); color:var(--gold-light); border:none;
+  padding:7px 13px; border-radius:20px; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+}
+.speak-toggle-btn.muted{ background:#fff; color:var(--ink); border:1.5px solid var(--line); }
+.speaking-wave{ display:inline-flex; align-items:center; gap:2px; height:14px; margin-left:2px; }
+.speaking-wave span{ width:3px; height:100%; background:var(--ink); border-radius:2px; animation:wave 0.9s ease-in-out infinite; }
+.speaking-wave span:nth-child(2){ animation-delay:0.15s; }
+.speaking-wave span:nth-child(3){ animation-delay:0.3s; }
+@keyframes wave{ 0%,100%{ transform:scaleY(0.3); } 50%{ transform:scaleY(1); } }
+
+#classroomContinueBtn.attn{ animation:continue-glow 1.8s ease-in-out infinite; }
+@keyframes continue-glow{
+  0%,100%{ box-shadow:0 0 0 0 rgba(201,162,78,0.55); }
+  50%{ box-shadow:0 0 0 10px rgba(201,162,78,0); }
+}
+
+.classroom-confetti{ position:fixed; inset:0; pointer-events:none; z-index:999; overflow:hidden; }
+.classroom-confetti span{
+  position:absolute; top:-10%; font-size:26px; animation:confetti-fall 1.6s ease-in forwards;
+}
+@keyframes confetti-fall{
+  0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+  100%{ transform:translateY(110vh) rotate(360deg); opacity:0; }
+}
 </style>
 </head>
 <body>
@@ -353,17 +391,23 @@
     </div>
 
     <div class="card" id="classroomLessonCard" style="display:none;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;">
+      <div class="classroom-header-row">
         <div>
           <div class="kicker" style="margin:0 0 4px;" id="classroomProgramLabel">Program</div>
-          <div id="classroomProgressLabel" style="font-size:12.5px; color:#8a8474; font-weight:600;"></div>
+          <div id="classroomProgressLabel" style="font-size:13px; color:#8a8474; font-weight:700;"></div>
         </div>
-        <button class="chip" style="background:transparent; border:1.5px solid var(--line); padding:6px 12px; white-space:nowrap;" onclick="exitProgram()">Switch program</button>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+          <button class="chip" style="background:transparent; border:1.5px solid var(--line); padding:6px 12px; white-space:nowrap;" onclick="exitProgram()">Switch program</button>
+          <span class="classroom-streak-badge" id="classroomStreakBadge">🔥 0 lessons</span>
+        </div>
       </div>
       <div class="classroom-progress-track"><div class="classroom-progress-fill" id="classroomProgressFill"></div></div>
 
-      <div class="classroom-stage-badge" id="classroomStageBadge">Warm-up</div>
-      <h3 id="classroomLessonTitle" style="margin:8px 0 14px;"></h3>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 0 8px;">
+        <div class="classroom-stage-badge" id="classroomStageBadge"><span id="classroomStageBadgeText">Warm-up</span><span class="speaking-wave" id="classroomSpeakingWave" style="display:none;"><span></span><span></span><span></span></span></div>
+        <button class="speak-toggle-btn" id="classroomSpeakToggle" onclick="toggleClassroomSpeech()">🔊 Voice on</button>
+      </div>
+      <h3 id="classroomLessonTitle" style="margin:0 0 14px;"></h3>
 
       <div id="classroomBoard" class="classroom-board" style="display:none;">
         <div class="classroom-board-label">📋 On the board</div>
@@ -452,6 +496,7 @@ function switchTab(tab){
   document.getElementById('tabHomeworkBtn').classList.toggle('active', tab === 'homework');
   document.getElementById('tabCareerBtn').classList.toggle('active', tab === 'career');
   document.getElementById('tabClassroomBtn').classList.toggle('active', tab === 'classroom');
+  if(tab !== 'classroom' && typeof stopClassroomSpeech === 'function') stopClassroomSpeech();
   if(tab === 'classroom') initClassroomIfNeeded();
 }
 
@@ -1078,12 +1123,13 @@ async function beginLesson(index, opts){
 function renderLessonStage(){
   const sections = classroomState.sections;
   const stage = classroomState.stage;
-  document.getElementById('classroomStageBadge').textContent = STAGE_LABELS[stage] || stage;
+  document.getElementById('classroomStageBadgeText').textContent = STAGE_LABELS[stage] || stage;
   document.getElementById('classroomLessonTitle').textContent = stage === 'cumulative_test'
     ? 'Review: ' + classroomState.cumulativeTitles.join(', ')
     : classroomState.program.lesson_titles[classroomState.lessonIndex];
 
   updateClassroomProgressUI();
+  updateStreakBadge();
 
   const board = document.getElementById('classroomBoard');
   if(sections && sections.board && sections.board.toUpperCase() !== 'NONE' && ['examples','explanation','test'].includes(stage)){
@@ -1104,8 +1150,16 @@ function renderLessonStage(){
     testArea.style.display = 'none';
     continueBtn.style.display = 'block';
     continueBtn.textContent = stage === 'explanation' ? "I've got it — continue" : 'Continue';
+    continueBtn.classList.add('attn');
     appendClassroomBubble(sections[stage], 'ai');
   }
+}
+
+function updateStreakBadge(){
+  const badge = document.getElementById('classroomStreakBadge');
+  if(!badge) return;
+  const n = classroomState.lessonIndex;
+  badge.textContent = `🔥 ${n} lesson${n === 1 ? '' : 's'}`;
 }
 
 function appendClassroomBubble(text, role, extraClass){
@@ -1115,6 +1169,63 @@ function appendClassroomBubble(text, role, extraClass){
   div.className = 'chat-bubble ' + role + (extraClass ? ' ' + extraClass : '');
   div.innerHTML = role === 'ai' ? renderMarkdown(text) : escapeHtml(text);
   log.appendChild(div);
+  if(role === 'ai') speakClassroomText(text);
+}
+
+/* ---------- Text-to-speech for the AI Classroom ---------- */
+let classroomSpeechEnabled = (localStorage.getItem('classroomSpeechEnabled') !== 'off');
+const classroomSpeechSupported = ('speechSynthesis' in window);
+
+function toggleClassroomSpeech(){
+  classroomSpeechEnabled = !classroomSpeechEnabled;
+  localStorage.setItem('classroomSpeechEnabled', classroomSpeechEnabled ? 'on' : 'off');
+  const btn = document.getElementById('classroomSpeakToggle');
+  btn.textContent = classroomSpeechEnabled ? '🔊 Voice on' : '🔇 Voice off';
+  btn.classList.toggle('muted', !classroomSpeechEnabled);
+  if(!classroomSpeechEnabled && classroomSpeechSupported) window.speechSynthesis.cancel();
+}
+
+function speakClassroomText(text){
+  if(!classroomSpeechSupported || !classroomSpeechEnabled) return;
+  // Strip markdown/list punctuation so it isn't read aloud literally
+  const clean = text
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/[-•]\s+/g, '')
+    .replace(/#+\s*/g, '')
+    .replace(/\n+/g, '. ');
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(clean);
+  utterance.rate = 1.0;
+  utterance.pitch = 1.0;
+  const wave = document.getElementById('classroomSpeakingWave');
+  utterance.onstart = () => { if(wave) wave.style.display = 'inline-flex'; };
+  utterance.onend = () => { if(wave) wave.style.display = 'none'; };
+  utterance.onerror = () => { if(wave) wave.style.display = 'none'; };
+  window.speechSynthesis.speak(utterance);
+}
+
+function stopClassroomSpeech(){
+  if(classroomSpeechSupported) window.speechSynthesis.cancel();
+  const wave = document.getElementById('classroomSpeakingWave');
+  if(wave) wave.style.display = 'none';
+}
+
+/* ---------- Small celebration burst on passing a test/lesson ---------- */
+function celebrateClassroom(){
+  const layer = document.createElement('div');
+  layer.className = 'classroom-confetti';
+  const emojis = ['🎉','✨','🏆','⭐','🎊'];
+  for(let i = 0; i < 16; i++){
+    const span = document.createElement('span');
+    span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    span.style.left = Math.random() * 100 + '%';
+    span.style.animationDelay = (Math.random() * 0.4) + 's';
+    span.style.fontSize = (18 + Math.random() * 16) + 'px';
+    layer.appendChild(span);
+  }
+  document.body.appendChild(layer);
+  setTimeout(() => layer.remove(), 2200);
 }
 
 function addClassroomThought(){
@@ -1158,6 +1269,7 @@ async function submitClassroomTest(){
     updateClassroomNotes(lessonTitle, passed, feedback);
 
     if(passed){
+      celebrateClassroom();
       classroomState.failCount = 0;
       if(classroomState.stage === 'cumulative_test'){
         classroomState.lessonsSinceTest = 0;
@@ -1216,6 +1328,8 @@ async function beginCumulativeTest(){
 }
 
 function renderProgramComplete(){
+  celebrateClassroom();
+  setTimeout(celebrateClassroom, 500);
   document.getElementById('classroomChatLog').innerHTML = '';
   document.getElementById('classroomStageBadge').textContent = 'Complete';
   document.getElementById('classroomLessonTitle').textContent = '🎉 Program complete!';
@@ -1227,6 +1341,7 @@ function renderProgramComplete(){
 }
 
 function updateClassroomProgressUI(){
+  syncSpeakToggleUI();
   const total = classroomState.program.lesson_titles.length;
   const completed = classroomState.lessonIndex + (classroomState.stage === 'complete' ? 1 : 0);
   const pct = Math.min(100, Math.round((completed / total) * 100));
@@ -1234,6 +1349,19 @@ function updateClassroomProgressUI(){
   document.getElementById('classroomProgressLabel').textContent = classroomState.stage === 'cumulative_test'
     ? `Review test — lessons ${classroomState.lessonIndex - classroomState.cumulativeTitles.length + 2}–${classroomState.lessonIndex + 1} of ${total}`
     : `Lesson ${classroomState.lessonIndex + 1} of ${total}`;
+}
+
+function syncSpeakToggleUI(){
+  const btn = document.getElementById('classroomSpeakToggle');
+  if(!btn) return;
+  if(!classroomSpeechSupported){
+    btn.textContent = '🔇 Voice unavailable';
+    btn.disabled = true;
+    btn.classList.add('muted');
+    return;
+  }
+  btn.textContent = classroomSpeechEnabled ? '🔊 Voice on' : '🔇 Voice off';
+  btn.classList.toggle('muted', !classroomSpeechEnabled);
 }
 
 function showClassroomLoading(msg){
@@ -1284,6 +1412,7 @@ async function updateClassroomNotes(lessonTitle, passed, feedback){
 }
 
 function exitProgram(){
+  stopClassroomSpeech();
   document.getElementById('classroomLessonCard').style.display = 'none';
   document.getElementById('classroomSetupCard').style.display = 'block';
 }
