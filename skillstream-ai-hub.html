@@ -11,6 +11,7 @@
   :root{
     --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
     --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2;
+    --paper:#F3ECDA; --paper-line:#E4D9BE;
     --shadow-soft:0 2px 10px rgba(20,31,56,0.06);
     --shadow-card:0 8px 24px rgba(20,31,56,0.08);
     --ease:cubic-bezier(.22,1,.36,1);
@@ -163,10 +164,58 @@
 .speaking-wave span:nth-child(3){ animation-delay:0.3s; }
 @keyframes wave{ 0%,100%{ transform:scaleY(0.3); } 50%{ transform:scaleY(1); } }
 
-#classroomContinueBtn.attn{ animation:continue-glow 1.8s ease-in-out infinite; }
+#classroomContinueBtn.attn{ animation:continue-glow 1.8s ease-in-out 3; }
 @keyframes continue-glow{
   0%,100%{ box-shadow:0 0 0 0 rgba(201,162,78,0.55); }
   50%{ box-shadow:0 0 0 10px rgba(201,162,78,0); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  #classroomContinueBtn.attn{ animation:none; }
+  .classroom-streak-badge.pop{ animation:none; }
+  .classroom-confetti span{ animation:none; opacity:0; }
+}
+
+/* ---------- Eye comfort: warm "paper" background for reading surfaces ----------
+   Stark white behind long stretches of reading text is a major source of
+   glare/eye strain. This swaps the Classroom's card and output backgrounds
+   for a warm, low-blue-light parchment tone — the same principle behind
+   e-reader "sepia" reading modes — as the default, not just in Comfort Mode. */
+#classroomPanel .card{ background:var(--paper); border:1px solid var(--paper-line); box-shadow:var(--shadow-soft); }
+#classroomChatLog .chat-bubble.ai{ background:#EFE6CC; }
+#classroomLoadingOutput.ai-output{ background:#EFE6CC; border-color:var(--paper-line); }
+#classroomTestArea textarea{ background:#FAF6EA; border-color:var(--paper-line); }
+body.classroom-comfort-mode #classroomPanel{ background:#20222B; margin:-20px; padding:20px; border-radius:0; }
+body.classroom-comfort-mode #classroomLessonCard,
+body.classroom-comfort-mode #classroomSetupCard{
+  background:#2A2D38; color:#E8E3D6; box-shadow:none; border:1px solid #3A3D4A;
+}
+body.classroom-comfort-mode #classroomLessonCard .kicker{ color:var(--gold-light); }
+body.classroom-comfort-mode #classroomProgressLabel{ color:#A8A395 !important; }
+body.classroom-comfort-mode #classroomLessonTitle{ color:#F2EEE2; }
+body.classroom-comfort-mode #classroomChatLog .chat-bubble.ai{ background:#343747; color:#E8E3D6; }
+body.classroom-comfort-mode #classroomChatLog .chat-bubble.user{ background:#4A4E60; }
+body.classroom-comfort-mode .classroom-board{ background:#16281F; box-shadow:inset 0 0 0 6px #0F1C16; }
+body.classroom-comfort-mode textarea,
+body.classroom-comfort-mode input{ background:#343747; color:#E8E3D6; border-color:#4A4E60; }
+body.classroom-comfort-mode .test-mode-btn, body.classroom-comfort-mode label{ color:#E8E3D6; }
+body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#E8E3D6; border-color:#4A4E60; }
+
+.classroom-eye-tip{
+  background:#EAF0EC; color:#3E5D46; border:1px solid #CFE0D4; border-radius:12px; padding:12px 14px;
+  font-size:13.5px; line-height:1.5; margin-bottom:14px; display:flex; gap:8px; align-items:flex-start;
+}
+
+.classroom-break-overlay{
+  position:fixed; inset:0; background:rgba(15,15,20,0.72); z-index:998;
+  display:flex; align-items:center; justify-content:center; padding:24px;
+}
+.classroom-break-card{
+  background:#fff; border-radius:20px; padding:32px 26px; text-align:center; max-width:300px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.4);
+}
+.classroom-break-count{
+  font-family:'Syne',sans-serif; font-size:40px; font-weight:800; color:var(--gold);
 }
 
 .classroom-confetti{ position:fixed; inset:0; pointer-events:none; z-index:999; overflow:hidden; }
@@ -403,11 +452,16 @@
       </div>
       <div class="classroom-progress-track"><div class="classroom-progress-fill" id="classroomProgressFill"></div></div>
 
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 0 8px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 0 8px; flex-wrap:wrap;">
         <div class="classroom-stage-badge" id="classroomStageBadge"><span id="classroomStageBadgeText">Warm-up</span><span class="speaking-wave" id="classroomSpeakingWave" style="display:none;"><span></span><span></span><span></span></span></div>
-        <button class="speak-toggle-btn" id="classroomSpeakToggle" onclick="toggleClassroomSpeech()">🔊 Voice on</button>
+        <div style="display:flex; gap:8px;">
+          <button class="speak-toggle-btn" id="classroomSpeakToggle" onclick="toggleClassroomSpeech()">🔊 Voice on</button>
+          <button class="speak-toggle-btn muted" id="classroomComfortToggle" onclick="toggleClassroomComfort()">🌙 Comfort mode</button>
+        </div>
       </div>
       <h3 id="classroomLessonTitle" style="margin:0 0 14px;"></h3>
+
+      <div class="classroom-eye-tip" id="classroomEyeTip" style="display:none;"></div>
 
       <div id="classroomBoard" class="classroom-board" style="display:none;">
         <div class="classroom-board-label">📋 On the board</div>
@@ -429,6 +483,16 @@
       <button class="submit-btn" id="classroomContinueBtn" onclick="withLoadingButton(this, advanceClassroomStage)">Continue</button>
 
       <div class="ai-output" id="classroomLoadingOutput" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <div class="classroom-break-overlay" id="classroomBreakOverlay" style="display:none;">
+    <div class="classroom-break-card">
+      <div style="font-size:38px; margin-bottom:6px;">👀</div>
+      <h3 style="margin:0 0 8px;">Quick eye break</h3>
+      <p style="margin:0 0 16px; font-size:14.5px; color:#8a8474; line-height:1.5;">Look at something about 20 feet (6 meters) away for 20 seconds. Your lesson will be right here.</p>
+      <div class="classroom-break-count" id="classroomBreakCount">20</div>
+      <button class="submit-btn" style="margin-top:16px;" onclick="dismissEyeBreak()">Continue lesson</button>
     </div>
   </div>
 
@@ -497,7 +561,12 @@ function switchTab(tab){
   document.getElementById('tabCareerBtn').classList.toggle('active', tab === 'career');
   document.getElementById('tabClassroomBtn').classList.toggle('active', tab === 'classroom');
   if(tab !== 'classroom' && typeof stopClassroomSpeech === 'function') stopClassroomSpeech();
-  if(tab === 'classroom') initClassroomIfNeeded();
+  if(tab !== 'classroom' && typeof stopClassroomBreakTimer === 'function') stopClassroomBreakTimer();
+  if(tab === 'classroom'){
+    initClassroomIfNeeded();
+    applyClassroomComfortUI();
+    startClassroomBreakTimer();
+  }
 }
 
 function fillCareerPrompt(text){
@@ -927,7 +996,7 @@ async function askCareerCoach(){
 
 let classroomState = {
   program: null, lessonIndex: 0, stage: 'setup', sections: null,
-  lessonsSinceTest: 0, failCount: 0, notes: '', initialized: false, cumulativeTitles: []
+  lessonsSinceTest: 0, failCount: 0, notes: '', initialized: false, cumulativeTitles: [], pendingEyeNudge: false
 };
 const STAGE_ORDER = ['warmup','objectives','introduction','examples','explanation'];
 const STAGE_LABELS = {
@@ -1131,6 +1200,15 @@ function renderLessonStage(){
   updateClassroomProgressUI();
   updateStreakBadge();
 
+  const eyeTip = document.getElementById('classroomEyeTip');
+  if(stage === 'warmup' && classroomState.pendingEyeNudge){
+    eyeTip.style.display = 'flex';
+    eyeTip.innerHTML = '<span style="font-size:18px;">🌿</span><span>Nice work — that\'s 3 lessons this session. A short break (stretch, look away from the screen, grab some water) helps your eyes and your memory. Continue whenever you\'re ready.</span>';
+    classroomState.pendingEyeNudge = false;
+  } else {
+    eyeTip.style.display = 'none';
+  }
+
   const board = document.getElementById('classroomBoard');
   if(sections && sections.board && sections.board.toUpperCase() !== 'NONE' && ['examples','explanation','test'].includes(stage)){
     board.style.display = 'block';
@@ -1211,8 +1289,63 @@ function stopClassroomSpeech(){
   if(wave) wave.style.display = 'none';
 }
 
+/* ---------- Eye comfort: Comfort Mode ---------- */
+let classroomComfortMode = (localStorage.getItem('classroomComfortMode') === 'on');
+
+function toggleClassroomComfort(){
+  classroomComfortMode = !classroomComfortMode;
+  localStorage.setItem('classroomComfortMode', classroomComfortMode ? 'on' : 'off');
+  applyClassroomComfortUI();
+}
+
+function applyClassroomComfortUI(){
+  document.body.classList.toggle('classroom-comfort-mode', classroomComfortMode);
+  const btn = document.getElementById('classroomComfortToggle');
+  if(!btn) return;
+  btn.textContent = classroomComfortMode ? '🌙 Comfort mode on' : '🌙 Comfort mode';
+  btn.classList.toggle('muted', !classroomComfortMode);
+}
+
+/* ---------- Eye comfort: 20-20-20 break reminders ----------
+   Every 20 minutes of active classroom time, gently prompt a 20-second
+   look-away break. Timer only runs while the Classroom tab is open. */
+let classroomBreakInterval = null;
+let classroomBreakCountdownInterval = null;
+const CLASSROOM_BREAK_INTERVAL_MS = 20 * 60 * 1000;
+
+function startClassroomBreakTimer(){
+  stopClassroomBreakTimer();
+  classroomBreakInterval = setInterval(showEyeBreakReminder, CLASSROOM_BREAK_INTERVAL_MS);
+}
+
+function stopClassroomBreakTimer(){
+  if(classroomBreakInterval){ clearInterval(classroomBreakInterval); classroomBreakInterval = null; }
+}
+
+function showEyeBreakReminder(){
+  const overlay = document.getElementById('classroomBreakOverlay');
+  const countEl = document.getElementById('classroomBreakCount');
+  let secondsLeft = 20;
+  countEl.textContent = secondsLeft;
+  overlay.style.display = 'flex';
+  stopClassroomSpeech();
+
+  clearInterval(classroomBreakCountdownInterval);
+  classroomBreakCountdownInterval = setInterval(() => {
+    secondsLeft -= 1;
+    countEl.textContent = Math.max(secondsLeft, 0);
+    if(secondsLeft <= 0) dismissEyeBreak();
+  }, 1000);
+}
+
+function dismissEyeBreak(){
+  clearInterval(classroomBreakCountdownInterval);
+  document.getElementById('classroomBreakOverlay').style.display = 'none';
+}
+
 /* ---------- Small celebration burst on passing a test/lesson ---------- */
 function celebrateClassroom(){
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const layer = document.createElement('div');
   layer.className = 'classroom-confetti';
   const emojis = ['🎉','✨','🏆','⭐','🎊'];
@@ -1277,6 +1410,7 @@ async function submitClassroomTest(){
         await goToNextLesson();
       } else {
         classroomState.lessonsSinceTest += 1;
+        if((classroomState.lessonIndex + 1) % 3 === 0) classroomState.pendingEyeNudge = true;
         const threshold = classroomState.program.lessons_per_test || 3;
         const isLastLesson = classroomState.lessonIndex >= classroomState.program.lesson_titles.length - 1;
         if(classroomState.lessonsSinceTest >= threshold && !isLastLesson){
