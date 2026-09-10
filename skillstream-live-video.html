@@ -35,6 +35,9 @@
     background:var(--gold); color:var(--ink); border:none; padding:8px 14px; border-radius:20px;
     font-size:13px; font-weight:700; cursor:pointer; font-family:'Syne',sans-serif;
   }
+  .ai-toggle-btn:disabled{
+    opacity:0.5; cursor:not-allowed;
+  }
 
   #aiTeacherPanel{
     position:fixed; bottom:0; left:0; right:0; background:#141F38; border-radius:20px 20px 0 0;
@@ -49,10 +52,14 @@
   .ai-bubble{padding:10px 13px; border-radius:12px; font-size:13.5px; line-height:1.5; max-width:88%;}
   .ai-bubble.user{background:var(--gold); color:#141F38; align-self:flex-end;}
   .ai-bubble.ai{background:rgba(255,255,255,0.1); color:#fff; align-self:flex-start;}
+  .ai-bubble.error{background:rgba(192, 82, 58, 0.3); color:#ff9999; align-self:flex-start;}
   .mic-row{display:flex; align-items:center; justify-content:center; gap:16px;}
   .mic-btn{
     width:64px; height:64px; border-radius:50%; border:none; background:var(--gold); color:#141F38;
     font-size:26px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .mic-btn:disabled{
+    opacity:0.5; cursor:not-allowed;
   }
   .mic-btn.listening{background:#c0523a; color:#fff; animation:mic-pulse 1s infinite;}
   @keyframes mic-pulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.1);}}
@@ -60,6 +67,9 @@
   .speaker-toggle{
     background:rgba(255,255,255,0.1); border:none; color:#fff; width:44px; height:44px; border-radius:50%;
     font-size:18px; cursor:pointer;
+  }
+  .speaker-toggle:disabled{
+    opacity:0.3; cursor:not-allowed;
   }
   .speaker-toggle.muted{opacity:0.4;}
 
@@ -81,7 +91,7 @@
     flex-direction:column; gap:14px; background:#0d1120; z-index:30; padding:24px; text-align:center;
   }
   #errorScreen h2{font-family:'Syne',sans-serif; font-size:18px;}
-  #errorScreen p{font-size:13.5px; opacity:0.75; max-width:320px;}
+  #errorScreen p{font-size:13.5px; opacity:0.75; max-width:320px; line-height:1.5;}
   #errorScreen a{color:var(--gold); font-weight:700; text-decoration:none;}
 </style>
 </head>
@@ -102,7 +112,7 @@
   <div class="title" id="sessionTitle">Live Class</div>
   <div style="display:flex; align-items:center; gap:10px;">
     <div class="live-chip"><span class="live-dot"></span> LIVE</div>
-    <button class="ai-toggle-btn" onclick="toggleAiPanel()">🤖 AI Teacher</button>
+    <button class="ai-toggle-btn" id="aiToggleBtn" onclick="toggleAiPanel()" disabled>🤖 AI Teacher</button>
     <button class="leave-btn" onclick="leaveSession()">✕ Leave</button>
   </div>
 </header>
@@ -113,15 +123,15 @@
   <div class="ai-panel-head">
     <h3>🤖 AI Teacher</h3>
     <div style="display:flex; align-items:center; gap:10px;">
-      <button class="speaker-toggle" id="speakerToggleBtn" onclick="toggleSpeaker()" title="Mute AI voice">🔊</button>
+      <button class="speaker-toggle" id="speakerToggleBtn" onclick="toggleSpeaker()" title="Mute AI voice" disabled>🔊</button>
       <button class="ai-panel-close" onclick="toggleAiPanel()">&times;</button>
     </div>
   </div>
   <div class="ai-chat-log" id="aiChatLog"></div>
   <div class="mic-row">
-    <button class="mic-btn" id="micBtn" onclick="toggleListening()">🎤</button>
+    <button class="mic-btn" id="micBtn" onclick="toggleListening()" disabled>🎤</button>
   </div>
-  <div class="mic-status" id="micStatus">Tap the mic and ask a question</div>
+  <div class="mic-status" id="micStatus">Loading…</div>
 </div>
 
 <script>
@@ -156,6 +166,16 @@ async function init(){
     return;
   }
 
+  // Initialize speech recognition early (even if AI panel not open yet)
+  initSpeechRecognition();
+  
+  // Enable AI buttons now that we know we can
+  if(recognition){
+    document.getElementById('aiToggleBtn').disabled = false;
+    document.getElementById('speakerToggleBtn').disabled = false;
+    document.getElementById('micBtn').disabled = false;
+  }
+
   joinCall();
 }
 
@@ -177,7 +197,9 @@ function joinCall(){
     },
     configOverwrite: {
       prejoinPageEnabled: false,
-      disableDeepLinking: true
+      disableDeepLinking: true,
+      startWithVideoMuted: false,
+      startWithAudioMuted: false
     },
     interfaceConfigOverwrite: {
       SHOW_JITSI_WATERMARK: false,
@@ -196,9 +218,7 @@ function joinCall(){
       leaveSession();
     });
 
-    // Real, native raise-hand tracking -- Jitsi's own UI already shows a
-    // hand icon on each participant's tile; this just also logs it so
-    // we could show a summary elsewhere later if wanted.
+    // Real, native raise-hand tracking
     jitsiApi.addEventListener('raiseHandUpdated', (event) => {
       console.log('Raise hand update:', event);
     });
@@ -207,16 +227,11 @@ function joinCall(){
     // the answer is sent through Jitsi's own room chat with a hidden
     // marker prefix. Every OTHER participant's page listens for that
     // marker and speaks it aloud locally on their own device the moment
-    // it arrives -- so the whole class (public or private) hears the
-    // AI answer, without needing to touch the call's actual audio track.
+    // it arrives.
     jitsiApi.addEventListener('incomingMessage', handleIncomingChatMessage);
 
-    // Safety net: meet.jit.si sometimes shows its own prompt (a sign-in
-    // request, a "waiting for moderator" lobby, etc.) instead of joining
-    // immediately. If our loading overlay never gets a 'joined' signal,
-    // it would otherwise sit on top of that prompt forever, hiding it
-    // from view. Force it out of the way after a few seconds regardless,
-    // so whatever Jitsi is actually showing becomes visible and tappable.
+    // Safety net: meet.jit.si sometimes shows its own prompt instead of
+    // joining immediately. Force it out of the way after a few seconds.
     setTimeout(() => {
       document.getElementById('loading').style.display = 'none';
     }, 4000);
@@ -250,10 +265,13 @@ async function leaveSession(){
     jitsiApi.dispose();
   }
 
-  // If the host leaves, mark the session as ended so it disappears from
-  // "Live Now" for everyone else.
+  // If the host leaves, mark the session as ended
   if(isHost && sessionId){
-    await sb.from('live_sessions').update({ status:'ended', ended_at: new Date().toISOString() }).eq('id', sessionId);
+    try {
+      await sb.from('live_sessions').update({ status:'ended', ended_at: new Date().toISOString() }).eq('id', sessionId);
+    } catch(e) {
+      console.error('Error marking session as ended:', e);
+    }
   }
 
   window.location.href = 'skillstream-dashboard.html';
@@ -262,9 +280,8 @@ async function leaveSession(){
 /* ====================================================================
    VOICE-ENABLED AI TEACHER
    Speech-to-text (SpeechRecognition) and text-to-speech (speechSynthesis)
-   are both native browser APIs — free, no key required, works in
-   Chrome/Android. AI responses come from the same /api/ask-ai serverless
-   function used everywhere else in the app.
+   are both native browser APIs — free, no key required.
+   AI responses come from /api/ask-ai serverless function.
    ==================================================================== */
 let recognition = null;
 let isListening = false;
@@ -276,7 +293,8 @@ let wasCallMicMuted = null;
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 function toggleAiPanel(){
-  document.getElementById('aiTeacherPanel').classList.toggle('open');
+  const panel = document.getElementById('aiTeacherPanel');
+  panel.classList.toggle('open');
 }
 
 function toggleSpeaker(){
@@ -296,8 +314,7 @@ function renderAiChat(){
 function initSpeechRecognition(){
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SpeechRecognition){
-    document.getElementById('micStatus').textContent = "Voice isn't supported in this browser — try Chrome on Android.";
-    document.getElementById('micBtn').disabled = true;
+    document.getElementById('micStatus').textContent = "Voice isn't supported — try Chrome/Android.";
     return;
   }
 
@@ -318,7 +335,7 @@ function initSpeechRecognition(){
   };
 
   recognition.onerror = (event) => {
-    document.getElementById('micStatus').textContent = 'Mic error: ' + event.error + ' — tap to try again.';
+    document.getElementById('micStatus').textContent = 'Mic error: ' + event.error + ' — try again.';
   };
 
   recognition.onend = () => {
@@ -330,21 +347,20 @@ function initSpeechRecognition(){
 }
 
 function toggleListening(){
-  if(!recognition){ initSpeechRecognition(); if(!recognition) return; }
+  if(!recognition){ 
+    initSpeechRecognition(); 
+    if(!recognition) return; 
+  }
 
   if(isListening){
     recognition.stop();
     return;
   }
 
-  window.speechSynthesis.cancel(); // stop any current AI speech before listening
+  window.speechSynthesis.cancel();
   document.getElementById('aiTeacherPanel').classList.add('open');
 
-  // Mute the actual call microphone while we listen -- on many phones,
-  // Jitsi's active call audio stream and the separate voice-recognition
-  // microphone request can conflict, leaving recognition stuck on
-  // "Listening..." forever with no result. Freeing the mic first fixes
-  // that, and we restore whatever state it was in afterward.
+  // Mute the actual call microphone while we listen to avoid conflicts
   if(jitsiApi){
     jitsiApi.isAudioMuted().then(muted => {
       wasCallMicMuted = muted;
@@ -355,24 +371,22 @@ function toggleListening(){
   try{
     recognition.start();
   } catch(e){
-    // Already-started errors are harmless — ignore.
+    // Already-started errors are harmless
+    console.log('Recognition already started');
   }
 
-  // Safety net: if nothing happens within 8 seconds (no result, no
-  // error, no natural end), force it to stop instead of hanging on
-  // "Listening..." forever.
   clearTimeout(listeningTimeout);
   listeningTimeout = setTimeout(() => {
     if(isListening && recognition){
       recognition.stop();
-      document.getElementById('micStatus').textContent = "Didn't catch that — tap the mic to try again.";
+      document.getElementById('micStatus').textContent = "Didn't catch that — tap to try again.";
     }
   }, 8000);
 }
 
 function restoreCallMic(){
   if(jitsiApi && wasCallMicMuted === false){
-    jitsiApi.executeCommand('toggleAudio'); // unmute again, since it started unmuted
+    jitsiApi.executeCommand('toggleAudio');
   }
   wasCallMicMuted = null;
 }
@@ -381,9 +395,15 @@ async function handleVoiceQuestion(transcript){
   aiChatHistory.push({ role:'user', text: transcript });
   renderAiChat();
   document.getElementById('micStatus').textContent = 'Thinking…';
+  document.getElementById('micBtn').disabled = true;
 
   const conversation = aiChatHistory.map(m => (m.role === 'user' ? 'Student: ' : 'AI Teacher: ') + m.text).join('\n');
-  const prompt = `You are a friendly AI teacher speaking live during an online class called "${decodeURIComponent(sessionTitle)}". Answer the student's question clearly and conversationally, as if speaking out loud — keep it natural and under 80 words since this will be read aloud.\n\nConversation so far:\n${conversation}\n\nAI Teacher:`;
+  const prompt = `You are a friendly AI teacher speaking live during an online class called "${decodeURIComponent(sessionTitle)}". Answer the student's question clearly and conversationally, in under 100 words. Be encouraging.
+
+Class conversation so far:
+${conversation}
+
+Answer only with your response — no "AI Teacher:" prefix.`;
 
   try{
     const response = await fetch('/api/ask-ai', {
@@ -391,26 +411,38 @@ async function handleVoiceQuestion(transcript){
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, maxTokens: 250 })
     });
+
+    if(!response.ok){
+      const errorData = await response.text();
+      throw new Error(`Server error: ${response.status} - ${errorData}`);
+    }
+
     const data = await response.json();
     if(data.error) throw new Error(data.error);
 
-    aiChatHistory.push({ role:'ai', text: data.text });
+    const text = data.text || data.reply || '';
+    if(!text) throw new Error('Empty response from AI');
+
+    aiChatHistory.push({ role:'ai', text: text });
     renderAiChat();
     document.getElementById('micStatus').textContent = 'Tap the mic and ask a question';
 
-    // Speak it locally for yourself right away...
+    // Speak it locally right away...
     if(!speakerMuted){
-      speakText(data.text);
+      speakText(text);
     }
-    // ...and broadcast it through the room's chat so everyone else's
-    // device speaks it aloud too, the moment it arrives on their end.
+    // ...and broadcast it through the room's chat
     if(jitsiApi){
-      jitsiApi.executeCommand('sendChatMessage', AI_MSG_PREFIX + data.text);
+      jitsiApi.executeCommand('sendChatMessage', AI_MSG_PREFIX + text);
     }
   } catch(err){
-    aiChatHistory.push({ role:'ai', text: 'Error: ' + err.message });
+    console.error('AI error:', err);
+    const errorMsg = 'Error: ' + (err.message || 'Could not reach AI service');
+    aiChatHistory.push({ role:'ai', text: errorMsg });
     renderAiChat();
-    document.getElementById('micStatus').textContent = 'Tap the mic and ask a question';
+    document.getElementById('micStatus').textContent = 'Tap the mic and try again';
+  } finally {
+    document.getElementById('micBtn').disabled = false;
   }
 }
 
