@@ -59,7 +59,7 @@ Features that dramatically improve user experience and retention.
 | 15 | **Admin Dashboard** | ✅ Built | `skillstream-admin.html` | Platform health: publish/unpublish, manage roles |
 | 16 | **In-App Notifications** | ✅ Built | Database + badge | "Your course is ready", "New review", etc. |
 
-**Action:** Polish UX, fix bugs (like live-video), test on real users. ✅
+**Action:** Polish UX, fix bugs (like live-video ✅), test on real users.
 
 ---
 
@@ -84,23 +84,32 @@ Features that aren't flashy but make the platform feel professional.
 
 ---
 
-## Tier 1D: Legacy / Review (Post-MVP)
-Features from earlier phases; decide keep/retire/fix.
+## Tier 1D: Platform Features (Core to Phase 2)
+Features from earlier phases that are now **core** to the platform.
 
-| # | Feature | Status | Component | Notes |
-|---|---------|--------|-----------|-------|
-| 28 | **Classrooms** | 🟠 Legacy | `skillstream-classrooms.html` + `skillstream-classrooms.js` | Pre-built; needs QA + integration decision |
-| 29 | **Calendar** | 🟠 Legacy | `skillstream-calendar.html` | Shows assignments due; needs linked to classrooms |
-| 30 | **Session Detail** | 🟠 Legacy | `skillstream-session-detail.html` | Pre-built; needs testing |
-| 31 | **Chess** | 🟠 Legacy | `skillstream-chess.html` | Gamification experiment; keep or remove? |
-| 32 | **Ludo** | 🟠 Legacy | `skillstream-ludo.html` | Gamification experiment; keep or remove? |
-| 33 | **Focus Mode** | 🟠 Legacy | `skillstream-focus.html` | Distraction-free learning; working? |
-| 34 | **Messages** | 🟠 Legacy | `skillstream-messages.html` | DM system between users; half-built |
-| 35 | **Teachers Directory** | ✅ Built | `skillstream-teachers.html` | Browse teacher profiles |
-| 36 | **Showcase** | 🟠 Legacy | `skillstream-showcase.html` | Portfolio for teachers; status? |
-| 37 | **Live Session** | 🟠 Legacy | `skillstream-live-session.html` | Older UI; replaced by live-video |
+| # | Feature | Status | Component | Why | Integration Status |
+|---|---------|--------|-----------|-----|-------------------|
+| 28 | **Classrooms** | 🟡 Built | `skillstream-classrooms.html` + `skillstream-classrooms.js` | **Teacher hubs** — pillar of Phase 2 | Ready for Phase 2 |
+| 29 | **Calendar** | 🟡 Built | `skillstream-calendar.html` | Assignments + announcements | Linked to classrooms |
+| 30 | **Session Detail** | 🟡 Built | `skillstream-session-detail.html` | Session info page | Part of classrooms |
+| 31 | **Focus Mode** | 🟡 Built | `skillstream-focus.html` | Distraction-free learning | Standalone feature |
+| 32 | **Messages** | 🟡 Built | `skillstream-messages.html` | DM system (teacher ↔ student) | Needs polish for Phase 2 |
+| 33 | **Teachers Directory** | ✅ Built | `skillstream-teachers.html` | Browse + filter teachers | Phase 2: Social |
 
-**Action:** Audit each; decide: **Keep + Polish**, **Remove**, or **Archive**.
+**Action:** Move these from "legacy review" → **Phase 2 integration**.
+
+---
+
+## Tier 1E: Experiments (Decide: Keep or Remove)
+Features that are fun but not core to learning.
+
+| # | Feature | Status | Component | Keep? | If Keep: Action |
+|---|---------|--------|-----------|-------|-----------------|
+| 34 | **Chess** | 🟠 Built | `skillstream-chess.html` | 🤔 | Gamification experiment |
+| 35 | **Ludo** | 🟠 Built | `skillstream-ludo.html` | 🤔 | Gamification experiment |
+| 36 | **Showcase** | 🟠 Built | `skillstream-showcase.html` | 🤔 | Teacher portfolio |
+
+**Decision:** Run A/B test on real users → **Keep or Archive by end of Sprint 2**.
 
 ---
 
@@ -112,28 +121,31 @@ Features from earlier phases; decide keep/retire/fix.
 
 | # | Feature | Status | Component | Why | Dependency |
 |---|---------|--------|-----------|-----|------------|
-| 1 | **Live Video Classes** | 🟢 Fixed | `skillstream-live-video.html` (Jitsi) | Teacher broadcasts; students join | None |
-| 2 | **AI Assistant in Live Class** | 🟢 Fixed | AI tutor inside live-video | Answer questions in real-time | Live video |
+| 1 | **Live Video Classes** | ✅ Fixed | `skillstream-live-video.html` (Jitsi) | Teacher broadcasts; students join | None |
+| 2 | **AI Assistant in Live Class** | ✅ Fixed | AI tutor inside live-video | Answer questions in real-time | Live video |
 | 3 | **Raise Hand** | ✅ Built | Jitsi native | Students signal to teacher | Live video |
 | 4 | **Class Chat** | ✅ Built | Jitsi native | Broadcast + questions | Live video |
 | 5 | **Class Recordings** | 🔴 Not built | Cloud storage | Students watch later | Live video (Jitsi or LiveKit) |
 | 6 | **Live Class Schedule** | ✅ Built | Dashboard + calendar | "When is the next class?" | Database schema |
+| 7 | **Live Class Discovery** | 🟡 Partial | Home page | Show "Live Now" classes | Live class system |
 
 **Effort:** Medium (Jitsi + Supabase). **Timeline:** 1 sprint. **Impact:** ⭐⭐⭐⭐⭐
 
 ---
 
-## Tier 2B: Classrooms (Teacher Hubs)
+## Tier 2B: Classrooms (Teacher Hubs) — **CORE**
 
 | # | Feature | Status | Component | Why | Dependency |
 |---|---------|--------|-----------|-----|------------|
-| 7 | **Create/Manage Classrooms** | 🟡 Partial | `skillstream-classrooms.html` | Teacher organizes students | Auth roles |
-| 8 | **Join Classroom** (by code) | ✅ Built | `skillstream-classrooms.js` | Students enroll | Classroom creation |
-| 9 | **Announcements** (teacher → class) | ✅ Built | `skillstream-classrooms.js` | Broadcast info | Classroom |
-| 10 | **Assignments** (with due dates) | ✅ Built | `skillstream-classrooms.js` | Students submit work | Classroom |
-| 11 | **Grading** (teacher feedback) | ✅ Built | `skillstream-classrooms.js` | Teacher marks + feedback | Assignments |
-| 12 | **Quizzes** (auto-graded) | ✅ Built | `skillstream-classrooms.js` | Instant feedback | Classroom |
-| 13 | **Attendance Tracking** | 🔴 Not built | Supabase | Teacher sees who's active | Classroom |
+| 8 | **Create/Manage Classrooms** | ✅ Built | `skillstream-classrooms.html` | Teacher organizes students | Auth roles |
+| 9 | **Join Classroom** (by code) | ✅ Built | `skillstream-classrooms.js` | Students enroll | Classroom creation |
+| 10 | **Announcements** (teacher → class) | ✅ Built | `skillstream-classrooms.js` | Broadcast info | Classroom |
+| 11 | **Assignments** (with due dates) | ✅ Built | `skillstream-classrooms.js` | Students submit work | Classroom |
+| 12 | **Grading** (teacher feedback) | ✅ Built | `skillstream-classrooms.js` | Teacher marks + feedback | Assignments |
+| 13 | **Quizzes** (auto-graded) | ✅ Built | `skillstream-classrooms.js` | Instant feedback | Classroom |
+| 14 | **Attendance Tracking** | 🔴 Not built | Supabase | Teacher sees who's active | Classroom |
+| 15 | **Classroom Chat** | 🟡 Built | `skillstream-messages.html` | Class discussion | Messages system |
+| 16 | **Invite Students** (email) | 🟡 Partial | Classrooms | Email with join code | Auth + email service |
 
 **Effort:** Medium-High (integrate + test). **Timeline:** 1-2 sprints. **Impact:** ⭐⭐⭐⭐
 
@@ -143,12 +155,12 @@ Features from earlier phases; decide keep/retire/fix.
 
 | # | Feature | Status | Component | Why | Dependency |
 |---|---------|--------|-----------|-----|------------|
-| 14 | **Teacher Directory** | ✅ Built | `skillstream-teachers.html` | Find teachers to learn from | Teacher profiles |
-| 15 | **Student Profiles** (public) | ✅ Built | `skillstream-profile.html` | Showcase learning journey | Auth |
-| 16 | **Follow Teacher** | 🔴 Not built | Database + UI | Get notified of new courses | Teacher profiles |
-| 17 | **Discussion Threads** (per course) | ✅ Built | Comments in course | Peer Q&A | Courses |
-| 18 | **Direct Messages** | 🟡 Partial | `skillstream-messages.html` | Teacher ↔ student | Auth |
-| 19 | **Badges / Achievements** | ✅ Built | Profile page | Gamification | Courses + certificates |
+| 17 | **Teacher Directory** | ✅ Built | `skillstream-teachers.html` | Find teachers to learn from | Teacher profiles |
+| 18 | **Student Profiles** (public) | ✅ Built | `skillstream-profile.html` | Showcase learning journey | Auth |
+| 19 | **Follow Teacher** | 🔴 Not built | Database + UI | Get notified of new courses | Teacher profiles |
+| 20 | **Discussion Threads** (per course) | ✅ Built | Comments in course | Peer Q&A | Courses |
+| 21 | **Direct Messages** | ✅ Built | `skillstream-messages.html` | Teacher ↔ student | Auth |
+| 22 | **Badges / Achievements** | ✅ Built | Profile page | Gamification | Courses + certificates |
 
 **Effort:** Low-Medium (mostly DB + UI). **Timeline:** 1 sprint. **Impact:** ⭐⭐⭐
 
@@ -206,21 +218,22 @@ Features from earlier phases; decide keep/retire/fix.
 # 📋 ROADMAP TIMELINE
 
 ## Sprint 1 (This Week) ✅
-- [x] Fix live video page (AI tutor bug)
+- [x] Fix live video page (AI tutor bug) ✅
 - [ ] Dark mode rollout (all pages)
 - [ ] Language translation rollout (full site)
-- [ ] Audit legacy features (Chess, Ludo, Messages, etc.)
+- [ ] Decide on gamification experiments (Chess/Ludo/Showcase)
 
 ## Sprint 2 (Next 2 Weeks)
 - [ ] Complete classroom testing + polish
 - [ ] Add attendance tracking
-- [ ] Deploy live class scheduling
+- [ ] Deploy live class scheduling + discovery
+- [ ] Integrate Messages with Classrooms
 - [ ] Fix any discovered bugs
 
 ## Sprint 3 (Week 3)
 - [ ] Social features (follow teacher, badges)
-- [ ] Direct messaging fix/completion
-- [ ] Mobile UX polish
+- [ ] Teacher Directory polish
+- [ ] Mobile UX refinements
 
 ## Sprint 4–5 (Weeks 4–5) — Phase 2 Complete
 - [ ] Full community testing
@@ -244,8 +257,7 @@ Features from earlier phases; decide keep/retire/fix.
 | Icon | Meaning | Action |
 |------|---------|--------|
 | 🟢 | Ready to use | Test on real users |
-| 🟡 | Partial / needs polish | Complete + integrate |
-| 🟠 | Legacy / uncertain | Audit + decide |
+| 🟡 | Built but needs polish | Complete + integrate |
 | 🔴 | Not built | Plan for future phase |
 | ✅ | Fully working | Monitor for bugs |
 
@@ -253,24 +265,53 @@ Features from earlier phases; decide keep/retire/fix.
 
 # 🔥 Highest-Impact Next Steps (Ranked)
 
-1. **Fix + test all Phase 1B features** (AI, certificates, reviews) — These drive retention ⭐⭐⭐⭐⭐
-2. **Complete dark mode + language rollout** — Polish baseline ⭐⭐⭐
-3. **Audit legacy features** (classrooms, chess, etc.) — Decide keep/remove ⭐⭐⭐
-4. **Live classrooms + scheduling** — Community pillar ⭐⭐⭐⭐⭐
-5. **Stripe integration** — Revenue engine ⭐⭐⭐⭐⭐
+1. **Complete Dark Mode + Language Rollout** — Polish baseline quality ⭐⭐⭐
+2. **Test Phase 1B features** (AI, certificates, reviews on real users) — Retention ⭐⭐⭐⭐⭐
+3. **Classroom + Messages Integration** — Phase 2 foundation ⭐⭐⭐⭐⭐
+4. **Live Class Discovery** — Get students discovering live classes ⭐⭐⭐⭐
+5. **Attendance + Calendar** — Teacher tools ⭐⭐⭐
+6. **Social Features** (follow, badges) — Engagement loops ⭐⭐⭐
 
 ---
 
-# 📞 Questions to Answer Now
+# 💾 **Features by Platform Layer**
 
-1. **Classrooms:** Keep? Integrate into Phase 2 or deprecate?
-2. **Games (Chess/Ludo):** Marketing gimmick or core feature? Keep or remove?
-3. **Messages:** Finish or remove?
-4. **Payments:** Timeline? (Blocks Phase 3)
-5. **Mobile-first:** Commit to no desktop version, or support both?
+## Frontend Pages (HTML)
+**Phase 1 Complete:**
+- `index.html` (landing)
+- `skillstream-login.html`, `skillstream-confirm.html`, `skillstream-reset-password.html`
+- `skillstream-dashboard.html`, `skillstream-home.html`
+- `skillstream-self-paced.html`, `skillstream-courses.html`, `skillstream-academic.html`
+- `skillstream-ai-hub.html`, `skillstream-leaderboard.html`, `skillstream-profile.html`, `skillstream-settings.html`
+- `skillstream-teacher-dashboard.html`, `skillstream-admin.html`
+
+**Phase 2 Integration (Classrooms):**
+- `skillstream-classrooms.html`, `skillstream-calendar.html`, `skillstream-teachers.html`, `skillstream-teachers-directory.html`
+- `skillstream-messages.html`, `skillstream-live-session.html`, `skillstream-session-detail.html`
+- `skillstream-live-video.html` (fixed ✅)
+
+**Experiments (TBD):**
+- `skillstream-chess.html`, `skillstream-ludo.html`, `skillstream-showcase.html`, `skillstream-focus.html`
+
+## Backend Modules (JS)
+- `skillstream-auth.js` (core auth + profile)
+- `skillstream-classrooms.js` (classroom CRUD + assignments)
+
+## Serverless Functions (Vercel)
+- `/api/ask-ai.js` (AI tutor via Groq)
 
 ---
 
-**Last Updated:** 2026-09-10  
-**Version:** 1.0 (Phase 1 Foundation)  
+# 📞 **Key Decisions Made**
+
+✅ **Classrooms:** KEEP — Moving from "legacy" → **Core Phase 2 feature**  
+❓ **Chess/Ludo/Showcase:** Run A/B test → Decide by end of Sprint 2  
+✅ **Messages:** KEEP — Integrate with Classrooms in Phase 2  
+✅ **Live Video:** FIXED ✅ — Ready for Phase 2 production  
+❓ **Payments Timeline:** Decide after Phase 2 completion (Sprint 5)
+
+---
+
+**Last Updated:** 2026-09-10 (Post-Fix)  
+**Version:** 1.1 (Phase 2 Priorities Clarified)  
 **Next Review:** After Sprint 1 completion
