@@ -89,27 +89,27 @@ Features from earlier phases that are now **core** to the platform.
 
 | # | Feature | Status | Component | Why | Integration Status |
 |---|---------|--------|-----------|-----|-------------------|
-| 28 | **Classrooms** | 🟡 Built | `skillstream-classrooms.html` + `skillstream-classrooms.js` | **Teacher hubs** — pillar of Phase 2 | Ready for Phase 2 |
-| 29 | **Calendar** | 🟡 Built | `skillstream-calendar.html` | Assignments + announcements | Linked to classrooms |
-| 30 | **Session Detail** | 🟡 Built | `skillstream-session-detail.html` | Session info page | Part of classrooms |
-| 31 | **Focus Mode** | 🟡 Built | `skillstream-focus.html` | Distraction-free learning | Standalone feature |
-| 32 | **Messages** | 🟡 Built | `skillstream-messages.html` | DM system (teacher ↔ student) | Needs polish for Phase 2 |
+| 28 | **Classrooms** | ✅ Built | `skillstream-classrooms.html` + `skillstream-classrooms.js` | **Teacher hubs** — pillar of Phase 2 | Ready for Phase 2 |
+| 29 | **Calendar** | ✅ Built | `skillstream-calendar.html` | Assignments + announcements | Linked to classrooms |
+| 30 | **Session Detail** | ✅ Built | `skillstream-session-detail.html` | Session info page | Part of classrooms |
+| 31 | **Focus Mode** | ✅ Built | `skillstream-focus.html` | Distraction-free learning | Standalone feature |
+| 32 | **Messages** | ✅ Built | `skillstream-messages.html` | DM system (teacher ↔ student) | Needs polish for Phase 2 |
 | 33 | **Teachers Directory** | ✅ Built | `skillstream-teachers.html` | Browse + filter teachers | Phase 2: Social |
 
-**Action:** Move these from "legacy review" → **Phase 2 integration**.
+**Action:** All moved to **Phase 2 integration** ✅.
 
 ---
 
-## Tier 1E: Experiments (Decide: Keep or Remove)
-Features that are fun but not core to learning.
+## Tier 1E: Gamification Experiments (KEEP — Phase 1 Engagement)
 
-| # | Feature | Status | Component | Keep? | If Keep: Action |
-|---|---------|--------|-----------|-------|-----------------|
-| 34 | **Chess** | 🟠 Built | `skillstream-chess.html` | 🤔 | Gamification experiment |
-| 35 | **Ludo** | 🟠 Built | `skillstream-ludo.html` | 🤔 | Gamification experiment |
-| 36 | **Showcase** | 🟠 Built | `skillstream-showcase.html` | 🤔 | Teacher portfolio |
+| # | Feature | Status | Component | Purpose | Action |
+|---|---------|--------|-----------|---------|--------|
+| 34 | **Chess** | ✅ Built | `skillstream-chess.html` | Learn strategy + problem-solving | Keep as engagement boost |
+| 35 | **Ludo** | ✅ Built | `skillstream-ludo.html` | Practice luck + probability | Keep as fun break |
+| 36 | **Showcase** | ✅ Built | `skillstream-showcase.html` | Teacher portfolio | Keep as career tool |
+| 37 | **Focus Mode** | ✅ Built | `skillstream-focus.html` | Distraction-free learning | Keep as productivity tool |
 
-**Decision:** Run A/B test on real users → **Keep or Archive by end of Sprint 2**.
+**Decision:** ✅ **KEEP ALL** — Gamification drives engagement; integrate into dashboards.
 
 ---
 
@@ -144,7 +144,7 @@ Features that are fun but not core to learning.
 | 12 | **Grading** (teacher feedback) | ✅ Built | `skillstream-classrooms.js` | Teacher marks + feedback | Assignments |
 | 13 | **Quizzes** (auto-graded) | ✅ Built | `skillstream-classrooms.js` | Instant feedback | Classroom |
 | 14 | **Attendance Tracking** | 🔴 Not built | Supabase | Teacher sees who's active | Classroom |
-| 15 | **Classroom Chat** | 🟡 Built | `skillstream-messages.html` | Class discussion | Messages system |
+| 15 | **Classroom Chat** | ✅ Built | `skillstream-messages.html` | Class discussion | Messages system |
 | 16 | **Invite Students** (email) | 🟡 Partial | Classrooms | Email with join code | Auth + email service |
 
 **Effort:** Medium-High (integrate + test). **Timeline:** 1-2 sprints. **Impact:** ⭐⭐⭐⭐
@@ -221,14 +221,13 @@ Features that are fun but not core to learning.
 - [x] Fix live video page (AI tutor bug) ✅
 - [ ] Dark mode rollout (all pages)
 - [ ] Language translation rollout (full site)
-- [ ] Decide on gamification experiments (Chess/Ludo/Showcase)
 
 ## Sprint 2 (Next 2 Weeks)
 - [ ] Complete classroom testing + polish
 - [ ] Add attendance tracking
 - [ ] Deploy live class scheduling + discovery
 - [ ] Integrate Messages with Classrooms
-- [ ] Fix any discovered bugs
+- [ ] Integrate gamification (Chess/Ludo/Showcase) into dashboards
 
 ## Sprint 3 (Week 3)
 - [ ] Social features (follow teacher, badges)
@@ -268,9 +267,10 @@ Features that are fun but not core to learning.
 1. **Complete Dark Mode + Language Rollout** — Polish baseline quality ⭐⭐⭐
 2. **Test Phase 1B features** (AI, certificates, reviews on real users) — Retention ⭐⭐⭐⭐⭐
 3. **Classroom + Messages Integration** — Phase 2 foundation ⭐⭐⭐⭐⭐
-4. **Live Class Discovery** — Get students discovering live classes ⭐⭐⭐⭐
-5. **Attendance + Calendar** — Teacher tools ⭐⭐⭐
-6. **Social Features** (follow, badges) — Engagement loops ⭐⭐⭐
+4. **Integrate Gamification** into dashboards (Chess/Ludo/Showcase discovery) ⭐⭐⭐⭐
+5. **Live Class Discovery** — Get students discovering live classes ⭐⭐⭐⭐
+6. **Attendance + Calendar** — Teacher tools ⭐⭐⭐
+7. **Social Features** (follow, badges) — Engagement loops ⭐⭐⭐
 
 ---
 
@@ -285,13 +285,16 @@ Features that are fun but not core to learning.
 - `skillstream-ai-hub.html`, `skillstream-leaderboard.html`, `skillstream-profile.html`, `skillstream-settings.html`
 - `skillstream-teacher-dashboard.html`, `skillstream-admin.html`
 
-**Phase 2 Integration (Classrooms):**
-- `skillstream-classrooms.html`, `skillstream-calendar.html`, `skillstream-teachers.html`, `skillstream-teachers-directory.html`
+**Phase 2 Integration (Classrooms + Social):**
+- `skillstream-classrooms.html`, `skillstream-calendar.html`, `skillstream-teachers.html`
 - `skillstream-messages.html`, `skillstream-live-session.html`, `skillstream-session-detail.html`
 - `skillstream-live-video.html` (fixed ✅)
 
-**Experiments (TBD):**
-- `skillstream-chess.html`, `skillstream-ludo.html`, `skillstream-showcase.html`, `skillstream-focus.html`
+**Phase 1 Engagement (KEEP):**
+- `skillstream-chess.html` — Strategy + problem-solving
+- `skillstream-ludo.html` — Luck + probability game
+- `skillstream-showcase.html` — Teacher portfolio + career tool
+- `skillstream-focus.html` — Distraction-free learning mode
 
 ## Backend Modules (JS)
 - `skillstream-auth.js` (core auth + profile)
@@ -304,14 +307,26 @@ Features that are fun but not core to learning.
 
 # 📞 **Key Decisions Made**
 
-✅ **Classrooms:** KEEP — Moving from "legacy" → **Core Phase 2 feature**  
-❓ **Chess/Ludo/Showcase:** Run A/B test → Decide by end of Sprint 2  
+✅ **Classrooms:** KEEP — Core Phase 2 feature  
 ✅ **Messages:** KEEP — Integrate with Classrooms in Phase 2  
+✅ **Chess/Ludo/Showcase/Focus:** KEEP ALL — Gamification + engagement  
 ✅ **Live Video:** FIXED ✅ — Ready for Phase 2 production  
 ❓ **Payments Timeline:** Decide after Phase 2 completion (Sprint 5)
 
 ---
 
-**Last Updated:** 2026-09-10 (Post-Fix)  
-**Version:** 1.1 (Phase 2 Priorities Clarified)  
+# 🎮 **Engagement Multiplier Strategy**
+
+By keeping **Chess**, **Ludo**, **Showcase**, and **Focus Mode**:
+- **Chess** → Teaches strategy while learning any subject
+- **Ludo** → Quick breaks between lessons (retention ↑)
+- **Showcase** → Teachers show off student work (motivation ↑)
+- **Focus Mode** → Deep work for serious learners (completion ↑)
+
+**Result:** 🎯 Higher engagement, lower churn, better word-of-mouth.
+
+---
+
+**Last Updated:** 2026-09-10 (Gamification Decisions)  
+**Version:** 1.2 (All Engagement Features KEEP)  
 **Next Review:** After Sprint 1 completion
