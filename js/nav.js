@@ -50,17 +50,42 @@
   }
 
   function init() {
-    // Default to learner nav immediately so it never blocks on auth;
-    // swap to teacher nav once/if we know the role.
-    render(LEARNER_ITEMS);
+    // Guess from the filename first (works even on pages that don't load
+    // SSAuth at all, e.g. skillstream-teacher-dashboard.html today).
+    var fname = currentFile();
+    var guessedItems = /teacher/i.test(fname) ? TEACHER_ITEMS : LEARNER_ITEMS;
+    render(guessedItems);
 
+    // If SSAuth IS present, trust the real role once it resolves, in case
+    // it disagrees with the filename guess (e.g. a shared page both roles use).
     if (window.SSAuth && window.SSAuth.ready) {
       window.SSAuth.ready.then(function () {
         var user = window.SSAuth.currentUser && window.SSAuth.currentUser();
-        if (user && user.role === 'teacher') {
+        if (!user) return;
+        var correctItems = user.role === 'teacher' ? TEACHER_ITEMS : LEARNER_ITEMS;
+        if (correctItems !== guessedItems) {
           var old = document.querySelector('.ln-bottom-nav');
           if (old) old.remove();
-          render(TEACHER_ITEMS);
+          render(correctItems);
+        }
+      }).catch(function () {});
+      return;
+    }
+
+    // No SSAuth on this page (e.g. pages with their own inline Supabase
+    // client). If that page opts in by exposing window.lnAuthReady (a
+    // promise) and window.currentProfile once it resolves, use the real
+    // role instead of the filename guess — without creating a second
+    // Supabase/auth client of our own.
+    if (window.lnAuthReady && typeof window.lnAuthReady.then === 'function') {
+      window.lnAuthReady.then(function () {
+        var profile = window.currentProfile;
+        if (!profile || !profile.role) return;
+        var correctItems = profile.role === 'teacher' ? TEACHER_ITEMS : LEARNER_ITEMS;
+        if (correctItems !== guessedItems) {
+          var old = document.querySelector('.ln-bottom-nav');
+          if (old) old.remove();
+          render(correctItems);
         }
       }).catch(function () {});
     }
