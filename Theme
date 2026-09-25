@@ -1,0 +1,101 @@
+/* ==========================================================================
+   Learning Never Ends — shared theme
+   Extracted from skillstream-dashboard.html / teacher-dashboard.html / ai-hub.html.
+   These are the SAME values already in use — nothing new invented here.
+   Include this AFTER Google Fonts, and you may safely delete the duplicate
+   :root block from a page's own <style> once it includes this file.
+   ========================================================================== */
+
+:root{
+  --ink:#141F38;
+  --ink-2:#1F2E52;
+  --gold:#C9A24E;
+  --gold-light:#E4C583;
+  --cream:#FBF7EF;
+  --sage:#6B8F71;
+  --charcoal:#2B2B2B;
+  --line:#E9E2D2;
+  --paper:#F3ECDA;
+  --paper-line:#E4D9BE;
+  --shadow-soft:0 2px 10px rgba(20,31,56,0.06);
+  --shadow-card:0 8px 24px rgba(20,31,56,0.08);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+
+/* ---- base ---- */
+body{
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:var(--cream);
+  color:var(--charcoal);
+}
+h1,h2,h3,.display{font-family:'Syne',sans-serif;}
+a{text-decoration:none;}
+button, a, .btn, .course-card, .chip{
+  transition:transform 0.18s var(--ease), box-shadow 0.18s var(--ease);
+}
+button:active, a.btn:active, .btn:active, .course-card:active{transform:scale(0.97);}
+
+/* ---- page header banner (dashboard-style) ---- */
+header.top{
+  background:linear-gradient(160deg, rgba(20,31,56,0.88) 0%, rgba(31,46,82,0.88) 100%);
+  background-size:cover; background-position:center;
+  color:var(--cream); padding:22px 18px 28px; position:relative;
+}
+header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+header.top h1{margin:0; font-size:25px;}
+header.top p{margin:6px 0 0; font-size:14px; opacity:0.85;}
+
+/* ---- shared building blocks ---- */
+.section-title{
+  font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
+  font-weight:700; margin-bottom:12px;
+}
+.section{margin-bottom:30px;}
+
+.card, .course-row, .cert-card, .ai-rec-card{
+  background:#fff; border:1px solid var(--line); border-radius:14px;
+}
+
+.empty{
+  background:#fff; border:1px dashed var(--line); border-radius:14px; padding:26px 18px;
+  text-align:center; color:#777; font-size:14px;
+}
+.empty a{color:var(--ink); font-weight:700;}
+
+.btn-primary{
+  display:inline-block; background:var(--ink); color:#fff;
+  padding:11px 16px; border-radius:9px; font-size:13.5px; font-weight:600; border:none; cursor:pointer;
+}
+.btn-gold{
+  display:inline-block; background:var(--gold); color:var(--ink);
+  padding:14px; border-radius:12px; font-weight:700; font-size:15px; text-align:center; border:none; cursor:pointer;
+}
+
+.loading{text-align:center; padding:30px; color:#888;}
+
+footer.site-footer{margin-top:30px; text-align:center; font-size:12.5px; color:#948f80;}
+footer.site-footer .foot-links{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:10px;}
+footer.site-footer a{color:var(--ink); font-weight:600;}
+
+/* ==========================================================================
+   Shared bottom mobile nav — injected by js/nav.js
+   ========================================================================== */
+.ln-bottom-nav{
+  position:fixed; left:0; right:0; bottom:0; z-index:50;
+  background:#fff; border-top:1px solid var(--line);
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+  display:flex; justify-content:space-around;
+}
+.ln-nav-item{
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  color:#8a8578; font-size:10.5px; font-weight:600;
+  background:none; border:none; padding:4px 8px; border-radius:10px; cursor:pointer;
+}
+.ln-nav-item .ln-nav-icon{font-size:19px; line-height:1;}
+.ln-nav-item.active{color:var(--ink);}
+.ln-nav-item.active .ln-nav-icon{filter:none;}
+
+@media (min-width: 900px){
+  .ln-bottom-nav{display:none;}
+}
