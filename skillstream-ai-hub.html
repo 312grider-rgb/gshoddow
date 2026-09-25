@@ -6,6 +6,7 @@
 <title>AI Tools — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -539,6 +540,7 @@ async function initAuth(){
   currentUser = session.user;
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   currentProfile = profile;
+  window.currentProfile = profile; // exposed for js/nav.js role-aware bottom nav
 
   sb.auth.onAuthStateChange((event, session)=>{
     if(!session){ window.location.href = 'skillstream-login.html'; }
@@ -1551,7 +1553,7 @@ function exitProgram(){
   document.getElementById('classroomSetupCard').style.display = 'block';
 }
 
-initAuth();
+window.lnAuthReady = initAuth(); // exposed for js/nav.js role-aware bottom nav
 </script>
 
 <script>
@@ -1567,5 +1569,6 @@ initAuth();
   updateLiveClock();
   setInterval(updateLiveClock, 1000);
 </script>
+<script src="js/nav.js" defer></script>
 </body>
 </html>
