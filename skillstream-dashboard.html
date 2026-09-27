@@ -69,15 +69,32 @@
   .stat .val{font-family:'Syne',sans-serif; font-size:24px; font-weight:700; color:var(--ink);}
   .stat .lbl{font-size:11.5px; color:#777; margin-top:2px;}
 
-  .section-title{
-    font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
-    font-weight:700; margin-bottom:12px;
+  .streak-row{
+    display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line);
+    border-radius:14px; padding:12px 14px; margin-bottom:16px;
   }
-  .section{margin-bottom:30px;}
+  .streak-pill{
+    display:flex; align-items:center; gap:6px; font-size:13.5px; font-weight:700; color:var(--ink);
+    white-space:nowrap;
+  }
+  .streak-pill .flame{font-size:16px;}
+  .streak-btn{
+    margin-left:auto; background:var(--gold); color:var(--ink); border:none; padding:8px 14px;
+    border-radius:9px; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+  .streak-btn:disabled{background:var(--line); color:#8a8578;}
 
   .course-row{
-    background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px;
+    background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:12px;
   }
+  .course-row .thumb{
+    width:100%; aspect-ratio:16/9; background:var(--ink) center/cover no-repeat; position:relative;
+  }
+  .course-row .thumb .category-tag{
+    position:absolute; top:10px; left:10px; background:rgba(20,31,56,0.85); color:var(--gold-light);
+    font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:6px; text-transform:uppercase; letter-spacing:0.4px;
+  }
+  .course-row .body{padding:14px 16px;}
   .course-row h3{font-size:16px; margin:0 0 8px; color:var(--ink);}
   .progress-track{height:7px; background:var(--line); border-radius:4px; overflow:hidden;}
   .progress-fill{height:100%; background:var(--sage);}
@@ -86,6 +103,37 @@
     display:inline-block; margin-top:12px; background:var(--ink); color:#fff;
     padding:10px 16px; border-radius:9px; font-size:13.5px; font-weight:600;
   }
+
+  .live-now-card{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px;
+    display:flex; align-items:center; gap:12px; margin-bottom:10px;
+  }
+  .live-dot{width:9px; height:9px; border-radius:50%; background:#d0473f; flex-shrink:0;}
+  .live-now-card h3{font-size:14.5px; margin:0; color:var(--ink);}
+  .live-now-card p{font-size:12px; color:#777; margin:2px 0 0;}
+  .live-join-btn{
+    margin-left:auto; background:#d0473f; color:#fff; padding:8px 14px; border-radius:9px;
+    font-size:12.5px; font-weight:700; white-space:nowrap;
+  }
+  .join-code-card{
+    background:#fff; border:1px dashed var(--line); border-radius:14px; padding:14px 16px;
+  }
+  .join-code-card .label{font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:8px;}
+  .join-code-row{display:flex; gap:8px;}
+  .join-code-row input{
+    flex:1; padding:10px 12px; border:1.5px solid var(--line); border-radius:9px; font-size:13.5px;
+    text-transform:uppercase;
+  }
+  .join-code-row button{
+    background:var(--ink); color:#fff; border:none; padding:10px 16px; border-radius:9px;
+    font-weight:700; font-size:13px;
+  }
+
+  .section-title{
+    font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
+    font-weight:700; margin-bottom:12px;
+  }
+  .section{margin-bottom:30px;}
 
   .cert-grid{display:flex; flex-direction:column; gap:10px;}
   .cert-card{
@@ -167,9 +215,19 @@
     <div class="stat"><div class="val">–</div><div class="lbl">Certificates</div></div>
   </div>
 
+  <div class="streak-row" id="streakRow" style="display:none;">
+    <div class="streak-pill"><span class="flame">🔥</span> <span id="streakText">0 days</span> streak</div>
+    <button class="streak-btn" id="streakBtn" onclick="markTodayDone()">Mark Today Done</button>
+  </div>
+
   <div class="section">
     <div class="section-title">Continue Learning</div>
     <div id="inProgressList"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Live Now</div>
+    <div id="liveNowList"><div class="loading">Loading…</div></div>
   </div>
 
   <div class="ai-rec-card">
@@ -230,6 +288,8 @@ async function initAuth(){
   document.getElementById('greeting').textContent = 'Welcome back' + (profile?.full_name ? ', ' + profile.full_name.split(' ')[0] : '');
 
   loadDashboard();
+  loadStreak();
+  loadLiveNow();
   checkUnreadNotifications();
 
   sb.auth.onAuthStateChange((event, session)=>{
@@ -288,7 +348,7 @@ async function loadDashboard(){
   // Pull all lesson_progress rows for this user, plus lesson->course mapping, plus certificates
   const [{ data: progress, error: pErr }, { data: certs, error: cErr }] = await Promise.all([
     sb.from('lesson_progress')
-      .select('lesson_id, completed, lessons(course_id, courses(id, title, description))')
+      .select('lesson_id, completed, lessons(course_id, courses(id, title, description, category, thumbnail_url))')
       .eq('user_id', currentUser.id),
     sb.from('certificates')
       .select('*, courses(title)')
@@ -349,14 +409,138 @@ async function renderInProgress(progress){
     const total = totalByCourse[cid] || entry.total;
     const pct = total > 0 ? Math.round((entry.done / total) * 100) : 0;
     const finished = total > 0 && entry.done >= total;
+    const thumb = entry.course.thumbnail_url
+      ? `background-image:url('${entry.course.thumbnail_url.replace(/'/g, "\\'")}');`
+      : '';
     return `
     <div class="course-row">
-      <h3>${escapeHtml(entry.course.title)}</h3>
-      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
-      <div class="progress-label"><span>${entry.done} of ${total} lessons</span><span>${pct}%</span></div>
-      <a class="resume-btn" href="skillstream-self-paced.html">${finished ? 'Review Course' : 'Resume Course'}</a>
+      <div class="thumb" style="${thumb}">
+        ${entry.course.category ? `<span class="category-tag">${escapeHtml(entry.course.category)}</span>` : ''}
+      </div>
+      <div class="body">
+        <h3>${escapeHtml(entry.course.title)}</h3>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+        <div class="progress-label"><span>${entry.done} of ${total} lessons</span><span>${pct}%</span></div>
+        <a class="resume-btn" href="skillstream-self-paced.html">${finished ? 'Review Course' : 'Resume Course'}</a>
+      </div>
     </div>`;
   }).join('');
+}
+
+/* ---------- STREAK (same logic as skillstream-home.html's Daily Inspiration) ---------- */
+function todayDateString(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+async function loadStreak(){
+  const { data, error } = await sb
+    .from('challenge_completions')
+    .select('completed_date')
+    .eq('user_id', currentUser.id)
+    .order('completed_date', { ascending:false })
+    .limit(60);
+
+  let streak = 0;
+  let doneToday = false;
+
+  if(!error && data){
+    const dates = new Set(data.map(r => r.completed_date));
+    const today = todayDateString();
+    doneToday = dates.has(today);
+
+    let cursor = new Date();
+    if(!doneToday) cursor.setDate(cursor.getDate() - 1);
+
+    while(true){
+      const key = cursor.getFullYear() + '-' + String(cursor.getMonth()+1).padStart(2,'0') + '-' + String(cursor.getDate()).padStart(2,'0');
+      if(dates.has(key)){
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else break;
+    }
+  }
+
+  document.getElementById('streakRow').style.display = 'flex';
+  document.getElementById('streakText').textContent = `${streak} day${streak===1?'':'s'}`;
+  const btn = document.getElementById('streakBtn');
+  btn.disabled = doneToday;
+  btn.textContent = doneToday ? '✓ Done Today' : 'Mark Today Done';
+}
+
+async function markTodayDone(){
+  const { error } = await sb.from('challenge_completions').upsert({
+    user_id: currentUser.id,
+    completed_date: todayDateString()
+  }, { onConflict: 'user_id,completed_date' });
+
+  if(error){ alert('Error: ' + error.message); return; }
+  loadStreak();
+}
+
+/* ---------- LIVE NOW (same query pattern as skillstream-home.html) ---------- */
+async function loadLiveNow(){
+  const el = document.getElementById('liveNowList');
+
+  const { data: myProfile } = await sb.from('profiles').select('grade_level').eq('id', currentUser.id).maybeSingle();
+  const myGrade = myProfile?.grade_level || null;
+
+  const { data, error } = await sb
+    .from('live_sessions')
+    .select('*, profiles(full_name)')
+    .eq('status', 'live')
+    .eq('is_public', true)
+    .order('started_at', { ascending:false });
+
+  let html = '';
+
+  if(!error && data){
+    const visible = data.filter(s => !s.target_grade_level || s.target_grade_level === myGrade);
+    if(visible.length > 0){
+      html += visible.map(s => `
+        <div class="live-now-card">
+          <span class="live-dot"></span>
+          <div>
+            <h3>${escapeHtml(s.title)}</h3>
+            <p>with ${escapeHtml(s.profiles?.full_name || 'a teacher')}</p>
+          </div>
+          <a class="live-join-btn" href="skillstream-live-video.html?room=${encodeURIComponent(s.room_name)}&session=${s.id}&title=${encodeURIComponent(s.title)}">Join</a>
+        </div>
+      `).join('');
+    }
+  }
+
+  if(!html){
+    html = `<div class="empty">No classes live right now.</div>`;
+  }
+
+  html += `
+    <div class="join-code-card" style="margin-top:10px;">
+      <div class="label">Have a private class code?</div>
+      <div class="join-code-row">
+        <input type="text" id="dashJoinCodeInput" placeholder="e.g. AB12CD">
+        <button onclick="dashJoinByCode()">Join</button>
+      </div>
+    </div>
+  `;
+
+  el.innerHTML = html;
+}
+
+async function dashJoinByCode(){
+  const code = document.getElementById('dashJoinCodeInput').value.trim().toUpperCase();
+  if(!code){ alert('Enter a join code first.'); return; }
+
+  const { data, error } = await sb
+    .from('live_sessions')
+    .select('*')
+    .eq('join_code', code)
+    .eq('status', 'live')
+    .maybeSingle();
+
+  if(error || !data){ alert('No live class found with that code.'); return; }
+
+  window.location.href = `skillstream-live-video.html?room=${encodeURIComponent(data.room_name)}&session=${data.id}&title=${encodeURIComponent(data.title)}`;
 }
 
 function renderCertificates(certs){
