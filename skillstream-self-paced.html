@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/incentives.js"></script>
 <style>
   :root{
     --ink:#141F38;
@@ -706,7 +707,13 @@ async function toggleComplete(){
   updateCompleteBtn();
   renderTrail();
   checkCertificateEligibility();
-  toast(newState ? 'Lesson complete!' : 'Marked incomplete');
+
+  if(newState && window.Incentives){
+    toast(Incentives.feedback.lessonComplete());
+    Incentives.checkAchievements(sb).then(earned => Incentives.showToasts(earned));
+  } else {
+    toast(newState ? 'Lesson complete!' : 'Marked incomplete');
+  }
 }
 
 /* ---------- CERTIFICATE ---------- */
@@ -752,6 +759,10 @@ async function issueCertificate(){
     });
 
     await sb.rpc('adjust_certificates_count', { delta: 1 }).catch(() => {});
+
+    if(window.Incentives){
+      Incentives.checkAchievements(sb).then(earned => Incentives.showToasts(earned));
+    }
   }
 
   const { data: profile } = await sb.from('profiles').select('full_name').eq('id', currentUser.id).maybeSingle();
