@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/incentives.js"></script>
 <style>
   :root{
     --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583; --cream:#FBF7EF; --sage:#6B8F71;
@@ -109,6 +110,20 @@
   <div class="avatar-card" id="avatarCard"><div class="loading">Loading profile…</div></div>
 
   <div class="stats-row" id="statsRow"></div>
+
+  <div class="section-title" id="goalTitle" style="display:none;">Learning Goal</div>
+  <div class="card" id="goalCard" style="display:none; padding:14px 16px; margin-bottom:16px;">
+    <div id="goalView"></div>
+    <div id="goalForm" style="display:none; margin-top:10px;">
+      <label>What do you want to learn?</label>
+      <input type="text" id="goalSubject" placeholder="e.g. Learn Python">
+      <label style="margin-top:8px; display:block;">Target (optional)</label>
+      <input type="text" id="goalTarget" placeholder="e.g. Build a small project">
+      <label style="margin-top:8px; display:block;">Deadline (optional)</label>
+      <input type="date" id="goalDeadline">
+      <button class="btn-primary" style="margin-top:10px;" onclick="saveGoal()">Save Goal</button>
+    </div>
+  </div>
 
   <div class="section-title" id="achievementsTitle" style="display:none;">Achievements</div>
   <div class="badge-grid" id="achievementsGrid"></div>
@@ -243,19 +258,20 @@ async function loadStats(){
       <div class="stat"><div class="val">${lessonsDone}</div><div class="lbl">Lessons Done</div></div>
       <div class="stat"><div class="val">${certsEarned}</div><div class="lbl">Certificates</div></div>
     `;
-    renderAchievements(lessonsDone, certsEarned);
+    renderAchievements();
+    loadGoal();
   }
 }
 
-function renderAchievements(lessonsDone, certsEarned){
-  const badges = [
-    { icon: '🌱', label: 'First Lesson', unlocked: lessonsDone >= 1 },
-    { icon: '📚', label: '10 Lessons', unlocked: lessonsDone >= 10 },
-    { icon: '🔥', label: '25 Lessons', unlocked: lessonsDone >= 25 },
-    { icon: '🏅', label: 'First Certificate', unlocked: certsEarned >= 1 },
-    { icon: '🎓', label: '3 Certificates', unlocked: certsEarned >= 3 },
-    { icon: '👑', label: '5 Certificates', unlocked: certsEarned >= 5 }
-  ];
+/* ---------- ACHIEVEMENTS (DB-backed — see achievements/user_achievements) ---------- */
+async function renderAchievements(){
+  const [{ data: all }, { data: earned }] = await Promise.all([
+    sb.from('achievements').select('code, title, icon, sort_order').order('sort_order'),
+    sb.from('user_achievements').select('achievements(code)').eq('user_id', currentUser.id)
+  ]);
+
+  const earnedCodes = new Set((earned || []).map(e => e.achievements?.code).filter(Boolean));
+  const badges = (all || []).map(a => ({ icon: a.icon, label: a.title, unlocked: earnedCodes.has(a.code) }));
 
   const anyUnlocked = badges.some(b => b.unlocked);
   document.getElementById('achievementsTitle').style.display = anyUnlocked ? 'block' : 'none';
@@ -263,9 +279,60 @@ function renderAchievements(lessonsDone, certsEarned){
   document.getElementById('achievementsGrid').innerHTML = badges.map(b => `
     <div class="achievement-badge ${b.unlocked ? '' : 'locked'}">
       <div class="icon">${b.icon}</div>
-      <div class="label">${b.label}</div>
+      <div class="label">${escapeHtml(b.label)}</div>
     </div>
   `).join('');
+}
+
+/* ---------- LEARNING GOAL ---------- */
+async function loadGoal(){
+  const { data: goal } = await sb.from('learning_goals').select('*')
+    .eq('user_id', currentUser.id).eq('status', 'active')
+    .order('created_at', { ascending:false }).limit(1).maybeSingle();
+
+  document.getElementById('goalTitle').style.display = 'block';
+  document.getElementById('goalCard').style.display = 'block';
+  const view = document.getElementById('goalView');
+  const form = document.getElementById('goalForm');
+
+  if(goal){
+    view.innerHTML = `
+      <div style="font-weight:700; color:var(--ink);">${escapeHtml(goal.subject)}</div>
+      ${goal.target ? `<div style="font-size:13px; color:#777; margin-top:3px;">${escapeHtml(goal.target)}</div>` : ''}
+      ${goal.deadline ? `<div style="font-size:12px; color:#999; margin-top:3px;">Target date: ${goal.deadline}</div>` : ''}
+      <button class="btn-primary" style="margin-top:10px;" onclick="markGoalComplete('${goal.id}')">Mark Goal Complete</button>
+    `;
+    view.style.display = 'block';
+    form.style.display = 'none';
+  } else {
+    view.innerHTML = `<div style="color:#777; font-size:13.5px;">No active goal yet — set one to keep your learning focused.</div>`;
+    view.style.display = 'block';
+    form.style.display = 'block';
+  }
+}
+
+async function saveGoal(){
+  const subject = document.getElementById('goalSubject').value.trim();
+  if(!subject){ alert('Tell us what you want to learn first.'); return; }
+  const target = document.getElementById('goalTarget').value.trim();
+  const deadline = document.getElementById('goalDeadline').value || null;
+
+  const { error } = await sb.from('learning_goals').insert({
+    user_id: currentUser.id, subject, target: target || null, deadline
+  });
+  if(error){ alert('Error: ' + error.message); return; }
+  loadGoal();
+}
+
+async function markGoalComplete(goalId){
+  const { error } = await sb.from('learning_goals')
+    .update({ status: 'completed', completed_at: new Date().toISOString() })
+    .eq('id', goalId).eq('user_id', currentUser.id);
+  if(error){ alert('Error: ' + error.message); return; }
+  loadGoal();
+  if(window.Incentives){
+    Incentives.checkAchievements(sb).then(earned => Incentives.showToasts(earned));
+  }
 }
 
 /* ---------- AVATAR UPLOAD ----------
