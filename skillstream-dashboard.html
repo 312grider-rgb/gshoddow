@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/incentives.js"></script>
 <style>
   :root{
     --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583; --cream:#FBF7EF; --sage:#6B8F71;
@@ -221,6 +222,11 @@
   </div>
 
   <div class="section">
+    <div class="section-title">My Learning Journey</div>
+    <div id="journeyCard"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="section">
     <div class="section-title">Continue Learning</div>
     <div id="inProgressList"><div class="loading">Loading…</div></div>
   </div>
@@ -291,6 +297,8 @@ async function initAuth(){
   loadStreak();
   loadLiveNow();
   checkUnreadNotifications();
+  loadJourney();
+  checkAchievementsAndToast();
 
   sb.auth.onAuthStateChange((event, session)=>{
     if(!session){ window.location.href = 'skillstream-login.html'; }
@@ -476,6 +484,30 @@ async function markTodayDone(){
 
   if(error){ alert('Error: ' + error.message); return; }
   loadStreak();
+  await checkAchievementsAndToast();
+  loadJourney();
+}
+
+/* ---------- MY LEARNING JOURNEY ---------- */
+async function loadJourney(){
+  const el = document.getElementById('journeyCard');
+  if(!el || !window.Incentives) return;
+  try{
+    await Incentives.renderJourney(el, sb, currentUser.id, {
+      continueHref: 'skillstream-self-paced.html'
+    });
+  }catch(e){
+    el.innerHTML = `<div class="empty">Couldn't load your learning journey.</div>`;
+  }
+}
+
+async function checkAchievementsAndToast(){
+  if(!window.Incentives) return;
+  const newlyEarned = await Incentives.checkAchievements(sb);
+  if(newlyEarned.length){
+    Incentives.showToasts(newlyEarned);
+    loadJourney(); // refresh the badge ribbon with what was just earned
+  }
 }
 
 /* ---------- LIVE NOW (same query pattern as skillstream-home.html) ---------- */
