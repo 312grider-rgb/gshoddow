@@ -257,6 +257,7 @@
   <footer class="site-footer">
     <div class="foot-links">
       <a href="skillstream-messages.html">Messages</a>
+      <a href="skillstream-challenges.html">Challenges</a>
       <a href="skillstream-home.html">Switch View</a>
       <a href="skillstream-academic.html">Academic Studies</a>
       <a href="skillstream-leaderboard.html">Leaderboard</a>
@@ -494,7 +495,8 @@ async function loadJourney(){
   if(!el || !window.Incentives) return;
   try{
     await Incentives.renderJourney(el, sb, currentUser.id, {
-      continueHref: 'skillstream-self-paced.html'
+      continueHref: 'skillstream-self-paced.html',
+      challengesHref: 'skillstream-challenges.html'
     });
   }catch(e){
     el.innerHTML = `<div class="empty">Couldn't load your learning journey.</div>`;

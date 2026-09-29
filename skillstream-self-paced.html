@@ -226,6 +226,12 @@
   .comment-card .c-name{font-weight:600; font-size:13.5px; color:var(--ink);}
   .comment-card .c-time{font-size:11px; color:#a8a094;}
   .comment-card .c-body{font-size:13.5px; color:#5c5648; line-height:1.55;}
+  .comment-card .c-actions{margin-top:8px;}
+  .helpful-btn{
+    background:none; border:1px solid var(--line); color:var(--ink); font-size:11.5px; font-weight:600;
+    padding:5px 10px; border-radius:20px; cursor:pointer;
+  }
+  .helpful-btn.given{background:var(--gold); border-color:var(--gold); color:var(--ink); cursor:default;}
 
   /* Player */
   .overlay{
@@ -845,6 +851,17 @@ async function loadDiscussion(courseId){
   }
 
   const comments = data || [];
+  const commentIds = comments.map(c => c.id);
+  let givenIds = new Set();
+  if(commentIds.length){
+    const { data: given } = await sb.from('community_contributions')
+      .select('reference_id')
+      .eq('recognized_by', currentUser.id)
+      .eq('reference_table', 'course_comments')
+      .in('reference_id', commentIds);
+    givenIds = new Set((given || []).map(g => g.reference_id));
+  }
+
   let html = `
     <div class="reviews-header"><div class="avg"><span style="font-size:12.5px; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:1.2px;">Discussion</span></div></div>
     <div class="comment-form">
@@ -863,11 +880,30 @@ async function loadDiscussion(courseId){
           <span class="c-time">${new Date(c.created_at).toLocaleDateString()}</span>
         </div>
         <div class="c-body">${escapeHtml(c.message)}</div>
+        ${c.user_id !== currentUser.id ? `
+          <div class="c-actions">
+            <button class="helpful-btn ${givenIds.has(c.id) ? 'given' : ''}"
+              ${givenIds.has(c.id) ? 'disabled' : `onclick="markHelpful('${c.id}', '${c.user_id}')"`}>
+              🤝 ${givenIds.has(c.id) ? 'Marked Helpful' : 'Mark Helpful'}
+            </button>
+          </div>` : ''}
       </div>
     `).join('');
   }
 
   el.innerHTML = html;
+}
+
+async function markHelpful(commentId, authorId){
+  const { error } = await sb.from('community_contributions').insert({
+    user_id: authorId,
+    recognized_by: currentUser.id,
+    type: 'helpful_answer',
+    reference_table: 'course_comments',
+    reference_id: commentId
+  });
+  if(error){ toast('Error: ' + error.message); return; }
+  toast('Marked as helpful');
 }
 
 async function postComment(courseId){

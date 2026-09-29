@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Feedback & Recognition — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="css/theme.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
+    --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); -webkit-font-smoothing:antialiased; padding-bottom:30px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;}
+  a{text-decoration:none;}
+
+  header.top{background:linear-gradient(160deg, rgba(20,31,56,0.88) 0%, rgba(31,46,82,0.88) 100%); color:var(--cream); padding:22px 18px 28px;}
+  header.top .eyebrow{font-size:11.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-light); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:22px;}
+  header.top p{margin:6px 0 0; font-size:13.5px; opacity:0.85;}
+
+  .wrap{padding:18px;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px;}
+  label{display:block; font-size:13px; font-weight:600; margin:12px 0 6px; color:var(--ink);}
+  label:first-child{margin-top:0;}
+  select, textarea, input{
+    width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+    font-family:inherit; font-size:13.5px; background:#fff;
+  }
+  textarea{min-height:80px; resize:vertical;}
+  .checkbox-row{display:flex; align-items:center; gap:8px; margin-top:12px; font-size:13px;}
+  .checkbox-row input{width:auto;}
+  .btn-primary{margin-top:14px; background:var(--ink); color:#fff; border:none; padding:12px 16px; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; width:100%;}
+  .empty{background:#fff; border:1px dashed var(--line); border-radius:14px; padding:22px 16px; text-align:center; color:#777; font-size:13.5px;}
+  .loading{text-align:center; padding:20px; color:#888;}
+
+  .section-title{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700; margin:22px 0 10px;}
+  .feedback-item{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; font-size:13px;}
+  .feedback-item .f-student{font-weight:700; color:var(--ink); margin-bottom:3px;}
+  .feedback-item .f-time{font-size:11px; color:#999; margin-top:4px;}
+
+  footer.site-footer{margin-top:30px; text-align:center; font-size:12.5px; color:#948f80;}
+  footer.site-footer a{color:var(--ink); font-weight:600;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>💬 Student Feedback & Recognition</h1>
+  <p>Recognize genuine improvement, good questions, and helping others — not just time spent online.</p>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <label>Course</label>
+    <select id="courseSelect" onchange="loadStudents()"><option>Loading your courses…</option></select>
+
+    <label>Student</label>
+    <select id="studentSelect"><option>Select a course first</option></select>
+
+    <label>Feedback message</label>
+    <textarea id="feedbackMessage" placeholder="e.g. Your explanation in the discussion was really clear — nice improvement since last week."></textarea>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="alsoRecognize" onchange="toggleRecognitionType()">
+      <label style="margin:0;">Also give community recognition</label>
+    </div>
+    <div id="recognitionTypeRow" style="display:none;">
+      <label>Recognition type</label>
+      <select id="recognitionType">
+        <option value="helpful_answer">Helpful Learner</option>
+        <option value="good_question">Curious Mind</option>
+        <option value="resource_share">Knowledge Sharer</option>
+        <option value="mentoring">Community Mentor</option>
+      </select>
+    </div>
+
+    <button class="btn-primary" onclick="sendFeedback()">Send Feedback</button>
+  </div>
+
+  <div class="section-title">Recently Sent</div>
+  <div id="recentList"><div class="loading">Loading…</div></div>
+
+  <footer class="site-footer">
+    <a href="skillstream-teacher-dashboard.html">&larr; Back to Teacher Dashboard</a>
+  </footer>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let studentsForCourse = [];
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+async function initAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', currentUser.id).maybeSingle();
+  if(profile?.role !== 'teacher'){
+    window.location.href = 'skillstream-dashboard.html';
+    return;
+  }
+
+  loadCourses();
+  loadRecent();
+}
+
+async function loadCourses(){
+  const { data: courses, error } = await sb.from('courses').select('id, title').eq('teacher_id', currentUser.id).order('title');
+  const sel = document.getElementById('courseSelect');
+  if(error || !courses || courses.length === 0){
+    sel.innerHTML = '<option value="">No courses yet</option>';
+    return;
+  }
+  sel.innerHTML = courses.map(c => `<option value="${c.id}">${escapeHtml(c.title)}</option>`).join('');
+  loadStudents();
+}
+
+async function loadStudents(){
+  const courseId = document.getElementById('courseSelect').value;
+  const studentSel = document.getElementById('studentSelect');
+  if(!courseId){ studentSel.innerHTML = '<option value="">No course selected</option>'; return; }
+
+  studentSel.innerHTML = '<option>Loading students…</option>';
+
+  const { data: rows, error } = await sb
+    .from('lesson_progress')
+    .select('user_id, lessons!inner(course_id)')
+    .eq('lessons.course_id', courseId);
+
+  if(error){
+    studentSel.innerHTML = '<option value="">Couldn\'t load students</option>';
+    return;
+  }
+
+  const userIds = Array.from(new Set((rows || []).map(r => r.user_id)));
+  if(userIds.length === 0){
+    studentSel.innerHTML = '<option value="">No students have started this course yet</option>';
+    studentsForCourse = [];
+    return;
+  }
+
+  const { data: profiles } = await sb.from('profiles').select('id, full_name').in('id', userIds);
+  studentsForCourse = profiles || [];
+  studentSel.innerHTML = studentsForCourse.map(p => `<option value="${p.id}">${escapeHtml(p.full_name || 'Learner')}</option>`).join('');
+}
+
+function toggleRecognitionType(){
+  document.getElementById('recognitionTypeRow').style.display =
+    document.getElementById('alsoRecognize').checked ? 'block' : 'none';
+}
+
+async function sendFeedback(){
+  const courseId = document.getElementById('courseSelect').value;
+  const studentId = document.getElementById('studentSelect').value;
+  const message = document.getElementById('feedbackMessage').value.trim();
+
+  if(!studentId){ alert('Choose a student first.'); return; }
+  if(!message){ alert('Write a feedback message first.'); return; }
+
+  const { error } = await sb.from('teacher_feedback').insert({
+    teacher_id: currentUser.id,
+    student_id: studentId,
+    course_id: courseId || null,
+    message
+  });
+  if(error){ alert('Error: ' + error.message); return; }
+
+  if(document.getElementById('alsoRecognize').checked){
+    const type = document.getElementById('recognitionType').value;
+    await sb.from('community_contributions').insert({
+      user_id: studentId,
+      recognized_by: currentUser.id,
+      type
+    }).catch(() => {}); // ignore duplicate-recognition conflicts silently
+  }
+
+  document.getElementById('feedbackMessage').value = '';
+  document.getElementById('alsoRecognize').checked = false;
+  toggleRecognitionType();
+  loadRecent();
+}
+
+async function loadRecent(){
+  const el = document.getElementById('recentList');
+  const { data: rows, error } = await sb.from('teacher_feedback')
+    .select('*').eq('teacher_id', currentUser.id)
+    .order('created_at', { ascending:false }).limit(10);
+
+  if(error || !rows || rows.length === 0){
+    el.innerHTML = `<div class="empty">You haven't sent any feedback yet.</div>`;
+    return;
+  }
+
+  const studentIds = Array.from(new Set(rows.map(r => r.student_id)));
+  const { data: profiles } = await sb.from('profiles').select('id, full_name').in('id', studentIds);
+  const nameById = {};
+  (profiles || []).forEach(p => { nameById[p.id] = p.full_name || 'Learner'; });
+
+  el.innerHTML = rows.map(r => `
+    <div class="feedback-item">
+      <div class="f-student">${escapeHtml(nameById[r.student_id] || 'Learner')}</div>
+      <div>${escapeHtml(r.message)}</div>
+      <div class="f-time">${new Date(r.created_at).toLocaleDateString()}</div>
+    </div>
+  `).join('');
+}
+
+initAuth();
+</script>
+<script src="js/nav.js" defer></script>
+</body>
+</html>
