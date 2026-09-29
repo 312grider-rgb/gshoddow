@@ -895,12 +895,11 @@ async function loadDiscussion(courseId){
 }
 
 async function markHelpful(commentId, authorId){
-  const { error } = await sb.from('community_contributions').insert({
-    user_id: authorId,
-    recognized_by: currentUser.id,
-    type: 'helpful_answer',
-    reference_table: 'course_comments',
-    reference_id: commentId
+  const { error } = await sb.rpc('recognize_contribution', {
+    p_user: authorId,
+    p_type: 'helpful_answer',
+    p_reference_table: 'course_comments',
+    p_reference_id: commentId
   });
   if(error){ toast('Error: ' + error.message); return; }
   toast('Marked as helpful');

@@ -177,13 +177,18 @@ async function sendFeedback(){
   });
   if(error){ alert('Error: ' + error.message); return; }
 
+  await sb.rpc('notify_user', {
+    p_user: studentId,
+    p_title: 'New feedback from your teacher',
+    p_body: message.length > 140 ? message.slice(0, 140) + '…' : message
+  });
+
   if(document.getElementById('alsoRecognize').checked){
     const type = document.getElementById('recognitionType').value;
-    await sb.from('community_contributions').insert({
-      user_id: studentId,
-      recognized_by: currentUser.id,
-      type
-    }).catch(() => {}); // ignore duplicate-recognition conflicts silently
+    const { error: recErr } = await sb.rpc('recognize_contribution', { p_user: studentId, p_type: type });
+    if(recErr && !/unique|duplicate/i.test(recErr.message)){
+      alert('Feedback sent, but recognition failed: ' + recErr.message);
+    }
   }
 
   document.getElementById('feedbackMessage').value = '';

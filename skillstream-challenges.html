@@ -58,6 +58,19 @@
 
   footer.site-footer{margin-top:30px; text-align:center; font-size:12.5px; color:#948f80;}
   footer.site-footer a{color:var(--ink); font-weight:600;}
+
+  .create-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:18px;}
+  .create-card label{display:block; font-size:13px; font-weight:600; margin:10px 0 5px; color:var(--ink);}
+  .create-card label:first-child{margin-top:0;}
+  .create-card select, .create-card input, .create-card textarea{
+    width:100%; border:1px solid var(--line); border-radius:9px; padding:9px 11px;
+    font-family:inherit; font-size:13.5px; background:#fff;
+  }
+  .create-card textarea{min-height:64px; resize:vertical;}
+  .create-toggle{
+    background:#fff; border:1.5px solid var(--line); color:var(--ink); padding:10px 14px;
+    border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:14px;
+  }
 </style>
 </head>
 <body>
@@ -69,6 +82,28 @@
 </header>
 
 <div class="wrap">
+  <button class="create-toggle" id="createToggleBtn" style="display:none;" onclick="toggleCreateForm()">+ Create a Challenge</button>
+  <div class="create-card" id="createCard" style="display:none;">
+    <label>Type</label>
+    <select id="newType">
+      <option value="daily">Daily Challenge</option>
+      <option value="weekly">Weekly Challenge</option>
+      <option value="skill">Skill Challenge</option>
+      <option value="project">Real-World Project</option>
+    </select>
+    <label>Title</label>
+    <input type="text" id="newTitle" placeholder="e.g. Explain your favorite concept from this week">
+    <label>Description</label>
+    <textarea id="newDescription" placeholder="What should the learner actually do?"></textarea>
+    <label>Difficulty</label>
+    <select id="newDifficulty">
+      <option value="easy">Easy</option>
+      <option value="normal" selected>Normal</option>
+      <option value="hard">Hard</option>
+    </select>
+    <button class="btn-primary" style="margin-top:12px;" onclick="createChallenge()">Publish Challenge</button>
+  </div>
+
   <div id="challengeList"><div class="loading">Loading challenges…</div></div>
 
   <footer class="site-footer">
@@ -89,6 +124,36 @@ async function initAuth(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ window.location.href = 'skillstream-login.html'; return; }
   currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', currentUser.id).maybeSingle();
+  if(profile?.role === 'teacher'){
+    document.getElementById('createToggleBtn').style.display = 'block';
+  }
+
+  loadChallenges();
+}
+
+function toggleCreateForm(){
+  const card = document.getElementById('createCard');
+  card.style.display = card.style.display === 'none' ? 'block' : 'none';
+}
+
+async function createChallenge(){
+  const type = document.getElementById('newType').value;
+  const title = document.getElementById('newTitle').value.trim();
+  const description = document.getElementById('newDescription').value.trim();
+  const difficulty = document.getElementById('newDifficulty').value;
+
+  if(!title || !description){ alert('Give it a title and a description first.'); return; }
+
+  const { error } = await sb.from('challenges').insert({
+    type, title, description, difficulty, created_by: currentUser.id
+  });
+  if(error){ alert('Error: ' + error.message); return; }
+
+  document.getElementById('newTitle').value = '';
+  document.getElementById('newDescription').value = '';
+  toggleCreateForm();
   loadChallenges();
 }
 
