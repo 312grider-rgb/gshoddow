@@ -134,25 +134,23 @@ async function loadStudents(){
 
   studentSel.innerHTML = '<option>Loading students…</option>';
 
-  const { data: rows, error } = await sb
-    .from('lesson_progress')
-    .select('user_id, lessons!inner(course_id)')
-    .eq('lessons.course_id', courseId);
+  // lesson_progress is locked down by RLS to each student's own rows, so a
+  // teacher can't query it directly — get_students_in_course() is a
+  // security-definer function that checks course ownership first and only
+  // returns names, never raw progress rows (see migrations/022).
+  const { data: rows, error } = await sb.rpc('get_students_in_course', { p_course_id: courseId });
 
   if(error){
     studentSel.innerHTML = '<option value="">Couldn\'t load students</option>';
     return;
   }
 
-  const userIds = Array.from(new Set((rows || []).map(r => r.user_id)));
-  if(userIds.length === 0){
+  studentsForCourse = (rows || []).map(r => ({ id: r.user_id, full_name: r.full_name }));
+  if(studentsForCourse.length === 0){
     studentSel.innerHTML = '<option value="">No students have started this course yet</option>';
-    studentsForCourse = [];
     return;
   }
 
-  const { data: profiles } = await sb.from('profiles').select('id, full_name').in('id', userIds);
-  studentsForCourse = profiles || [];
   studentSel.innerHTML = studentsForCourse.map(p => `<option value="${p.id}">${escapeHtml(p.full_name || 'Learner')}</option>`).join('');
 }
 

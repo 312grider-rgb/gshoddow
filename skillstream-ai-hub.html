@@ -67,6 +67,15 @@
   .ai-output.loading-text{color:#a8a094; font-style:italic;}
   .ai-output.field-error{color:#B5473F; border-color:#E8B4AE; background:#FBEEEC; font-weight:600;}
 
+  .followup-wrap{margin-top:12px;}
+  .followup-label{font-size:11.5px; text-transform:uppercase; letter-spacing:1px; color:#a8a094; margin-bottom:8px;}
+  .followup-chip{
+    display:block; width:100%; text-align:left; background:#fff; border:1px solid var(--line); color:var(--ink);
+    padding:11px 14px; border-radius:10px; font-size:14.5px; font-weight:600; margin-bottom:8px; cursor:pointer;
+  }
+  .followup-chip:active{transform:scale(0.98);}
+  .followup-chip .fq-icon{margin-right:6px;}
+
   .chat-bubble{
     padding:13px 16px; border-radius:14px; font-size:17px; line-height:1.6; margin-bottom:8px; max-width:88%;
   }
@@ -301,15 +310,19 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
   <!-- Ask & Explain -->
   <div class="tool-panel" id="askPanel">
     <div class="card">
-      <div class="kicker">Ask & Explain</div>
-      <h3>Ask anything, get a clear answer</h3>
-      <p class="desc">Ask a question about any topic, or paste something you're studying and ask the AI to explain it more simply.</p>
+      <div class="kicker">Ask & Explore</div>
+      <h3>Start with "I wonder why..."</h3>
+      <p class="desc">Ask a question about anything, or paste something you're studying and ask for a simpler explanation. Each answer comes with a few new questions to follow, if you want to go deeper.</p>
 
       <label>Your Question</label>
-      <textarea id="askQuestion" placeholder="e.g. Explain how photosynthesis works, or why the stock market crashed in 1929..."></textarea>
+      <textarea id="askQuestion" placeholder="e.g. I wonder why the sky is blue, or explain how photosynthesis works..."></textarea>
 
-      <button class="submit-btn" onclick="withLoadingButton(this, askGeneral)">Ask</button>
+      <button class="submit-btn" id="askSubmitBtn" onclick="withLoadingButton(this, askGeneral)">Ask</button>
       <div class="ai-output" id="askOutput"></div>
+      <div class="followup-wrap" id="askFollowups" style="display:none;">
+        <div class="followup-label">Keep exploring</div>
+        <div id="askFollowupChips"></div>
+      </div>
     </div>
   </div>
 
@@ -817,21 +830,44 @@ async function evaluateLevel(){
 }
 
 /* ---------- ASK & EXPLAIN ---------- */
-async function askGeneral(){
-  const question = document.getElementById('askQuestion').value.trim();
+let lastFollowups = [];
+
+async function askGeneral(question){
+  question = (typeof question === 'string' ? question : document.getElementById('askQuestion').value).trim();
   const output = document.getElementById('askOutput');
+  const followupWrap = document.getElementById('askFollowups');
   if(!question){ showFieldError(output, 'Please type a question first.'); return; }
 
+  document.getElementById('askQuestion').value = question;
+  followupWrap.style.display = 'none';
   output.style.display = 'block';
   output.className = 'ai-output loading-text';
   output.textContent = 'Thinking…';
 
-  const prompt = `Answer this question clearly and simply, as if explaining to a curious learner. Keep it under 200 words unless more detail is truly needed.\n\nQuestion: ${question}`;
+  // Ask for the answer AND 2-3 follow-up questions in one call, using a
+  // plain-text delimiter (more reliable from this model than strict JSON)
+  // so curiosity can chain: QUESTION -> EXPLANATION -> NEW QUESTIONS.
+  const prompt = `Answer this question clearly and simply, as if explaining to a curious learner. Keep it under 180 words unless more detail is truly needed.\n\nQuestion: ${question}\n\nThen, on a new line, write exactly "FOLLOW-UP:" followed by 2-3 short, genuinely interesting follow-up questions this answer naturally raises, separated by " | ". Keep each one under 12 words.`;
 
   try{
-    const text = await callClaude(prompt, 600);
+    const text = await callClaude(prompt, 650);
+    const splitIndex = text.indexOf('FOLLOW-UP:');
+    const answer = (splitIndex === -1 ? text : text.slice(0, splitIndex)).trim();
+    const rawFollowups = splitIndex === -1 ? '' : text.slice(splitIndex + 'FOLLOW-UP:'.length);
+    const followups = rawFollowups.split('|').map(q => q.trim()).filter(q => q.length > 3).slice(0, 3);
+
     output.className = 'ai-output';
-    output.innerHTML = renderMarkdown(text);
+    output.innerHTML = renderMarkdown(answer);
+
+    lastFollowups = followups;
+    if(followups.length){
+      document.getElementById('askFollowupChips').innerHTML = followups.map((q, i) => `
+        <button type="button" class="followup-chip" onclick="askGeneral(lastFollowups[${i}])">
+          <span class="fq-icon">🔎</span>${escapeHtml(q)}
+        </button>
+      `).join('');
+      followupWrap.style.display = 'block';
+    }
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;

@@ -61,36 +61,107 @@ const Incentives = (function () {
     }
   };
 
-  /** Pulls the numbers the journey card and achievement engine both need. */
+  /** Pulls the numbers the journey card and achievement engine both need.
+   *  The lesson_progress select is enriched with the course/lesson join so
+   *  Next Best Action gets per-course completion counts for free, instead
+   *  of running a second query for data the dashboard already fetches
+   *  separately elsewhere. */
   async function loadStats(sb, userId) {
     const [
-      { data: doneRows },
+      { data: progressRows },
       { data: myCerts },
       { data: streakRows },
       { data: goal },
-      { data: earned }
+      { data: earned },
+      { data: challenges },
+      { data: challengeProgress }
     ] = await Promise.all([
-      sb.from('lesson_progress').select('lesson_id').eq('user_id', userId).eq('completed', true),
+      sb.from('lesson_progress').select('lesson_id, completed, lessons(course_id, courses(title))').eq('user_id', userId),
       sb.from('certificates').select('id').eq('user_id', userId),
       sb.from('challenge_completions').select('completed_date').eq('user_id', userId)
         .order('completed_date', { ascending: false }).limit(60),
       sb.from('learning_goals').select('*').eq('user_id', userId).eq('status', 'active')
         .order('created_at', { ascending: false }).limit(1).maybeSingle(),
       sb.from('user_achievements').select('earned_at, achievements(code, title, description, icon, category)')
-        .eq('user_id', userId).order('earned_at', { ascending: false })
+        .eq('user_id', userId).order('earned_at', { ascending: false }),
+      sb.from('challenges').select('id, title').order('created_at').limit(20),
+      sb.from('challenge_progress').select('challenge_id, status').eq('user_id', userId)
     ]);
 
-    const lessonsDone = (doneRows || []).length;
+    const rows = progressRows || [];
+    const lessonsDone = rows.filter(r => r.completed).length;
     const certsCount = (myCerts || []).length;
     const streak = computeStreakFromRows(streakRows || []);
 
-    return {
+    const courseMap = {};
+    rows.forEach(r => {
+      const c = r.lessons?.courses;
+      const courseId = r.lessons?.course_id;
+      if (!c || !courseId) return;
+      if (!courseMap[courseId]) courseMap[courseId] = { title: c.title, done: 0, total: 0 };
+      courseMap[courseId].total += 1;
+      if (r.completed) courseMap[courseId].done += 1;
+    });
+
+    const progressByChallenge = {};
+    (challengeProgress || []).forEach(p => { progressByChallenge[p.challenge_id] = p.status; });
+    const openChallenge = (challenges || []).find(c => progressByChallenge[c.id] !== 'completed') || null;
+
+    const stats = {
       lessonsDone,
       certsCount,
       streak,
       goal: goal || null,
       achievements: earned || [],
       level: levelInfo(lessonsDone)
+    };
+    stats.nextAction = computeNextAction(stats, courseMap, openChallenge);
+    return stats;
+  }
+
+  /** Deterministic, rule-based "what should I do next" — no AI call needed
+   *  for the common cases. Priority: finish something nearly done > work
+   *  toward the active goal > resume something in progress > try an open
+   *  challenge > set a goal > start something new. */
+  function computeNextAction(stats, courseMap, openChallenge) {
+    const courses = Object.values(courseMap);
+
+    const nearlyDone = courses.find(c => c.total - c.done > 0 && c.total - c.done <= 2);
+    if (nearlyDone) {
+      const left = nearlyDone.total - nearlyDone.done;
+      return {
+        text: `You're close to finishing "${nearlyDone.title}" — ${left} lesson${left === 1 ? '' : 's'} left.`,
+        ctaLabel: 'Finish It', ctaHref: 'skillstream-self-paced.html'
+      };
+    }
+    if (stats.goal) {
+      return {
+        text: `Keep working toward your goal: ${stats.goal.subject}.`,
+        ctaLabel: 'Continue Learning', ctaHref: 'skillstream-self-paced.html'
+      };
+    }
+    const inProgress = courses.find(c => c.done > 0 && c.done < c.total);
+    if (inProgress) {
+      return {
+        text: `Pick up where you left off in "${inProgress.title}".`,
+        ctaLabel: 'Continue', ctaHref: 'skillstream-self-paced.html'
+      };
+    }
+    if (openChallenge) {
+      return {
+        text: `Try a learning challenge: "${openChallenge.title}".`,
+        ctaLabel: 'View Challenge', ctaHref: 'skillstream-challenges.html'
+      };
+    }
+    if (!stats.goal) {
+      return {
+        text: 'Set a learning goal so we can help you find your next step.',
+        ctaLabel: 'Set a Goal', ctaHref: 'skillstream-profile.html'
+      };
+    }
+    return {
+      text: 'Ready for something new — browse courses to get started.',
+      ctaLabel: 'Browse Courses', ctaHref: 'skillstream-courses.html'
     };
   }
 
@@ -139,6 +210,10 @@ const Incentives = (function () {
       .incentive-toast .icon{font-size:20px;}
       .incentive-toast .title{color:var(--gold-light,var(--gold));}
       .journey-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px;}
+      .next-action{background:var(--paper,#F3ECDA); border-radius:10px; padding:12px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+      .next-action .na-label{font-size:10.5px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); font-weight:700; margin-bottom:3px;}
+      .next-action .na-text{font-size:13.5px; color:var(--ink); font-weight:600; line-height:1.4;}
+      .next-action .na-cta{flex-shrink:0; background:var(--ink); color:#fff; padding:8px 14px; border-radius:8px; font-size:12.5px; font-weight:700; text-decoration:none;}
       .journey-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;}
       .journey-level{font-family:'Syne',sans-serif; font-weight:700; color:var(--ink); font-size:16px;}
       .journey-milestone{font-size:12px; color:#777;}
@@ -154,6 +229,20 @@ const Incentives = (function () {
         padding:11px; border-radius:9px; font-size:13.5px; font-weight:600; text-decoration:none;}
       .journey-secondary{display:block; margin-top:8px; text-align:center; color:var(--ink);
         font-size:12.5px; font-weight:600; text-decoration:underline;}
+      .reflection-card{
+        position:fixed; left:50%; bottom:0; transform:translateX(-50%) translateY(100%);
+        background:#fff; border:1px solid var(--line); border-top-left-radius:16px; border-top-right-radius:16px;
+        padding:16px 18px 20px; width:100%; max-width:480px; box-shadow:0 -8px 24px rgba(20,31,56,0.14);
+        z-index:210; transition:transform 0.3s ease; box-sizing:border-box;
+      }
+      .reflection-card.show{transform:translateX(-50%) translateY(0);}
+      .reflection-card .rc-label{font-size:10.5px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); font-weight:700; margin-bottom:4px;}
+      .reflection-card .rc-prompt{font-size:14.5px; font-weight:700; color:var(--ink); margin-bottom:10px;}
+      .reflection-card .rc-input{width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px;
+        font-family:inherit; font-size:13.5px; min-height:50px; resize:vertical; margin-bottom:10px; box-sizing:border-box;}
+      .reflection-card .rc-actions{display:flex; justify-content:flex-end; gap:8px;}
+      .reflection-card .rc-skip{background:none; border:none; color:#888; font-size:13px; font-weight:600; padding:8px 10px; cursor:pointer;}
+      .reflection-card .rc-submit{background:var(--ink); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;}
     `;
     document.head.appendChild(style);
   }
@@ -191,6 +280,15 @@ const Incentives = (function () {
 
     containerEl.innerHTML = `
       <div class="journey-card">
+        ${stats.nextAction ? `
+          <div class="next-action">
+            <div>
+              <div class="na-label">Next Best Action</div>
+              <div class="na-text">${escapeHtml(stats.nextAction.text)}</div>
+            </div>
+            <a class="na-cta" href="${stats.nextAction.ctaHref}">${escapeHtml(stats.nextAction.ctaLabel)}</a>
+          </div>
+        ` : ''}
         <div class="journey-top">
           <div class="journey-level">Level ${lvl.level}</div>
           <div class="journey-milestone">${escapeHtml(lvl.milestoneText)}</div>
@@ -215,6 +313,67 @@ const Incentives = (function () {
     return stats;
   }
 
+  const REFLECTION_PROMPTS = [
+    'What was hardest about this?',
+    'What would you explain differently to a friend?',
+    'Where might you use this in real life?',
+    'What changed in how you understood this?'
+  ];
+
+  // At most once per day, so this stays a light touch rather than an
+  // interruption after every single lesson/challenge.
+  function shouldShowReflection() {
+    try {
+      const today = new Date().toDateString();
+      if (localStorage.getItem('lne_reflection_last_shown') === today) return false;
+      localStorage.setItem('lne_reflection_last_shown', today);
+      return true;
+    } catch (e) {
+      return true; // if storage is unavailable, default to showing it
+    }
+  }
+
+  /** Optional, unscored reflection prompt after a lesson or challenge.
+   *  contextType: 'lesson' | 'challenge'. Never blocks navigation — it's a
+   *  dismissible bottom sheet, and skipping saves nothing. */
+  function showReflectionPrompt(sb, userId, contextType, contextId) {
+    if (!shouldShowReflection()) return;
+    injectStyles();
+
+    const prompt = REFLECTION_PROMPTS[Math.floor(Math.random() * REFLECTION_PROMPTS.length)];
+    const el = document.createElement('div');
+    el.className = 'reflection-card';
+    el.innerHTML = `
+      <div class="rc-label">Quick Reflection (optional)</div>
+      <div class="rc-prompt">${escapeHtml(prompt)}</div>
+      <textarea class="rc-input" placeholder="A sentence is plenty..."></textarea>
+      <div class="rc-actions">
+        <button class="rc-skip" type="button">Skip</button>
+        <button class="rc-submit" type="button">Save</button>
+      </div>
+    `;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+
+    function close() {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 300);
+    }
+
+    el.querySelector('.rc-skip').onclick = close;
+    el.querySelector('.rc-submit').onclick = async () => {
+      const response = el.querySelector('.rc-input').value.trim();
+      if (response) {
+        try {
+          await sb.from('reflections').insert({
+            user_id: userId, context_type: contextType, context_id: contextId, prompt, response
+          });
+        } catch (e) { /* non-critical — never block the learner on this */ }
+      }
+      close();
+    };
+  }
+
   return {
     levelInfo,
     skillsFromCourses,
@@ -223,6 +382,7 @@ const Incentives = (function () {
     checkAchievements,
     showToast,
     showToasts,
+    showReflectionPrompt,
     renderJourney
   };
 })();

@@ -230,6 +230,7 @@ async function saveProgress(challengeId, status){
 
   if(status === 'completed' && window.Incentives){
     Incentives.showToasts(await Incentives.checkAchievements(sb));
+    setTimeout(() => Incentives.showReflectionPrompt(sb, currentUser.id, 'challenge', challengeId), 900);
   }
 }
 

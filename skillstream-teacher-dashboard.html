@@ -84,6 +84,29 @@
   .quick-link .sub{font-size:12px; color:#8a8474;}
 
   .empty{background:#fff; border:1px dashed var(--line); border-radius:14px; padding:26px 18px; text-align:center; color:#8a8474; font-size:14px;}
+
+  .insight-select{
+    width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+    font-family:inherit; font-size:13.5px; background:#fff; margin-bottom:14px;
+  }
+  .hardest-card{background:#F6E3DE; border-radius:14px; padding:14px 16px; margin-bottom:14px;}
+  .hardest-card .h-label{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#c0523a; font-weight:700; margin-bottom:4px;}
+  .hardest-card .h-title{font-family:'Syne',sans-serif; font-weight:700; color:var(--ink); font-size:15px; margin-bottom:3px;}
+  .hardest-card .h-stat{font-size:12.5px; color:#8a5548;}
+
+  .student-row{
+    background:#fff; border-radius:12px; padding:12px 14px; margin-bottom:8px; box-shadow:var(--shadow-soft);
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .student-row .s-name{font-weight:700; color:var(--ink); font-size:14px;}
+  .student-row .s-meta{font-size:11.5px; color:#8a8474; margin-top:2px;}
+  .student-row .s-bar{width:60px; height:6px; background:var(--line); border-radius:4px; overflow:hidden; margin-top:5px;}
+  .student-row .s-fill{height:100%; background:#c0523a;}
+  .student-row.ok .s-fill{background:var(--sage);}
+  .student-row .s-action{
+    flex-shrink:0; background:var(--ink); color:#fff; font-size:11.5px; font-weight:700;
+    padding:7px 11px; border-radius:8px; text-decoration:none; white-space:nowrap;
+  }
   .empty a{color:var(--ink); font-weight:700;}
   .loading{text-align:center; padding:30px; color:#8a8474;}
 
@@ -132,6 +155,13 @@
   <div class="section">
     <div class="section-title">Your Courses</div>
     <div id="courseList"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="section" id="insightsSection" style="display:none;">
+    <div class="section-title">Who Needs Help</div>
+    <select class="insight-select" id="insightCourseSelect" onchange="refreshInsights(this.value)"></select>
+    <div id="hardestLessonBox"></div>
+    <div id="strugglingList"><div class="loading">Loading…</div></div>
   </div>
 
   <div class="section">
@@ -307,6 +337,94 @@ async function loadDashboard(){
         <span class="badge ${c.is_published ? 'live' : 'draft'}">${c.is_published ? 'Published' : 'Draft'}</span>
       </div>
     </div>`;
+  }).join('');
+
+  loadInsights(courses.filter(c => (c.lessons?.[0]?.count || 0) > 0));
+}
+
+/* ---------- WHO NEEDS HELP ---------- */
+function loadInsights(coursesWithLessons){
+  const section = document.getElementById('insightsSection');
+  if(!coursesWithLessons || coursesWithLessons.length === 0){ section.style.display = 'none'; return; }
+
+  section.style.display = 'block';
+  const sel = document.getElementById('insightCourseSelect');
+  sel.innerHTML = coursesWithLessons.map(c => `<option value="${c.id}">${escapeHtml(c.title)}</option>`).join('');
+  refreshInsights(coursesWithLessons[0].id);
+}
+
+async function refreshInsights(courseId){
+  const hardestBox = document.getElementById('hardestLessonBox');
+  const listBox = document.getElementById('strugglingList');
+  hardestBox.innerHTML = '';
+  listBox.innerHTML = '<div class="loading">Loading…</div>';
+
+  const [{ data: lessonStats, error: lessonErr }, { data: studentStats, error: studentErr }] = await Promise.all([
+    sb.rpc('get_course_lesson_stats', { p_course_id: courseId }),
+    sb.rpc('get_course_student_stats', { p_course_id: courseId })
+  ]);
+
+  if(lessonErr || studentErr){
+    listBox.innerHTML = `<div class="empty">Couldn't load insights for this course.</div>`;
+    return;
+  }
+
+  // Hardest lesson: lowest completion ratio among lessons at least 2
+  // students have attempted (avoids one slow learner skewing the signal).
+  const attempted = (lessonStats || []).filter(l => l.students_started >= 2);
+  if(attempted.length){
+    const hardest = attempted.reduce((worst, l) => {
+      const ratio = l.students_completed / l.students_started;
+      const worstRatio = worst.students_completed / worst.students_started;
+      return ratio < worstRatio ? l : worst;
+    });
+    const pct = Math.round((hardest.students_completed / hardest.students_started) * 100);
+    if(pct < 70){
+      hardestBox.innerHTML = `
+        <div class="hardest-card">
+          <div class="h-label">Lesson Most Students Get Stuck On</div>
+          <div class="h-title">${escapeHtml(hardest.lesson_title)}</div>
+          <div class="h-stat">Only ${pct}% of students who started it have finished (${hardest.students_completed} of ${hardest.students_started}). Might be worth reviewing in class.</div>
+        </div>
+      `;
+    }
+  }
+
+  if(!studentStats || studentStats.length === 0){
+    listBox.innerHTML = `<div class="empty">No students have started this course yet.</div>`;
+    return;
+  }
+
+  const now = Date.now();
+  const withRatio = studentStats.map(s => ({
+    ...s,
+    ratio: s.total_lessons > 0 ? s.completed_count / s.total_lessons : 0,
+    daysSinceActive: s.last_activity ? Math.floor((now - new Date(s.last_activity).getTime()) / 86400000) : null
+  }));
+
+  const needsHelp = withRatio.filter(s => s.ratio < 0.5 || s.daysSinceActive === null || s.daysSinceActive > 7)
+    .sort((a, b) => a.ratio - b.ratio);
+
+  if(needsHelp.length === 0){
+    listBox.innerHTML = `<div class="empty">Everyone in this course is progressing well. 🎉</div>`;
+    return;
+  }
+
+  listBox.innerHTML = needsHelp.map(s => {
+    const pct = Math.round(s.ratio * 100);
+    const activityLabel = s.daysSinceActive === null ? 'No completed lessons yet'
+      : s.daysSinceActive === 0 ? 'Active today'
+      : `Last active ${s.daysSinceActive} day${s.daysSinceActive === 1 ? '' : 's'} ago`;
+    return `
+      <div class="student-row ${pct >= 50 ? 'ok' : ''}">
+        <div>
+          <div class="s-name">${escapeHtml(s.full_name || 'Learner')}</div>
+          <div class="s-meta">${s.completed_count}/${s.total_lessons} lessons &middot; ${activityLabel}</div>
+          <div class="s-bar"><div class="s-fill" style="width:${pct}%;"></div></div>
+        </div>
+        <a class="s-action" href="skillstream-recognition.html">Send Feedback</a>
+      </div>
+    `;
   }).join('');
 }
 

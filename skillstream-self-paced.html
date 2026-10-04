@@ -270,6 +270,7 @@
     font-weight:700; margin-bottom:12px;
   }
   .ai-actions{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+  .ai-subtitle{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#a8a094; margin:2px 0 8px;}
   .ai-chip{
     background:#F6ECD8; color:var(--ink); border:none; padding:9px 15px;
     border-radius:20px; font-size:13px; font-weight:600; cursor:pointer;
@@ -370,6 +371,15 @@
           <button class="ai-chip" onclick="askAI('explain')">Explain This Lesson</button>
           <button class="ai-chip" onclick="askAI('quiz')">Quiz Me</button>
           <button class="ai-chip" onclick="askAI('summarize')">Summarize</button>
+        </div>
+        <div class="ai-subtitle">Go Deeper</div>
+        <div class="ai-actions">
+          <button class="ai-chip" onclick="askAI('why')">Why?</button>
+          <button class="ai-chip" onclick="askAI('example')">Example</button>
+          <button class="ai-chip" onclick="askAI('deeper')">Go Deeper</button>
+          <button class="ai-chip" onclick="askAI('whatif')">What If?</button>
+          <button class="ai-chip" onclick="askAI('connect')">Connect This</button>
+          <button class="ai-chip" onclick="askAI('whereused')">Where Is This Used?</button>
         </div>
         <div class="ai-ask-row">
           <input type="text" id="aiQuestion" placeholder="Ask a question about this lesson...">
@@ -717,6 +727,7 @@ async function toggleComplete(){
   if(newState && window.Incentives){
     toast(Incentives.feedback.lessonComplete());
     Incentives.checkAchievements(sb).then(earned => Incentives.showToasts(earned));
+    setTimeout(() => Incentives.showReflectionPrompt(sb, currentUser.id, 'lesson', activeLesson.id), 900);
   } else {
     toast(newState ? 'Lesson complete!' : 'Marked incomplete');
   }
@@ -795,6 +806,18 @@ async function askAI(mode){
     prompt = `Create a short 3-question quiz (with answers shown after each question) testing understanding of the lesson "${activeLesson.title}" from the course "${activeCourse.title}". Lesson notes: ${activeLesson.content || '(no notes provided, use the title and course context)'}.`;
   } else if(mode === 'summarize'){
     prompt = `Summarize the key takeaways of the lesson "${activeLesson.title}" from the course "${activeCourse.title}" in 3-5 bullet points. Lesson notes: ${activeLesson.content || '(no notes provided, use the title and course context)'}.`;
+  } else if(mode === 'why'){
+    prompt = `A self-paced learner is studying the lesson "${activeLesson.title}" from the course "${activeCourse.title}". Lesson notes: ${activeLesson.content || '(no notes provided, use the title and course context)'}. Explain WHY this is true or works this way — the underlying reason or mechanism, not just a restatement of the fact. Keep it under 120 words.`;
+  } else if(mode === 'example'){
+    prompt = `For the lesson "${activeLesson.title}" from the course "${activeCourse.title}" (notes: ${activeLesson.content || 'use the title and course context'}), give one clear, concrete, relatable example that illustrates the idea. Keep it under 100 words.`;
+  } else if(mode === 'deeper'){
+    prompt = `A learner has understood the basics of the lesson "${activeLesson.title}" from the course "${activeCourse.title}" (notes: ${activeLesson.content || 'use the title and course context'}) and wants to go deeper. Introduce one more advanced or nuanced idea connected to this lesson, pitched just above their current level — not a full new topic. Keep it under 150 words.`;
+  } else if(mode === 'whatif'){
+    prompt = `For the lesson "${activeLesson.title}" from the course "${activeCourse.title}" (notes: ${activeLesson.content || 'use the title and course context'}), pose one thought-provoking "what if" scenario that tests or extends understanding of this idea, and briefly discuss what would happen. Keep it under 120 words.`;
+  } else if(mode === 'connect'){
+    prompt = `For the lesson "${activeLesson.title}" from the course "${activeCourse.title}" (notes: ${activeLesson.content || 'use the title and course context'}), name 2-3 other topics or subjects this idea connects to, and briefly explain each connection in one sentence. Keep it under 120 words.`;
+  } else if(mode === 'whereused'){
+    prompt = `For the lesson "${activeLesson.title}" from the course "${activeCourse.title}" (notes: ${activeLesson.content || 'use the title and course context'}), explain where this is actually used in the real world — jobs, everyday life, or other fields. Keep it under 120 words.`;
   } else {
     if(!question){ toast('Type a question first'); return; }
     prompt = `In the context of the lesson "${activeLesson.title}" (course: "${activeCourse.title}"), answer this student question clearly and concisely: ${question}`;
