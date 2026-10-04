@@ -51,6 +51,15 @@
   .stat .val{font-family:'Syne',sans-serif; font-size:22px; font-weight:700; color:var(--ink);}
   .stat .lbl{font-size:11px; color:#777; margin-top:2px;}
 
+  .portfolio-subhead{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#a8a094; margin:14px 0 8px;}
+  .portfolio-subhead:first-child{margin-top:0;}
+  .portfolio-item{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:8px;}
+  .portfolio-item .p-title{font-weight:700; color:var(--ink); font-size:13.5px;}
+  .portfolio-item .p-meta{font-size:11.5px; color:#8a8474; margin-top:2px;}
+  .portfolio-item .p-response{font-size:13px; color:#5c5648; margin-top:6px; line-height:1.5;}
+  .portfolio-item a.p-link{font-size:12px; color:var(--ink); font-weight:600; margin-top:6px; display:inline-block;}
+  .portfolio-empty{font-size:12.5px; color:#999; padding:6px 2px 10px;}
+
   .badge-grid{
     display:flex; flex-wrap:wrap; gap:10px; margin-bottom:22px;
   }
@@ -127,6 +136,9 @@
 
   <div class="section-title" id="achievementsTitle" style="display:none;">Achievements</div>
   <div class="badge-grid" id="achievementsGrid"></div>
+
+  <div class="section-title" id="portfolioTitle" style="display:none;">Portfolio — What I Can Do</div>
+  <div id="portfolioContent"></div>
 
   <div class="section-title" id="feedbackTitle" style="display:none;">Feedback From Your Teachers</div>
   <div id="feedbackList"></div>
@@ -253,7 +265,7 @@ async function loadStats(){
   } else {
     const [{ data: progress }, { data: certs }] = await Promise.all([
       sb.from('lesson_progress').select('lesson_id, completed').eq('user_id', currentUser.id).eq('completed', true),
-      sb.from('certificates').select('id').eq('user_id', currentUser.id)
+      sb.from('certificates').select('id, issued_at, courses(title)').eq('user_id', currentUser.id)
     ]);
     const lessonsDone = (progress||[]).length;
     const certsEarned = (certs||[]).length;
@@ -264,7 +276,63 @@ async function loadStats(){
     renderAchievements();
     loadGoal();
     loadTeacherFeedback();
+    loadPortfolio(certs || []);
   }
+}
+
+/* ---------- PORTFOLIO ("what can this learner actually do") ----------
+   Pulls together certificates, Project Showcase entries, and completed
+   challenge responses into one view — the three places real demonstrated
+   work already lives — instead of a fourth new table. */
+async function loadPortfolio(certs){
+  const [{ data: projects }, { data: challengeRows }] = await Promise.all([
+    sb.from('projects').select('*').eq('user_id', currentUser.id).order('created_at', { ascending:false }),
+    sb.from('challenge_progress').select('*, challenges(title, type)').eq('user_id', currentUser.id)
+      .eq('status', 'completed').order('completed_at', { ascending:false })
+  ]);
+
+  const hasAny = certs.length || (projects && projects.length) || (challengeRows && challengeRows.length);
+  document.getElementById('portfolioTitle').style.display = hasAny ? 'block' : 'none';
+  if(!hasAny){ document.getElementById('portfolioContent').innerHTML = ''; return; }
+
+  let html = '';
+
+  if(certs.length){
+    html += `<div class="portfolio-subhead">Certificates</div>`;
+    html += certs.map(c => `
+      <div class="portfolio-item">
+        <div class="p-title">${escapeHtml(c.courses?.title || 'Course')}</div>
+        <div class="p-meta">Issued ${new Date(c.issued_at).toLocaleDateString()}</div>
+      </div>
+    `).join('');
+  }
+
+  html += `<div class="portfolio-subhead">Projects</div>`;
+  if(projects && projects.length){
+    html += projects.map(p => `
+      <div class="portfolio-item">
+        <div class="p-title">${escapeHtml(p.title)}</div>
+        ${p.subject ? `<div class="p-meta">${escapeHtml(p.subject)}</div>` : ''}
+        ${p.description ? `<div class="p-response">${escapeHtml(p.description)}</div>` : ''}
+        <a class="p-link" href="skillstream-showcase.html">View in Showcase &rarr;</a>
+      </div>
+    `).join('');
+  } else {
+    html += `<div class="portfolio-empty">No projects shared yet.</div>
+      <a class="p-link" href="skillstream-showcase.html">+ Share a Project</a>`;
+  }
+
+  if(challengeRows && challengeRows.length){
+    html += `<div class="portfolio-subhead">Completed Challenges</div>`;
+    html += challengeRows.map(c => `
+      <div class="portfolio-item">
+        <div class="p-title">${escapeHtml(c.challenges?.title || 'Challenge')}</div>
+        ${c.response ? `<div class="p-response">${escapeHtml(c.response)}</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('portfolioContent').innerHTML = html;
 }
 
 /* ---------- ACHIEVEMENTS (DB-backed — see achievements/user_achievements) ---------- */
