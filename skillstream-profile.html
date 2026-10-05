@@ -44,21 +44,21 @@
   }
   .role-badge.student{background:#EAF0EC; color:var(--sage);}
   .role-badge.teacher{background:#F5EAD6; color:var(--gold);}
-  .bio-text{font-size:13.5px; color:#666; margin-top:10px; line-height:1.5;}
+  .bio-text{font-size:14.5px; color:#666; margin-top:10px; line-height:1.5;}
 
   .stats-row{display:flex; gap:10px; margin-bottom:22px;}
   .stat{flex:1; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 8px; text-align:center;}
-  .stat .val{font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--ink); line-height:1.1;}
-  .stat .lbl{font-size:12px; color:#777; margin-top:4px;}
+  .stat .val{font-family:'Inter',sans-serif; font-size:26px; font-weight:700; color:var(--ink); line-height:1.1; letter-spacing:-0.5px;}
+  .stat .lbl{font-size:13px; color:#777; margin-top:4px;}
 
   .portfolio-subhead{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#a8a094; margin:14px 0 8px;}
   .portfolio-subhead:first-child{margin-top:0;}
   .portfolio-item{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:8px;}
-  .portfolio-item .p-title{font-weight:700; color:var(--ink); font-size:13.5px;}
-  .portfolio-item .p-meta{font-size:11.5px; color:#8a8474; margin-top:2px;}
-  .portfolio-item .p-response{font-size:13px; color:#5c5648; margin-top:6px; line-height:1.5;}
-  .portfolio-item a.p-link{font-size:12px; color:var(--ink); font-weight:600; margin-top:6px; display:inline-block;}
-  .portfolio-empty{font-size:12.5px; color:#999; padding:6px 2px 10px;}
+  .portfolio-item .p-title{font-weight:700; color:var(--ink); font-size:14.5px;}
+  .portfolio-item .p-meta{font-size:12.5px; color:#8a8474; margin-top:2px;}
+  .portfolio-item .p-response{font-size:14px; color:#5c5648; margin-top:6px; line-height:1.5;}
+  .portfolio-item a.p-link{font-size:13px; color:var(--ink); font-weight:600; margin-top:6px; display:inline-block;}
+  .portfolio-empty{font-size:13.5px; color:#999; padding:6px 2px 10px;}
 
   .badge-grid{
     display:flex; flex-wrap:wrap; gap:9px; margin-bottom:22px;
@@ -78,7 +78,7 @@
   }
   .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:20px;}
 
-  label{display:block; font-size:13px; font-weight:600; margin:14px 0 6px; color:var(--ink);}
+  label{display:block; font-size:14px; font-weight:600; margin:14px 0 6px; color:var(--ink);}
   label:first-child{margin-top:0;}
   input, textarea{
     width:100%; padding:11px 12px; border:1.5px solid var(--line); border-radius:9px;
@@ -370,14 +370,14 @@ async function loadGoal(){
   if(goal){
     view.innerHTML = `
       <div style="font-weight:700; color:var(--ink);">${escapeHtml(goal.subject)}</div>
-      ${goal.target ? `<div style="font-size:13px; color:#777; margin-top:3px;">${escapeHtml(goal.target)}</div>` : ''}
-      ${goal.deadline ? `<div style="font-size:12px; color:#999; margin-top:3px;">Target date: ${goal.deadline}</div>` : ''}
+      ${goal.target ? `<div style="font-size:14px; color:#777; margin-top:3px;">${escapeHtml(goal.target)}</div>` : ''}
+      ${goal.deadline ? `<div style="font-size:13px; color:#999; margin-top:3px;">Target date: ${goal.deadline}</div>` : ''}
       <button class="btn-primary" style="margin-top:10px;" onclick="markGoalComplete('${goal.id}')">Mark Goal Complete</button>
     `;
     view.style.display = 'block';
     form.style.display = 'none';
   } else {
-    view.innerHTML = `<div style="color:#777; font-size:13.5px;">No active goal yet — set one to keep your learning focused.</div>`;
+    view.innerHTML = `<div style="color:#777; font-size:14.5px;">No active goal yet — set one to keep your learning focused.</div>`;
     view.style.display = 'block';
     form.style.display = 'block';
   }
@@ -425,9 +425,9 @@ async function loadTeacherFeedback(){
   title.style.display = 'block';
   list.innerHTML = rows.map(r => `
     <div class="card" style="padding:14px 16px; margin-bottom:10px;">
-      <div style="font-weight:700; color:var(--ink); font-size:13.5px;">${escapeHtml(nameById[r.teacher_id])}${r.courses?.title ? ' &middot; ' + escapeHtml(r.courses.title) : ''}</div>
-      <div style="font-size:13.5px; margin-top:4px;">${escapeHtml(r.message)}</div>
-      <div style="font-size:11px; color:#999; margin-top:6px;">${new Date(r.created_at).toLocaleDateString()}</div>
+      <div style="font-weight:700; color:var(--ink); font-size:14.5px;">${escapeHtml(nameById[r.teacher_id])}${r.courses?.title ? ' &middot; ' + escapeHtml(r.courses.title) : ''}</div>
+      <div style="font-size:14.5px; margin-top:4px;">${escapeHtml(r.message)}</div>
+      <div style="font-size:12px; color:#999; margin-top:6px;">${new Date(r.created_at).toLocaleDateString()}</div>
     </div>
   `).join('');
 }
