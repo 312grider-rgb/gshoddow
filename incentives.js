@@ -202,7 +202,7 @@ const Incentives = (function () {
       .incentive-toast{
         position:fixed; left:50%; bottom:90px; transform:translateX(-50%) translateY(20px);
         background:var(--ink); color:#fff; padding:12px 18px; border-radius:12px;
-        display:flex; align-items:center; gap:10px; font-size:14.5px; font-weight:600;
+        display:flex; align-items:center; gap:10px; font-size:17px; font-weight:600;
         box-shadow:0 8px 24px rgba(20,31,56,0.25); z-index:200; opacity:0;
         transition:opacity 0.25s ease, transform 0.25s ease; max-width:88%;
       }
@@ -211,24 +211,24 @@ const Incentives = (function () {
       .incentive-toast .title{color:var(--gold-light,var(--gold));}
       .journey-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px;}
       .next-action{background:var(--paper,#F3ECDA); border-radius:10px; padding:12px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
-      .next-action .na-label{font-size:10.5px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); font-weight:700; margin-bottom:3px;}
-      .next-action .na-text{font-size:14.5px; color:var(--ink); font-weight:600; line-height:1.4;}
-      .next-action .na-cta{flex-shrink:0; background:var(--ink); color:#fff; padding:8px 14px; border-radius:8px; font-size:13.5px; font-weight:700; text-decoration:none;}
+      .next-action .na-label{font-size:13.5px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); font-weight:700; margin-bottom:3px;}
+      .next-action .na-text{font-size:17px; color:var(--ink); font-weight:600; line-height:1.4;}
+      .next-action .na-cta{flex-shrink:0; background:var(--ink); color:#fff; padding:8px 14px; border-radius:8px; font-size:16px; font-weight:700; text-decoration:none;}
       .journey-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;}
-      .journey-level{font-family:'Syne',sans-serif; font-weight:700; color:var(--ink); font-size:16px;}
-      .journey-milestone{font-size:13px; color:#777;}
+      .journey-level{font-family:'Syne',sans-serif; font-weight:700; color:var(--ink); font-size:17.5px;}
+      .journey-milestone{font-size:15.5px; color:#777;}
       .journey-track{height:8px; background:var(--line); border-radius:5px; overflow:hidden; margin-bottom:12px;}
       .journey-fill{height:100%; background:var(--sage,var(--gold));}
-      .journey-row{display:flex; justify-content:space-between; font-size:13.5px; color:#666; margin-bottom:6px;}
+      .journey-row{display:flex; justify-content:space-between; font-size:16px; color:#666; margin-bottom:6px;}
       .journey-row strong{color:var(--ink);}
-      .journey-goal{margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:14px; color:var(--charcoal,#2B2B2B);}
-      .journey-goal .g-label{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); font-weight:700; margin-bottom:3px;}
+      .journey-goal{margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:16.5px; color:var(--charcoal,#2B2B2B);}
+      .journey-goal .g-label{font-size:14px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); font-weight:700; margin-bottom:3px;}
       .journey-badges{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;}
       .journey-badge{font-size:18px; background:var(--paper,#F3ECDA); border-radius:8px; padding:5px 7px;}
       .journey-cta{display:block; margin-top:12px; text-align:center; background:var(--ink); color:#fff;
-        padding:11px; border-radius:9px; font-size:14.5px; font-weight:600; text-decoration:none;}
+        padding:11px; border-radius:9px; font-size:17px; font-weight:600; text-decoration:none;}
       .journey-secondary{display:block; margin-top:8px; text-align:center; color:var(--ink);
-        font-size:13.5px; font-weight:600; text-decoration:underline;}
+        font-size:16px; font-weight:600; text-decoration:underline;}
       .reflection-card{
         position:fixed; left:50%; bottom:0; transform:translateX(-50%) translateY(100%);
         background:#fff; border:1px solid var(--line); border-top-left-radius:16px; border-top-right-radius:16px;
@@ -236,13 +236,13 @@ const Incentives = (function () {
         z-index:210; transition:transform 0.3s ease; box-sizing:border-box;
       }
       .reflection-card.show{transform:translateX(-50%) translateY(0);}
-      .reflection-card .rc-label{font-size:10.5px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); font-weight:700; margin-bottom:4px;}
-      .reflection-card .rc-prompt{font-size:14.5px; font-weight:700; color:var(--ink); margin-bottom:10px;}
+      .reflection-card .rc-label{font-size:13.5px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); font-weight:700; margin-bottom:4px;}
+      .reflection-card .rc-prompt{font-size:17px; font-weight:700; color:var(--ink); margin-bottom:10px;}
       .reflection-card .rc-input{width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px;
-        font-family:inherit; font-size:13.5px; min-height:50px; resize:vertical; margin-bottom:10px; box-sizing:border-box;}
+        font-family:inherit; font-size:16px; min-height:50px; resize:vertical; margin-bottom:10px; box-sizing:border-box;}
       .reflection-card .rc-actions{display:flex; justify-content:flex-end; gap:8px;}
-      .reflection-card .rc-skip{background:none; border:none; color:#888; font-size:13px; font-weight:600; padding:8px 10px; cursor:pointer;}
-      .reflection-card .rc-submit{background:var(--ink); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;}
+      .reflection-card .rc-skip{background:none; border:none; color:#888; font-size:15.5px; font-weight:600; padding:8px 10px; cursor:pointer;}
+      .reflection-card .rc-submit{background:var(--ink); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:15.5px; font-weight:700; cursor:pointer;}
     `;
     document.head.appendChild(style);
   }
