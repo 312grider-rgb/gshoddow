@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Future Architect — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="css/theme.css" rel="stylesheet">
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');}catch(e){}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+
+/* Layout: a route map. The five activities are stations on one loop; every view returns to it.
+   Colours come from css/theme.css (ink, gold, cream, sage). Dark mode follows the app's 'theme' setting. */
+:root{
+  --bg:var(--cream);--surface:#FFFFFF;--raised:#FDFCFA;--muted:#6B6558;--line-soft:#F1EBDD;
+  --accent:#141F38;--on-accent:#FFFFFF;--accent-soft:#F3ECDA;--focus:#C9A24E;--gold-text:#8A6A1F;--link:#1F2E52;
+  --fast:#4F7556;--fast-soft:#E3EFE5;--steady:#8A6A1F;--steady-soft:#F6ECD2;--bumpy:#A8472F;--bumpy-soft:#F7E1DA;
+  --fact:#141F38;--on-fact:#FBF7EF;
+  --font-display:'Syne','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --font-body:'Inter','Segoe UI',system-ui,sans-serif;
+  --font-mono:'Inter','Segoe UI',system-ui,sans-serif;
+  --r:12px;
+}
+html[data-theme="dark"]{
+  --ink:#EDE9DD;--ink-2:#F5F1E6;--gold:#D9B366;--gold-light:#E9CD8F;--cream:#12172A;--sage:#7FAF88;--charcoal:#EDE9DD;--line:#2A3350;--paper:#232B47;
+  --surface:#1B2138;--raised:#222A45;--muted:#A9A89F;--line-soft:#232B47;
+  --accent:#E4C583;--on-accent:#141F38;--accent-soft:#2A3350;--focus:#E4C583;--gold-text:#E4C583;--link:#E4C583;
+  --fast:#8CC9A0;--fast-soft:#1F3A2B;--steady:#E4C583;--steady-soft:#3A3014;--bumpy:#F0917A;--bumpy-soft:#41211B;
+  --fact:#EDE9DD;--on-fact:#12172A;
+  color-scheme:dark;
+}
+header.top{background:linear-gradient(160deg,#141F38 0%,#1F2E52 100%);color:#FBF7EF;padding:26px 20px 28px}
+header.top .eyebrow{color:#E4C583;font-size:12px;letter-spacing:2.2px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+header.top h1{margin:0;font-size:30px;font-weight:700;color:#FBF7EF}
+header.top p{margin:8px 0 0;font-size:15px;opacity:.85;max-width:60ch}
+header.top .banner-link{display:inline-block;margin-top:14px;color:#E4C583;font-weight:600;font-size:14px}
+*{box-sizing:border-box}
+body{margin:0;padding-bottom:40px;background:var(--bg);color:var(--ink);font:400 1rem/1.55 var(--font-body);-webkit-font-smoothing:antialiased}
+#app{max-width:1120px;margin-inline:auto;padding:20px 20px 0}
+.loading{padding:40px 0}
+h1,h2,h3,h4{font-family:var(--font-display);margin:0;line-height:1.12;text-wrap:balance;letter-spacing:-.012em}
+.h3{font-size:1.3rem;font-weight:800}.h4{font-size:1rem;font-weight:800}
+p,ul,ol{margin:0}
+ul,ol{padding-inline-start:1.1rem}
+.mono{font-family:var(--font-mono);font-size:.76rem;letter-spacing:.02em}
+.dim,.hint{color:var(--muted)}.hint{font-size:.875rem}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:44px;padding:.5rem .95rem;border:1px solid var(--line);background:var(--raised);color:var(--ink);border-radius:var(--r);font-weight:600;font-size:.92rem;line-height:1.2;text-align:center}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.small{min-height:36px;padding:.3rem .7rem;font-size:.82rem}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn:disabled{opacity:.55;cursor:default}
+.link{background:none;border:0;padding:6px 0;color:var(--link);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+/* header */
+.fa-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-block:14px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;text-align:start}
+.brand span{display:grid;line-height:1.1}.brand strong{font:800 1.1rem var(--font-display)}.brand small{color:var(--muted)}
+.levels{display:flex;flex-wrap:wrap;gap:6px;margin-inline-start:auto}
+.lv{min-height:40px;padding:.3rem .8rem;border:1px solid var(--line);background:var(--raised);border-radius:999px;font-size:.85rem;font-weight:600}
+.lv[aria-checked="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.save{color:var(--muted);flex-basis:100%}
+@media(min-width:760px){.save{flex-basis:auto}}
+
+/* hero */
+.hero{display:grid;gap:24px;padding-block:8px 24px;align-items:center}
+@media(min-width:860px){.hero{grid-template-columns:minmax(0,1fr) 260px}}
+.eyebrow{color:var(--gold-text);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em}
+.hero-h{font-size:clamp(1.9rem,5.5vw,3.1rem);font-weight:800;max-width:19ch}
+.lede{margin-top:14px;max-width:62ch;color:var(--muted);font-size:1.05rem}
+.lede.small{font-size:1rem;margin-top:8px}
+.hero svg{width:100%;max-width:260px;justify-self:end;color:var(--muted)}
+.projbar{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-top:22px}
+.projbar .field{flex:1 1 260px}
+.note{margin-top:12px;color:var(--muted);font-size:.9rem}
+
+/* route */
+h2.sec{font-size:1.5rem;font-weight:800;margin-block:28px 14px}
+.route{position:relative;display:grid;gap:12px;padding-inline-start:44px;margin:0;list-style:none}
+.route::before{content:"";position:absolute;inset-block:18px;inset-inline-start:15px;border-inline-start:2px dashed var(--line)}
+.stop{position:relative;list-style:none}
+.badge{position:absolute;inset-inline-start:-44px;top:12px;width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center}
+.stop-btn{display:grid;gap:8px;width:100%;height:100%;text-align:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.stop-btn:hover{border-color:var(--gold)}
+.stop-btn h3{font-size:1.1rem;font-weight:800}.stop-btn p{color:var(--muted);font-size:.9rem}
+.bar{display:block;height:6px;background:var(--line-soft);border-radius:3px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--gold)}
+.loop{margin-top:12px;color:var(--muted)}
+@media(min-width:1000px){
+  .route{grid-template-columns:repeat(5,minmax(0,1fr));padding-inline-start:0;padding-top:44px}
+  .route::before{inset-block:auto;inset-inline:16px;top:15px;border-inline-start:0;border-top:2px dashed var(--line)}
+  .badge{inset-inline-start:12px;top:-44px}
+}
+@media(prefers-reduced-motion:no-preference){.bar>i{transition:width .3s}}
+
+/* cards and dashboard */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:12px;align-content:start}
+.two{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));margin-top:28px}
+.plist{list-style:none;padding:0;display:grid;gap:8px}
+.prow{display:flex;flex-wrap:wrap;gap:8px 12px;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--raised)}
+.prow.on{border-color:var(--gold);box-shadow:inset 3px 0 0 var(--gold)}
+.pmeta{display:grid;gap:2px;min-width:0}.pmeta strong{overflow-wrap:anywhere}
+.pact{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.meter{display:grid;gap:4px}.meter .row{display:flex;justify-content:space-between;gap:8px}
+.meter small{color:var(--muted)}
+.qcard{margin-top:28px;border-inline-start:4px solid var(--gold);padding:6px 0 6px 16px;display:grid;gap:10px;justify-items:start}
+.qcard p.q{font:700 1.35rem/1.25 var(--font-display);max-width:46ch}
+
+/* section view */
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;padding-top:14px}
+.crumb{color:var(--muted);overflow-wrap:anywhere}
+.sec-title{font-size:clamp(1.7rem,4.5vw,2.6rem);font-weight:800;margin-top:6px;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.sec-title .n{color:var(--gold-text)}
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin-block:18px}
+.step{min-height:40px;padding:.25rem .8rem;border:1px solid var(--line);background:var(--raised);border-radius:var(--r);font-size:.85rem;font-weight:600}
+.step[aria-current="step"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.work{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:960px){.work{grid-template-columns:minmax(0,1fr) 320px}.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);align-self:start}}
+.main{display:grid;gap:18px;align-content:start;min-width:0}
+.nav{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;margin-top:6px}
+.notice{padding:10px 14px;border:1px solid var(--steady);background:var(--steady-soft);border-radius:var(--r);margin-top:14px}
+
+/* fields */
+.field{display:grid;gap:6px;min-width:0}
+.field label,.lbl{font-weight:600;font-size:.95rem}
+input[type=text],textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--raised);border:1px solid var(--line);border-radius:var(--r);padding:.6rem .7rem;min-height:44px}
+textarea{resize:vertical}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.cb{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.done{text-decoration:line-through;color:var(--muted)}
+.lrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lrow input[type=text]{flex:1 1 160px;min-width:0}
+.chain{list-style:none;padding:0;display:grid}
+.cl{position:relative;display:grid;gap:6px;padding-inline-start:28px;padding-bottom:16px}
+.cl::before{content:"";position:absolute;inset-inline-start:7px;top:22px;bottom:-4px;border-inline-start:2px solid var(--line)}
+.cl:last-child::before{display:none}
+.cl::after{content:"";position:absolute;inset-inline-start:2px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--gold)}
+.cl .mono{color:var(--muted)}
+.claim{display:grid;grid-template-columns:minmax(0,1fr) 170px auto;gap:8px;align-items:center}
+@media(max-width:560px){.claim{grid-template-columns:1fr}}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.85rem;color:var(--muted)}
+.topics{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+.topic{display:grid;gap:4px;text-align:start;padding:10px 12px;background:var(--raised);border:1px solid var(--line);border-radius:var(--r);font-weight:600}
+.topic[aria-pressed="true"]{border-color:var(--gold);background:var(--accent-soft)}
+.topic small{color:var(--muted);font-weight:400}
+
+/* tags */
+.tag{display:inline-block;font:500 .7rem var(--font-mono);padding:2px 8px;border-radius:999px;border:1px solid currentColor;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.tag.fact{background:var(--fact);color:var(--on-fact);border-color:var(--fact)}
+.tag.assumption{color:var(--steady);background:var(--steady-soft)}
+.tag.possibility{color:var(--muted);border-style:dashed}
+.tag.supports{color:var(--fast);background:var(--fast-soft)}.tag.against{color:var(--bumpy);background:var(--bumpy-soft)}.tag.neutral{color:var(--muted)}
+
+/* coach */
+.asks{display:grid;gap:6px;color:var(--ink)}
+.coach-out{white-space:pre-wrap;font-size:.95rem;min-height:1.5em}
+.coach-out.empty{color:var(--muted)}
+
+/* scenarios */
+.scn-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))}
+.k-fast{--c:var(--fast);--cs:var(--fast-soft)}.k-steady{--c:var(--steady);--cs:var(--steady-soft)}.k-bumpy{--c:var(--bumpy);--cs:var(--bumpy-soft)}
+.scn{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:var(--r);padding:14px;display:grid;gap:10px;align-content:start;min-width:0}
+.scn .kind{color:var(--c);text-transform:uppercase;letter-spacing:.06em}
+.scn h3{font-size:1.2rem;font-weight:800}
+.scn h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:4px}
+.scn ul{display:grid;gap:4px}.basis{list-style:none;padding:0}.basis li{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+details.cmp{border:1px solid var(--line);border-radius:var(--r);padding:10px 14px;background:var(--surface)}
+details.cmp summary{font-weight:600;cursor:pointer;min-height:36px;display:flex;align-items:center}
+.tablewrap{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;min-width:640px;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--line);padding:8px;text-align:start;vertical-align:top}
+th{background:var(--raised)}
+
+/* map */
+.mapwrap{overflow-x:auto;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:8px}
+.mapsvg{display:block;margin-inline:auto}
+.edge{fill:none;stroke:var(--line);stroke-width:1.8}
+.node{cursor:pointer}
+.node rect{fill:var(--cs,var(--raised));stroke:var(--c,var(--line));stroke-width:1.5}
+.node text{fill:var(--ink);font:500 12px var(--font-body)}
+.node.root rect{fill:var(--ink);stroke:var(--ink)}.node.root text{fill:var(--bg)}
+.node.sel rect{stroke:var(--gold-text);stroke-width:3.5}
+.conf-row{display:grid;gap:6px;padding:10px 12px;border-inline-start:5px solid var(--c);background:var(--raised);border-radius:var(--r)}
+.conf-row label{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.sigs{list-style:none;padding:0;display:grid;gap:8px}
+.sig{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:8px 12px;border-inline-start:5px solid var(--c);background:var(--raised);border-radius:var(--r)}
+.sig span{display:grid;min-width:0;flex:1 1 180px}.sig small{color:var(--muted)}
+
+/* ladder */
+.ladder{list-style:none;padding:0;display:grid}
+.rung{position:relative;padding-inline-start:30px;padding-bottom:18px;display:grid;gap:6px}
+.rung::before{content:"\2193";position:absolute;inset-inline-start:0;top:0;font:700 1.1rem var(--font-mono);color:var(--gold-text)}
+.rung.goal{padding:12px 12px 12px 30px;background:var(--accent-soft);border-radius:var(--r);margin-bottom:12px}
+.rung.goal::before{content:"\2605"}
+
+/* opportunity and test cards */
+.stack{display:grid;gap:12px}
+.xcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:14px}
+.xcard.open{border-color:var(--gold)}
+.card-head{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;width:100%;text-align:start;background:none;border:0;padding:4px 0;min-height:44px}
+.card-head strong{flex:1 1 220px;min-width:0;overflow-wrap:anywhere}
+.status{font:500 .72rem var(--font-mono);padding:2px 8px;border-radius:4px;background:var(--line-soft);text-transform:uppercase;letter-spacing:.05em}
+.s-testing,.s-investigating{background:var(--accent-soft);color:var(--accent)}
+.s-resolved,.s-looks-real{background:var(--fast-soft);color:var(--fast)}
+.s-dropped{background:var(--bumpy-soft);color:var(--bumpy)}
+.evl{list-style:none;padding:0;display:grid;gap:6px}
+.evl li{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.evl li span.t{flex:1 1 200px;min-width:0;overflow-wrap:anywhere}
+.cols{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem;max-width:70ch}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Future Architect</h1>
+  <p>Learn to understand change, spot opportunities, and build the future you want. No one can predict the future, but anyone can get better at preparing for it.</p>
+  <a class="banner-link" href="skillstream-ai-hub.html">&larr; Back to AI Tools</a>
+</header>
+<div id="app"><p class="loading">Loading Future Architect...</p></div>
+<script src="skillstream-auth.js"></script>
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const now=()=>Date.now();
+const trim=s=>String(s==null?'':s).trim();
+const slug=s=>String(s).toLowerCase().replace(/\W+/g,'-');
+const filled=a=>(a||[]).filter(x=>trim(typeof x==='string'?x:x&&x.text)).length;
+const getPath=(o,path)=>path.split('.').reduce((a,k)=>a==null?a:a[k],o);
+function setPath(o,path,v){const ks=path.split('.');let a=o;for(let i=0;i<ks.length-1;i++){if(a[ks[i]]==null)a[ks[i]]={};a=a[ks[i]];}a[ks[ks.length-1]]=v;}
+const fmtDate=t=>{try{return new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'});}catch(e){return '';}};
+const idFor=p=>'f_'+p.replace(/[^\w]+/g,'_');
+
+/* ---------- content ---------- */
+const LEVELS=[{id:'kids',label:'Children',sub:'Ages 5 to 9'},{id:'middle',label:'Middle school',sub:'Ages 10 to 13'},{id:'high',label:'High school',sub:'Ages 14 to 17'},{id:'adult',label:'University & adults',sub:'18 and over'}];
+const LV_ORDER=['kids','middle','high','adult'];
+const SECTIONS=[
+{id:'understand',n:1,title:'Understand Change',
+ blurb:{kids:'Find out what is changing and what happens next.',all:'Explore why something is changing, who gains, who loses, and what follows.'},
+ intro:{kids:'Pick something that is changing. Say what happens, and then what happens after that.',middle:'Choose a change, explain what drives it, and follow its effects one step at a time.',all:'Separate what you know from what you assume, then follow the consequences past the first step.'}},
+{id:'opportunities',n:2,title:'Discover Opportunities',
+ blurb:{kids:'Find a problem you could help with.',all:'Turn a change into problems people may need solved, then plan the cheapest check.'},
+ intro:{kids:'Find problems people might have. Then think of one small thing to try.',all:'An opportunity is a guess until someone tests it. Describe the problem, who has it, and the cheapest way to check.'}},
+{id:'futures',n:3,title:'Explore Possible Futures',
+ blurb:{kids:'Imagine three ways things could go.',all:'Compare three possible futures with their causes, risks, opportunities and early signs.'},
+ intro:{kids:'Things can go in different ways. Imagine three of them.',all:'Futures are possibilities, not predictions. Compare how a change could unfold and what to watch for.'}},
+{id:'design',n:4,title:'Design My Future',
+ blurb:{kids:'Pick a future you want, then plan small steps.',all:'Describe the future you want to help create and plan backward from it.'},
+ intro:{kids:'Decide what you would like to make better. Then plan small steps.',all:'Start from the future you want. Work out what has to be true and what has to happen first.'}},
+{id:'test',n:5,title:'Test My Ideas',
+ blurb:{kids:'Check your ideas by trying them.',all:'Record predictions and assumptions, run small experiments, and update what you believe.'},
+ intro:{kids:'Guess, try, and see what happens. Then change your mind if you need to.',all:'Turn assumptions into small experiments. You are scored on how well you reason, not on being right.'}}];
+const DOMAINS=['Technology','Science','Education','Economics','Business','Jobs','Society','Demographics','Environment','Human behavior','Culture'];
+const TOPICS={
+kids:[['Robots that help at school','Technology'],['Cars that drive themselves','Technology'],['More trees in cities','Environment'],['Talking helpers on phones','Technology'],['Learning from videos at home','Education']],
+middle:[['AI homework helpers','Education'],['Electric buses and cars','Environment'],['Everything bought online','Business'],['Fewer paper books','Culture'],['Solar panels on more roofs','Science']],
+high:[['Personal AI tutors getting cheaper','Education'],['Remote work staying common','Jobs'],['Electric cars replacing petrol cars','Economics'],['Solar power getting cheaper','Science'],['More people earning through gig work','Jobs'],['Social media shaping how teens learn','Society']],
+adult:[['AI changing entry-level jobs','Jobs'],['Aging populations in many countries','Demographics'],['Skills-based hiring replacing degrees','Jobs'],['Lab-grown and fermented food','Science'],['Water stress in growing cities','Environment'],['Micro-credentials competing with universities','Education']]};
+const KIND_LABEL={fast:'Rapid, positive',steady:'Gradual',bumpy:'Difficult'};
+const TYPE_LABEL={fact:'Fact',assumption:'Assumption',possibility:'Possibility'};
+const SIG_STATES=['Not watching','Strengthening','Stable','Weakening','Contradicting'];
+const LADDER_ALL=[['y5','In 5 years'],['y3','In 3 years'],['y1','In 1 year'],['m6','In 6 months'],['d30','In 30 days'],['w1','This week'],['t0','Today']];
+const LADDERS={kids:[['y3','One day, when I am older'],['y1','Next year'],['d30','Next month'],['w1','This week'],['t0','Today']],middle:[['y3','In 3 years'],['y1','In 1 year'],['m6','In 6 months'],['w1','This week'],['t0','Today']],high:LADDER_ALL,adult:LADDER_ALL};
+const QBANK={
+kids:['What is one thing that changed since you were smaller?','If a robot did one chore at home, what would happen next?','Who would be happy about it? Who might not be?','What could you try today to find out if your idea works?','What is something you guessed but have not checked?'],
+middle:['What do you assume will never change? What could change it?','Who benefits from this change and who might lose?','What happens first? And then what?','What evidence would prove you wrong?','What is a cheap way to test your idea this week?'],
+high:['What assumption have I never checked?','Who has a reason to speed this up, and who has a reason to slow it down?','What is the bottleneck: money, skills, rules, trust or time?','What would change my mind?','What am I not seeing because of where I stand?','Which question, if answered, would change my plan the most?']};
+const ASK={
+understand:{kids:['What happened first?','And then what happened?','Who is happy about it? Who is not?'],all:['What evidence supports that?','What are you assuming?','Who benefits, and who loses?','And then what?','What could slow this down or reverse it?']},
+opp:{kids:['Who has this problem?','What small thing could you try?'],all:['Who has this problem today, and how do they cope?','What do people already use instead?','What would make this opportunity disappear?','What is the cheapest way to test it this week?']},
+question:{kids:['What do I really want to find out?'],all:['Could this question have more than one answer?','Does it say who, what and by when?','What would I do differently depending on the answer?']},
+scenarios:{kids:['Which way would you like it to go?','What could we do to help?'],all:['Which assumption holds each future up?','Which early sign would show a future getting closer?','What could I do now that helps in all three?','Who has a reason to push each future?']},
+design:{kids:['What do I need to learn first?','What can I do today?'],all:['What would have to be true for this future to exist?','What must happen before each step?','What is the smallest first step I can take today?','What is the bottleneck: time, money, skills, rules or trust?']},
+test:{kids:['How can I check?','What did I find out?'],all:['What result would change my mind?','Is this the cheapest test I can run?','What would count as evidence against me?','What did I learn that I can use next time?']}};
+const PERSONA={
+kids:'The learner is about 5 to 9 years old. Use very simple words. Write at most 3 short sentences and ask exactly one question. Be warm.',
+middle:'The learner is 10 to 13 years old. Use plain language. Write at most 90 words and ask 2 questions.',
+high:'The learner is 14 to 17 years old. Be direct. Write at most 120 words and ask up to 3 sharp questions.',
+adult:'The learner is a university student or adult. Be concise and rigorous. Write at most 140 words and ask up to 3 sharp questions.'};
+const BASE='You are the coach inside Future Architect, a tool that teaches people to think about possible futures. You never predict the future and never give the answer. Your job is to make the learner think better. Plain text only, no markdown symbols. If you state a fact, say how the learner could check it. Keep the tone hopeful and age-appropriate, avoid frightening detail, and stay politically balanced.';
+const TASK={
+understand:'Challenge the learner\'s explanation of this change. Look for hidden assumptions, missing people or groups, and effects they have not followed with "and then what?". First name one specific thing that is good.',
+opp:'Challenge whether this is a real problem for real people. Ask about evidence, existing alternatives, and the cheapest test. First name one specific thing that is good.',
+question:'The learner wrote a question about the future. Say whether it is too vague or too closed. Then offer two sharper versions of THEIR question, each starting with "Try:".',
+scenarios:'Challenge the three futures. Point to what is missing, name the weakest assumption, and ask which early sign would be the best one to watch.',
+design:'Challenge the plan. Ask what would have to be true, what must happen before the first step, and what the smallest first step is.',
+test:'Challenge the test. Ask whether the experiment is cheap, whether any result would change the learner\'s mind, and what would count as evidence against.'};
+
+/* ---------- state ---------- */
+let S=null,aiBlocked=false,userId=null,sb=null,gradeLevel=null,offlineLoad=false;
+let saveText='Loading...';
+const dirtyIds=new Set(),deletedIds=new Set();
+const ui={view:'home',section:null,step:0,coach:{},coachKind:'',editScn:new Set(),openOpp:null,openTest:null,nodeSel:'root',notice:'',busy:null,confirm:null,focus:null,ctl:null};
+const proj=()=>S.projects.find(p=>p.id===S.activeId)||S.projects[0];
+const pick=v=>{if(v&&typeof v==='object'&&!Array.isArray(v))return v[S.level]!=null?v[S.level]:(v.all!=null?v.all:(v.high!=null?v.high:(v.middle!=null?v.middle:(v.adult!=null?v.adult:v.kids))));return v;};
+const atLeast=l=>LV_ORDER.indexOf(S.level)>=LV_ORDER.indexOf(l);
+const kidsMode=()=>S.level==='kids';
+
+function blank(title){return{id:'p_'+uid(),title:title||'Untitled project',example:false,created:now(),updated:now(),
+ understand:{change:'',domain:'',what:'',why:'',brakes:'',gain:'',lose:'',incentive:'',chain:['',''],claims:[{text:'',type:'assumption'}]},
+ opps:[],futures:{question:'',horizon:'3 years',scenarios:[],signals:{},ai:false},
+ design:{vision:'',outcome:'',conditions:[''],skills:[''],resources:[''],people:[''],long:[''],short:[''],actions:[{text:'',done:false}],ladder:{},fail:'',guarantee:'',safeguards:['']},
+ tests:[],coachAsks:0};}
+function fixProject(p){const b=blank();
+ ['understand','futures','design'].forEach(k=>{p[k]=Object.assign({},b[k],p[k]||{});});
+ p.opps=p.opps||[];p.tests=p.tests||[];p.futures.scenarios=p.futures.scenarios||[];p.futures.signals=p.futures.signals||{};
+ p.futures.scenarios.forEach(s=>{s.children=s.children||[];});p.design.ladder=p.design.ladder||{};
+ p.tests.forEach(t=>{t.evidence=t.evidence||[];});p.coachAsks=p.coachAsks||0;return p;}
+function ensure(){
+ if(!LV_ORDER.includes(S.level))S.level='high';S.qIdx=S.qIdx||0;
+ if(!Array.isArray(S.projects))S.projects=[];
+ if(!S.projects.length){const nb=blank();S.projects.push(nb);dirtyIds.add(nb.id);}
+ S.projects.forEach(fixProject);
+ if(!S.projects.some(p=>p.id===S.activeId))S.activeId=S.projects[0].id;}
+
+function seedProject(){
+ const t=now(),day=86400000,p=blank('Personal AI tutors for every student');p.id='p_example';p.example=true;p.created=t-6*day;p.updated=t-day;
+ p.understand={change:'Personal AI tutoring is becoming cheap enough for many students',domain:'Education',
+  what:'Tools that tutor one student at a time are getting easier to build and cheaper to run.',
+  why:'Running costs keep falling, and many families already study on phones and laptops.',
+  brakes:'Wrong answers, school rules, privacy worries, and unequal access to devices and internet.',
+  gain:'Students who cannot afford a tutor, teachers who gain time, and companies that build learning tools.',
+  lose:'Tutoring services that only sell basic help, and students who skip the effort of thinking.',
+  incentive:'Schools want results and safety. Parents want trust. Companies want users. Students want quick answers.',
+  chain:['More students get one-to-one help at home','Students expect lessons to adapt to them','Schools rethink homework, grading and class time','New products appear: progress reports for parents, tools for teachers'],
+  claims:[{text:'Software can explain topics and write practice questions.',type:'fact'},{text:'Tutoring costs less when software does the first pass.',type:'assumption'},{text:'Schools will allow AI tutors in class.',type:'possibility'}]};
+ const o1=uid(),o2=uid(),t1=uid(),t2=uid();
+ p.opps=[{id:o1,problem:'Parents cannot tell whether an AI tutor is really teaching their child.',who:'Parents of school-age children',why:'As tutors spread, trust becomes the missing piece.',evidence:'Parents already ask teachers for progress updates.',existing:'Progress charts inside each app',vanish:'Apps offer a simple, trusted progress report.',test:'Show a one-page mock summary to five parents and ask what they would change.',conf:40,status:'Investigating',ai:false,testId:t1},
+ {id:o2,problem:'Teachers have no time to read what each student asked an AI tutor.',who:'Teachers',why:'More tutor use means more activity to review.',evidence:'',existing:'Manual spot checks',vanish:'Tutor apps build good teacher summaries.',test:'Ask two teachers how they would use a ten-line class summary.',conf:25,status:'Idea',ai:false,testId:null}];
+ const mk=(kind,name,story,causes,opps,risks,signals,basis,children)=>({id:'s_'+uid(),kind,name,story,causes,opps,risks,signals,basis,children,conf:null,logged:false});
+ p.futures={question:'What could happen to school if every student can get a personal AI tutor?',horizon:'3 years',signals:{},ai:false,scenarios:[
+ mk('fast','Tutors for everyone','Good AI tutors become a normal, low-cost part of studying. Most students use one, and schools build lessons around what students already learned at home.',['Running costs keep falling','Schools and parents trust the tools','Tutors show reliable progress'],['Tools that help teachers read tutor activity','Progress reports parents understand','Training on how to learn with AI'],['Students lean on the tutor instead of thinking','Gaps between families with and without devices'],['Schools publish rules that allow AI tutors','Education budgets include tutor tools','Independent studies show learning gains'],[{text:'Software can already explain topics and make practice questions.',type:'fact'},{text:'Costs will keep falling.',type:'assumption'},{text:'Most schools adopt tutors within a few years.',type:'possibility'}],
+  [{id:'c_'+uid(),text:'Teachers spend more time on discussion and projects',children:[{id:'c_'+uid(),text:'Exams change to test thinking, not recall',children:[]}]}]),
+ mk('steady','Slow and uneven','Some schools and families adopt tutors while many wait. Rules, training and trust take years, so change arrives in pockets.',['Rules differ between schools and countries','Teachers need training and time','Parents worry about privacy'],['Teacher training programs','Privacy-friendly tutor tools','Tools that work on slow internet'],['Gaps grow between early and late adopters','Money spent on tools nobody uses'],['Pilot programs expand slowly','Teacher groups publish guidance','Study results look mixed'],[{text:'Schools often adopt new technology slowly.',type:'assumption'},{text:'Rules will stay different from place to place.',type:'possibility'}],
+  [{id:'c_'+uid(),text:'Early-adopter schools become models others copy',children:[]}]),
+ mk('bumpy','A rocky start','Early tutors give wrong answers or collect too much data. A few high-profile problems lead to strict limits before better versions arrive.',['Mistakes in tutor answers','Data privacy incidents','Public pressure on lawmakers'],['Tools that check tutor answers','Independent safety ratings','Tutors that run only on the student\'s device'],['Students lose trust in learning tools','Rules slow down helpful uses too'],['Reports of tutors giving wrong answers','New laws about student data','Schools banning tools'],[{text:'Any software can give wrong answers.',type:'fact'},{text:'Privacy problems will be common.',type:'assumption'},{text:'Strict limits arrive before better tools do.',type:'possibility'}],[])]};
+ p.futures.scenarios[0].conf=35;p.futures.scenarios[1].conf=45;p.futures.scenarios[2].conf=20;
+ p.design=Object.assign(p.design,{vision:'Help parents see what their child actually learns from an AI tutor.',outcome:'Five families use a weekly progress summary and tell me it helped.',
+  conditions:['Parents want summaries more than extra features','I can build a simple summary from what a student shares'],skills:['Writing clear summaries','Running short interviews','Building a simple web page'],resources:['A free page builder','Five willing parents'],people:['A teacher who can review my summary','A parent group'],
+  long:['Run a pilot with 20 families'],short:['Interview 5 parents','Test a one-page mock summary'],actions:[{text:'Write 5 interview questions',done:true},{text:'Ask two parents for 15 minutes',done:false}],
+  ladder:{y1:'20 families use the summary each week',m6:'Five families have tried it and I know what to change',d30:'Interviews are done and the mock summary is tested',w1:'Questions are written and two parents are booked',t0:'Write the first five questions'},
+  fail:'Parents liked the idea but never opened the summaries.',guarantee:'Building features before talking to any parent.',safeguards:['Talk to parents before building','Track weekly opens, not sign-ups']});
+ p.tests=[{id:t1,type:'assumption',statement:'At least 3 of 5 parents would read a weekly progress summary.',conf:55,horizon:'1 month',reasoning:'Parents already check report cards, and a short summary takes less time.',changeMind:'Fewer than 2 of 5 ask to see it again.',exp:'Show a one-page mock summary to five parents and ask if they would want it every week.',expSuccess:'Three or more say yes and name something they would do with it.',status:'Testing',evidence:[{id:uid(),text:'Two parents said yes right away. One asked how it is made.',dir:'supports',date:t-2*day}],outcome:'',updated:null,lesson:'',fromOpp:o1},
+ {id:t2,type:'prediction',statement:'Parents will care more about price than about progress reports.',conf:70,horizon:'1 month',reasoning:'Free tools are everywhere.',changeMind:'Parents ask about reports before price.',exp:'Ask five parents what they would look at first.',expSuccess:'Most mention price first.',status:'Resolved',evidence:[{id:uid(),text:'Four of five asked about accuracy before price.',dir:'against',date:t-4*day}],outcome:'contradicted',updated:30,lesson:'I assumed parents think like shoppers. They worry about their child\'s learning. Next time I will ask about worries first.'}];
+ return p;}
+/* ---------- saving (Supabase table future_projects, one row per project) ---------- */
+function gradeToLevel(g){if(!g)return 'adult';if(g==='kg')return 'kids';if(g==='university')return 'adult';
+ const n=parseInt(String(g).replace('grade_',''),10);if(n>=1&&n<=4)return 'kids';if(n>=5&&n<=8)return 'middle';if(n>=9&&n<=12)return 'high';return 'adult';}
+const prefsKey=()=>'fa-prefs:'+userId,cacheKey=()=>'fa-cache:'+userId;
+function readPrefs(){try{return JSON.parse(localStorage.getItem(prefsKey())||'{}')||{};}catch(e){return{};}}
+function savePrefs(){try{localStorage.setItem(prefsKey(),JSON.stringify({level:S.level,activeId:S.activeId,qIdx:S.qIdx,seeded:true}));}catch(e){}}
+function writeCache(){try{localStorage.setItem(cacheKey(),JSON.stringify(S.projects));}catch(e){}}
+function setStatus(t){saveText=t;const el=document.getElementById('saveState');if(el)el.textContent=t;}
+let timer=null,saving=false,retryTimer=null;
+function flushSoon(){setStatus('Saving...');clearTimeout(timer);timer=setTimeout(flush,800);}
+function touch(){const p=proj();if(p){p.updated=now();dirtyIds.add(p.id);}flushSoon();}
+async function flush(){
+ if(saving)return;saving=true;let ok=true;
+ try{while(dirtyIds.size||deletedIds.size){
+  const ids=Array.from(dirtyIds),dels=Array.from(deletedIds);dirtyIds.clear();deletedIds.clear();
+  const rows=ids.map(id=>S.projects.find(p=>p.id===id)).filter(Boolean).map(p=>({user_id:userId,id:p.id,title:String(p.title||'Untitled project').slice(0,200),data:p,updated_at:new Date().toISOString()}));
+  try{
+   if(rows.length){const r=await sb.from('future_projects').upsert(rows,{onConflict:'user_id,id'});if(r.error)throw r.error;}
+   if(dels.length){const r=await sb.from('future_projects').delete().eq('user_id',userId).in('id',dels);if(r.error)throw r.error;}
+  }catch(e){ok=false;ids.forEach(i=>dirtyIds.add(i));dels.forEach(i=>deletedIds.add(i));break;}
+ }}finally{saving=false;}
+ writeCache();
+ if(ok){offlineLoad=false;setStatus('Saved');}
+ else{setStatus('Could not save. Your changes stay on this device and will retry.');clearTimeout(retryTimer);retryTimer=setTimeout(flush,15000);}
+}
+async function loadAll(){
+ const prefs=readPrefs();let rows=null;
+ try{const r=await sb.from('future_projects').select('id,data').eq('user_id',userId).order('created_at',{ascending:true});if(r.error)throw r.error;rows=r.data||[];}catch(e){rows=null;}
+ let projects;
+ if(rows===null){
+  try{projects=JSON.parse(localStorage.getItem(cacheKey())||'null');}catch(e){projects=null;}
+  if(!Array.isArray(projects))projects=[];
+  offlineLoad=true;setStatus('Could not reach your saved projects. Showing the copy on this device.');
+ }else{
+  projects=rows.map(r=>r.data).filter(d=>d&&d.id);
+  if(!projects.length&&!prefs.seeded){const sp=seedProject();projects=[sp];dirtyIds.add(sp.id);}
+  setStatus('Saved');
+ }
+ S={level:LV_ORDER.includes(prefs.level)?prefs.level:gradeToLevel(gradeLevel),activeId:prefs.activeId,projects:projects,qIdx:prefs.qIdx||0};
+ ensure();savePrefs();
+ if(dirtyIds.size)flushSoon();
+}
+
+/* ---------- widgets ---------- */
+function F(path,label,o){o=o||{};const v=getPath(proj(),path),id=idFor(path);
+ const ctl=o.line?`<input id="${id}" type="text" data-bind="${path}" value="${esc(v)}" placeholder="${esc(o.ph||'')}" autocomplete="off">`
+ :`<textarea id="${id}" rows="${o.rows||3}" data-bind="${path}" placeholder="${esc(o.ph||'')}">${esc(v)}</textarea>`;
+ return `<div class="field"><label for="${id}">${esc(label)}</label>${o.hint?`<p class="hint">${esc(o.hint)}</p>`:''}${ctl}</div>`;}
+function SEL(path,label,opts,o){o=o||{};const v=getPath(proj(),path),id=idFor(path);
+ return `<div class="field"><label for="${id}">${esc(label)}</label><select id="${id}" data-bind="${path}"${o.rerender?' data-rerender="1"':''}>${opts.map(x=>{const a=Array.isArray(x)?x:[x,x];return `<option value="${esc(a[0])}"${a[0]===(v==null?'':v)?' selected':''}>${esc(a[1])}</option>`;}).join('')}</select></div>`;}
+function ensureArr(path,dflt){const p=proj();let a=getPath(p,path);if(!Array.isArray(a)||!a.length){a=dflt;setPath(p,path,a);}return a;}
+function LIST(path,label,o){o=o||{};const arr=ensureArr(path,['']);
+ const rows=arr.map((v,i)=>`<div class="lrow"><input id="${idFor(path+'.'+i)}" type="text" data-bind="${path}.${i}" value="${esc(v)}" placeholder="${esc(o.ph||'')}" autocomplete="off" aria-label="${esc(label)} ${i+1}">${o.testBtn&&trim(v)?`<button class="btn small" data-act="cond-test" data-i="${i}">Test this</button>`:''}<button class="btn small ghost" data-act="arr-del" data-arg="${path}" data-i="${i}" aria-label="Remove item ${i+1}">Remove</button></div>`).join('');
+ return `<div class="field"><span class="lbl">${esc(label)}</span>${o.hint?`<p class="hint">${esc(o.hint)}</p>`:''}${rows}<div><button class="btn small" data-act="arr-add" data-arg="${path}" data-kind="str">Add another</button></div></div>`;}
+function CHECK(path,label){const arr=ensureArr(path,[{text:'',done:false}]);
+ const rows=arr.map((a,i)=>`<div class="lrow"><input type="checkbox" class="cb" id="${idFor(path+'.'+i+'.done')}" data-bind="${path}.${i}.done" data-rerender="1" ${a.done?'checked':''} aria-label="Done"><input id="${idFor(path+'.'+i+'.text')}" type="text" data-bind="${path}.${i}.text" value="${esc(a.text)}" class="${a.done?'done':''}" autocomplete="off" aria-label="${esc(label)} ${i+1}"><button class="btn small ghost" data-act="arr-del" data-arg="${path}" data-i="${i}" aria-label="Remove action ${i+1}">Remove</button></div>`).join('');
+ return `<div class="field"><span class="lbl">${esc(label)}</span>${rows}<div><button class="btn small" data-act="arr-add" data-arg="${path}" data-kind="check">Add an action</button></div></div>`;}
+function chainLabels(){return kidsMode()?['First','Then','And then','And then','And then','And then']:(S.level==='middle'?['Right away','Next','After that','After that','After that','After that']:['Immediate effect','Second-order effect','Third-order effect','Fourth-order effect','Fifth-order effect','Sixth-order effect']);}
+function CHAIN(path){const arr=ensureArr(path,['','']),labs=chainLabels();
+ return `<ol class="chain">${arr.map((v,i)=>`<li class="cl"><label class="mono" for="${idFor(path+'.'+i)}">${labs[i]||'And then'}</label><div class="lrow"><input id="${idFor(path+'.'+i)}" type="text" data-bind="${path}.${i}" value="${esc(v)}" autocomplete="off">${i>=2?`<button class="btn small ghost" data-act="arr-del" data-arg="${path}" data-i="${i}">Remove</button>`:''}</div></li>`).join('')}</ol>${arr.length<6?`<div><button class="btn small" data-act="arr-add" data-arg="${path}" data-kind="str">${kidsMode()?'And then what happens?':'And then what?'}</button></div>`:''}`;}
+const TYPE_OPTS=[['fact','Fact: I can check it'],['assumption','Assumption: I treat it as true'],['possibility','Possibility: it might happen']];
+function CLAIMS(path){const arr=ensureArr(path,[{text:'',type:'assumption'}]);
+ return `<div class="legend"><span><span class="tag fact">Fact</span> can be checked</span><span><span class="tag assumption">Assumption</span> taken as true</span><span><span class="tag possibility">Possibility</span> might happen</span></div>`+
+ arr.map((c,i)=>`<div class="claim"><input id="${idFor(path+'.'+i+'.text')}" type="text" data-bind="${path}.${i}.text" value="${esc(c.text)}" autocomplete="off" aria-label="Statement ${i+1}"><select data-bind="${path}.${i}.type" aria-label="Type of statement ${i+1}">${TYPE_OPTS.map(o=>`<option value="${o[0]}"${c.type===o[0]?' selected':''}>${o[1]}</option>`).join('')}</select><button class="btn small ghost" data-act="arr-del" data-arg="${path}" data-i="${i}">Remove</button></div>`).join('')+
+ `<div><button class="btn small" data-act="arr-add" data-arg="${path}" data-kind="claim">Add a statement</button></div>`;}
+
+/* ---------- progress ---------- */
+const avg=c=>Object.values(c).reduce((a,b)=>a+b,0)/Object.values(c).length;
+function countKids(nodes){return(nodes||[]).reduce((a,n)=>a+(n.children?n.children.length+countKids(n.children):0),0);}
+function comp(p){const u=p.understand,f=p.futures,d=p.design,fr=a=>a.filter(Boolean).length/a.length;
+ const rungs=Object.values(d.ladder||{}).filter(trim).length;
+ return{understand:fr([trim(u.change),trim(u.what),trim(u.why),trim(u.gain),trim(u.lose),filled(u.chain)>=2]),
+  opportunities:Math.min(1,p.opps.filter(o=>trim(o.problem)&&trim(o.who)&&trim(o.test)).length/2),
+  futures:fr([trim(f.question),f.scenarios.length>=3,countKids(f.scenarios)>=1,f.scenarios.some(s=>s.conf!=null)]),
+  design:fr([trim(d.vision),filled(d.conditions)+filled(d.skills)>=2,rungs>=3,filled(d.actions)>=1]),
+  test:fr([p.tests.some(t=>trim(t.exp)),p.tests.some(t=>t.evidence.length),p.tests.some(t=>t.status==='Resolved')])};}
+function skills(){let q=0,a=0,o=0,pl=0,t=0;
+ S.projects.forEach(p=>{q+=(p.coachAsks||0)+filled(p.understand.claims);a+=filled(p.understand.chain)+p.futures.scenarios.length+countKids(p.futures.scenarios);
+  o+=p.opps.filter(x=>trim(x.problem)&&trim(x.test)).length;pl+=Object.values(p.design.ladder).filter(trim).length+p.design.actions.filter(x=>x.done&&trim(x.text)).length;
+  t+=p.tests.filter(x=>x.evidence.length).length+p.tests.filter(x=>x.updated!=null&&x.updated!==x.conf).length;});
+ return[['Questioning',q,10,'Coach challenges and labelled statements'],['Anticipating',a,12,'Effects followed, futures explored'],['Spotting opportunities',o,4,'Problems with a test attached'],['Planning',pl,12,'Backward steps and finished actions'],['Testing and updating',t,6,'Evidence logged and beliefs updated']];}
+function calib(){const rs=[];S.projects.forEach(p=>p.tests.forEach(t=>{if(t.status==='Resolved'&&(t.outcome==='supported'||t.outcome==='contradicted'))rs.push(t);}));
+ if(rs.length<3)return['Resolve 3 or more tests to see how well your confidence matches what happened.'];
+ const out=[],hi=rs.filter(t=>t.conf>=70),lo=rs.filter(t=>t.conf<=40),hit=a=>a.filter(t=>t.outcome==='supported').length;
+ if(hi.length)out.push(`Tests where you were 70% or more sure: ${hi.length}. They held up ${hit(hi)} times.`);
+ if(lo.length)out.push(`Tests where you were 40% or less sure: ${lo.length}. They held up ${hit(lo)} times.`);
+ if(!out.length)out.push(`You have resolved ${rs.length} tests. Try a few at the high and low ends of confidence to compare.`);return out;}
+function nextUp(p){const c=comp(p);for(const s of SECTIONS){if(c[s.id]<1)return{section:s.id,label:(avg(c)===0?'Start: ':'Continue: ')+s.title};}return{section:'understand',label:'Start the next loop'};}
+
+/* ---------- coach ---------- */
+const aiOk=()=>!aiBlocked;
+function coachText(c){if(c.status==='thinking')return c.text?esc(c.text):'Thinking...';
+ if(c.status==='done')return esc(c.text);if(c.status==='error')return esc((c.text?c.text+'\n\n':'')+(c.error||'Something went wrong. Try again.'));
+ return '<span class="dim">The coach reads what you wrote and asks questions. It will not give you the answer.</span>';}
+function coachPanel(kind){ui.coachKind=kind;const key=ui.view+':'+ui.section+':'+ui.step+':'+kind,c=ui.coach.key===key?ui.coach:{status:'idle',text:''};
+ const asks=(ASK[kind]||ASK.understand)[kidsMode()?'kids':'all'];
+ return `<div class="card" id="coachWrap"><h2 class="h3">Ask yourself</h2><ul class="asks">${asks.map(a=>`<li>${esc(a)}</li>`).join('')}</ul>
+ <h3 class="h4">Coach</h3>${aiOk()?`<div class="lrow"><button class="btn primary" data-act="coach" data-arg="${kind}"${c.status==='thinking'?' disabled':''}>Challenge my thinking</button>${c.status==='thinking'?'<button class="btn small" data-act="stop">Stop</button>':''}</div>`:'<p class="hint">The AI coach is not available in this view. The questions above work on their own.</p>'}
+ <div id="coachOut" class="coach-out" aria-live="polite">${coachText(c)}</div></div>`;}
+function refreshCoach(){const el=document.getElementById('coachWrap');if(el&&ui.coachKind)el.outerHTML=coachPanel(ui.coachKind);}
+
+/* ---------- chrome ---------- */
+const MARK='<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="15" cy="5" r="3" fill="currentColor"/><path d="M15 8v5M15 13L6 20M15 13l9 7M15 13v9"/><circle cx="6" cy="23" r="3"/><circle cx="15" cy="25" r="3"/><circle cx="24" cy="23" r="3"/></svg>';
+function header(){return `<div class="fa-bar">
+ <div class="levels" role="radiogroup" aria-label="Learning level">${LEVELS.map(l=>`<button class="lv" role="radio" aria-checked="${S.level===l.id}" data-act="level" data-arg="${l.id}" title="${esc(l.sub)}">${esc(l.label)}</button>`).join('')}</div>
+ <span class="save mono" id="saveState" role="status">${esc(saveText)}</span></div>`;}
+const HERO_SVG='<svg viewBox="0 0 260 170" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="130" cy="14" r="8" fill="currentColor"/><path d="M130 22C130 50 50 44 50 78M130 22v56M130 22c0 28 80 22 80 56"/><circle cx="50" cy="84" r="8" style="stroke:var(--fast)"/><circle cx="130" cy="84" r="8" style="stroke:var(--steady)"/><circle cx="210" cy="84" r="8" style="stroke:var(--bumpy)"/><path stroke-dasharray="4 5" d="M50 92c0 24-24 20-24 50M50 92c0 24 24 20 24 50M130 92v50M210 92c0 24-24 20-24 50M210 92c0 24 24 20 24 50"/><circle cx="26" cy="150" r="5"/><circle cx="74" cy="150" r="5"/><circle cx="130" cy="150" r="5"/><circle cx="186" cy="150" r="5"/><circle cx="234" cy="150" r="5"/></svg>';
+function footer(){return '<p class="foot">Future Architect shows possibilities, not predictions. Text written by AI can contain mistakes, so check any fact before you rely on it.</p>';}
+
+/* ---------- home ---------- */
+function viewHome(){const p=proj(),c=comp(p),nx=nextUp(p),qb=QBANK[kidsMode()?'kids':(S.level==='middle'?'middle':'high')],q=qb[S.qIdx%qb.length];
+ const route=`<ol class="route">${SECTIONS.map(s=>{const v=Math.round(c[s.id]*100);return `<li class="stop"><span class="badge mono" aria-hidden="true">${s.n}</span><button class="stop-btn" data-act="go" data-arg="${s.id}"><h3>${s.title}</h3><p>${esc(pick(s.blurb))}</p><span class="bar"><i style="width:${v}%"></i></span><span class="mono">${v}% done</span></button></li>`;}).join('')}</ol><p class="loop mono">After step 5, return to step 1 with what you learned.</p>`;
+ const projs=S.projects.map(x=>{const t=Math.round(avg(comp(x))*100),on=x.id===S.activeId;return `<li class="prow${on?' on':''}"><div class="pmeta"><strong>${esc(x.title)}</strong><span class="mono dim">${x.example?'Example project. ':''}Updated ${fmtDate(x.updated)}, ${t}% through the loop</span></div><div class="pact">${on?'<span class="mono">Open now</span>':`<button class="btn small" data-act="proj-open" data-arg="${x.id}">Open</button>`}<button class="btn small ghost" data-act="proj-dup" data-arg="${x.id}">Duplicate</button><button class="btn small ghost" data-act="proj-del" data-arg="${x.id}">${ui.confirm==='del:'+x.id?'Click again to delete':'Delete'}</button></div></li>`;}).join('');
+ const meters=skills().map(m=>{const v=Math.min(100,Math.round(m[1]/m[2]*100));return `<div class="meter"><div class="row"><strong>${m[0]}</strong><span class="mono">${Math.min(m[1],m[2])} / ${m[2]}</span></div><span class="bar"><i style="width:${v}%"></i></span><small>${m[3]}</small></div>`;}).join('');
+ return `<section class="hero"><div><h2 class="hero-h">You cannot know the future. You can get good at shaping it.</h2>
+ <p class="lede">${esc(pick({kids:'Learn to ask what is changing, what happens next, and what you can try.',all:'Practise spotting change, weighing possible futures, and testing your plans with small experiments. Nothing here predicts the future. Everything here helps you prepare for it.'}))}</p>
+ <div class="projbar"><div class="field"><label for="projTitle">Current project</label><input id="projTitle" type="text" data-bind="title" value="${esc(p.title)}" autocomplete="off"></div><button class="btn primary" data-act="go" data-arg="${nx.section}">${esc(nx.label)}</button></div>
+ ${p.example?'<p class="note">This is an example project. Edit it, duplicate it, or start your own below.</p>':''}</div>${HERO_SVG}</section>
+ <h2 class="sec">The loop</h2>${route}
+ <div class="two"><section class="card" aria-labelledby="ph"><h2 class="h3" id="ph">Saved projects</h2><ul class="plist">${projs}</ul><div><button class="btn" data-act="proj-new">New project</button></div></section>
+ <section class="card" aria-labelledby="skh"><h2 class="h3" id="skh">Thinking skills</h2>${meters}<h3 class="h4">Confidence check</h3>${calib().map(l=>`<p class="hint">${esc(l)}</p>`).join('')}</section></div>
+ <section class="qcard" aria-label="Question to think about"><span class="mono dim">A question to think about</span><p class="q">${esc(q)}</p><button class="btn small" data-act="q-next">Another question</button></section>`;}
+
+/* ---------- section shell ---------- */
+const STEPS={
+ understand:[{k:'pick',t:'Pick a change'},{k:'explain',t:'What and why'},{k:'people',t:'Who gains, who loses'},{k:'next',t:'And then what?'}],
+ futures:[{k:'question',t:'Your question'},{k:'futures',t:'Three futures'},{k:'map',t:'Future map'},{k:'commit',t:'Signals and confidence'}],
+ design:[{k:'vision',t:'Vision'},{k:'conditions',t:'What must be true'},{k:'goals',t:'Goals and actions'},{k:'ladder',t:'Work backward'},{k:'stress',t:'What could fail',min:'middle'}]};
+const stepsFor=id=>(STEPS[id]||[]).filter(s=>!s.min||atLeast(s.min));
+function clampStep(){if(ui.view==='section'){const n=stepsFor(ui.section).length;if(n&&ui.step>=n)ui.step=n-1;}}
+function stepper(list){return `<nav class="steps" aria-label="Steps">${list.map((s,i)=>`<button class="step" data-act="step" data-arg="${i}"${i===ui.step?' aria-current="step"':''}>${i+1}. ${esc(s.t)}</button>`).join('')}</nav>`;}
+const FINAL={understand:['opportunities','Find opportunities'],opportunities:['futures','Explore possible futures'],futures:['design','Design my future'],design:['test','Test my riskiest assumption'],test:['home','Back to the loop']};
+function stepNav(list){const last=ui.step>=list.length-1,f=FINAL[ui.section];
+ return `<div class="nav">${ui.step>0?`<button class="btn" data-act="step" data-arg="${ui.step-1}">Back</button>`:'<span></span>'}${last?`<button class="btn primary" data-act="${f[0]==='home'?'home':'go'}" data-arg="${f[0]}">${f[1]}</button>`:`<button class="btn primary" data-act="step" data-arg="${ui.step+1}">Next: ${esc(list[ui.step+1].t)}</button>`}</div>`;}
+function shell(sec,steps,main,side){const p=proj();
+ return `<div class="sec-head"><button class="link" data-act="home">Back to the loop</button><span class="crumb mono">${esc(p.title)}</span></div>
+ <h2 class="sec-title"><span class="mono n">${sec.n} / 5</span>${sec.title}</h2><p class="lede small">${esc(pick(sec.intro))}</p>
+ ${ui.notice?`<p class="notice" role="status">${esc(ui.notice)}</p>`:''}${steps}<div class="work"><div class="main">${main}</div><aside class="side" aria-label="Coach">${side}</aside></div>`;}
+function viewSection(){const sec=SECTIONS.find(s=>s.id===ui.section)||SECTIONS[0];clampStep();
+ const list=stepsFor(sec.id);let main='',kind='understand';
+ if(sec.id==='understand'){main=[uPick,uExplain,uPeople,uNext][ui.step]();kind='understand';}
+ else if(sec.id==='opportunities'){main=viewOpps();kind='opp';}
+ else if(sec.id==='futures'){const k=list[ui.step].k;main={question:fQuestion,futures:fFutures,map:fMap,commit:fCommit}[k]();kind=k==='question'?'question':'scenarios';}
+ else if(sec.id==='design'){const k=list[ui.step].k;main={vision:dVision,conditions:dConditions,goals:dGoals,ladder:dLadder,stress:dStress}[k]();kind='design';}
+ else{main=viewTest();kind='test';}
+ return shell(sec,list.length?stepper(list):'',main+(list.length?stepNav(list):FINALBTN()),coachPanel(kind));}
+function FINALBTN(){const f=FINAL[ui.section];return `<div class="nav"><span></span><button class="btn primary" data-act="${f[0]==='home'?'home':'go'}" data-arg="${f[0]}">${f[1]}</button></div>`;}
+
+/* ---------- 1 understand ---------- */
+function uPick(){const u=proj().understand;
+ return `<h2 class="h3">${esc(pick({kids:'Choose something that is changing',all:'Choose a change to understand'}))}</h2><p class="hint">${esc(pick({kids:'Tap one, or write your own.',all:'Tap a starter or write your own. Pick something you care about.'}))}</p>
+ <div class="topics">${TOPICS[S.level].map((t,i)=>`<button class="topic" data-act="topic" data-arg="${i}" aria-pressed="${u.change===t[0]}"><span>${esc(t[0])}</span><small class="mono">${esc(t[1])}</small></button>`).join('')}</div>
+ ${F('understand.change',pick({kids:'My change',all:'The change, in one sentence'}),{line:true})}
+ ${atLeast('middle')?SEL('understand.domain','Where is it happening?',[['','Choose...']].concat(DOMAINS)):''}`;}
+function uExplain(){return F('understand.what','What is changing?')+F('understand.why',pick({kids:'Why is it changing?',all:'Why is it changing? What is driving it?'}))+(atLeast('middle')?F('understand.brakes','What could slow it down or reverse it?',{rows:2}):'');}
+function uPeople(){return F('understand.gain',pick({kids:'Who is happy about it?',all:'Who benefits?'}),{rows:2})+F('understand.lose',pick({kids:'Who might not be happy?',all:'Who loses, or has to change?'}),{rows:2})+(atLeast('high')?F('understand.incentive','What does each group want? Who has a reason to act differently?',{rows:3}):'');}
+function uNext(){return `<h2 class="h3">${kidsMode()?'What happens next?':'And then what?'}</h2><p class="hint">${esc(pick({kids:'Write what happens. Then ask "and then what?" again.',all:'Follow the change past the first effect. Each step should come from the one before it.'}))}</p>${CHAIN('understand.chain')}`+
+ (atLeast('middle')?`<h3 class="h4">Sort what you wrote</h3><p class="hint">Label each statement as a fact, an assumption, or a possibility.</p>${CLAIMS('understand.claims')}`:'');}
+
+/* ---------- 2 opportunities ---------- */
+const OPP_STATUS=['Idea','Investigating','Looks real','Dropped'];
+function oppCard(o,i){const open=ui.openOpp===o.id,b='opps.'+i+'.';let body='';
+ if(open){body=F(b+'problem',pick({kids:'What problem do people have?',all:'The problem'}),{rows:2})+F(b+'who',pick({kids:'Who has it?',all:'Who needs a solution?'}),{line:true})+
+  (atLeast('middle')?F(b+'why','Why might it become more important?',{rows:2})+F(b+'existing','What do people use today?',{rows:2}):'')+
+  (atLeast('high')?F(b+'evidence','What evidence do you have?',{rows:2})+F(b+'vanish','What could make this opportunity disappear?',{rows:2}):'')+
+  F(b+'test',pick({kids:'What small thing could I try?',all:'Cheapest way to test it'}),{rows:2})+
+  `<div class="field"><label for="oc_${i}">How sure am I that this is real? <span class="mono" id="oco_${i}">${o.conf}%</span></label><input id="oc_${i}" type="range" min="0" max="100" step="5" value="${o.conf}" data-bind="opps.${i}.conf" data-out="oco_${i}" data-fmt="pct"></div>`+
+  SEL(b+'status','Status',OPP_STATUS)+
+  `<div class="lrow">${o.testId?`<button class="btn" data-act="opp-test" data-arg="${o.id}">Open its test</button>`:`<button class="btn primary" data-act="opp-test" data-arg="${o.id}">Send to Test My Ideas</button>`}<button class="btn ghost" data-act="opp-del" data-arg="${o.id}">${ui.confirm==='opp:'+o.id?'Click again to delete':'Delete'}</button></div>`;}
+ return `<article class="xcard${open?' open':''}"><button class="card-head" data-act="opp-open" data-arg="${o.id}" aria-expanded="${open}"><span class="status s-${slug(o.status)}">${esc(o.status)}</span><strong>${esc(o.problem||'New opportunity')}</strong>${o.ai?'<span class="tag possibility">Claude idea</span>':''}<span class="mono dim">${o.conf}% sure</span></button>${body}</article>`;}
+function viewOpps(){const p=proj(),topic=trim(p.understand.change)||trim(p.title);
+ return `<p class="hint">Working from: <strong>${esc(topic||'no change picked yet')}</strong>. An opportunity is a guess until you test it.</p>
+ <div class="lrow">${aiOk()?`<button class="btn primary" data-act="opp-ai"${ui.busy==='opps'?' disabled':''}>${ui.busy==='opps'?'Thinking...':'Suggest ideas to investigate'}</button>`:''}${ui.busy==='opps'?'<button class="btn small" data-act="stop">Stop</button>':''}<button class="btn" data-act="opp-add">Add my own</button></div>
+ <div class="stack">${p.opps.length?p.opps.map(oppCard).join(''):'<p class="hint">No opportunities yet. Add your own, or ask for ideas to investigate. Ideas are never treated as proven.</p>'}</div>`;}
+
+/* ---------- 3 futures ---------- */
+function fQuestion(){const u=proj().understand;
+ return `<h2 class="h3">What do you want to know about the future?</h2>`+F('futures.question','My question',{rows:3,ph:'For example: What could happen to school if every student has a personal AI tutor?',hint:'Good questions are open, name who or what, and say by when.'})+(trim(u.change)?'<div><button class="btn small" data-act="q-from-change">Start from my change</button></div>':'');}
+function UL(title,a){a=(a||[]).filter(trim);return a.length?`<h4>${title}</h4><ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';}
+function scnCard(s,i){const ed=ui.editScn.has(s.id),b='futures.scenarios.'+i+'.',mid=atLeast('middle');let body;
+ if(ed){body=F(b+'name','Name',{line:true})+F(b+'story','What happens',{rows:3})+(mid?LIST(b+'causes','Causes'):'')+LIST(b+'opps','Opportunities')+LIST(b+'risks','Risks')+(mid?LIST(b+'signals','Early signs')+`<span class="lbl">What this rests on</span>${CLAIMS(b+'basis')}`:'')+`<div><button class="btn small" data-act="fut-edit" data-arg="${s.id}">Done editing</button></div>`;}
+ else{body=`<p>${esc(s.story)}</p>${mid?UL('Causes',s.causes):''}${UL('Opportunities',s.opps)}${UL('Risks',s.risks)}${mid?UL('Early signs',s.signals):''}`+
+  (mid&&s.basis.filter(x=>trim(x.text)).length?`<h4>What this rests on</h4><ul class="basis">${s.basis.filter(x=>trim(x.text)).map(x=>`<li><span class="tag ${x.type}">${TYPE_LABEL[x.type]}</span><span>${esc(x.text)}</span></li>`).join('')}</ul>`:'')+
+  `<div><button class="btn small" data-act="fut-edit" data-arg="${s.id}">Edit</button></div>`;}
+ return `<article class="scn k-${s.kind}"><span class="mono kind">${KIND_LABEL[s.kind]}</span><h3>${esc(s.name||'Untitled future')}</h3>${body}</article>`;}
+function fFutures(){const p=proj(),f=p.futures,sc=f.scenarios;
+ const gen=aiOk()?`<button class="btn primary" data-act="fut-gen"${ui.busy==='futures'?' disabled':''}>${ui.busy==='futures'?'Thinking...':(sc.length?(ui.confirm==='regen'?'Click again to replace':'Write new futures'):'Draft three futures with Claude')}</button>${ui.busy==='futures'?'<button class="btn small" data-act="stop">Stop</button>':''}`:'';
+ if(!sc.length)return `<h2 class="h3">Three possible futures</h2><p class="hint">Question: ${esc(f.question||'(write it in step 1)')}</p><p>Futures are possibilities, not predictions. Draft them with Claude and then challenge them, or write your own.</p><div class="lrow">${gen}<button class="btn" data-act="fut-own">Write my own</button></div>`;
+ let cmp='';
+ if(atLeast('high')){const row=(t,k)=>`<tr><th scope="row">${t}</th>${sc.map(s=>`<td><ul>${(s[k]||[]).filter(trim).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></td>`).join('')}</tr>`;
+  cmp=`<details class="cmp"><summary>Compare side by side</summary><div class="tablewrap"><table><thead><tr><th></th>${sc.map(s=>`<th scope="col">${esc(s.name)}</th>`).join('')}</tr></thead><tbody>${row('Causes','causes')}${row('Opportunities','opps')}${row('Risks','risks')}${row('Early signs','signals')}</tbody></table></div></details>`;}
+ return `<h2 class="h3">Three possible futures</h2><p class="hint">Question: ${esc(f.question)}</p>${f.ai?'<p class="notice">Drafted by Claude from your question. These are possibilities, not predictions. Check anything marked Fact before you rely on it, and edit anything you disagree with.</p>':'<p class="hint">These are possibilities, not predictions.</p>'}
+ <div class="scn-grid">${sc.map(scnCard).join('')}</div>${cmp}<div class="lrow">${gen}</div>`;}
+
+/* future map */
+function layoutMap(p){const f=p.futures,W=148,H=52,GX=14,GY=46,nodes=[];let nx=0,maxD=0;
+ const root={id:'root',text:trim(f.question)||'Today',children:f.scenarios.map(s=>({id:s.id,text:s.name||'Future',kind:s.kind,children:s.children,scn:s}))};
+ function go(n,d,kind,parent){const node={n,d,kind,parent,x:0,y:d*(H+GY)};nodes.push(node);maxD=Math.max(maxD,d);const kids=n.children||[];
+  if(!kids.length){node.x=nx;nx+=W+GX;}else{const cs=kids.map(c=>go(c,d+1,d===0?c.kind:kind,node));node.x=(cs[0].x+cs[cs.length-1].x)/2;}return node;}
+ go(root,0,'root',null);return{nodes,W,H,GY,w:Math.max(nx-GX,W)+20,h:maxD*(H+GY)+H+20};}
+function wrapTxt(t,max,lines){const w=trim(t).split(/\s+/),out=[];let cur='';
+ for(const x of w){if((cur+' '+x).trim().length>max){if(cur)out.push(cur);cur=x;}else cur=(cur+' '+x).trim();}if(cur)out.push(cur);
+ if(out.length>lines){out.length=lines;out[lines-1]=out[lines-1].slice(0,max-1).replace(/\s+$/,'')+'...';}return out;}
+function findNode(L,id){return L.nodes.find(x=>x.n.id===id);}
+function fMap(){const p=proj(),f=p.futures;
+ if(!f.scenarios.length)return '<h2 class="h3">Future map</h2><p>Draft or write your three futures first. Then grow the map here.</p><div><button class="btn primary" data-act="step" data-arg="1">Go to three futures</button></div>';
+ const L=layoutMap(p);if(!findNode(L,ui.nodeSel))ui.nodeSel='root';
+ const edges=L.nodes.filter(x=>x.parent).map(x=>{const a=x.parent,x1=a.x+L.W/2+10,y1=a.y+L.H+10,x2=x.x+L.W/2+10,y2=x.y+10;return `<path class="edge" d="M${x1} ${y1}C${x1} ${y1+L.GY/2} ${x2} ${y2-L.GY/2} ${x2} ${y2}"/>`;}).join('');
+ const nodes=L.nodes.map(x=>{const px=x.x+10,py=x.y+10,cx=px+L.W/2,root=x.d===0;
+  const lines=root?['TODAY',wrapTxt(x.n.text,22,1)[0]||'']:wrapTxt(x.n.text,22,2),y0=py+L.H/2-(lines.length-1)*7+4;
+  return `<g class="node${root?' root':' k-'+x.kind}${x.n.id===ui.nodeSel?' sel':''}" data-act="node" data-arg="${x.n.id}" tabindex="0" role="button" aria-label="${esc(root?'Today':x.n.text)}"><rect x="${px}" y="${py}" width="${L.W}" height="${L.H}" rx="5"/><text text-anchor="middle">${lines.map((t,i)=>`<tspan x="${cx}" y="${y0+i*15}">${esc(t)}</tspan>`).join('')}</text></g>`;}).join('');
+ const sel=findNode(L,ui.nodeSel),n=sel.n,d=sel.d;
+ const detail=`<div class="card"><h3 class="h3">${d===0?'Today':esc(n.text)}</h3>${d===0?`<p>${esc(f.question||'Add your question in step 1.')}</p><p class="hint">Select a future to ask what could happen next.</p>`:(d===1?`<p>${esc(n.scn.story)}</p>`:'')}
+ ${d>=1&&d<5?`<div class="field"><label for="nodeText">If this happens, what could happen next?</label><div class="lrow"><input id="nodeText" type="text" autocomplete="off" placeholder="One possible next step"><button class="btn primary" data-act="node-add" data-arg="${n.id}">Add to map</button></div></div>`:''}
+ ${d>=2?`<div><button class="btn small ghost" data-act="node-del" data-arg="${n.id}">Remove this branch</button></div>`:''}</div>`;
+ return `<h2 class="h3">Future map</h2><p class="hint">Select a future, then add what could happen next. Each branch is a possibility you can test later.</p><div class="mapwrap"><svg class="mapsvg" role="group" aria-label="Future map" width="${L.w}" height="${L.h}" viewBox="0 0 ${L.w} ${L.h}">${edges}${nodes}</svg></div>${detail}`;}
+
+function fCommit(){const p=proj(),f=p.futures,sc=f.scenarios;
+ if(!sc.length)return '<h2 class="h3">Signals and confidence</h2><p>Draft or write your futures first.</p><div><button class="btn primary" data-act="step" data-arg="1">Go to three futures</button></div>';
+ const rows=sc.map((s,i)=>`<div class="conf-row k-${s.kind}"><label for="cf_${i}"><span>${esc(s.name)}</span><span class="mono" id="cfo_${i}">${s.conf==null?'not set':s.conf+'%'}</span></label><input id="cf_${i}" type="range" min="0" max="100" step="5" value="${s.conf==null?30:s.conf}" data-bind="futures.scenarios.${i}.conf" data-out="cfo_${i}" data-fmt="pct"></div>`).join('');
+ const items=[];sc.forEach(s=>s.signals.forEach((t,i)=>{if(trim(t))items.push({key:s.id+':'+i,t:t,kind:s.kind,name:s.name});}));
+ const sigs=items.length?`<ul class="sigs">${items.map(it=>{const st=f.signals[it.key]||SIG_STATES[0];return `<li class="sig k-${it.kind}"><span>${esc(it.t)}<small class="mono">${esc(it.name)}</small></span><button class="btn small" data-act="sig-cycle" data-arg="${esc(it.key)}" aria-label="Signal status: ${st}. Activate to change.">${st}</button></li>`;}).join('')}</ul>`:'<p class="hint">Add early signs to your futures to track them here.</p>';
+ const unlogged=sc.filter(s=>s.conf!=null&&!s.logged).length;
+ return `<h2 class="h3">How likely does each future feel?</h2><p class="hint">Move a slider to set it. Futures can overlap, so the numbers do not need to add up to 100%. These are your guesses, and you can change them.</p><div class="stack">${rows}</div>
+ ${SEL('futures.horizon','Over what time?',['6 months','1 year','3 years','5 years'])}
+ <div class="lrow"><button class="btn primary" data-act="fut-log"${unlogged?'':' disabled'}>Save as predictions to test</button></div>
+ <h3 class="h4">Early-signal radar</h3><p class="hint">Mark how each sign is moving as you see new evidence. Click a sign to change its status.</p>${sigs}`;}
+
+/* ---------- 4 design ---------- */
+function dVision(){return `<h2 class="h3">${esc(pick({kids:'What would you like to make better one day?',all:'What future do I want to help create?'}))}</h2>`+F('design.vision',pick({kids:'My big idea',all:'My vision'}),{rows:3})+(atLeast('middle')?F('design.outcome','How will I know it worked?',{rows:2,hint:'Name something you could see or count.'}):'');}
+function dConditions(){return `<h2 class="h3">${esc(pick({kids:'What do I need?',all:'What would have to be true for this future to exist?'}))}</h2>`+
+ (atLeast('middle')?LIST('design.conditions','Conditions that must be true',{testBtn:true,hint:'Each condition is an assumption. Use "Test this" to turn one into an experiment.'}):'')+
+ LIST('design.skills',pick({kids:'Things I need to learn',all:'Skills I need'}))+(atLeast('high')?LIST('design.resources','Resources I need'):'')+(atLeast('middle')?LIST('design.people','People who can help'):'');}
+function dGoals(){return `<h2 class="h3">${esc(pick({kids:'What can I do?',all:'Goals and daily actions'}))}</h2>`+(atLeast('high')?LIST('design.long','Long-term goals (1 to 5 years)')+LIST('design.short','Short-term goals (next 3 months)'):'')+CHECK('design.actions',pick({kids:'One small thing I can do today',all:'Practical daily actions'}));}
+function dLadder(){const d=proj().design;
+ return `<h2 class="h3">Work backward from the future you want</h2><p class="hint">Start at the top. At each step ask: what must happen before this can happen?</p><ol class="ladder"><li class="rung goal"><span class="mono">The future I want</span><p>${esc(d.vision||'Write your vision in step 1.')}</p></li>${LADDERS[S.level].map(r=>`<li class="rung">${F('design.ladder.'+r[0],r[1],{rows:2})}</li>`).join('')}</ol>`;}
+function dStress(){const hi=atLeast('high');return `<h2 class="h3">Before you start, imagine it failed</h2>`+F('design.fail',hi?'Imagine this completely failed. Why?':'What could go wrong?',{rows:3,hint:hi?'Think about money, technology, people, incentives and surprises.':''})+(hi?F('design.guarantee','What would guarantee failure?',{rows:2,hint:'Then flip each answer into a rule for success.'})+LIST('design.safeguards','Safeguards and rules for success'):'');}
+
+/* ---------- 5 test ---------- */
+const T_STATUS=['Open','Testing','Resolved'];
+const quality=t=>[t.reasoning,t.changeMind,t.exp,t.expSuccess,t.evidence.length,t.lesson].filter(x=>trim(x)).length;
+function testCard(t,i){const open=ui.openTest===t.id,b='tests.'+i+'.',mid=atLeast('middle'),q=quality(t);let body='';
+ if(open){const ev=t.evidence.length?`<ul class="evl">${t.evidence.map((e,j)=>`<li><span class="tag ${e.dir}">${e.dir}</span><span class="t">${esc(e.text)}</span><span class="mono dim">${fmtDate(e.date)}</span><button class="btn small ghost" data-act="ev-del" data-arg="${t.id}" data-i="${j}">Remove</button></li>`).join('')}</ul>`:'<p class="hint">No evidence yet.</p>';
+  body=SEL(b+'type','What is this?',[['prediction','Prediction'],['assumption','Assumption'],['idea','Idea']])+F(b+'statement',pick({kids:'I think...',all:'Statement to test'}),{rows:2})+
+  `<div class="field"><label for="tc_${i}">How sure am I? <span class="mono" id="tco_${i}">${t.conf}%</span></label><input id="tc_${i}" type="range" min="0" max="100" step="5" value="${t.conf}" data-bind="tests.${i}.conf" data-out="tco_${i}" data-fmt="pct"></div>`+
+  (mid?SEL(b+'horizon','When will I know?',['1 week','1 month','3 months','1 year','3 years']):'')+(mid?F(b+'reasoning','Why do I think so?',{rows:2})+F(b+'changeMind','What would change my mind?',{rows:2}):'')+
+  `<h4 class="h4">Small experiment</h4>`+F(b+'exp',pick({kids:'How can I check?',all:'Cheapest test I can run'}),{rows:2})+(mid?F(b+'expSuccess','What result would support it?',{rows:2}):'')+
+  SEL(b+'status','Where is it?',T_STATUS,{rerender:true})+
+  `<h4 class="h4">Evidence</h4>${ev}<div class="lrow"><input id="ev_${t.id}" type="text" placeholder="What did you find out?" autocomplete="off" aria-label="New evidence"><select id="evd_${t.id}" aria-label="Does it support the statement?"><option value="supports">Supports</option><option value="against">Against</option><option value="neutral">Neutral</option></select><button class="btn" data-act="ev-add" data-arg="${t.id}">Add evidence</button></div>`+
+  (t.status==='Resolved'||t.evidence.length?SEL(b+'outcome','What happened?',[['','Choose...'],['supported','Supported'],['mixed','Mixed'],['contradicted','Contradicted']])+`<div class="field"><label for="tu_${i}">How sure am I now? <span class="mono" id="tuo_${i}">${t.updated==null?t.conf:t.updated}%</span></label><input id="tu_${i}" type="range" min="0" max="100" step="5" value="${t.updated==null?t.conf:t.updated}" data-bind="tests.${i}.updated" data-out="tuo_${i}" data-fmt="pct"></div>`+F(b+'lesson','What did I learn?',{rows:2}):'')+
+  `<p class="hint">Thinking quality: ${q} of 6. This counts reasoning, a real test, evidence and a lesson. It does not count whether you were right.</p><div><button class="btn ghost" data-act="test-del" data-arg="${t.id}">${ui.confirm==='test:'+t.id?'Click again to delete':'Delete'}</button></div>`;}
+ const shift=t.updated!=null&&t.updated!==t.conf?`<span class="mono">${t.conf}% to ${t.updated}%</span>`:`<span class="mono dim">${t.conf}% sure</span>`;
+ return `<article class="xcard${open?' open':''}"><button class="card-head" data-act="test-open" data-arg="${t.id}" aria-expanded="${open}"><span class="status s-${slug(t.status)}">${t.status}</span><strong>${esc(t.statement||'New idea')}</strong>${shift}<span class="mono dim">thinking ${q}/6</span></button>${body}</article>`;}
+function viewTest(){const p=proj();
+ return `<div class="card"><h2 class="h3">Record something to test</h2><div class="lrow"><select id="newTestType" aria-label="Type"><option value="prediction">Prediction</option><option value="assumption">Assumption</option><option value="idea">Idea</option></select><input id="newTestText" type="text" placeholder="${esc(pick({kids:'I think...',all:'For example: most parents would read a weekly summary'}))}" autocomplete="off" aria-label="Statement"><button class="btn primary" data-act="test-add">Add</button></div><p class="hint">Your confidence check: ${esc(calib()[0])}</p></div>
+ <div class="stack">${p.tests.length?p.tests.map(testCard).join(''):'<p class="hint">Nothing here yet. Add a prediction, an assumption from your plan, or an idea.</p>'}</div>`;}
+
+/* ---------- router ---------- */
+function view(){return header()+`<main id="main">${ui.view==='home'?(ui.notice?`<p class="notice" role="status">${esc(ui.notice)}</p>`:'')+viewHome():viewSection()}</main>`+footer();}
+
+/* ---------- render and events ---------- */
+const $app=document.getElementById('app');
+const isTyping=()=>{const a=document.activeElement;return !!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&$app.contains(a));};
+function render(o){const y=window.scrollY;$app.innerHTML=view();window.scrollTo(0,o&&o.top?0:y);
+ if(ui.focus){const el=document.getElementById(ui.focus);if(el)el.focus();ui.focus=null;}}
+function bindVal(path,v){const p=proj();setPath(p,path,v);touch();}
+$app.addEventListener('input',e=>{const t=e.target,b=t.getAttribute&&t.getAttribute('data-bind');if(!b)return;
+ let v=t.type==='checkbox'?t.checked:(t.type==='range'?Number(t.value):t.value);bindVal(b,v);
+ const out=t.getAttribute('data-out');if(out){const el=document.getElementById(out);if(el)el.textContent=v+'%';}
+ if(t.getAttribute('data-rerender'))render();});
+$app.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(el)act(el.getAttribute('data-act'),el.getAttribute('data-arg'),el);});
+$app.addEventListener('keydown',e=>{
+ if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('g[data-act]')){e.preventDefault();act('node',e.target.getAttribute('data-arg'),e.target);return;}
+ if(e.key==='Enter'&&e.target.id){const id=e.target.id;
+  if(id==='nodeText'){const b=$app.querySelector('[data-act="node-add"]');if(b)act('node-add',b.getAttribute('data-arg'),b);}
+  else if(id==='newTestText')act('test-add','',e.target);
+  else if(id.indexOf('ev_')===0)act('ev-add',id.slice(3),e.target);}});
+
+function goSection(id,step){ui.view='section';ui.section=id;ui.step=step||0;ui.notice='';ui.coach={};ui.confirm=null;render({top:true});}
+function confirmed(key){if(ui.confirm===key){ui.confirm=null;return true;}ui.confirm=key;render();
+ setTimeout(()=>{if(ui.confirm===key){ui.confirm=null;if(!isTyping())render();}},5000);return false;}
+function mkTest(o){return Object.assign({id:uid(),type:'assumption',statement:'',conf:50,horizon:'1 month',reasoning:'',changeMind:'',exp:'',expSuccess:'',status:'Open',evidence:[],outcome:'',updated:null,lesson:''},o);}
+function blankScn(kind){return{id:'s_'+uid(),kind:kind,name:'',story:'',causes:[''],opps:[''],risks:[''],signals:[''],basis:[{text:'',type:'assumption'}],children:[],conf:null,logged:false};}
+
+function act(a,arg,el){const I=el.getAttribute('data-i')!=null?Number(el.getAttribute('data-i')):null,p=proj(),u=p.understand,f=p.futures;
+ switch(a){
+ case 'home':ui.view='home';ui.notice='';ui.confirm=null;render({top:true});break;
+ case 'go':goSection(arg,0);break;
+ case 'level':S.level=arg;ui.coach={};clampStep();savePrefs();render();break;
+ case 'step':ui.step=Number(arg);ui.notice='';render({top:true});break;
+ case 'topic':{const t=TOPICS[S.level][Number(arg)];u.change=t[0];u.domain=t[1];if(!trim(p.title)||p.title==='Untitled project')p.title=t[0].slice(0,70);touch();render();break;}
+ case 'proj-open':S.activeId=arg;ui.confirm=null;savePrefs();render();break;
+ case 'proj-new':{const np=blank();S.projects.push(np);S.activeId=np.id;savePrefs();touch();goSection('understand',0);break;}
+ case 'proj-dup':{const src=S.projects.find(x=>x.id===arg);if(src){const c=JSON.parse(JSON.stringify(src));c.id='p_'+uid();c.title=src.title+' (copy)';c.example=false;c.created=c.updated=now();S.projects.push(c);S.activeId=c.id;savePrefs();touch();render();}break;}
+ case 'proj-del':if(!confirmed('del:'+arg))break;S.projects=S.projects.filter(x=>x.id!==arg);deletedIds.add(arg);dirtyIds.delete(arg);if(!S.projects.length){const nb=blank();S.projects.push(nb);dirtyIds.add(nb.id);}if(S.activeId===arg)S.activeId=S.projects[0].id;savePrefs();flushSoon();render();break;
+ case 'q-next':S.qIdx=(S.qIdx||0)+1;savePrefs();render();break;
+ case 'arr-add':{const arr=getPath(p,arg),k=el.getAttribute('data-kind');arr.push(k==='check'?{text:'',done:false}:(k==='claim'?{text:'',type:'assumption'}:''));
+  ui.focus=idFor(arg+'.'+(arr.length-1)+(k==='str'?'':'.text'));touch();render();break;}
+ case 'arr-del':{const arr=getPath(p,arg);arr.splice(I,1);touch();render();break;}
+ case 'cond-test':{const txt=trim(p.design.conditions[I]);if(!txt)break;let t=p.tests.find(x=>x.fromCond===txt);
+  if(!t){t=mkTest({type:'assumption',statement:txt,fromCond:txt});p.tests.push(t);touch();}
+  goSection('test',0);ui.openTest=t.id;ui.notice='Added to Test My Ideas. Design a small experiment and record what you find.';render({top:true});break;}
+ case 'opp-add':{const o={id:uid(),problem:'',who:'',why:'',evidence:'',existing:'',vanish:'',test:'',conf:30,status:'Idea',ai:false,testId:null};p.opps.push(o);ui.openOpp=o.id;ui.focus=idFor('opps.'+(p.opps.length-1)+'.problem');touch();render();break;}
+ case 'opp-open':ui.openOpp=ui.openOpp===arg?null:arg;render();break;
+ case 'opp-del':if(!confirmed('opp:'+arg))break;p.opps=p.opps.filter(x=>x.id!==arg);touch();render();break;
+ case 'opp-ai':suggestOpps();break;
+ case 'opp-test':{const o=p.opps.find(x=>x.id===arg);if(!o)break;let t=o.testId&&p.tests.find(x=>x.id===o.testId);
+  if(!t){t=mkTest({type:'assumption',statement:(trim(o.who)||'People')+' have this problem often enough to want a solution: '+trim(o.problem),conf:o.conf,exp:o.test,fromOpp:o.id});p.tests.push(t);o.testId=t.id;if(o.status==='Idea')o.status='Investigating';touch();}
+  goSection('test',0);ui.openTest=t.id;ui.notice='Added to Test My Ideas. Run the experiment, then record what you find.';render({top:true});break;}
+ case 'fut-gen':if(f.scenarios.length&&!confirmed('regen'))break;genFutures();break;
+ case 'fut-own':f.scenarios=['fast','steady','bumpy'].map(blankScn);f.ai=false;f.signals={};ui.editScn=new Set(f.scenarios.map(s=>s.id));touch();render();break;
+ case 'fut-edit':if(ui.editScn.has(arg))ui.editScn.delete(arg);else ui.editScn.add(arg);render();break;
+ case 'node':ui.nodeSel=arg;render();break;
+ case 'node-add':{const inp=document.getElementById('nodeText'),txt=inp?trim(inp.value):'';if(!txt)break;
+  const L=layoutMap(p),nd=findNode(L,arg);if(!nd||nd.d<1||nd.d>=5)break;const kids=nd.d===1?nd.n.scn.children:nd.n.children;const c={id:'c_'+uid(),text:txt,children:[]};kids.push(c);
+  ui.nodeSel=arg;touch();render();const again=document.getElementById('nodeText');if(again)again.focus();break;}
+ case 'node-del':{const L=layoutMap(p),nd=findNode(L,arg);if(!nd||nd.d<2)break;const par=nd.parent,arr=par.d===1?par.n.scn.children:par.n.children,ix=arr.findIndex(x=>x.id===arg);if(ix>=0)arr.splice(ix,1);ui.nodeSel=par.n.id;touch();render();break;}
+ case 'sig-cycle':{const cur=f.signals[arg]||SIG_STATES[0];f.signals[arg]=SIG_STATES[(SIG_STATES.indexOf(cur)+1)%SIG_STATES.length];touch();render();break;}
+ case 'q-from-change':f.question='What could happen next with "'+trim(u.change)+'", and what should we do about it?';touch();render();break;
+ case 'fut-log':{let n=0;f.scenarios.forEach(s=>{if(s.conf!=null&&!s.logged){const first=trim(s.story).split(/(?<=[.!?])\s/)[0]||s.name;p.tests.push(mkTest({type:'prediction',statement:(s.name||'Future')+': '+first,conf:s.conf,horizon:f.horizon,fromScn:s.id}));s.logged=true;n++;}});
+  if(n){touch();ui.notice='Added '+n+' prediction'+(n>1?'s':'')+' to Test My Ideas. Open that step to design a small test for each.';}render({top:true});break;}
+ case 'test-add':{const tx=document.getElementById('newTestText'),ty=document.getElementById('newTestType'),txt=tx?trim(tx.value):'';if(!txt)break;
+  const t=mkTest({type:ty?ty.value:'idea',statement:txt});p.tests.push(t);ui.openTest=t.id;touch();render();break;}
+ case 'test-open':ui.openTest=ui.openTest===arg?null:arg;render();break;
+ case 'test-del':if(!confirmed('test:'+arg))break;p.tests=p.tests.filter(x=>x.id!==arg);touch();render();break;
+ case 'ev-add':{const t=p.tests.find(x=>x.id===arg),inp=document.getElementById('ev_'+arg),sel=document.getElementById('evd_'+arg),txt=inp?trim(inp.value):'';if(!t||!txt)break;
+  t.evidence.push({id:uid(),text:txt,dir:sel?sel.value:'neutral',date:now()});if(t.status==='Open')t.status='Testing';touch();render();break;}
+ case 'ev-del':{const t=p.tests.find(x=>x.id===arg);if(t){t.evidence.splice(I,1);touch();render();}break;}
+ case 'coach':askCoach(arg);break;
+ case 'stop':if(ui.ctl)ui.ctl.abort();break;
+ }}
+
+/* ---------- AI ---------- */
+const LANGS={en:'English',ar:'Arabic',fr:'French',es:'Spanish',zh:'Chinese'};
+function langLine(){let l='en';try{l=localStorage.getItem('language')||'en';}catch(e){}
+ return l==='en'||!LANGS[l]?'':' Write all learner-facing text in '+LANGS[l]+'. Keep JSON field names and the words fact, assumption and possibility in English.';}
+async function callAI(prompt,maxTokens,signal){
+ let r;
+ try{r=await fetch('/api/ask-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt,maxTokens:maxTokens||1200}),signal:signal});}
+ catch(e){if(e&&e.name==='AbortError')throw{code:'cancelled'};throw{code:'upstream_error'};}
+ let d;try{d=await r.json();}catch(e){throw{code:'upstream_error'};}
+ if(d.error||!d.text)throw{code:r.status===429?'rate_limited':'upstream_error',message:d.error};
+ return d.text;}
+function parseJSON(text){
+ try{return JSON.parse(text);}catch(e){}
+ const fence=String(text).match(/```(?:json)?\s*([\s\S]*?)```/);if(fence){try{return JSON.parse(fence[1]);}catch(e){}}
+ const a=String(text).search(/[\[{]/),b=Math.max(String(text).lastIndexOf('}'),String(text).lastIndexOf(']'));
+ if(a>=0&&b>a){try{return JSON.parse(String(text).slice(a,b+1));}catch(e){}}
+ throw{code:'invalid_json'};}
+function errCopy(e){const c=e&&e.code;
+ if(c==='rate_limited')return 'Claude is busy, or your usage limit was reached. Try again later.';
+ if(c==='not_granted'||c==='sampling_disabled'||c==='not_declared'||c==='capability_disabled'||c==='capability_removed')return 'Claude is not available for this page.';
+ if(c==='refused')return 'Claude could not help with that wording. Try rephrasing.';
+ if(c==='invalid_json')return 'Claude\'s answer could not be read. Try again.';
+ return 'Something went wrong. Try again.';}
+function aiFail(e){const c=e&&e.code;if(c==='cancelled')return;ui.notice=errCopy(e);
+ if(c==='not_granted'||c==='sampling_disabled'||c==='not_declared'||c==='capability_disabled'||c==='capability_removed')aiBlocked=true;}
+function ctxFor(kind){const p=proj(),u=p.understand,f=p.futures,d=p.design,L=['Project: '+p.title];
+ const add=(k,v)=>{if(trim(v))L.push(k+': '+trim(v));};
+ if(kind==='understand'||kind==='opp'||kind==='question'){add('Change',u.change);add('Where',u.domain);add('What is changing',u.what);add('Why',u.why);add('What could slow it',u.brakes);add('Who gains',u.gain);add('Who loses',u.lose);add('Incentives',u.incentive);u.chain.forEach((c,i)=>add('Effect '+(i+1),c));u.claims.forEach(c=>add('Statement ('+c.type+')',c.text));}
+ if(kind==='question')add('Learner question',f.question);
+ if(kind==='opp')p.opps.forEach((o,i)=>{add('Opportunity '+(i+1),o.problem);add('  who',o.who);add('  existing',o.existing);add('  test',o.test);});
+ if(kind==='scenarios'){add('Question',f.question);f.scenarios.forEach(s=>{add('Future ('+KIND_LABEL[s.kind]+')',s.name+'. '+s.story);add('  risks',s.risks.join('; '));add('  early signs',s.signals.join('; '));});}
+ if(kind==='design'){add('Vision',d.vision);add('Outcome',d.outcome);add('Conditions',d.conditions.join('; '));add('Skills',d.skills.join('; '));Object.keys(d.ladder).forEach(k=>add('Backward step '+k,d.ladder[k]));add('Imagined failure',d.fail);add('What would guarantee failure',d.guarantee);}
+ if(kind==='test')p.tests.forEach((t,i)=>{add('Test '+(i+1),t.statement+' ('+t.conf+'% sure)');add('  reasoning',t.reasoning);add('  would change mind',t.changeMind);add('  experiment',t.exp);add('  evidence',t.evidence.map(e=>e.dir+': '+e.text).join('; '));});
+ return L.join('\n');}
+async function askCoach(kind){
+ const key=ui.view+':'+ui.section+':'+ui.step+':'+kind,c=ui.coach={key:key,status:'thinking',text:''};ui.ctl=new AbortController();refreshCoach();
+ const input=PERSONA[S.level]+'\n\n'+BASE+langLine()+'\n\nTask: '+TASK[kind]+'\n\nThe learner\'s work:\n'+ctxFor(kind);
+ try{const text=await callAI(input,1500,ui.ctl.signal);c.status='done';c.text=text;const p=proj();p.coachAsks=(p.coachAsks||0)+1;touch();}
+ catch(e){if(e&&e.code==='cancelled'){c.status='idle';}else{c.status='error';c.error=errCopy(e);}}
+ ui.ctl=null;if(ui.coach===c)refreshCoach();}
+const S1=(v,n)=>trim(v).slice(0,n||220);
+const SA=(v,k)=>Array.isArray(v)?v.map(x=>S1(typeof x==='string'?x:x&&x.text)).filter(Boolean).slice(0,k||4):[];
+async function suggestOpps(){const p=proj(),topic=trim(p.understand.change)||trim(p.title);if(!topic||!aiOk())return;
+ ui.busy='opps';ui.notice='';ui.ctl=new AbortController();render();
+ const prompt=PERSONA[S.level]+'\n\n'+BASE+langLine()+'\n\nA learner is studying this change: "'+topic+'".\nWhat the learner wrote:\n'+ctxFor('understand')+'\n\nSuggest exactly 3 different problems this change could create for real people that someone might build a solution for. These are ideas to investigate, not proven opportunities.\nReply with only a JSON array of 3 objects with these string fields: problem, who, why, existing, vanish, test.\n- problem: the problem in one sentence\n- who: who has it\n- why: why it may become more important\n- existing: what people use today instead\n- vanish: what could make the opportunity disappear\n- test: the cheapest test the learner could run in a week with free or cheap tools\nUse simple words. Do not invent statistics, company names or quotes. Keep each field under 25 words.';
+ try{const r=parseJSON(await callAI(prompt,2500,ui.ctl.signal));const arr=Array.isArray(r)?r:(r&&r.opportunities);if(!Array.isArray(arr)||!arr.length)throw{code:'invalid_json'};
+  arr.slice(0,3).forEach(x=>{p.opps.push({id:uid(),problem:S1(x.problem),who:S1(x.who),why:S1(x.why),evidence:'',existing:S1(x.existing),vanish:S1(x.vanish),test:S1(x.test),conf:30,status:'Idea',ai:true,testId:null});});
+  ui.openOpp=p.opps[p.opps.length-1].id;touch();}
+ catch(e){aiFail(e);}
+ ui.busy=null;ui.ctl=null;render();}
+function normScn(r,i){r=r||{};const kinds=['fast','steady','bumpy'],names=['Fast and helpful','Slow and steady','Bumpy and difficult'];
+ const basis=Array.isArray(r.basis)?r.basis.map(b=>({text:S1(b&&b.text),type:['fact','assumption','possibility'].indexOf(b&&b.type)>=0?b.type:'possibility'})).filter(b=>b.text).slice(0,5):[];
+ return{id:'s_'+uid(),kind:kinds[i],name:S1(r.name,60)||names[i],story:S1(r.story,420),causes:SA(r.causes),opps:SA(r.opportunities||r.opps),risks:SA(r.risks),signals:SA(r.signals),basis:basis,children:[],conf:null,logged:false};}
+async function genFutures(){const p=proj(),q=trim(p.futures.question);
+ if(!q){ui.notice='Write your question in step 1 first.';render();return;}if(!aiOk())return;
+ ui.busy='futures';ui.notice='';ui.ctl=new AbortController();render();
+ const prompt=PERSONA[S.level]+'\n\n'+BASE+langLine()+'\n\nThe learner asks this question about the future: "'+q+'".\nWhat the learner wrote about the change:\n'+ctxFor('understand')+'\n\nWrite exactly three different possible futures, in this order: 1) rapid, positive development, 2) gradual development, 3) difficult, negative development. They are possibilities, never predictions. Never give probabilities.\nReply with only a JSON object {"scenarios":[...]} holding 3 objects with these fields: name (under 5 words), story (2 sentences), causes (array of 2 or 3 short strings), opportunities (2 or 3), risks (2 or 3), signals (2 or 3 early signs a learner could watch for), basis (array of 3 objects {"text": string, "type": "fact" | "assumption" | "possibility"}).\nRules for basis: use "fact" only for widely documented present-day or historical facts the learner could check; use "assumption" for things taken for granted; use "possibility" for anything about the future. Do not invent statistics, names or quotes. Keep each string under 16 words.';
+ try{const r=parseJSON(await callAI(prompt,4000,ui.ctl.signal));const arr=Array.isArray(r)?r:(r&&r.scenarios);if(!Array.isArray(arr)||arr.length<3)throw{code:'invalid_json'};
+  p.futures.scenarios=arr.slice(0,3).map(normScn);p.futures.ai=true;p.futures.signals={};ui.editScn=new Set();ui.nodeSel='root';touch();}
+ catch(e){aiFail(e);}
+ ui.busy=null;ui.ctl=null;render();}
+
+/* ---------- boot ---------- */
+async function boot(){
+ const user=await window.SSAuth.requireAuth();if(!user)return;
+ userId=user.id;sb=window.SSAuth.client;
+ try{const r=await sb.from('profiles').select('grade_level').eq('id',userId).maybeSingle();gradeLevel=r.data&&r.data.grade_level;if(user.role==='teacher')gradeLevel=null;}catch(e){}
+ await loadAll();render();
+ window.addEventListener('beforeunload',()=>{if(dirtyIds.size||deletedIds.size)flush();});
+}
+boot();
+})();
+</script>
+<script src="js/nav.js" defer></script>
+</body>
+</html>

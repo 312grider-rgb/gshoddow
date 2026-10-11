@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shared With Teachers — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="css/theme.css" rel="stylesheet">
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');}catch(e){}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  /* A private space for one student and one teacher. Colours come from css/theme.css;
+     dark mode follows the app's 'theme' setting. */
+  :root{
+    --surface:#FFFFFF; --raised:#FDFCFA; --muted:#6B6558; --line-soft:#F1EBDD;
+    --gold-text:#8A6A1F; --link:#1F2E52;
+    --good:#4F7556; --good-soft:#E3EFE5; --warn:#8A6A1F; --warn-soft:#F6ECD2; --bad:#A8472F; --bad-soft:#F7E1DA;
+    --focus:#C9A24E;
+  }
+  html[data-theme="dark"]{
+    --ink:#EDE9DD; --ink-2:#F5F1E6; --gold:#D9B366; --gold-light:#E9CD8F; --cream:#12172A; --sage:#7FAF88; --charcoal:#EDE9DD;
+    --line:#2A3350; --paper:#232B47; --surface:#1B2138; --raised:#222A45; --muted:#A9A89F; --line-soft:#232B47;
+    --gold-text:#E4C583; --link:#E4C583; --good:#8CC9A0; --good-soft:#1F3A2B; --warn:#E4C583; --warn-soft:#3A3014;
+    --bad:#F0917A; --bad-soft:#41211B; --focus:#E4C583; color-scheme:dark;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--cream); color:var(--charcoal); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; padding-bottom:40px;}
+  h1,h2,h3,h4{font-family:'Syne',sans-serif; letter-spacing:-0.01em; margin:0;}
+  button,input,textarea,select{font:inherit; color:inherit;}
+  button{cursor:pointer;}
+  :focus-visible{outline:3px solid var(--focus); outline-offset:2px;}
+
+  header.top{background:linear-gradient(160deg,#141F38 0%,#1F2E52 100%); color:#FBF7EF; padding:24px 20px 26px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:2.2px; text-transform:uppercase; color:#E4C583; font-weight:700; margin-bottom:6px;}
+  header.top h1{font-size:28px; font-weight:700; color:#FBF7EF;}
+  header.top p{margin:8px 0 0; font-size:15px; opacity:.85; max-width:60ch;}
+  header.top .banner-link{display:inline-block; margin-top:12px; color:#E4C583; font-weight:600; font-size:14px;}
+
+  main{max-width:860px; margin:0 auto; padding:20px;}
+  .loading{text-align:center; padding:36px 0; color:var(--muted);}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px;}
+  .card h2{font-size:18px; font-weight:700; margin-bottom:10px;}
+  .hint{color:var(--muted); font-size:14px; line-height:1.5;}
+  .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+  .between{justify-content:space-between;}
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:8px 16px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-weight:600; font-size:15px;}
+  .btn.primary{background:var(--ink); border-color:var(--ink); color:var(--cream);}
+  html[data-theme="dark"] .btn.primary{background:var(--gold); border-color:var(--gold); color:#141F38;}
+  .btn.small{min-height:38px; padding:5px 12px; font-size:14px;}
+  .btn.ghost{background:transparent; border-color:transparent; color:var(--muted);}
+  .btn:disabled{opacity:.55; cursor:default;}
+  .link-btn{background:none; border:0; padding:8px 0; min-height:44px; color:var(--link); font-weight:600; text-decoration:underline; text-underline-offset:3px;}
+
+  .notice{border-radius:12px; padding:12px 14px; font-size:14.5px; line-height:1.5; margin-bottom:16px; background:var(--warn-soft); border:1px solid var(--warn); color:var(--ink);}
+  .notice.error{background:var(--bad-soft); border-color:var(--bad);}
+  .notice.good{background:var(--good-soft); border-color:var(--good);}
+  .safe{background:var(--paper); border:1px solid var(--paper-line,var(--line)); border-radius:12px; padding:12px 14px; font-size:14.5px; line-height:1.5; margin-bottom:16px;}
+  html[data-theme="dark"] .safe{border-color:var(--line);}
+
+  label{display:block; font-weight:600; font-size:14.5px; margin:12px 0 6px;}
+  input[type=text],input[type=url],input[type=file],textarea,select{width:100%; padding:11px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--raised); font-size:16px; min-height:44px;}
+  textarea{min-height:84px; resize:vertical;}
+  input:focus,textarea:focus,select:focus{outline:none; border-color:var(--gold);}
+
+  /* people */
+  .people{display:grid; gap:10px;}
+  .person{display:flex; align-items:center; gap:14px; width:100%; text-align:start; padding:14px; background:var(--surface); border:1px solid var(--line); border-radius:14px;}
+  .person:hover{border-color:var(--gold);}
+  .avatar{flex:none; width:44px; height:44px; border-radius:50%; background:var(--ink); color:var(--cream); display:grid; place-items:center; font:700 18px 'Syne',sans-serif;}
+  html[data-theme="dark"] .avatar{background:var(--gold); color:#141F38;}
+  .pbody{min-width:0; flex:1;}
+  .pname{font-weight:700; font-size:17px; overflow-wrap:anywhere;}
+  .psub{color:var(--muted); font-size:14px; overflow-wrap:anywhere;}
+  .newtag{display:inline-block; margin-inline-start:8px; padding:2px 9px; border-radius:999px; background:var(--gold); color:#141F38; font-size:12px; font-weight:700; vertical-align:middle;}
+  .modes{display:flex; gap:8px; margin-bottom:16px;}
+  .mode{flex:1; min-height:44px; border:1px solid var(--line); background:var(--surface); border-radius:10px; font-weight:700;}
+  .mode[aria-pressed="true"]{background:var(--ink); color:var(--cream); border-color:var(--ink);}
+  html[data-theme="dark"] .mode[aria-pressed="true"]{background:var(--gold); color:#141F38; border-color:var(--gold);}
+  .empty{background:var(--surface); border:1px dashed var(--line); border-radius:14px; padding:26px 18px; text-align:center; color:var(--muted); font-size:15.5px; line-height:1.5;}
+  .empty a{color:var(--link); font-weight:700;}
+
+  /* space */
+  .spacehead h2{font-size:24px; font-weight:800; overflow-wrap:anywhere;}
+  .tabs{display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap;}
+  .tab{min-height:40px; padding:6px 14px; border:1px solid var(--line); background:var(--surface); border-radius:999px; font-weight:600; font-size:14.5px;}
+  .tab[aria-selected="true"]{background:var(--ink); color:var(--cream); border-color:var(--ink);}
+  html[data-theme="dark"] .tab[aria-selected="true"]{background:var(--gold); color:#141F38; border-color:var(--gold);}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;}
+  .chip{min-height:38px; padding:4px 12px; border:1px solid var(--line); background:var(--surface); border-radius:999px; font-size:14px; font-weight:600;}
+  .chip[aria-pressed="true"]{background:var(--gold); border-color:var(--gold); color:#141F38;}
+  .req{display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--line-soft);}
+  .req:first-of-type{border-top:0;}
+  .req input[type=checkbox]{width:24px; height:24px; accent-color:var(--gold); flex:none;}
+  .req .t{flex:1; min-width:0; overflow-wrap:anywhere;}
+  .req .t.done{text-decoration:line-through; color:var(--muted);}
+
+  .item{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; display:grid; gap:10px;}
+  .ihead{display:flex; gap:12px; align-items:flex-start;}
+  .iicon{flex:none; width:40px; height:40px; border-radius:10px; background:var(--paper); display:grid; place-items:center; font-size:20px;}
+  .ititle{font-weight:700; font-size:17px; overflow-wrap:anywhere;}
+  .imeta{color:var(--muted); font-size:13.5px;}
+  .inote{white-space:pre-wrap; overflow-wrap:anywhere; font-size:15px; line-height:1.55;}
+  .media audio,.media video,.media img{width:100%; max-width:100%; border-radius:10px; display:block;}
+  .media video{max-height:420px; background:#000;}
+  .media img{max-height:420px; object-fit:contain; background:var(--paper);}
+  .iact{display:flex; flex-wrap:wrap; gap:6px;}
+  .cmts{border-top:1px solid var(--line-soft); padding-top:10px; display:grid; gap:8px;}
+  .cmt{font-size:14.5px; overflow-wrap:anywhere;}
+  .cmt b{font-weight:700;} .cmt span{color:var(--muted); font-size:12.5px; margin-inline-start:6px;}
+  .cmt p{margin:2px 0 0; white-space:pre-wrap;}
+  .reportbox{border:1px solid var(--bad); background:var(--bad-soft); border-radius:10px; padding:10px; display:grid; gap:8px;}
+  #toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(86px + env(safe-area-inset-bottom,0px)); background:var(--ink); color:var(--cream); padding:10px 16px; border-radius:10px; font-size:14.5px; z-index:80; max-width:92vw; display:none;}
+  html[data-theme="dark"] #toast{background:var(--gold); color:#141F38;}
+  @media (prefers-reduced-motion:no-preference){ .person,.btn{transition:transform .15s ease,border-color .15s ease;} .btn:active,.person:active{transform:scale(.98);} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1 id="pageTitle">Shared With Teachers</h1>
+  <p id="pageSub">A private space for you and your teacher to share documents, songs, videos and PDFs.</p>
+  <a class="banner-link" id="backDash" href="skillstream-dashboard.html">&larr; Back to dashboard</a>
+</header>
+<main id="app"><p class="loading">Loading...</p></main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="skillstream-auth.js"></script>
+<script>
+(function(){
+'use strict';
+var BUCKET='teacher-shared', MAX_BYTES=40*1024*1024;
+var FILETYPES={
+  pdf:['application/pdf','pdf'],
+  doc:['application/msword','document'],
+  docx:['application/vnd.openxmlformats-officedocument.wordprocessingml.document','document'],
+  ppt:['application/vnd.ms-powerpoint','document'],
+  pptx:['application/vnd.openxmlformats-officedocument.presentationml.presentation','document'],
+  xls:['application/vnd.ms-excel','document'],
+  xlsx:['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','document'],
+  txt:['text/plain','document'],
+  png:['image/png','image'], jpg:['image/jpeg','image'], jpeg:['image/jpeg','image'], webp:['image/webp','image'],
+  mp3:['audio/mpeg','audio'], m4a:['audio/mp4','audio'], wav:['audio/wav','audio'], ogg:['audio/ogg','audio'], aac:['audio/aac','audio'],
+  mp4:['video/mp4','video'], webm:['video/webm','video'], mov:['video/quicktime','video']
+};
+var ACCEPT=Object.keys(FILETYPES).map(function(e){return '.'+e;}).join(',');
+var KIND_LABEL={pdf:'PDF',document:'Document',audio:'Audio',video:'Video',image:'Image',link:'Link',note:'Note'};
+var KIND_ICON={pdf:'📄',document:'📝',audio:'🎵',video:'🎬',image:'🖼️',link:'🔗',note:'💬'};
+var FILTERS=[['all','All'],['docs','Documents'],['audio','Audio'],['video','Video'],['image','Images'],['link','Links'],['note','Notes']];
+
+var sb=null, me=null, mode='student', view='list', people=[], other=null, items=[], comments={}, requests=[], signed={};
+var filter='all', openC={}, openRep={}, reported={}, confirmKey=null, tab='file', drafts={}, busy=false, lastLoad=0, errorMsg='', setupMissing=false, search='';
+var $app=document.getElementById('app');
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function initial(n){n=String(n||'?').trim();return esc(n.charAt(0).toUpperCase()||'?');}
+function when(t){try{var d=new Date(t),n=new Date();var sameDay=d.toDateString()===n.toDateString();
+  return sameDay?d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString([], {month:'short',day:'numeric'});}catch(e){return '';}}
+function size(b){if(!b&&b!==0)return '';if(b<1024*1024)return Math.max(1,Math.round(b/1024))+' KB';return (b/1024/1024).toFixed(1)+' MB';}
+function uuid(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();
+  var a=new Uint8Array(16);crypto.getRandomValues(a);a[6]=(a[6]&15)|64;a[8]=(a[8]&63)|128;
+  var h=Array.prototype.map.call(a,function(x){return ('0'+x.toString(16)).slice(-2);}).join('');
+  return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function seenKey(oid){return 'lne-shared-seen:'+me.id+':'+oid;}
+function isMissing(e){return !!e&&(e.code==='42P01'||e.code==='PGRST205'||/does not exist|schema cache|Could not find the table/i.test(e.message||''));}
+function nameOf(id){return id===me.id?'You':(other&&other.id===id?other.name:'Someone');}
+var toastTimer=null;
+function toast(t){var el=document.getElementById('toast');el.textContent=t;el.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.style.display='none';},3200);}
+function teacherId(){return mode==='teacher'?me.id:other.id;}
+function studentId(){return mode==='teacher'?other.id:me.id;}
+function displayName(p){return (p&&(p.name||p.full_name))||'Unknown';}
+
+/* ---------- data ---------- */
+function q(r){if(r&&r.error)throw r.error;return r?r.data:null;}
+async function profilesFor(ids){
+  if(!ids.length)return {};
+  var rows=q(await sb.from('profiles').select('id,name,full_name').in('id',ids))||[];
+  var map={};rows.forEach(function(p){map[p.id]=displayName(p);});return map;}
+
+async function loadPeople(){
+  var list=[];
+  if(mode==='student'){
+    var mem=q(await sb.from('classroom_members').select('classroom_id').eq('user_id',me.id).eq('role','student'))||[];
+    var cids=mem.map(function(m){return m.classroom_id;});
+    var cls=cids.length?(q(await sb.from('classrooms').select('id,name,teacher_id').in('id',cids))||[]):[];
+    var byT={};cls.forEach(function(c){if(!c.teacher_id)return;(byT[c.teacher_id]=byT[c.teacher_id]||[]).push(c.name||'Class');});
+    var tids=Object.keys(byT),names=await profilesFor(tids);
+    list=tids.map(function(id){return {id:id,name:names[id]||'Your teacher',classes:byT[id]};});
+  }else{
+    var mine=q(await sb.from('classrooms').select('id,name').eq('teacher_id',me.id))||[];
+    var ids=mine.map(function(c){return c.id;}),nameById={};mine.forEach(function(c){nameById[c.id]=c.name||'Class';});
+    var mem2=ids.length?(q(await sb.from('classroom_members').select('classroom_id,user_id').in('classroom_id',ids).eq('role','student'))||[]):[];
+    var byS={};mem2.forEach(function(m){(byS[m.user_id]=byS[m.user_id]||[]).push(nameById[m.classroom_id]);});
+    var sids=Object.keys(byS),sn=await profilesFor(sids);
+    list=sids.map(function(id){return {id:id,name:sn[id]||'Student',classes:byS[id]};});
+  }
+  var col=mode==='teacher'?'teacher_id':'student_id';
+  var recent=[];
+  try{recent=q(await sb.from('shared_items').select('id,teacher_id,student_id,uploader_id,title,kind,created_at').eq(col,me.id).eq('status','active').order('created_at',{ascending:false}).limit(300))||[];setupMissing=false;}
+  catch(e){if(isMissing(e)){setupMissing=true;}else throw e;}
+  list.forEach(function(p){
+    var mineItems=recent.filter(function(i){return (mode==='teacher'?i.student_id:i.teacher_id)===p.id;});
+    var seen=lsGet(seenKey(p.id))||'1970-01-01T00:00:00Z';
+    p.last=mineItems[0]||null;
+    p.fresh=mineItems.filter(function(i){return i.uploader_id!==me.id&&i.created_at>seen;}).length;
+  });
+  list.sort(function(a,b){var ta=a.last?a.last.created_at:'',tb=b.last?b.last.created_at:'';return ta<tb?1:ta>tb?-1:a.name.localeCompare(b.name);});
+  people=list;
+}
+
+async function loadSpace(){
+  var tid=teacherId(),sid=studentId();
+  var rows=q(await sb.from('shared_items').select('*').eq('teacher_id',tid).eq('student_id',sid).eq('status','active').order('created_at',{ascending:false}).limit(200))||[];
+  items=rows;
+  var ids=rows.map(function(i){return i.id;});
+  comments={};
+  if(ids.length){(q(await sb.from('shared_comments').select('*').in('item_id',ids).order('created_at',{ascending:true}))||[]).forEach(function(c){(comments[c.item_id]=comments[c.item_id]||[]).push(c);});}
+  requests=q(await sb.from('shared_requests').select('*').eq('teacher_id',tid).eq('student_id',sid).order('created_at',{ascending:false}).limit(50))||[];
+  signed={};
+  var paths=rows.filter(function(i){return i.storage_path;}).map(function(i){return i.storage_path;});
+  if(paths.length){
+    try{var s=await sb.storage.from(BUCKET).createSignedUrls(paths,3600);
+      (s&&s.data||[]).forEach(function(x){if(x&&x.signedUrl&&!x.error)signed[x.path]=x.signedUrl;});}
+    catch(e){}
+  }
+  lastLoad=Date.now();
+  lsSet(seenKey(other.id),new Date().toISOString());
+}
+
+/* ---------- views ---------- */
+function render(){
+  var html='';
+  if(setupMissing){html+='<div class="notice error">Sharing is not set up on this site yet. An administrator needs to run migration 025_teacher_student_sharing.sql in Supabase.</div>';}
+  if(errorMsg){html+='<div class="notice error" role="alert">'+esc(errorMsg)+'</div>';}
+  html+=(view==='list'?listView():spaceView());
+  $app.innerHTML=html;
+  var t=document.getElementById('pageTitle'),s=document.getElementById('pageSub');
+  if(mode==='teacher'){t.textContent='Shared With Students';s.textContent='A private space for each student to share documents, songs, videos and PDFs with you.';}
+  else{t.textContent='Shared With Teachers';s.textContent='A private space for you and your teacher to share documents, songs, videos and PDFs.';}
+  document.getElementById('backDash').setAttribute('href',me.role==='teacher'||(me.role==='both'&&mode==='teacher')?'skillstream-teacher-dashboard.html':'skillstream-dashboard.html');
+}
+
+function listView(){
+  var h='';
+  if(me.role==='both'){
+    h+='<div class="modes" role="group" aria-label="View as"><button class="mode" data-act="mode" data-arg="student" aria-pressed="'+(mode==='student')+'">As a student</button><button class="mode" data-act="mode" data-arg="teacher" aria-pressed="'+(mode==='teacher')+'">As a teacher</button></div>';
+  }
+  h+='<div class="safe">'+(mode==='teacher'
+    ?'Each space is private between you and one student. Other students cannot see it. Only students in your classrooms appear here.'
+    :'Only you and your teacher can see what you share here. Only share things you are happy for your teacher to see. If something does not feel right, tap <b>Report</b> or tell a trusted adult.')+'</div>';
+  if(!people.length){
+    h+='<div class="empty">'+(mode==='teacher'
+      ?'You do not have any students yet.<br>Share your class code, and students who join will appear here.<br><a href="skillstream-classrooms.html">Go to Classrooms</a>'
+      :'You are not in a classroom yet.<br>Ask your teacher for the class code, then join with it.<br><a href="skillstream-classrooms.html">Join a classroom</a>')+'</div>';
+    return h;
+  }
+  var shown=people;
+  if(people.length>8){
+    h+='<div class="card"><label for="pSearch" style="margin-top:0">Find a student</label><input id="pSearch" type="text" data-draft="search" value="'+esc(search)+'" placeholder="Type a name" autocomplete="off"></div>';
+    var s=search.trim().toLowerCase();if(s)shown=people.filter(function(p){return p.name.toLowerCase().indexOf(s)>=0;});
+  }
+  h+='<div class="people" id="peopleList">'+shown.map(personCard).join('')+'</div>';
+  if(!shown.length)h+='<div class="empty">No one matches that name.</div>';
+  return h;
+}
+function personCard(p){
+  var sub=p.classes.map(esc).join(', ');
+  var last=p.last?'<br>Latest: '+esc(p.last.title)+' · '+esc(when(p.last.created_at)):'<br>Nothing shared yet';
+  return '<button class="person" data-act="open" data-arg="'+esc(p.id)+'"><span class="avatar" aria-hidden="true">'+initial(p.name)+'</span><span class="pbody"><span class="pname">'+esc(p.name)+(p.fresh?'<span class="newtag">'+p.fresh+' new</span>':'')+'</span><span class="psub">'+sub+last+'</span></span><span aria-hidden="true">&rsaquo;</span></button>';
+}
+
+function spaceView(){
+  var h='<div class="row between" style="margin-bottom:6px"><button class="link-btn" data-act="back">&larr; '+(mode==='teacher'?'All students':'All teachers')+'</button><button class="btn small" data-act="refresh">Refresh</button></div>';
+  h+='<div class="spacehead" style="margin-bottom:14px"><h2>Shared with '+esc(other.name)+'</h2><p class="hint">Only you and '+esc(other.name)+' can see this space.</p></div>';
+  if(mode==='student')h+='<div class="safe">Only share things you are happy for your teacher to see. If something does not feel right, tap <b>Report</b> or tell a trusted adult.</div>';
+  h+=requestsCard()+composerCard();
+  h+='<div class="chips" role="group" aria-label="Show">'+FILTERS.map(function(f){return '<button class="chip" data-act="filter" data-arg="'+f[0]+'" aria-pressed="'+(filter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div>';
+  h+='<div id="feed">'+feedHtml()+'</div>';
+  return h;
+}
+
+function requestsCard(){
+  var h='';
+  if(mode==='teacher'){
+    h+='<div class="card"><h2>Ask for something</h2><p class="hint">For example: "Record yourself reading page 12" or "Upload your finished essay".</p>'+
+       '<label for="reqText" style="margin-top:8px">What would you like from '+esc(other.name)+'?</label><div class="row"><input id="reqText" type="text" data-draft="req" value="'+esc(drafts.req||'')+'" maxlength="500" autocomplete="off" style="flex:1 1 220px;width:auto"><button class="btn primary" data-act="req-add"'+(busy?' disabled':'')+'>Ask</button></div>';
+  }
+  if(requests.length||mode==='teacher'){
+    if(mode!=='teacher'||requests.length){
+      if(mode!=='teacher')h+='<div class="card"><h2>Asked by your teacher</h2>';
+      else h+='<div style="margin-top:14px">';
+      h+=requests.map(function(r){
+        return '<div class="req"><input type="checkbox" id="rq_'+esc(r.id)+'" data-act="req-toggle" data-arg="'+esc(r.id)+'" '+(r.done?'checked':'')+' aria-label="Mark done"><label for="rq_'+esc(r.id)+'" class="t'+(r.done?' done':'')+'" style="margin:0;font-weight:500">'+esc(r.text)+'</label>'+
+          (mode==='teacher'?'<button class="btn small ghost" data-act="req-del" data-arg="'+esc(r.id)+'" aria-label="Delete request">'+(confirmKey==='rq:'+r.id?'Click again':'Delete')+'</button>':'')+'</div>';
+      }).join('');
+      h+='</div>';
+    }
+  }
+  if(mode==='teacher')h+='</div>';
+  return h;
+}
+
+function composerCard(){
+  var tabs=[['file','Upload a file'],['link','Add a link'],['note','Write a note']];
+  var h='<div class="card"><h2>Share something</h2><div class="tabs" role="tablist">'+tabs.map(function(t){return '<button class="tab" role="tab" data-act="tab" data-arg="'+t[0]+'" aria-selected="'+(tab===t[0])+'">'+t[1]+'</button>';}).join('')+'</div>';
+  if(tab==='file'){
+    h+='<label for="fFile">File</label><input id="fFile" type="file" accept="'+ACCEPT+'"><p class="hint" style="margin-top:6px">PDF, Word, PowerPoint, Excel, text, images, audio (mp3, m4a, wav) and video (mp4, webm, mov), up to 40 MB. For a longer video, add a link instead.</p>';
+  }
+  if(tab==='link'){
+    h+='<label for="fLink">Link (starts with https://)</label><input id="fLink" type="url" inputmode="url" data-draft="link" value="'+esc(drafts.link||'')+'" placeholder="https://" autocomplete="off">';
+  }
+  h+='<label for="fTitle">Title</label><input id="fTitle" type="text" data-draft="title" value="'+esc(drafts.title||'')+'" maxlength="200" autocomplete="off">';
+  h+='<label for="fNote">'+(tab==='note'?'Your note':'Message (optional)')+'</label><textarea id="fNote" data-draft="note" maxlength="2000">'+esc(drafts.note||'')+'</textarea>';
+  h+='<div style="margin-top:12px"><button class="btn primary" data-act="share"'+(busy?' disabled':'')+'>'+(busy?'Sharing...':'Share with '+esc(other.name))+'</button></div></div>';
+  return h;
+}
+
+function kindGroup(k){return k==='pdf'||k==='document'?'docs':k;}
+function feedHtml(){
+  var list=items.filter(function(i){return filter==='all'||kindGroup(i.kind)===filter;});
+  if(!items.length)return '<div class="empty">Nothing has been shared yet.<br>Upload a file, add a link or write a note to start.</div>';
+  if(!list.length)return '<div class="empty">Nothing in this group yet.</div>';
+  return list.map(itemHtml).join('');
+}
+function safeHttps(u){try{var x=new URL(u);return x.protocol==='https:'?x:null;}catch(e){return null;}}
+function itemHtml(i){
+  var url=i.storage_path?signed[i.storage_path]:null,media='';
+  if(i.kind==='audio'&&url)media='<div class="media"><audio controls preload="none" src="'+esc(url)+'"></audio></div>';
+  else if(i.kind==='video'&&url)media='<div class="media"><video controls preload="metadata" playsinline src="'+esc(url)+'"></video></div>';
+  else if(i.kind==='image'&&url)media='<div class="media"><img loading="lazy" src="'+esc(url)+'" alt="'+esc(i.title)+'"></div>';
+  else if(i.kind==='pdf'||i.kind==='document'){media=url?'<div><a class="btn small" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open '+esc(KIND_LABEL[i.kind].toLowerCase())+'</a></div>':'<p class="hint">This file could not be loaded. Tap Refresh to try again.</p>';}
+  else if((i.kind==='audio'||i.kind==='video'||i.kind==='image')&&!url)media='<p class="hint">This file could not be loaded. Tap Refresh to try again.</p>';
+  else if(i.kind==='link'){var u=safeHttps(i.link_url);media=u?'<div><a class="btn small" href="'+esc(u.href)+'" target="_blank" rel="noopener noreferrer">Open link ('+esc(u.hostname)+')</a></div>':'<p class="hint">This link is not safe to open.</p>';}
+  var cs=comments[i.id]||[],mineItem=i.uploader_id===me.id,canRemove=mineItem||mode==='teacher';
+  var meta=esc(nameOf(i.uploader_id))+' · '+esc(when(i.created_at))+(i.size_bytes?' · '+esc(size(i.size_bytes)):'')+' · '+esc(KIND_LABEL[i.kind]);
+  var h='<article class="item" data-id="'+esc(i.id)+'"><div class="ihead"><span class="iicon" aria-hidden="true">'+KIND_ICON[i.kind]+'</span><div style="min-width:0"><div class="ititle">'+esc(i.title)+'</div><div class="imeta">'+meta+'</div></div></div>';
+  if(i.note)h+='<div class="inote">'+esc(i.note)+'</div>';
+  h+=media;
+  h+='<div class="iact"><button class="btn small" data-act="cmt-toggle" data-arg="'+esc(i.id)+'" aria-expanded="'+(!!openC[i.id])+'">Comments ('+cs.length+')</button>';
+  if(!mineItem){h+=reported[i.id]?'<span class="hint" style="align-self:center">Reported</span>':'<button class="btn small ghost" data-act="rep-toggle" data-arg="'+esc(i.id)+'">Report</button>';}
+  if(canRemove)h+='<button class="btn small ghost" data-act="remove" data-arg="'+esc(i.id)+'">'+(confirmKey==='rm:'+i.id?'Click again to remove':'Remove')+'</button>';
+  h+='</div>';
+  if(openRep[i.id]&&!reported[i.id]){
+    h+='<div class="reportbox"><label for="rr_'+esc(i.id)+'" style="margin:0">Why are you reporting this? (optional)</label><input id="rr_'+esc(i.id)+'" type="text" data-draft="rr_'+esc(i.id)+'" value="'+esc(drafts['rr_'+i.id]||'')+'" maxlength="500" autocomplete="off"><div class="row"><button class="btn small primary" data-act="rep-send" data-arg="'+esc(i.id)+'">Send report</button><button class="btn small ghost" data-act="rep-toggle" data-arg="'+esc(i.id)+'">Cancel</button></div><p class="hint">A site administrator can review reports.</p></div>';
+  }
+  if(openC[i.id]){
+    h+='<div class="cmts">'+(cs.length?cs.map(function(c){return '<div class="cmt"><b>'+esc(nameOf(c.author_id))+'</b><span>'+esc(when(c.created_at))+'</span><p>'+esc(c.body)+'</p></div>';}).join(''):'<p class="hint">No comments yet.</p>')+
+       '<div class="row"><label for="cm_'+esc(i.id)+'" class="hint" style="margin:0;font-weight:500;flex-basis:100%">Add a comment</label><input id="cm_'+esc(i.id)+'" type="text" data-draft="cm_'+esc(i.id)+'" value="'+esc(drafts['cm_'+i.id]||'')+'" maxlength="1000" autocomplete="off" style="flex:1 1 200px;width:auto"><button class="btn small primary" data-act="cmt-send" data-arg="'+esc(i.id)+'">Send</button></div></div>';
+  }
+  return h+'</article>';
+}
+function renderFeed(){var f=document.getElementById('feed');if(f)f.innerHTML=feedHtml();}
+
+/* ---------- actions ---------- */
+function fail(e,fallback){
+  if(isMissing(e)){setupMissing=true;errorMsg='';}
+  else{errorMsg=fallback||'Something went wrong. Please try again.';try{console.warn('Shared space:',e&&e.message||e);}catch(x){}}
+  render();window.scrollTo(0,0);
+}
+async function openSpace(id){
+  other=people.filter(function(p){return p.id===id;})[0];if(!other)return;
+  view='space';errorMsg='';filter='all';openC={};openRep={};confirmKey=null;drafts={};tab='file';
+  $app.innerHTML='<p class="loading">Loading...</p>';
+  try{await loadSpace();try{history.replaceState(null,'','?with='+encodeURIComponent(id));}catch(e){}render();window.scrollTo(0,0);}
+  catch(e){view='list';fail(e,'Could not open this space. Please try again.');}
+}
+async function refresh(quiet){
+  try{await loadSpace();render();if(!quiet)toast('Updated');}catch(e){if(!quiet)fail(e,'Could not refresh. Please try again.');}
+}
+function extOf(name){var m=/\.([a-z0-9]+)$/i.exec(name||'');return m?m[1].toLowerCase():'';}
+async function share(){
+  if(busy)return;
+  var title=(document.getElementById('fTitle').value||'').trim(),note=(document.getElementById('fNote').value||'').trim();
+  var row={teacher_id:teacherId(),student_id:studentId(),uploader_id:me.id,title:title,note:note||null},path=null;
+  if(tab==='file'){
+    var inp=document.getElementById('fFile'),f=inp&&inp.files&&inp.files[0];
+    if(!f){toast('Choose a file first.');return;}
+    var ext=extOf(f.name),spec=FILETYPES[ext];
+    if(!spec){toast('That file type is not allowed. Choose a PDF, document, image, audio or video file.');return;}
+    if(f.size>MAX_BYTES){toast('That file is over 40 MB. For a big video, add a link instead.');return;}
+    if(!title){title=f.name.replace(/\.[^.]+$/,'').slice(0,200);row.title=title;}
+    row.kind=spec[1];row.mime_type=spec[0];row.size_bytes=f.size;
+    path=teacherId()+'/'+studentId()+'/'+uuid()+'.'+ext;row.storage_path=path;
+    busy=true;render();
+    var up=await sb.storage.from(BUCKET).upload(path,f,{contentType:spec[0],upsert:false,cacheControl:'3600'});
+    if(up&&up.error){busy=false;fail(up.error,'The file could not be uploaded. Check your connection and try again.');return;}
+  }else if(tab==='link'){
+    var raw=(document.getElementById('fLink').value||'').trim(),u=safeHttps(raw);
+    if(!u){toast('Add a link that starts with https://');return;}
+    row.kind='link';row.link_url=u.href;if(!title){title=u.hostname;row.title=title;}
+    busy=true;render();
+  }else{
+    if(!title||!note){toast('Add a title and a note.');return;}
+    row.kind='note';busy=true;render();
+  }
+  if(!row.title){busy=false;render();toast('Add a title.');return;}
+  var ins=await sb.from('shared_items').insert(row);
+  if(ins&&ins.error){
+    if(path){try{await sb.storage.from(BUCKET).remove([path]);}catch(e){}}
+    busy=false;fail(ins.error,'Could not share that. Please try again.');return;
+  }
+  busy=false;drafts={};
+  try{await loadSpace();}catch(e){}
+  errorMsg='';render();toast('Shared with '+other.name);
+}
+async function removeItem(id){
+  var it=items.filter(function(i){return i.id===id;})[0];if(!it)return;
+  if(confirmKey!=='rm:'+id){confirmKey='rm:'+id;renderFeed();setTimeout(function(){if(confirmKey==='rm:'+id){confirmKey=null;renderFeed();}},5000);return;}
+  confirmKey=null;
+  var r=await sb.from('shared_items').update({status:'removed'}).eq('id',id);
+  if(r&&r.error){fail(r.error,'Could not remove that.');return;}
+  if(it.uploader_id===me.id&&it.storage_path){try{await sb.storage.from(BUCKET).remove([it.storage_path]);}catch(e){}}
+  items=items.filter(function(i){return i.id!==id;});renderFeed();toast('Removed');
+}
+async function sendComment(id){
+  var el=document.getElementById('cm_'+id),body=el?el.value.trim():'';if(!body)return;
+  var r=await sb.from('shared_comments').insert({item_id:id,author_id:me.id,body:body});
+  if(r&&r.error){fail(r.error,'Could not send that comment.');return;}
+  delete drafts['cm_'+id];
+  var cs=q(await sb.from('shared_comments').select('*').eq('item_id',id).order('created_at',{ascending:true}))||[];
+  comments[id]=cs;renderFeed();
+}
+async function sendReport(id){
+  var el=document.getElementById('rr_'+id),reason=el?el.value.trim():'';
+  var r=await sb.from('shared_reports').insert({item_id:id,reporter_id:me.id,reason:reason||null});
+  if(r&&r.error&&r.error.code!=='23505'){fail(r.error,'Could not send the report.');return;}
+  reported[id]=true;delete openRep[id];delete drafts['rr_'+id];renderFeed();toast('Reported. An administrator can review it.');
+}
+async function addRequest(){
+  var el=document.getElementById('reqText'),text=el?el.value.trim():'';if(!text){toast('Write what you would like.');return;}
+  var r=await sb.from('shared_requests').insert({teacher_id:me.id,student_id:other.id,text:text});
+  if(r&&r.error){fail(r.error,'Could not send that request.');return;}
+  drafts.req='';
+  requests=q(await sb.from('shared_requests').select('*').eq('teacher_id',teacherId()).eq('student_id',studentId()).order('created_at',{ascending:false}).limit(50))||[];
+  render();toast('Request sent');
+}
+async function toggleRequest(id,checked){
+  var r=await sb.from('shared_requests').update({done:!!checked,done_at:checked?new Date().toISOString():null}).eq('id',id);
+  if(r&&r.error){fail(r.error,'Could not update that.');return;}
+  requests.forEach(function(x){if(x.id===id){x.done=!!checked;}});render();
+}
+async function deleteRequest(id){
+  if(confirmKey!=='rq:'+id){confirmKey='rq:'+id;render();setTimeout(function(){if(confirmKey==='rq:'+id){confirmKey=null;if(view==='space')render();}},5000);return;}
+  confirmKey=null;
+  var r=await sb.from('shared_requests').delete().eq('id',id);
+  if(r&&r.error){fail(r.error,'Could not delete that.');return;}
+  requests=requests.filter(function(x){return x.id!==id;});render();
+}
+
+/* ---------- events ---------- */
+$app.addEventListener('input',function(e){var t=e.target,k=t.getAttribute&&t.getAttribute('data-draft');if(!k)return;
+  if(k==='search'){search=t.value;var pl=document.getElementById('peopleList');if(pl){var s=search.trim().toLowerCase();pl.innerHTML=people.filter(function(p){return !s||p.name.toLowerCase().indexOf(s)>=0;}).map(personCard).join('');}return;}
+  drafts[k]=t.value;});
+$app.addEventListener('change',function(e){var t=e.target;
+  if(t.id==='fFile'&&t.files&&t.files[0]){var ti=document.getElementById('fTitle');if(ti&&!ti.value.trim()){ti.value=t.files[0].name.replace(/\.[^.]+$/,'').slice(0,200);drafts.title=ti.value;}}
+  if(t.getAttribute&&t.getAttribute('data-act')==='req-toggle'){toggleRequest(t.getAttribute('data-arg'),t.checked);}});
+$app.addEventListener('keydown',function(e){
+  if(e.key!=='Enter'||!e.target.id)return;var id=e.target.id;
+  if(id==='reqText'){e.preventDefault();addRequest();}
+  else if(id.indexOf('cm_')===0){e.preventDefault();sendComment(id.slice(3));}
+  else if(id.indexOf('rr_')===0){e.preventDefault();sendReport(id.slice(3));}});
+$app.addEventListener('click',function(e){
+  var el=e.target.closest&&e.target.closest('[data-act]');if(!el||el.getAttribute('data-act')==='req-toggle')return;
+  var a=el.getAttribute('data-act'),arg=el.getAttribute('data-arg');
+  if(a==='open')openSpace(arg);
+  else if(a==='back'){view='list';other=null;errorMsg='';try{history.replaceState(null,'',location.pathname);}catch(x){}loadPeople().then(render).catch(function(er){fail(er);});render();}
+  else if(a==='refresh')refresh();
+  else if(a==='filter'){filter=arg;render();}
+  else if(a==='tab'){tab=arg;render();}
+  else if(a==='share')share();
+  else if(a==='cmt-toggle'){openC[arg]=!openC[arg];renderFeed();}
+  else if(a==='cmt-send')sendComment(arg);
+  else if(a==='rep-toggle'){openRep[arg]=!openRep[arg];renderFeed();}
+  else if(a==='rep-send')sendReport(arg);
+  else if(a==='remove')removeItem(arg);
+  else if(a==='req-add')addRequest();
+  else if(a==='req-del')deleteRequest(arg);
+  else if(a==='mode'){mode=arg;lsSet('lne-shared-mode',arg);view='list';other=null;errorMsg='';$app.innerHTML='<p class="loading">Loading...</p>';loadPeople().then(render).catch(function(er){fail(er);});}
+});
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&view==='space'&&other&&Date.now()-lastLoad>30000&&!busy){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.value)return;refresh(true);}});
+
+/* ---------- boot ---------- */
+async function boot(){
+  var user=await window.SSAuth.requireAuth();if(!user)return;
+  me=user;sb=window.SSAuth.client;
+  mode=user.role==='teacher'?'teacher':(user.role==='both'&&lsGet('lne-shared-mode')==='teacher'?'teacher':'student');
+  try{
+    await loadPeople();
+    var want=null;try{want=new URLSearchParams(location.search).get('with');}catch(e){}
+    if(want&&people.some(function(p){return p.id===want;})){await openSpace(want);return;}
+    render();
+  }catch(e){fail(e,'Could not load your teachers. Please check your connection and reload.');}
+}
+boot();
+})();
+</script>
+<script src="js/nav.js" defer></script>
+</body>
+</html>
