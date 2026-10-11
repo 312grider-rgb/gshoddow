@@ -12,11 +12,58 @@
 --   * Only safe file types are accepted, with a 40 MB size limit per file.
 --   * Items are never hard-deleted by the page; they are marked 'removed'.
 --   * Either person can report an item. Reports are readable by admins only.
--- Run after 024. Needs the existing classrooms and classroom_members tables.
+-- Run after 024. Needs the existing classrooms and classroom_members tables
+-- (column names are detected automatically).
 
 -- ---------------------------------------------------------------------------
 -- Helper functions
 -- ---------------------------------------------------------------------------
+
+-- Your classroom tables may name their columns differently from what this file
+-- assumes, so we look at the real columns and build a small private view
+-- (lne_classroom_students: teacher_id, student_id) that everything below uses.
+-- Nobody but the database itself can read this view.
+do $$
+declare
+  t_col text; link_col text; stu_col text; role_col text; cond text := 'true';
+begin
+  select column_name into t_col from information_schema.columns
+   where table_schema='public' and table_name='classrooms'
+     and column_name in ('teacher_id','owner_id','created_by','instructor_id','user_id')
+   order by array_position(array['teacher_id','owner_id','created_by','instructor_id','user_id'], column_name::text) limit 1;
+
+  select column_name into link_col from information_schema.columns
+   where table_schema='public' and table_name='classroom_members'
+     and column_name in ('classroom_id','class_id','classroom')
+   order by array_position(array['classroom_id','class_id','classroom'], column_name::text) limit 1;
+
+  select column_name into stu_col from information_schema.columns
+   where table_schema='public' and table_name='classroom_members'
+     and column_name in ('user_id','student_id','profile_id','member_id')
+   order by array_position(array['user_id','student_id','profile_id','member_id'], column_name::text) limit 1;
+
+  select column_name into role_col from information_schema.columns
+   where table_schema='public' and table_name='classroom_members' and column_name = 'role';
+
+  if t_col is null or link_col is null or stu_col is null then
+    raise exception 'Could not find the classroom columns. classrooms teacher column: %, classroom_members class column: %, student column: %. Columns found in classroom_members: %',
+      t_col, link_col, stu_col,
+      (select string_agg(column_name, ', ') from information_schema.columns where table_schema='public' and table_name='classroom_members');
+  end if;
+
+  if role_col is not null then
+    cond := format('(m.%I::text = ''student'' or m.%I is null)', role_col, role_col);
+  end if;
+
+  execute format(
+    'create or replace view public.lne_classroom_students as
+       select distinct c.%I::uuid as teacher_id, m.%I::uuid as student_id
+       from public.classrooms c
+       join public.classroom_members m on m.%I = c.id
+       where %s',
+    t_col, stu_col, link_col, cond);
+  execute 'revoke all on public.lne_classroom_students from anon, authenticated';
+end $$;
 
 -- True when the signed-in user is the teacher or the student in the pair AND
 -- the teacher currently teaches a classroom the student belongs to.
@@ -30,12 +77,8 @@ as $$
   select auth.uid() is not null
     and auth.uid() in (t, s)
     and exists (
-      select 1
-      from classrooms c
-      join classroom_members m on m.classroom_id = c.id
-      where c.teacher_id = t
-        and m.user_id = s
-        and m.role = 'student'
+      select 1 from public.lne_classroom_students v
+      where v.teacher_id = t and v.student_id = s
     );
 $$;
 
