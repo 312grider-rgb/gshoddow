@@ -44,33 +44,54 @@
   // ════════════════════════════════════
   // LIST VIEW
   // ════════════════════════════════════
+  // Look up display names for a list of user ids (no table-link/embed needed).
+  async function nameMap(db, ids) {
+    const uniq = Array.from(new Set((ids || []).filter(Boolean)));
+    const map = {};
+    if (!uniq.length) return map;
+    const { data } = await db.from('profiles').select('id, name, full_name').in('id', uniq);
+    (data || []).forEach(p => { map[p.id] = p.name || p.full_name || null; });
+    return map;
+  }
+
   async function myClasses() {
     const user = await currentUserOrThrow();
     const db = client();
 
     const { data: taught, error: e1 } = await db
-      .from('classrooms')
-      .select('*, classroom_members(count)')
-      .eq('teacher_id', user.id);
+      .from('classrooms').select('*').eq('teacher_id', user.id);
     if (e1) throw e1;
 
+    // Student counts for the classes I teach
+    const taughtIds = (taught || []).map(c => c.id);
+    const countByClass = {};
+    if (taughtIds.length) {
+      const { data: mem } = await db.from('classroom_members').select('classroom_id').in('classroom_id', taughtIds);
+      (mem || []).forEach(m => { countByClass[m.classroom_id] = (countByClass[m.classroom_id] || 0) + 1; });
+    }
+
+    // Classes I am a student in
     const { data: memberRows, error: e2 } = await db
-      .from('classroom_members')
-      .select('classroom_id, classrooms(*, teacher:profiles!classrooms_teacher_id_fkey(name))')
-      .eq('student_id', user.id);
+      .from('classroom_members').select('classroom_id').eq('student_id', user.id);
     if (e2) throw e2;
+    const enrolledIds = (memberRows || []).map(r => r.classroom_id);
+    let enrolledClasses = [];
+    if (enrolledIds.length) {
+      const { data: cls, error: e3 } = await db
+        .from('classrooms').select('id, name, subject, teacher_id').in('id', enrolledIds);
+      if (e3) throw e3;
+      enrolledClasses = cls || [];
+    }
+    const teacherNames = await nameMap(db, enrolledClasses.map(c => c.teacher_id));
 
     const teaching = (taught || []).map(c => ({
       id: c.id, name: c.name, subject: c.subject, code: c.code,
-      students: new Array(c.classroom_members?.[0]?.count || 0)
+      students: new Array(countByClass[c.id] || 0)
     }));
-
-    const enrolled = (memberRows || [])
-      .filter(r => r.classrooms)
-      .map(r => ({
-        id: r.classrooms.id, name: r.classrooms.name, subject: r.classrooms.subject,
-        teacherName: r.classrooms.teacher?.name || 'Unknown teacher'
-      }));
+    const enrolled = enrolledClasses.map(c => ({
+      id: c.id, name: c.name, subject: c.subject,
+      teacherName: teacherNames[c.teacher_id] || 'Unknown teacher'
+    }));
 
     return { teaching, enrolled };
   }
@@ -131,38 +152,21 @@
     const db = client();
 
     const { data: classroom, error } = await db
-      .from('classrooms')
-      .select('*, teacher:profiles!classrooms_teacher_id_fkey(id, name)')
-      .eq('id', classroomId)
-      .single();
+      .from('classrooms').select('*').eq('id', classroomId).single();
     if (error) throw error;
 
     const { data: members, error: mErr } = await db
-      .from('classroom_members')
-      .select('student_id')
-      .eq('classroom_id', classroomId);
+      .from('classroom_members').select('student_id').eq('classroom_id', classroomId);
     if (mErr) throw mErr;
     const sids = (members || []).map(m => m.student_id);
-    let nameById = {};
-    if (sids.length) {
-      const { data: profs } = await db.from('profiles').select('id, name').in('id', sids);
-      (profs || []).forEach(p => { nameById[p.id] = p.name; });
-    }
-    const students = sids.map(id => ({
-      name: nameById[id] || 'Unknown', email: id // "email" field = real user id
-    }));
 
     const { data: announcements, error: anErr } = await db
-      .from('announcements')
-      .select('*, profiles:author_id(name)')
-      .eq('classroom_id', classroomId)
+      .from('announcements').select('*').eq('classroom_id', classroomId)
       .order('created_at', { ascending: false });
     if (anErr) throw anErr;
 
     const { data: assignments, error: asErr } = await db
-      .from('assignments')
-      .select('*')
-      .eq('classroom_id', classroomId)
+      .from('assignments').select('*').eq('classroom_id', classroomId)
       .order('due_date', { ascending: true });
     if (asErr) throw asErr;
 
@@ -170,21 +174,10 @@
     let submissionRows = [];
     if (assignmentIds.length) {
       const { data, error: subErr } = await db
-        .from('submissions')
-        .select('*, profiles(id, name)')
-        .in('assignment_id', assignmentIds);
+        .from('submissions').select('*').in('assignment_id', assignmentIds);
       if (subErr) throw subErr;
       submissionRows = data || [];
     }
-    const submissions = {};
-    submissionRows.forEach(s => {
-      submissions[s.assignment_id] = submissions[s.assignment_id] || [];
-      submissions[s.assignment_id].push({
-        studentName: s.profiles?.name || 'Unknown',
-        studentEmail: s.profiles?.id,
-        grade: s.grade, feedback: s.feedback, submittedAt: s.submitted_at
-      });
-    });
 
     const { data: quizzes, error: qErr } = await db
       .from('quizzes').select('*').eq('classroom_id', classroomId);
@@ -194,41 +187,56 @@
     let quizResultRows = [];
     if (quizIds.length) {
       const { data, error: qrErr } = await db
-        .from('quiz_results')
-        .select('*, profiles(id, name)')
-        .in('quiz_id', quizIds);
+        .from('quiz_results').select('*').in('quiz_id', quizIds);
       if (qrErr) throw qrErr;
       quizResultRows = data || [];
     }
+
+    const { data: messageRows, error: msgErr } = await db
+      .from('messages').select('*').eq('classroom_id', classroomId)
+      .order('created_at', { ascending: true });
+    if (msgErr) throw msgErr;
+
+    // One lookup for every name we need
+    const names = await nameMap(db, [
+      classroom.teacher_id, ...sids,
+      ...(announcements || []).map(a => a.author_id),
+      ...submissionRows.map(r => r.user_id),
+      ...quizResultRows.map(r => r.user_id),
+      ...(messageRows || []).map(m => m.user_id)
+    ]);
+    const nm = id => names[id] || 'Unknown';
+
+    const students = sids.map(id => ({ name: nm(id), email: id })); // "email" field = real user id
+
+    const submissions = {};
+    submissionRows.forEach(r => {
+      submissions[r.assignment_id] = submissions[r.assignment_id] || [];
+      submissions[r.assignment_id].push({
+        studentName: nm(r.user_id), studentEmail: r.user_id,
+        grade: r.grade, feedback: r.feedback, submittedAt: r.submitted_at
+      });
+    });
+
     const quizResults = {};
     quizResultRows.forEach(r => {
       const quiz = (quizzes || []).find(q => q.id === r.quiz_id);
       const total = quiz ? (quiz.questions || []).reduce((sum, x) => sum + (x.points || 1), 0) : 0;
       quizResults[r.quiz_id] = quizResults[r.quiz_id] || [];
-      quizResults[r.quiz_id].push({
-        studentName: r.profiles?.name || 'Unknown',
-        studentEmail: r.profiles?.id,
-        score: r.score, total
-      });
+      quizResults[r.quiz_id].push({ studentName: nm(r.user_id), studentEmail: r.user_id, score: r.score, total });
     });
 
-    const { data: messageRows, error: msgErr } = await db
-      .from('messages')
-      .select('*, profiles(name)')
-      .eq('classroom_id', classroomId)
-      .order('created_at', { ascending: true });
-    if (msgErr) throw msgErr;
     const messages = (messageRows || []).map(m => ({
-      authorName: m.profiles?.name || 'Unknown', text: m.body, createdAt: m.created_at
+      authorName: nm(m.user_id), text: m.body, createdAt: m.created_at
     }));
 
     return {
       id: classroom.id, name: classroom.name, subject: classroom.subject, code: classroom.code,
-      teacherName: classroom.teacher?.name || 'Unknown teacher',
-      teacherEmail: classroom.teacher?.id, // "email" field = teacher's real user id
+      teacherName: names[classroom.teacher_id] || 'Unknown teacher',
+      teacherEmail: classroom.teacher_id, // "email" field = teacher's real user id
       students,
       announcements: (announcements || []).map(a => ({
-        title: a.title, body: a.body, authorName: a.profiles?.name || 'Unknown', createdAt: a.created_at
+        title: a.title, body: a.body, authorName: nm(a.author_id), createdAt: a.created_at
       })),
       assignments: (assignments || []).map(a => ({
         id: a.id, title: a.title, description: a.description,
@@ -240,6 +248,43 @@
       quizResults,
       messages
     };
+  }
+
+  // ════════════════════════════════════
+  // CALENDAR — assignment due dates + announcements across all my classes
+  // ════════════════════════════════════
+  async function upcomingEvents() {
+    const db = client();
+    const { teaching, enrolled } = await myClasses();
+    const all = [...teaching, ...enrolled];
+    if (!all.length) return [];
+    const ids = all.map(c => c.id);
+    const classNameById = {};
+    all.forEach(c => { classNameById[c.id] = c.name; });
+
+    const { data: due, error: e1 } = await db
+      .from('assignments').select('classroom_id, title, due_date')
+      .in('classroom_id', ids).not('due_date', 'is', null);
+    if (e1) throw e1;
+
+    const since = new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString();
+    const { data: posts, error: e2 } = await db
+      .from('announcements').select('classroom_id, title, created_at')
+      .in('classroom_id', ids).gte('created_at', since)
+      .order('created_at', { ascending: false }).limit(80);
+    if (e2) throw e2;
+
+    const events = [];
+    (due || []).forEach(a => events.push({
+      date: String(a.due_date).slice(0, 10), title: a.title || 'Assignment',
+      type: 'assignment', className: classNameById[a.classroom_id] || 'Class'
+    }));
+    (posts || []).forEach(a => events.push({
+      date: String(a.created_at).slice(0, 10), title: a.title || 'Announcement',
+      type: 'announcement', className: classNameById[a.classroom_id] || 'Class'
+    }));
+    events.sort((x, y) => x.date < y.date ? -1 : x.date > y.date ? 1 : 0);
+    return events;
   }
 
   // ════════════════════════════════════
@@ -342,7 +387,7 @@
   }
 
   window.SSClass = {
-    myClasses, unreadCounts, markSeen, create, join, get,
+    myClasses, unreadCounts, markSeen, create, join, get, upcomingEvents,
     addAnnouncement, addAssignment, addSubmission, gradeSubmission,
     addQuiz, submitQuiz, postMessage
   };
