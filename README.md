@@ -34,6 +34,8 @@ The project is built and maintained entirely from a mobile device (GitHub's mobi
 - ✅ AI Study Recommendation — personalized "what to study next" on the dashboard
 - ✅ AI Homework Helper — step-by-step guidance rather than just answers
 - ✅ AI Career Coach — goal-based guidance and next steps
+- ✅ Shared With Teachers — a private space for one student and one teacher (who share a classroom) to exchange documents, PDFs, audio, video, links and notes, with comments, teacher requests and reporting. Files live in a private storage bucket opened through short-lived signed links (`skillstream-shared.html`, migration `025_teacher_student_sharing.sql`)
+- ✅ Future Architect — a strategic-foresight workshop: understand change, discover opportunities, compare three possible futures, plan backward from a desired future, and test ideas with small experiments. Adapts to the learner's grade level and saves projects per account (`skillstream-future-architect.html`, migration `024_future_architect.sql`)
 
 **Community**
 - ✅ Leaderboard (lessons completed / certificates earned)
@@ -107,7 +109,7 @@ Replace both with your real values.
 
 ## Database Migrations
 
-SQL migrations are tracked as plain `.sql` files. See `/migrations` — run them in order in the Supabase SQL Editor. (See Roadmap: consolidating scattered migration snippets into this folder is an active cleanup task.)
+SQL migrations are tracked as plain `.sql` files. See `/migrations` — run them in order in the Supabase SQL Editor. Shared With Teachers needs `025_teacher_student_sharing.sql` (tables, row-level security, and the private `teacher-shared` storage bucket; run after 024). Future Architect needs `024_future_architect.sql` (table `future_projects`, row-level security so each learner only sees their own projects). (See Roadmap: consolidating scattered migration snippets into this folder is an active cleanup task.)
 
 ## Roadmap
 

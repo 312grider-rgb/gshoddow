@@ -130,6 +130,15 @@
     font-weight:700; font-size:16.5px;
   }
 
+  /* Continue with your teacher */
+  .ts-list{display:flex; flex-direction:column; gap:10px;}
+  .ts-card{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; text-decoration:none; color:inherit; box-shadow:var(--shadow-soft);}
+  .ts-avatar{flex:none; width:44px; height:44px; border-radius:50%; background:var(--ink); color:var(--cream); display:grid; place-items:center; font-family:'Syne',sans-serif; font-weight:700; font-size:18px;}
+  .ts-body{min-width:0; flex:1;}
+  .ts-name{font-weight:700; font-size:17px; color:var(--ink); overflow-wrap:anywhere;}
+  .ts-sub{font-size:14.5px; color:#8a8474; overflow-wrap:anywhere;}
+  .ts-new{display:inline-block; margin-left:8px; padding:2px 9px; border-radius:999px; background:var(--gold); color:var(--ink); font-size:12px; font-weight:700; vertical-align:middle;}
+  .ts-more{display:inline-block; margin-top:10px; font-weight:700; color:var(--ink); font-size:15px;}
   .section-title{
     font-size:14.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
     font-weight:700; margin-bottom:12px;
@@ -234,6 +243,11 @@
     <div id="inProgressList"><div class="loading">Loading…</div></div>
   </div>
 
+  <div class="section" id="teacherSpaceSection">
+    <div class="section-title">Continue With Your Teacher</div>
+    <div id="teacherSpaceList"><div class="loading">Loading…</div></div>
+  </div>
+
   <div class="section">
     <div class="section-title">Live Now</div>
     <div id="liveNowList"><div class="loading">Loading…</div></div>
@@ -290,6 +304,69 @@ let dashCerts = [];
 
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
+/* ---------- CONTINUE WITH YOUR TEACHER ----------
+   Shows the teachers this student shares a classroom with, newest activity
+   first. Each card opens the private shared space (skillstream-shared.html). */
+async function loadTeacherSpaces(){
+  const box = document.getElementById('teacherSpaceList');
+  const section = document.getElementById('teacherSpaceSection');
+  try{
+    const { data: mem, error: e1 } = await sb.from('classroom_members').select('classroom_id').eq('user_id', currentUser.id).eq('role', 'student');
+    if(e1) throw e1;
+    const cids = (mem || []).map(m => m.classroom_id);
+    if(!cids.length){
+      box.innerHTML = `<div class="empty">Join your teacher's classroom to share documents, songs, videos and PDFs.<br><a href="skillstream-classrooms.html">Join with a class code</a></div>`;
+      return;
+    }
+    const { data: cls, error: e2 } = await sb.from('classrooms').select('id,name,teacher_id').in('id', cids);
+    if(e2) throw e2;
+    const byTeacher = {};
+    (cls || []).forEach(c => { if(c.teacher_id){ (byTeacher[c.teacher_id] = byTeacher[c.teacher_id] || []).push(c.name || 'Class'); } });
+    const tids = Object.keys(byTeacher);
+    if(!tids.length){ section.style.display = 'none'; return; }
+
+    const { data: profs } = await sb.from('profiles').select('id,name,full_name').in('id', tids);
+    const names = {};
+    (profs || []).forEach(p => { names[p.id] = p.name || p.full_name || 'Your teacher'; });
+
+    // If the sharing tables are not installed yet, hide the section quietly.
+    const { data: items, error: e3 } = await sb.from('shared_items')
+      .select('teacher_id,uploader_id,title,created_at')
+      .eq('student_id', currentUser.id).eq('status', 'active')
+      .order('created_at', { ascending: false }).limit(100);
+    if(e3){ section.style.display = 'none'; return; }
+
+    const cards = tids.map(id => {
+      const mine = (items || []).filter(i => i.teacher_id === id);
+      let seen = '1970-01-01T00:00:00Z';
+      try{ seen = localStorage.getItem('lne-shared-seen:' + currentUser.id + ':' + id) || seen; }catch(e){}
+      return {
+        id, name: names[id] || 'Your teacher', classes: byTeacher[id],
+        last: mine[0] || null,
+        fresh: mine.filter(i => i.uploader_id !== currentUser.id && i.created_at > seen).length
+      };
+    }).sort((a, b) => {
+      const ta = a.last ? a.last.created_at : '', tb = b.last ? b.last.created_at : '';
+      return ta < tb ? 1 : ta > tb ? -1 : a.name.localeCompare(b.name);
+    });
+
+    const card = c => `
+      <a class="ts-card" href="skillstream-shared.html?with=${encodeURIComponent(c.id)}">
+        <span class="ts-avatar" aria-hidden="true">${escapeHtml((c.name.trim().charAt(0) || '?').toUpperCase())}</span>
+        <span class="ts-body">
+          <div class="ts-name">${escapeHtml(c.name)}${c.fresh ? `<span class="ts-new">${c.fresh} new</span>` : ''}</div>
+          <div class="ts-sub">${escapeHtml(c.classes.join(', '))}${c.last ? ' · Latest: ' + escapeHtml(c.last.title) : ' · Nothing shared yet'}</div>
+        </span>
+        <span aria-hidden="true">›</span>
+      </a>`;
+    box.innerHTML = `<div class="ts-list">${cards.slice(0, 3).map(card).join('')}</div>` +
+      (cards.length > 3 ? `<a class="ts-more" href="skillstream-shared.html">See all ${cards.length} teachers →</a>` : '');
+  }catch(err){
+    console.warn('Could not load teacher spaces:', err && err.message);
+    box.innerHTML = `<div class="empty">Could not load your teachers right now. <a href="skillstream-shared.html">Open shared files</a></div>`;
+  }
+}
+
 async function initAuth(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ window.location.href = 'skillstream-login.html'; return; }
@@ -301,6 +378,7 @@ async function initAuth(){
   loadDashboard();
   loadStreak();
   loadLiveNow();
+  loadTeacherSpaces();
   checkUnreadNotifications();
   loadJourney();
   checkAchievementsAndToast();
