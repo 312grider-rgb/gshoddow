@@ -180,10 +180,27 @@ async function profilesFor(ids){
   var rows=q(await sb.from('profiles').select('id,name,full_name').in('id',ids))||[];
   var map={};rows.forEach(function(p){map[p.id]=displayName(p);});return map;}
 
+var memCol=null,roleOk=true;
+/* Your classroom_members table may call the student column user_id, student_id, etc.
+   Find out which one exists, and whether there is a role column. */
+async function detectMembers(){
+  if(memCol)return;
+  var cands=['user_id','student_id','profile_id','member_id'];
+  for(var i=0;i<cands.length;i++){
+    var r=await sb.from('classroom_members').select(cands[i]).limit(1);
+    if(!r.error){memCol=cands[i];break;}
+  }
+  if(!memCol)memCol='user_id';
+  var r2=await sb.from('classroom_members').select('role').limit(1);
+  roleOk=!r2.error;
+}
+function onlyStudents(qb){return roleOk?qb.eq('role','student'):qb;}
+
 async function loadPeople(){
+  await detectMembers();
   var list=[];
   if(mode==='student'){
-    var mem=q(await sb.from('classroom_members').select('classroom_id').eq('user_id',me.id).eq('role','student'))||[];
+    var mem=q(await onlyStudents(sb.from('classroom_members').select('classroom_id').eq(memCol,me.id)))||[];
     var cids=mem.map(function(m){return m.classroom_id;});
     var cls=cids.length?(q(await sb.from('classrooms').select('id,name,teacher_id').in('id',cids))||[]):[];
     var byT={};cls.forEach(function(c){if(!c.teacher_id)return;(byT[c.teacher_id]=byT[c.teacher_id]||[]).push(c.name||'Class');});
@@ -192,8 +209,8 @@ async function loadPeople(){
   }else{
     var mine=q(await sb.from('classrooms').select('id,name').eq('teacher_id',me.id))||[];
     var ids=mine.map(function(c){return c.id;}),nameById={};mine.forEach(function(c){nameById[c.id]=c.name||'Class';});
-    var mem2=ids.length?(q(await sb.from('classroom_members').select('classroom_id,user_id').in('classroom_id',ids).eq('role','student'))||[]):[];
-    var byS={};mem2.forEach(function(m){(byS[m.user_id]=byS[m.user_id]||[]).push(nameById[m.classroom_id]);});
+    var mem2=ids.length?(q(await onlyStudents(sb.from('classroom_members').select('classroom_id,'+memCol).in('classroom_id',ids)))||[]):[];
+    var byS={};mem2.forEach(function(m){var sid=m[memCol];(byS[sid]=byS[sid]||[]).push(nameById[m.classroom_id]);});
     var sids=Object.keys(byS),sn=await profilesFor(sids);
     list=sids.map(function(id){return {id:id,name:sn[id]||'Student',classes:byS[id]};});
   }

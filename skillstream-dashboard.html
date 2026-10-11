@@ -311,7 +311,17 @@ async function loadTeacherSpaces(){
   const box = document.getElementById('teacherSpaceList');
   const section = document.getElementById('teacherSpaceSection');
   try{
-    const { data: mem, error: e1 } = await sb.from('classroom_members').select('classroom_id').eq('user_id', currentUser.id).eq('role', 'student');
+    // Find the real student column (user_id, student_id, ...) and whether a role column exists.
+    let memCol = null;
+    for(const c of ['user_id','student_id','profile_id','member_id']){
+      const r = await sb.from('classroom_members').select(c).limit(1);
+      if(!r.error){ memCol = c; break; }
+    }
+    if(!memCol) memCol = 'user_id';
+    const roleTest = await sb.from('classroom_members').select('role').limit(1);
+    let memQ = sb.from('classroom_members').select('classroom_id').eq(memCol, currentUser.id);
+    if(!roleTest.error) memQ = memQ.eq('role', 'student');
+    const { data: mem, error: e1 } = await memQ;
     if(e1) throw e1;
     const cids = (mem || []).map(m => m.classroom_id);
     if(!cids.length){
