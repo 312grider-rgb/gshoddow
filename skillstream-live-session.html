@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');}catch(e){}</script>
+
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>SkillStream — Live Session</title>
-<meta name="theme-color" content="#7B6FFF"/>
+<title>Live Session — Learning Never Ends</title>
+<meta name="theme-color" content="#141F38"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#07080C;--surface:#0F1118;--card:#161920;--border:#1E2130;
-  --accent:#7B6FFF;--accent-dark:#5A4FD8;--live:#FF3D5A;--green:#00E5A0;
-  --yellow:#FFB930;--blue:#4B9EFF;--text:#ECEDF5;--muted:#5A5E75;
-  --radius:14px;--radius-sm:8px;--radius-full:9999px;--shadow:0 8px 40px rgba(0,0,0,.7)
+--bg:#0E1426;--surface:#161D36;--card:#1B2340;--border:#2A3350;
+--accent:#C9A24E;--accent-dark:#B8923F;--on-accent:#141F38;--live:#E5604F;--green:#7FAF88;
+--yellow:#D9B366;--blue:#E4C583;--text:#EDE9DD;--muted:#9AA0B8;
+--pill:#232A45;--shadow:0 8px 30px rgba(20,31,56,0.14);
+--accent-soft:rgba(31,46,82,.07);--accent-line:rgba(31,46,82,.25);
+--topbar:linear-gradient(160deg,#141F38 0%,#1F2E52 100%);
+--radius:14px;--radius-sm:8px;--radius-full:9999px
 }
 html,body{height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);overflow:hidden}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
@@ -26,13 +31,13 @@ html,body{height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:
 .preview-box{width:100%;aspect-ratio:4/3;background:#000;border-radius:var(--radius-sm);overflow:hidden;position:relative;margin-bottom:16px;border:1px solid var(--border)}
 .preview-box video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 .preview-off{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--muted);font-size:13px}
-.preview-off .av{width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:22px}
+.preview-off .av{width:56px;height:56px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:22px}
 .device-row{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
 .dev-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:17px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
 .dev-btn.off{background:var(--live);border-color:var(--live)}
 .name-field{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:11px 14px;font-size:14px;margin-bottom:14px;font-family:'Inter',sans-serif}
 .name-field:focus{outline:none;border-color:var(--accent)}
-.btn-join{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s}
+.btn-join{width:100%;background:var(--accent);color:var(--on-accent);border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s}
 .btn-join:hover{background:var(--accent-dark)}
 .btn-join:disabled{opacity:.5;cursor:not-allowed}
 .perm-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5}
@@ -56,7 +61,7 @@ html,body{height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:
 .tile.self video{transform:scaleX(-1)}
 .tile-label{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.6);border-radius:var(--radius-sm);padding:4px 10px;font-size:12px;font-weight:600;z-index:1}
 .tile-off{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted)}
-.tile-off .av{width:64px;height:64px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:24px}
+.tile-off .av{width:64px;height:64px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:24px}
 .ai-tile{background:linear-gradient(160deg,#14103a,#0a0c18)}
 .ai-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--blue));display:flex;align-items:center;justify-content:center;font-size:30px}
 .ai-avatar.thinking{animation:pulse 1s infinite}
@@ -70,12 +75,12 @@ html,body{height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:
 .panel-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
 .msg{max-width:88%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5}
 .msg.ai{background:var(--card);align-self:flex-start;border:1px solid var(--border)}
-.msg.me{background:var(--accent);color:#fff;align-self:flex-end}
+.msg.me{background:var(--accent);color:var(--on-accent);align-self:flex-end}
 .msg.sys{align-self:center;color:var(--muted);font-size:11px;background:none}
 .panel-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
 .panel-input-row input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px}
 .panel-input-row input:focus{outline:none;border-color:var(--accent)}
-.panel-send{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 16px;font-weight:700;cursor:pointer;font-size:13px}
+.panel-send{background:var(--accent);color:var(--on-accent);border:none;border-radius:var(--radius-sm);padding:0 16px;font-weight:700;cursor:pointer;font-size:13px}
 .panel-send:disabled{opacity:.5;cursor:not-allowed}
 .key-note{padding:10px 14px;font-size:11px;color:var(--muted);background:var(--card);border-top:1px solid var(--border);line-height:1.5}
 .key-note a{color:var(--accent);text-decoration:none;font-weight:700}
@@ -92,6 +97,8 @@ html,body{height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:
   .side-panel.open{transform:translateY(0)}
   .video-grid.duo{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
 }
+
+/* --- Learning Never Ends look (matches the dashboards) --- */
 </style>
 </head>
 <body>
