@@ -150,7 +150,7 @@ var KIND_ICON={pdf:'📄',document:'📝',audio:'🎵',video:'🎬',image:'🖼�
 var FILTERS=[['all','All'],['docs','Documents'],['audio','Audio'],['video','Video'],['image','Images'],['link','Links'],['note','Notes']];
 
 var sb=null, me=null, mode='student', view='list', people=[], other=null, items=[], comments={}, requests=[], signed={};
-var filter='all', openC={}, openRep={}, reported={}, confirmKey=null, tab='file', drafts={}, busy=false, lastLoad=0, errorMsg='', setupMissing=false, search='';
+var filter='all', openC={}, openRep={}, reported={}, confirmKey=null, tab='file', drafts={}, busy=false, lastLoad=0, errorMsg='', setupMissing=false, setupDetail='', search='';
 var $app=document.getElementById('app');
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -217,7 +217,7 @@ async function loadPeople(){
   var col=mode==='teacher'?'teacher_id':'student_id';
   var recent=[];
   try{recent=q(await sb.from('shared_items').select('id,teacher_id,student_id,uploader_id,title,kind,created_at').eq(col,me.id).eq('status','active').order('created_at',{ascending:false}).limit(300))||[];setupMissing=false;}
-  catch(e){if(isMissing(e)){setupMissing=true;}else throw e;}
+  catch(e){if(isMissing(e)){setupMissing=true;setupDetail=String(e&&e.message||e);}else throw e;}
   list.forEach(function(p){
     var mineItems=recent.filter(function(i){return (mode==='teacher'?i.student_id:i.teacher_id)===p.id;});
     var seen=lsGet(seenKey(p.id))||'1970-01-01T00:00:00Z';
@@ -250,7 +250,7 @@ async function loadSpace(){
 /* ---------- views ---------- */
 function render(){
   var html='';
-  if(setupMissing){html+='<div class="notice error">Sharing is not set up on this site yet. An administrator needs to run migration 025_teacher_student_sharing.sql in Supabase.</div>';}
+  if(setupMissing){html+='<div class="notice error">Sharing is not set up on this site yet. An administrator needs to run migration 025_teacher_student_sharing.sql in Supabase.'+(setupDetail?'<br><small>Technical detail: '+esc(setupDetail)+'</small>':'')+'</div>';}
   if(errorMsg){html+='<div class="notice error" role="alert">'+esc(errorMsg)+'</div>';}
   html+=(view==='list'?listView():spaceView());
   $app.innerHTML=html;
@@ -373,7 +373,7 @@ function renderFeed(){var f=document.getElementById('feed');if(f)f.innerHTML=fee
 
 /* ---------- actions ---------- */
 function fail(e,fallback){
-  if(isMissing(e)){setupMissing=true;errorMsg='';}
+  if(isMissing(e)){setupMissing=true;setupDetail=String(e&&e.message||e);errorMsg='';}
   else{errorMsg=fallback||'Something went wrong. Please try again.';try{console.warn('Shared space:',e&&e.message||e);}catch(x){}}
   render();window.scrollTo(0,0);
 }

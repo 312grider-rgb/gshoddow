@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/incentives.js"></script>
+<script src="js/incentives.js?v=2"></script>
 <style>
   :root{
     --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583; --cream:#FBF7EF; --sage:#6B8F71;
@@ -373,7 +373,7 @@ async function loadTeacherSpaces(){
       (cards.length > 3 ? `<a class="ts-more" href="skillstream-shared.html">See all ${cards.length} teachers →</a>` : '');
   }catch(err){
     console.warn('Could not load teacher spaces:', err && err.message);
-    box.innerHTML = `<div class="empty">Could not load your teachers right now. <a href="skillstream-shared.html">Open shared files</a></div>`;
+    box.innerHTML = `<div class="empty">Could not load your teachers right now. <a href="skillstream-shared.html">Open shared files</a><br><small style="opacity:.7">${String((err && err.message) || err || 'Unknown error').replace(/</g,'&lt;')}</small></div>`;
   }
 }
 
