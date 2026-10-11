@@ -57,8 +57,7 @@
     const { data: memberRows, error: e2 } = await db
       .from('classroom_members')
       .select('classroom_id, classrooms(*, teacher:profiles!classrooms_teacher_id_fkey(name))')
-      .eq('user_id', user.id)
-      .eq('role', 'student');
+      .eq('student_id', user.id);
     if (e2) throw e2;
 
     const teaching = (taught || []).map(c => ({
@@ -115,17 +114,14 @@
 
   async function join(code) {
     if (!code || !code.trim()) return { ok: false, error: 'Enter a class code.' };
-    const user = await currentUserOrThrow();
+    await currentUserOrThrow();
     const db = client();
-    const { data: classroom, error: findErr } = await db
-      .from('classrooms').select('*').eq('code', code.trim().toUpperCase()).single();
-    if (findErr || !classroom) return { ok: false, error: 'No class found with that code.' };
-    if (classroom.teacher_id === user.id) return { ok: false, error: "You're the teacher of this class." };
-    const { error: joinErr } = await db
-      .from('classroom_members')
-      .upsert({ classroom_id: classroom.id, user_id: user.id, role: 'student' }, { onConflict: 'classroom_id,user_id' });
+    // The lookup by code runs inside the database (join_classroom, migration 026),
+    // because a student cannot read a classroom before they are a member.
+    const { data: cid, error: joinErr } = await db.rpc('join_classroom', { p_code: code.trim() });
     if (joinErr) return { ok: false, error: joinErr.message };
-    return { ok: true, classroom };
+    const { data: classroom } = await db.from('classrooms').select('*').eq('id', cid).single();
+    return { ok: true, classroom: classroom || { id: cid } };
   }
 
   // ════════════════════════════════════
@@ -143,12 +139,17 @@
 
     const { data: members, error: mErr } = await db
       .from('classroom_members')
-      .select('user_id, profiles(id, name, email)')
-      .eq('classroom_id', classroomId)
-      .eq('role', 'student');
+      .select('student_id')
+      .eq('classroom_id', classroomId);
     if (mErr) throw mErr;
-    const students = (members || []).map(m => ({
-      name: m.profiles?.name || 'Unknown', email: m.profiles?.id // "email" field = real user id
+    const sids = (members || []).map(m => m.student_id);
+    let nameById = {};
+    if (sids.length) {
+      const { data: profs } = await db.from('profiles').select('id, name').in('id', sids);
+      (profs || []).forEach(p => { nameById[p.id] = p.name; });
+    }
+    const students = sids.map(id => ({
+      name: nameById[id] || 'Unknown', email: id // "email" field = real user id
     }));
 
     const { data: announcements, error: anErr } = await db
