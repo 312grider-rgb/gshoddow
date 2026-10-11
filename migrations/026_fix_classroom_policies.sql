@@ -28,10 +28,7 @@ create policy "Members and teacher can view classroom" on classrooms
 
 drop policy if exists "Teachers can create classrooms" on classrooms;
 create policy "Teachers can create classrooms" on classrooms
-  for insert with check (
-    teacher_id = auth.uid()
-    and exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('teacher','both','admin'))
-  );
+  for insert with check (teacher_id = auth.uid());
 
 drop policy if exists "Teacher can update own classroom" on classrooms;
 create policy "Teacher can update own classroom" on classrooms
