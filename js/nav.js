@@ -37,7 +37,8 @@
     items.forEach(function (item) {
       var btn = document.createElement('a');
       btn.href = item.href;
-      btn.className = 'ln-nav-item' + (item.href === current ? ' active' : '');
+      var onAiFamily = item.href === 'skillstream-ai-hub.html' && current === 'skillstream-future-architect.html';
+      btn.className = 'ln-nav-item' + (item.href === current || onAiFamily ? ' active' : '');
       btn.innerHTML = '<span class="ln-nav-icon">' + item.icon + '</span>' + item.label;
       nav.appendChild(btn);
     });

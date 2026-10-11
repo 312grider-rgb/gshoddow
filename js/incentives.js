@@ -17,7 +17,10 @@
  * check_and_award_achievements() RPC (security definer) — this file
  * never inserts into user_achievements directly.
  */
-const Incentives = (function () {
+// Assigned to window so pages can feature-detect it with `window.Incentives`.
+// (A top-level `const` is NOT a window property, which made every page think
+// this file was missing.)
+window.Incentives = (function () {
   const LESSONS_PER_LEVEL = 5; // tune freely — level is just a friendly framing of lessons completed
 
   function levelInfo(lessonsDone) {
