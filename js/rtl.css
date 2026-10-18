@@ -1,0 +1,8 @@
+/* Learning Never Ends — right-to-left (Arabic) and language-switch styles. Loaded on every page. */
+#lneLang{position:fixed;left:8px;bottom:78px;z-index:50;font:600 12px/1 system-ui,sans-serif;padding:5px 8px;border-radius:999px;border:1px solid var(--border,#E9E2D2);background:var(--surface,#fff);color:var(--text,#141F38);opacity:.92;max-width:92px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+html[lang="ar"] body{font-family:'Segoe UI','Noto Sans Arabic',Tahoma,'Geeza Pro',system-ui,sans-serif}
+html[lang="zh"] body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif}
+html[dir="rtl"] body{direction:rtl;text-align:start}
+html[dir="rtl"] input,html[dir="rtl"] textarea,html[dir="rtl"] select{text-align:start}
+html[dir="rtl"] input[type="email"],html[dir="rtl"] input[type="url"],html[dir="rtl"] input[type="password"],html[dir="rtl"] input[type="number"]{direction:ltr;text-align:right}
+html[dir="rtl"] .back,html[dir="rtl"] [class*="arrow"]{unicode-bidi:plaintext}
