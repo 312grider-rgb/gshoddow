@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Settings — Paradise Of The Eternal Learners</title>
@@ -149,7 +152,7 @@
     <div class="setting-row">
       <div>
         <div class="label" id="labelLanguage">App Language</div>
-        <div class="desc" id="descLanguage">Applies to this Settings page now</div>
+        <div class="desc" id="descLanguage">Applies to every page</div>
       </div>
       <select id="languageSelect" onchange="changeLanguage()">
         <option value="en">English</option>
@@ -160,7 +163,7 @@
       </select>
     </div>
   </div>
-  <div class="lang-note" id="langNote">This page is fully translated as a working example. Full site-wide translation across every page is a larger rollout — ask if you'd like it applied everywhere.</div>
+  <div class="lang-note" id="langNote">Changing the language reloads the page. Text written by other people stays in the language it was written in.</div>
 
   <div class="section-title" id="titleNotifications">Notifications</div>
   <div class="card">
@@ -256,7 +259,7 @@ function toggleReadAloud(){
    Lightweight demo translation for this page's own UI strings.
    Stored in localStorage as 'language'. */
 const TRANSLATIONS = {
-  en: { dir:'ltr', pageTitle:'Settings', titleAppearance:'Appearance', labelDarkMode:'Dark Mode', descDarkMode:'Easier on the eyes at night', titleLanguage:'Language', labelLanguage:'App Language', descLanguage:'Applies to this Settings page now', langNote:"This page is fully translated as a working example. Full site-wide translation across every page is a larger rollout — ask if you'd like it applied everywhere.", titleNotifications:'Notifications', labelInApp:'In-App Notifications', descInApp:'Certificates, replies, and updates', labelEmail:'Email Notifications', descEmail:'Occasional summaries and reminders', titleAccount:'Account', labelProfile:'Edit Profile', descProfile:'Name, bio, avatar', btnLogout:'Log Out', backLink:'← Back to Dashboard' },
+  en: { dir:'ltr', pageTitle:'Settings', titleAppearance:'Appearance', labelDarkMode:'Dark Mode', descDarkMode:'Easier on the eyes at night', titleLanguage:'Language', labelLanguage:'App Language', descLanguage:'Applies to every page', langNote:"Changing the language reloads the page. Text written by other people stays in the language it was written in.", titleNotifications:'Notifications', labelInApp:'In-App Notifications', descInApp:'Certificates, replies, and updates', labelEmail:'Email Notifications', descEmail:'Occasional summaries and reminders', titleAccount:'Account', labelProfile:'Edit Profile', descProfile:'Name, bio, avatar', btnLogout:'Log Out', backLink:'← Back to Dashboard' },
   ar: { dir:'rtl', pageTitle:'الإعدادات', titleAppearance:'المظهر', labelDarkMode:'الوضع الداكن', descDarkMode:'أسهل على العينين ليلاً', titleLanguage:'اللغة', labelLanguage:'لغة التطبيق', descLanguage:'تُطبَّق على صفحة الإعدادات هذه الآن', langNote:'تمت ترجمة هذه الصفحة بالكامل كمثال عملي. الترجمة الكاملة لكل صفحات الموقع تتطلب خطوة أكبر لاحقًا.', titleNotifications:'الإشعارات', labelInApp:'إشعارات داخل التطبيق', descInApp:'الشهادات والردود والتحديثات', labelEmail:'إشعارات البريد الإلكتروني', descEmail:'ملخصات وتذكيرات بين الحين والآخر', titleAccount:'الحساب', labelProfile:'تعديل الملف الشخصي', descProfile:'الاسم، النبذة، الصورة', btnLogout:'تسجيل الخروج', backLink:'→ العودة إلى لوحة التحكم' },
   fr: { dir:'ltr', pageTitle:'Paramètres', titleAppearance:'Apparence', labelDarkMode:'Mode sombre', descDarkMode:'Plus reposant la nuit', titleLanguage:'Langue', labelLanguage:"Langue de l'application", descLanguage:'S’applique à cette page pour le moment', langNote:"Cette page est entièrement traduite à titre d'exemple. La traduction complète du site est une étape ultérieure plus large.", titleNotifications:'Notifications', labelInApp:"Notifications dans l'application", descInApp:'Certificats, réponses et mises à jour', labelEmail:'Notifications par e-mail', descEmail:'Résumés et rappels occasionnels', titleAccount:'Compte', labelProfile:'Modifier le profil', descProfile:'Nom, bio, avatar', btnLogout:'Se déconnecter', backLink:'← Retour au tableau de bord' },
   es: { dir:'ltr', pageTitle:'Configuración', titleAppearance:'Apariencia', labelDarkMode:'Modo oscuro', descDarkMode:'Más cómodo por la noche', titleLanguage:'Idioma', labelLanguage:'Idioma de la app', descLanguage:'Se aplica a esta página de ajustes por ahora', langNote:'Esta página está totalmente traducida como ejemplo funcional. La traducción completa del sitio es un paso más amplio a futuro.', titleNotifications:'Notificaciones', labelInApp:'Notificaciones en la app', descInApp:'Certificados, respuestas y novedades', labelEmail:'Notificaciones por correo', descEmail:'Resúmenes y recordatorios ocasionales', titleAccount:'Cuenta', labelProfile:'Editar perfil', descProfile:'Nombre, bio, avatar', btnLogout:'Cerrar sesión', backLink:'← Volver al panel' },
@@ -264,6 +267,7 @@ const TRANSLATIONS = {
 };
 
 function applyLanguage(lang){
+  if(window.LNE_I18N){ document.getElementById('languageSelect').value = lang; return; } // site-wide engine handles the text
   const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
   document.documentElement.setAttribute('lang', lang);
   document.documentElement.setAttribute('dir', t.dir);
@@ -277,6 +281,7 @@ function applyLanguage(lang){
 
 function changeLanguage(){
   const lang = document.getElementById('languageSelect').value;
+  if(window.LNE_I18N){ LNE_I18N.setLang(lang); return; }
   localStorage.setItem('language', lang);
   applyLanguage(lang);
 }

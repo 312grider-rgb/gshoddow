@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Welcome — Paradise Of The Eternal Learners</title>
@@ -266,6 +269,7 @@ function applyHomeLanguage(lang){
 
 function changeHomeLanguage(){
   const lang = document.getElementById('langSwitcher').value;
+  if(window.LNE_I18N){ LNE_I18N.setLang(lang); return; }
   localStorage.setItem('language', lang);
   applyHomeLanguage(lang);
 }
