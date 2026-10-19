@@ -15,6 +15,12 @@
   var root = document.documentElement;
   root.setAttribute('lang', lang);
   root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+  // The page is already in the chosen language: stop the browser's own auto-translate (Chrome) from re-translating it.
+  root.setAttribute('translate', 'no');
+  if (lang !== 'en') {
+    var nt = document.createElement('meta'); nt.name = 'google'; nt.content = 'notranslate';
+    (document.head || root).appendChild(nt);
+  }
 
   var api = window.LNE_I18N = {
     lang: lang, langs: LANGS,
