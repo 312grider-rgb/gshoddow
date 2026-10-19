@@ -149,3 +149,44 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready); else ready();
 })();
+
+/* ---------------------------------------------------------------------------
+   AI requests: attach the signed-in user's Supabase token to calls to /api/ask-ai
+   so the server can verify who is asking (the endpoint now requires a login).
+   The token already lives in this browser (Supabase keeps the session in
+   localStorage); nothing new is stored and it is only sent to our own server.
+   --------------------------------------------------------------------------- */
+(function () {
+  var origFetch = window.fetch;
+  if (!origFetch) return;
+
+  function accessToken() {
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (/^sb-.+-auth-token$/.test(k)) {
+          var v = JSON.parse(localStorage.getItem(k));
+          var t = v && (v.access_token || (v.currentSession && v.currentSession.access_token));
+          if (t) return t;
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  window.fetch = function (input, init) {
+    try {
+      var url = typeof input === 'string' ? input : (input && input.url) || '';
+      if (/(^|\/)api\/ask-ai(\?|$)/.test(url)) {
+        var t = accessToken();
+        if (t) {
+          init = init || {};
+          var h = new Headers(init.headers || (typeof input !== 'string' && input && input.headers) || {});
+          if (!h.has('Authorization')) h.set('Authorization', 'Bearer ' + t);
+          init.headers = h;
+        }
+      }
+    } catch (e) {}
+    return origFetch.call(this, input, init);
+  };
+})();
