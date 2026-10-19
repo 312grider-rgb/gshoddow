@@ -513,7 +513,7 @@ async function loadInspiration(userId){
       </div>
       <div class="insp-body" id="inspBody"></div>
       <div class="inspiration-row">
-        <div class="streak-pill"><span class="flame">🔥</span> <span id="streakText">0 days</span> streak</div>
+        <div class="streak-pill"><span class="flame">🔥</span> <span id="streakText">0 days streak</span></div>
         <button class="streak-btn" id="streakBtn" onclick="markTodayDone()">Mark Today Done</button>
       </div>
     </div>
@@ -552,7 +552,7 @@ async function loadStreak(userId){
 
   inspStreak = streak;
   inspDoneToday = doneToday;
-  document.getElementById('streakText').textContent = `${streak} day${streak===1?'':'s'}`;
+  document.getElementById('streakText').textContent = `${streak} day${streak===1?'':'s'} streak`;
   const btn = document.getElementById('streakBtn');
   btn.disabled = doneToday;
   btn.textContent = doneToday ? '✓ Done Today' : 'Mark Today Done';

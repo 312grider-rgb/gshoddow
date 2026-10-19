@@ -232,7 +232,7 @@
   </div>
 
   <div class="streak-row" id="streakRow" style="display:none;">
-    <div class="streak-pill"><span class="flame">🔥</span> <span id="streakText">0 days</span> streak</div>
+    <div class="streak-pill"><span class="flame">🔥</span> <span id="streakText">0 days streak</span></div>
     <button class="streak-btn" id="streakBtn" onclick="markTodayDone()">Mark Today Done</button>
   </div>
 
@@ -566,7 +566,7 @@ async function loadStreak(){
   }
 
   document.getElementById('streakRow').style.display = 'flex';
-  document.getElementById('streakText').textContent = `${streak} day${streak===1?'':'s'}`;
+  document.getElementById('streakText').textContent = `${streak} day${streak===1?'':'s'} streak`;
   const btn = document.getElementById('streakBtn');
   btn.disabled = doneToday;
   btn.textContent = doneToday ? '✓ Done Today' : 'Mark Today Done';
