@@ -49,7 +49,7 @@
     const uniq = Array.from(new Set((ids || []).filter(Boolean)));
     const map = {};
     if (!uniq.length) return map;
-    const { data } = await db.from('profiles').select('id, name, full_name').in('id', uniq);
+    const { data } = await db.from('public_profiles').select('id, name, full_name').in('id', uniq);
     (data || []).forEach(p => { map[p.id] = p.name || p.full_name || null; });
     return map;
   }
