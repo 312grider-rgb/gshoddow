@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/lne-helpers.js"></script>
 <script src="https://meet.jit.si/external_api.js"></script>
 <style>
   :root{
@@ -411,7 +412,7 @@ Answer only with your response — no "AI Teacher:" prefix.`;
   try{
     const response = await fetch('/api/ask-ai', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await aiHeaders(sb),
       body: JSON.stringify({ prompt, maxTokens: 250 })
     });
 

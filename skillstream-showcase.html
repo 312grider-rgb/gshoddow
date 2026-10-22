@@ -166,7 +166,7 @@ async function initAuth(){
 
 async function getProfile(userId){
   if(profilesCache[userId]) return profilesCache[userId];
-  const { data } = await sb.from('profiles').select('full_name, role').eq('id', userId).maybeSingle();
+  const { data } = await sb.from('public_profiles').select('full_name, role').eq('id', userId).maybeSingle();
   profilesCache[userId] = data || { full_name:'Unknown' };
   return profilesCache[userId];
 }
@@ -198,7 +198,7 @@ async function loadProjects(){
 
     return `
     <div class="project-card ${p.is_teachers_pick ? 'pinned' : ''}">
-      ${p.is_teachers_pick ? '<div class="pin-tag">⭐ Teacher\\'s Pick</div>' : ''}
+      ${p.is_teachers_pick ? '<div class="pin-tag">⭐ Teacher\'s Pick</div>' : ''}
       ${p.image_url ? `<img class="project-image" src="${p.image_url}">` : ''}
       <div class="project-body">
         <h3>${escapeHtml(p.title)}</h3>

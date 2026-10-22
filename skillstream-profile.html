@@ -421,7 +421,7 @@ async function loadTeacherFeedback(){
   if(!rows || rows.length === 0){ title.style.display = 'none'; list.innerHTML = ''; return; }
 
   const teacherIds = Array.from(new Set(rows.map(r => r.teacher_id)));
-  const { data: teachers } = await sb.from('profiles').select('id, full_name').in('id', teacherIds);
+  const { data: teachers } = await sb.from('public_profiles').select('id, full_name').in('id', teacherIds);
   const nameById = {};
   (teachers || []).forEach(t => { nameById[t.id] = t.full_name || 'Your teacher'; });
 

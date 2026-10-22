@@ -12,6 +12,7 @@
 <link href="css/theme.css" rel="stylesheet">
 <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');}catch(e){}</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/lne-helpers.js"></script>
 <style>
 
 /* Layout: a route map. The five activities are stations on one loop; every view returns to it.
@@ -691,7 +692,7 @@ function langLine(){let l='en';try{l=localStorage.getItem('language')||'en';}cat
  return l==='en'||!LANGS[l]?'':' Write all learner-facing text in '+LANGS[l]+'. Keep JSON field names and the words fact, assumption and possibility in English.';}
 async function callAI(prompt,maxTokens,signal){
  let r;
- try{r=await fetch('/api/ask-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt,maxTokens:maxTokens||1200}),signal:signal});}
+ try{r=await fetch('/api/ask-ai',{method:'POST',headers:await aiHeaders(sb),body:JSON.stringify({prompt:prompt,maxTokens:maxTokens||1200}),signal:signal});}
  catch(e){if(e&&e.name==='AbortError')throw{code:'cancelled'};throw{code:'upstream_error'};}
  let d;try{d=await r.json();}catch(e){throw{code:'upstream_error'};}
  if(d.error||!d.text)throw{code:r.status===429?'rate_limited':'upstream_error',message:d.error};

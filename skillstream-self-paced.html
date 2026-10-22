@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/lne-helpers.js"></script>
 <script src="js/incentives.js?v=2"></script>
 <style>
   :root{
@@ -833,7 +834,7 @@ async function askAI(mode){
   try{
     const response = await fetch('/api/ask-ai', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await aiHeaders(sb),
       body: JSON.stringify({ prompt, maxTokens: 500 })
     });
 
@@ -867,9 +868,10 @@ async function loadDiscussion(courseId){
 
   const { data, error } = await sb
     .from('course_comments')
-    .select('*, profiles(full_name)')
+    .select('*')
     .eq('course_id', courseId)
     .order('created_at', { ascending:false });
+  if(data) await attachProfiles(sb, data, 'user_id');
 
   if(error){
     el.innerHTML = `<div class="empty">Couldn't load discussion.</div>`;
@@ -953,9 +955,10 @@ async function loadReviews(courseId){
 
   const { data, error } = await sb
     .from('course_reviews')
-    .select('*, profiles(full_name)')
+    .select('*')
     .eq('course_id', courseId)
     .order('created_at', { ascending:false });
+  if(data) await attachProfiles(sb, data, 'user_id');
 
   if(error){
     el.innerHTML = `<div class="empty">Couldn't load reviews.</div>`;

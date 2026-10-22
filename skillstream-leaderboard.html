@@ -112,7 +112,7 @@ async function loadBoard(){
   const column = currentBoard === 'lessons' ? 'lessons_completed_count' : 'certificates_count';
 
   const { data, error } = await sb
-    .from('profiles')
+    .from('public_profiles')
     .select('id, full_name, avatar_url, role, lessons_completed_count, certificates_count')
     .eq('role', 'student')
     .gt(column, 0)

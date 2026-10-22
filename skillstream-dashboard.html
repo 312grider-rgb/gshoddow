@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/lne-helpers.js"></script>
 <script src="js/incentives.js?v=2"></script>
 <style>
   :root{
@@ -338,7 +339,7 @@ async function loadTeacherSpaces(){
     const tids = Object.keys(byTeacher);
     if(!tids.length){ section.style.display = 'none'; return; }
 
-    const { data: profs } = await sb.from('profiles').select('id,name,full_name').in('id', tids);
+    const { data: profs } = await sb.from('public_profiles').select('id,name,full_name').in('id', tids);
     const names = {};
     (profs || []).forEach(p => { names[p.id] = p.name || p.full_name || 'Your teacher'; });
 
@@ -622,10 +623,11 @@ async function loadLiveNow(){
 
   const { data, error } = await sb
     .from('live_sessions')
-    .select('*, profiles(full_name)')
+    .select('*')
     .eq('status', 'live')
     .eq('is_public', true)
     .order('started_at', { ascending:false });
+  await attachProfiles(sb, data, 'teacher_id');
 
   let html = '';
 
@@ -726,7 +728,7 @@ async function getRecommendation(){
   try{
     const response = await fetch('/api/ask-ai', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await aiHeaders(sb),
       body: JSON.stringify({ prompt, maxTokens: 400 })
     });
     const data = await response.json();
@@ -878,7 +880,7 @@ async function handleDashVoiceQuestion(transcript){
 
   try{
     const response = await fetch('/api/ask-ai', {
-      method:'POST', headers:{ 'Content-Type':'application/json' },
+      method:'POST', headers: await aiHeaders(sb),
       body: JSON.stringify({ prompt, maxTokens:300 })
     });
     const data = await response.json();

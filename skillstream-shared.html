@@ -180,7 +180,7 @@ function displayName(p){return (p&&(p.name||p.full_name))||'Unknown';}
 function q(r){if(r&&r.error)throw r.error;return r?r.data:null;}
 async function profilesFor(ids){
   if(!ids.length)return {};
-  var rows=q(await sb.from('profiles').select('id,name,full_name').in('id',ids))||[];
+  var rows=q(await sb.from('public_profiles').select('id,name,full_name').in('id',ids))||[];
   var map={};rows.forEach(function(p){map[p.id]=displayName(p);});return map;}
 
 var memCol=null,roleOk=true;

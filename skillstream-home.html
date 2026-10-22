@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/lne-helpers.js"></script>
 <style>
   :root{
     --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
@@ -282,10 +283,11 @@ async function loadLiveClasses(){
 
   const { data, error } = await sb
     .from('live_sessions')
-    .select('*, profiles(full_name)')
+    .select('*')
     .eq('status', 'live')
     .eq('is_public', true)
     .order('started_at', { ascending:false });
+  await attachProfiles(sb, data, 'teacher_id');
 
   let html = '';
 

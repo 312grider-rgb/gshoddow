@@ -210,7 +210,7 @@ async function loadRecent(){
   }
 
   const studentIds = Array.from(new Set(rows.map(r => r.student_id)));
-  const { data: profiles } = await sb.from('profiles').select('id, full_name').in('id', studentIds);
+  const { data: profiles } = await sb.from('public_profiles').select('id, full_name').in('id', studentIds);
   const nameById = {};
   (profiles || []).forEach(p => { nameById[p.id] = p.full_name || 'Learner'; });
 

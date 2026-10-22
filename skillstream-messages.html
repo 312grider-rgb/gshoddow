@@ -160,7 +160,7 @@ function showNewMessage(){
 
 async function getProfile(userId){
   if(profilesCache[userId]) return profilesCache[userId];
-  const { data } = await sb.from('profiles').select('full_name, role, avatar_url').eq('id', userId).maybeSingle();
+  const { data } = await sb.from('public_profiles').select('full_name, role, avatar_url').eq('id', userId).maybeSingle();
   profilesCache[userId] = data || { full_name: 'Unknown' };
   return profilesCache[userId];
 }
@@ -217,7 +217,7 @@ async function loadInbox(){
 /* ---------- NEW MESSAGE: pick anyone with a profile ---------- */
 async function loadPeople(){
   const el = document.getElementById('peopleList');
-  const { data, error } = await sb.from('profiles').select('id, full_name, role').neq('id', currentUser.id).limit(100);
+  const { data, error } = await sb.from('public_profiles').select('id, full_name, role').neq('id', currentUser.id).limit(100);
 
   if(error || !data || data.length === 0){
     el.innerHTML = `<div class="empty">No one else has joined yet.</div>`;

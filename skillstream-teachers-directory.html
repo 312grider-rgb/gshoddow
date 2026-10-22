@@ -78,7 +78,7 @@ async function loadTeachers(){
   const el = document.getElementById('teacherList');
 
   const { data: teachers, error } = await sb
-    .from('profiles')
+    .from('public_profiles')
     .select('id, full_name, bio, avatar_url')
     .eq('role', 'teacher');
 
