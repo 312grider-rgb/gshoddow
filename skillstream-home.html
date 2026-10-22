@@ -265,6 +265,20 @@ function applyHomeLanguage(lang){
       <p>${t.faDesc}</p>
       <div class="go">${t.faGo}</div>
     </a>
+    ${role === 'admin' ? `
+    <a class="view-card" href="skillstream-admin.html">
+      <div class="icon">🛠️</div>
+      <h2>Admin</h2>
+      <p>Manage courses and users.</p>
+      <div class="go">Open Admin →</div>
+    </a>
+
+    <a class="view-card" href="skillstream-admin-assistant.html">
+      <div class="icon">🧭</div>
+      <h2>Admin Assistant</h2>
+      <p>Ask the AI adviser about usage, health and what to improve next. Read-only.</p>
+      <div class="go">Open Assistant →</div>
+    </a>` : ''}
   `;
 }
 
