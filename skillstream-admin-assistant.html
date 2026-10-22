@@ -27,6 +27,7 @@
   .btn:disabled{opacity:.55;}
   .answer{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-top:16px; line-height:1.6; font-size:15px; white-space:pre-wrap; word-wrap:break-word;}
   .answer.err{border-color:var(--danger); color:var(--danger);}
+  .answer pre.codeblock{background:#F3EEE0; border-radius:10px; padding:10px; overflow:auto; font-size:12.5px; white-space:pre; margin:8px 0;}
   .answer code{background:#F3EEE0; padding:1px 5px; border-radius:5px; font-size:13px;}
   details{margin-top:14px; font-size:12.5px; color:#666;}
   details pre{background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px; overflow:auto; max-height:300px; font-size:12px;}
@@ -91,13 +92,23 @@ async function init(){
   document.getElementById('adminView').style.display = 'block';
 }
 
-// Safe mini-markdown: everything is HTML-escaped FIRST, then only **bold**, *italic*, `code` are added.
+// Safe mini-markdown: everything is HTML-escaped FIRST, then only a few formats are added.
+function inline(e){
+  return e.replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>')
+          .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,:;!?]|$)/g,'$1<em>$2</em>')
+          .replace(/`([^`\n]+)`/g,'<code>$1</code>');
+}
 function render(t){
-  var e = String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  e = e.replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>')
-       .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,:;!?]|$)/g,'$1<em>$2</em>')
-       .replace(/`([^`\n]+)`/g,'<code>$1</code>');
-  return e;
+  var esc = String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  var out = [], inCode = false;
+  esc.split('\n').forEach(function(line){
+    if(/^\s*```/.test(line)){ out.push(inCode ? '</pre>' : '<pre class="codeblock">'); inCode = !inCode; return; }
+    if(inCode){ out.push(line + '\n'); return; }
+    var h = line.match(/^#{1,6}\s+(.*)$/);
+    out.push(h ? '<strong>' + inline(h[1]) + '</strong>\n' : inline(line) + '\n');
+  });
+  if(inCode) out.push('</pre>');
+  return out.join('');
 }
 
 function show(text, isErr){
