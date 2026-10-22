@@ -185,9 +185,21 @@ module.exports = async (req, res) => {
         return;
       }
     } else {
-      console.error('ai_consume failed', m.status, m.data);
-      send(res, 503, { error: 'AI is temporarily unavailable. Please try again.', code: 'metering_error' });
-      return;
+      const hint = (m.status === 401 || m.status === 403)
+        ? ' -> check that SUPABASE_SERVICE_KEY in Vercel is the SECRET key, then redeploy'
+        : '';
+      console.error('ai_consume failed' + hint, m.status, m.data);
+      if (ENFORCE) {
+        // Limits are being enforced, so we must not answer without counting the request.
+        send(res, 503, { error: 'AI is temporarily unavailable. Please try again.', code: 'metering_error' });
+        return;
+      }
+      // Not enforcing: usage recording is best-effort. Keep AI working with the safety net.
+      if (!fallbackAllowed(userId)) {
+        send(res, 429, { error: 'Too many AI requests. Please wait a few minutes.', code: 'rate_limited' });
+        return;
+      }
+      meta = { metered: false, reason: 'metering_error', status: m.status };
     }
   } else {
     warnOnce('no-key', 'SUPABASE_SERVICE_KEY is not set: AI usage is not being recorded.');
