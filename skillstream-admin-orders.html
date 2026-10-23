@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Payments — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#B5533C; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:60px;}
+  h1,h2,h3{font-family:'Fraunces',serif;}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px 26px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px;}
+  header.top a{color:var(--gold); font-size:13px; text-decoration:none; display:inline-block; margin-top:8px;}
+  .wrap{padding:18px; max-width:760px; margin:0 auto;}
+  .section-title{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700; margin:18px 0 10px;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px;}
+  .row{display:flex; justify-content:space-between; gap:10px; font-size:14px; padding:3px 0;}
+  .ref{font-family:monospace; background:#F3EEE0; padding:2px 7px; border-radius:6px; word-break:break-all;}
+  .btns{display:flex; gap:8px; margin-top:10px;}
+  .btn{flex:1; border:0; border-radius:10px; padding:12px; font-weight:700; font-size:14px; cursor:pointer; font-family:inherit;}
+  .btn.ok{background:var(--sage); color:#fff;}
+  .btn.no{background:#fff; color:var(--danger); border:1.5px solid var(--danger);}
+  .btn:disabled{opacity:.5;}
+  .badge{font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; text-transform:uppercase;}
+  .b-paid{background:#E8F1EA; color:#3E6B48;} .b-rejected{background:#FBEAE5; color:var(--danger);}
+  .b-submitted{background:#FBF4E2; color:#8A6A1F;} .b-pending,.b-canceled{background:#EEE; color:#666;}
+  .muted{font-size:12.5px; color:#777;}
+  .note{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:13px; color:#555; line-height:1.5;}
+  #lockedView,#adminView{display:none;}
+  #toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:10px; font-size:14px; display:none;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Admin</div>
+  <h1>Payments</h1>
+  <a href="skillstream-admin.html">&larr; Back to Admin</a>
+</header>
+<div class="wrap">
+  <div id="loadingView">Loading…</div>
+  <div id="lockedView"><h2>Admins only</h2><a href="skillstream-home.html">Go home</a></div>
+  <div id="adminView">
+    <div class="note"><b>How to check a payment:</b> open your Bravo app, find the transaction with the same
+      <b>reference</b>, and confirm the <b>amount</b> and that the money arrived. Only then tap <b>Approve</b>. Approving activates the plan immediately.</div>
+    <div class="section-title">Waiting for review</div>
+    <div id="pendingList"></div>
+    <div class="section-title">Recent history</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let names = {}, planNames = {};
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; setTimeout(()=>t.style.display='none', 2600); }
+function money(c, cur){ return (c/100).toLocaleString('en-US', {maximumFractionDigits:2}) + ' ' + esc(cur||''); }
+
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+  document.getElementById('loadingView').style.display = 'none';
+  if(!profile || profile.role !== 'admin'){ document.getElementById('lockedView').style.display = 'block'; return; }
+  document.getElementById('adminView').style.display = 'block';
+  load();
+}
+
+function card(o, actions){
+  const who = names[o.user_id] || 'Unknown user';
+  return '<div class="card"><div class="row"><b>' + esc(who) + '</b><span class="badge b-' + esc(o.status) + '">' + esc(o.status) + '</span></div>'
+    + '<div class="row"><span>Plan</span><span>' + esc(planNames[o.plan_id] || '') + ' · ' + (o.period==='yearly'?'yearly':'monthly') + '</span></div>'
+    + '<div class="row"><span>Amount</span><b>' + money(o.amount_cents, o.currency) + '</b></div>'
+    + '<div class="row"><span>Method</span><span>' + esc(o.provider) + '</span></div>'
+    + (o.payment_reference ? '<div class="row"><span>Reference</span><span class="ref">' + esc(o.payment_reference) + '</span></div>' : '')
+    + (o.payer_note ? '<div class="muted">Note: ' + esc(o.payer_note) + '</div>' : '')
+    + (o.review_note ? '<div class="muted">Review note: ' + esc(o.review_note) + '</div>' : '')
+    + '<div class="muted">' + new Date(o.submitted_at || o.created_at).toLocaleString() + '</div>'
+    + (actions ? '<div class="btns"><button class="btn ok" onclick="review(\'' + esc(o.id) + '\', true, this)">Approve</button>'
+                + '<button class="btn no" onclick="review(\'' + esc(o.id) + '\', false, this)">Reject</button></div>' : '')
+    + '</div>';
+}
+
+async function load(){
+  const [o, p] = await Promise.all([
+    sb.from('orders').select('*').neq('status', 'pending').order('created_at', { ascending: false }).limit(60),
+    sb.from('plans').select('id, name')
+  ]);
+  (p.data || []).forEach(x => planNames[x.id] = x.name);
+  const rows = o.data || [];
+  const ids = Array.from(new Set(rows.map(r => r.user_id)));
+  if(ids.length){
+    const pr = await sb.from('profiles').select('id, full_name, name, email').in('id', ids);
+    (pr.data || []).forEach(x => names[x.id] = (x.full_name || x.name || 'No name') + (x.email ? ' (' + x.email + ')' : ''));
+  }
+  const pend = rows.filter(r => r.status === 'submitted').sort((a,b) => new Date(a.submitted_at) - new Date(b.submitted_at));
+  const hist = rows.filter(r => r.status !== 'submitted' && r.status !== 'canceled');
+  document.getElementById('pendingList').innerHTML = pend.map(r => card(r, true)).join('') || '<div class="muted">Nothing waiting. ✓</div>';
+  document.getElementById('historyList').innerHTML = hist.map(r => card(r, false)).join('') || '<div class="muted">No history yet.</div>';
+}
+
+async function review(id, approve, btn){
+  let note = null;
+  if(!approve){ note = prompt('Reason for rejecting (the user will not see this):', 'Amount or reference did not match'); if(note === null) return; }
+  else if(!confirm('Confirm: you checked this payment in the Bravo app (amount + reference). Activate the plan now?')) return;
+  btn.disabled = true;
+  const r = await sb.rpc('admin_review_order', { p_order: id, p_approve: approve, p_note: note });
+  if(r.error){ toast('Error: ' + r.error.message); btn.disabled = false; return; }
+  toast(approve ? 'Approved. Plan activated.' : 'Rejected.');
+  load();
+}
+init();
+</script>
+</body>
+</html>

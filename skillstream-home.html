@@ -265,6 +265,13 @@ function applyHomeLanguage(lang){
       <p>${t.faDesc}</p>
       <div class="go">${t.faGo}</div>
     </a>
+
+    <a class="view-card" href="skillstream-pricing.html">
+      <div class="icon">⭐</div>
+      <h2>Plans et tarifs</h2>
+      <p>Voir votre plan, votre usage de l'IA et passer à Premium.</p>
+      <div class="go">Voir les plans →</div>
+    </a>
     ${role === 'admin' ? `
     <a class="view-card" href="skillstream-admin.html">
       <div class="icon">🛠️</div>
@@ -278,6 +285,13 @@ function applyHomeLanguage(lang){
       <h2>Admin Assistant</h2>
       <p>Ask the AI adviser about usage, health and what to improve next. Read-only.</p>
       <div class="go">Open Assistant →</div>
+    </a>
+
+    <a class="view-card" href="skillstream-admin-orders.html">
+      <div class="icon">💳</div>
+      <h2>Payments</h2>
+      <p>Review and approve subscription payments.</p>
+      <div class="go">Open Payments →</div>
     </a>` : ''}
   `;
 }

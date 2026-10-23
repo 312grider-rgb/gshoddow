@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plans et tarifs — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#B5533C; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:60px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px 26px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top a{color:var(--gold); font-size:13px; text-decoration:none; display:inline-block; margin-top:8px;}
+  .wrap{padding:18px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:14px;}
+  .card.current{border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,162,78,.25);}
+  .tag{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; background:var(--gold); color:var(--ink); padding:3px 10px; border-radius:20px; margin-bottom:8px;}
+  .price{font-family:'Fraunces',serif; font-size:26px; font-weight:700; color:var(--ink); margin:6px 0 2px;}
+  .muted{font-size:13px; color:#777;}
+  ul.feat{list-style:none; padding:0; margin:12px 0;}
+  ul.feat li{padding:5px 0 5px 24px; position:relative; font-size:14.5px;}
+  ul.feat li::before{content:'✓'; position:absolute; left:0; color:var(--sage); font-weight:700;}
+  .btn{background:var(--ink); color:#fff; border:0; border-radius:12px; padding:13px 18px; font-weight:700; font-size:15px; cursor:pointer; width:100%; font-family:inherit;}
+  .btn.gold{background:var(--gold); color:var(--ink);}
+  .btn.ghost{background:#fff; color:var(--ink); border:1.5px solid var(--line);}
+  .btn:disabled{opacity:.55;}
+  .bar{height:10px; border-radius:8px; background:#EFE8D8; overflow:hidden; margin:8px 0 4px;}
+  .bar > i{display:block; height:100%; background:var(--sage);}
+  .row{display:flex; justify-content:space-between; gap:10px; font-size:14px; padding:4px 0;}
+  label{display:block; font-size:13px; font-weight:600; margin:12px 0 5px; color:var(--ink);}
+  select,input,textarea{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font:inherit; font-size:15px; background:#fff;}
+  .opt{display:flex; gap:8px;}
+  .opt button{flex:1; background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:11px 6px; font-weight:600; cursor:pointer; font-family:inherit; font-size:14px;}
+  .opt button.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .pay{background:#FBF4E2; border:1px dashed var(--gold); border-radius:12px; padding:14px; margin-top:12px; font-size:14.5px; line-height:1.55;}
+  .pay .big{font-family:'Fraunces',serif; font-size:22px; font-weight:700; color:var(--ink);}
+  .msg{padding:11px 13px; border-radius:10px; font-size:14px; margin-top:12px;}
+  .msg.err{background:#FBEAE5; color:var(--danger);}
+  .msg.ok{background:#E8F1EA; color:#3E6B48;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Plans et tarifs</h1>
+  <a href="skillstream-home.html">&larr; Accueil</a>
+</header>
+
+<div class="wrap">
+  <div id="mine"></div>
+  <div id="orderPanel"></div>
+  <div id="plans">Chargement…</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let session = null, summary = null, plans = [], methods = [];
+let choice = { plan:null, period:'monthly', provider:null };
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function money(cents, cur){ return (cents/100).toLocaleString('fr-FR', {maximumFractionDigits:2}) + ' ' + esc(cur||''); }
+function frErr(m){
+  const map = {
+    'The price for this plan is not available yet.':'Le prix de ce plan n’est pas encore disponible.',
+    'This payment method is not available.':'Ce moyen de paiement n’est pas disponible pour le moment.',
+    'You already have a payment waiting for review.':'Vous avez déjà un paiement en attente de vérification.',
+    'This reference has already been used.':'Cette référence a déjà été utilisée.',
+    'The reference must be between 4 and 64 characters.':'La référence doit contenir entre 4 et 64 caractères.',
+    'Order not found or already submitted.':'Commande introuvable ou déjà envoyée.',
+    'Please log in.':'Veuillez vous connecter.'
+  };
+  return map[m] || 'Une erreur est survenue. Réessayez.';
+}
+
+async function load(){
+  const s = await sb.auth.getSession();
+  session = s.data.session;
+  const p = await sb.from('plans').select('id, code, name, description, price_monthly_cents, price_yearly_cents, currency, sort_order, plan_features(feature_key, label_fr, sort_order)').eq('is_active', true).order('sort_order');
+  plans = p.data || [];
+  if(session){
+    const r = await sb.rpc('my_plan_summary'); summary = r.data || null;
+    const m = await sb.from('payment_methods').select('code, name, account_label, account_value, instructions').eq('is_active', true).order('sort_order');
+    methods = m.data || [];
+    if(methods.length && !choice.provider) choice.provider = methods[0].code;
+  }
+  renderMine(); renderOrder(); renderPlans();
+}
+
+function renderMine(){
+  const el = document.getElementById('mine');
+  if(!session || !summary){ el.innerHTML = ''; return; }
+  const lim = summary.ai_limit_per_day, used = summary.ai_used_today || 0;
+  const unlimited = lim === -1, pct = (lim && lim > 0) ? Math.min(100, Math.round(used*100/lim)) : 0;
+  el.innerHTML = '<div class="card current"><h3 style="margin:0 0 6px">Mon plan</h3>'
+    + '<div class="row"><span>Plan actuel</span><b>' + esc(summary.plan_name || summary.plan) + '</b></div>'
+    + (summary.expires_at ? '<div class="row"><span>Valable jusqu’au</span><b>' + new Date(summary.expires_at).toLocaleDateString('fr-FR') + '</b></div>' : '')
+    + '<div class="row"><span>Demandes IA aujourd’hui</span><b>' + used + (unlimited ? ' / illimité' : (lim != null ? ' / ' + lim : '')) + '</b></div>'
+    + (!unlimited && lim ? '<div class="bar"><i style="width:' + pct + '%"></i></div>' : '')
+    + (summary.credit_balance ? '<div class="row"><span>Crédits IA</span><b>' + summary.credit_balance + '</b></div>' : '')
+    + '<div class="muted">Le compteur repart de zéro chaque jour (heure UTC).</div></div>';
+}
+
+function renderPlans(){
+  const el = document.getElementById('plans');
+  const cur = summary ? summary.plan : (session ? 'free' : null);
+  el.innerHTML = plans.map(function(p){
+    const feats = (p.plan_features || []).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(f => '<li>' + esc(f.label_fr || f.feature_key) + '</li>').join('');
+    const isFree = p.code === 'free';
+    let price = isFree ? '<div class="price">Gratuit</div>'
+      : (p.price_monthly_cents ? '<div class="price">' + money(p.price_monthly_cents, p.currency) + ' <span class="muted">/ mois</span></div>'
+         + (p.price_yearly_cents ? '<div class="muted">ou ' + money(p.price_yearly_cents, p.currency) + ' / an</div>' : '')
+         : '<div class="price">Bientôt</div><div class="muted">Le prix sera annoncé prochainement.</div>');
+    let cta = '';
+    if(cur === p.code) cta = '<button class="btn ghost" disabled>Votre plan actuel</button>';
+    else if(!isFree){
+      const canBuy = !!(p.price_monthly_cents || p.price_yearly_cents) && (!session || methods.length);
+      cta = canBuy ? '<button class="btn gold" onclick="startOrder(\'' + esc(p.code) + '\')">Choisir ' + esc(p.name) + '</button>'
+                   : '<button class="btn ghost" disabled>Bientôt disponible</button>';
+    }
+    return '<div class="card' + (cur === p.code ? ' current' : '') + '">' + (cur === p.code ? '<span class="tag">Actuel</span>' : '')
+      + '<h2 style="margin:0">' + esc(p.name) + '</h2><div class="muted">' + esc(p.description || '') + '</div>'
+      + price + '<ul class="feat">' + feats + '</ul>' + cta + '</div>';
+  }).join('') || '<div class="muted">Aucun plan pour le moment.</div>';
+}
+
+function planByCode(c){ return plans.find(p => p.code === c); }
+function methodByCode(c){ return methods.find(m => m.code === c); }
+
+function startOrder(code){
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  const p = planByCode(code);
+  choice.plan = code;
+  choice.period = p.price_monthly_cents ? 'monthly' : 'yearly';
+  window._stage = 'choose'; window._order = null;
+  renderOrder();
+  document.getElementById('orderPanel').scrollIntoView({behavior:'smooth'});
+}
+
+function setPeriod(v){ choice.period = v; renderOrder(); }
+
+function payBox(o){
+  const m = methodByCode(o.provider) || {};
+  return '<div class="pay"><div>Montant exact à payer</div><div class="big">' + money(o.amount_cents, o.currency) + '</div>'
+    + '<div style="margin-top:8px">' + esc(m.name || o.provider) + '</div>'
+    + (m.account_value ? '<div><b>' + esc(m.account_label || 'Compte') + ' :</b> ' + esc(m.account_value) + '</div>' : '')
+    + (m.instructions ? '<div class="muted" style="margin-top:6px">' + esc(m.instructions) + '</div>' : '') + '</div>';
+}
+
+function renderOrder(){
+  const el = document.getElementById('orderPanel');
+  const open = summary && summary.open_order;
+  if(window._stage === 'choose' && choice.plan){
+    const p = planByCode(choice.plan);
+    el.innerHTML = '<div class="card"><h3 style="margin:0 0 4px">Passer à ' + esc(p.name) + '</h3>'
+      + '<label>Durée</label><div class="opt">'
+      + (p.price_monthly_cents ? '<button class="' + (choice.period==='monthly'?'on':'') + '" onclick="setPeriod(\'monthly\')">Mensuel<br>' + money(p.price_monthly_cents,p.currency) + '</button>' : '')
+      + (p.price_yearly_cents ? '<button class="' + (choice.period==='yearly'?'on':'') + '" onclick="setPeriod(\'yearly\')">Annuel<br>' + money(p.price_yearly_cents,p.currency) + '</button>' : '')
+      + '</div><label>Moyen de paiement</label><select id="prov" onchange="choice.provider=this.value">'
+      + methods.map(m => '<option value="' + esc(m.code) + '"' + (m.code===choice.provider?' selected':'') + '>' + esc(m.name) + '</option>').join('') + '</select>'
+      + '<button class="btn" style="margin-top:14px" id="goBtn" onclick="createOrder()">Continuer</button>'
+      + '<button class="btn ghost" style="margin-top:8px" onclick="window._stage=null; renderOrder();">Annuler</button>'
+      + '<div id="oMsg"></div></div>';
+    return;
+  }
+  if(open && open.status === 'pending'){
+    el.innerHTML = '<div class="card"><h3 style="margin:0 0 4px">Finalisez votre paiement</h3>'
+      + '<div class="muted">Plan : ' + esc(open.plan) + ' · ' + (open.period==='yearly'?'annuel':'mensuel') + '</div>'
+      + payBox(open)
+      + '<label>Référence de la transaction (reçue après le paiement)</label><input id="ref" maxlength="64" placeholder="Ex. 123456789">'
+      + '<label>Note (facultatif)</label><input id="note" maxlength="300" placeholder="Ex. nom affiché sur le paiement">'
+      + '<button class="btn gold" style="margin-top:14px" id="subBtn" onclick="submitPay(\'' + esc(open.id) + '\')">J’ai payé</button>'
+      + '<button class="btn ghost" style="margin-top:8px" onclick="cancelOrder(\'' + esc(open.id) + '\')">Annuler cette commande</button>'
+      + '<div id="oMsg"></div></div>';
+    return;
+  }
+  if(open && open.status === 'submitted'){
+    el.innerHTML = '<div class="card"><h3 style="margin:0 0 4px">Paiement en cours de vérification</h3>'
+      + '<div class="muted">Référence envoyée : <b>' + esc(open.payment_reference) + '</b></div>'
+      + '<div class="msg ok">Nous vérifions votre paiement. Votre plan sera activé dès la validation. Revenez sur cette page pour voir le statut.</div></div>';
+    return;
+  }
+  el.innerHTML = '';
+}
+
+async function createOrder(){
+  const b = document.getElementById('goBtn'); b.disabled = true;
+  const r = await sb.rpc('create_order', { p_plan_code: choice.plan, p_period: choice.period, p_provider: choice.provider });
+  if(r.error){ document.getElementById('oMsg').innerHTML = '<div class="msg err">' + esc(frErr(r.error.message)) + '</div>'; b.disabled = false; return; }
+  window._stage = null; await load();
+}
+
+async function submitPay(id){
+  const ref = document.getElementById('ref').value.trim();
+  const note = document.getElementById('note').value.trim();
+  const b = document.getElementById('subBtn'); b.disabled = true;
+  const r = await sb.rpc('submit_payment', { p_order: id, p_reference: ref, p_note: note || null });
+  if(r.error){ document.getElementById('oMsg').innerHTML = '<div class="msg err">' + esc(frErr(r.error.message)) + '</div>'; b.disabled = false; return; }
+  await load();
+}
+
+async function cancelOrder(id){
+  await sb.rpc('cancel_order', { p_order: id });
+  await load();
+}
+
+load();
+</script>
+</body>
+</html>
