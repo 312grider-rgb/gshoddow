@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Discoveries — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#B5533C; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:60px;}
+  h1,h2,h3{font-family:'Fraunces',serif;}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px 26px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px;}
+  header.top a{color:var(--gold); font-size:13px; text-decoration:none; display:inline-block; margin:8px 14px 0 0;}
+  .wrap{padding:18px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px;}
+  .row{display:flex; justify-content:space-between; gap:10px; align-items:center;}
+  .badge{font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; text-transform:uppercase;}
+  .b-published{background:#E8F1EA; color:#3E6B48;} .b-draft{background:#FBF4E2; color:#8A6A1F;}
+  .muted{font-size:12.5px; color:#777;}
+  label{display:block; font-size:13px; font-weight:600; margin:12px 0 5px; color:var(--ink);}
+  input,select,textarea{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font:inherit; font-size:15px; background:#fff;}
+  textarea{min-height:84px;}
+  .btn{background:var(--ink); color:#fff; border:0; border-radius:12px; padding:13px 16px; font-weight:700; font-size:15px; cursor:pointer; width:100%; font-family:inherit; margin-top:12px;}
+  .btn.ghost{background:#fff; color:var(--ink); border:1.5px solid var(--line);}
+  .btn.del{background:#fff; color:var(--danger); border:1.5px solid var(--danger);}
+  .small{padding:8px 12px; font-size:13px; width:auto; margin:0;}
+  .note{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:13px; color:#555; line-height:1.5; margin-bottom:14px;}
+  #lockedView,#adminView,#formBox{display:none;}
+  #toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:10px; font-size:14px; display:none; z-index:9;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Admin</div>
+  <h1>Discoveries &amp; Records</h1>
+  <a href="skillstream-admin.html">&larr; Back to Admin</a><a href="skillstream-discoveries.html">View public page</a>
+</header>
+<div class="wrap">
+  <div id="loadingView">Loading…</div>
+  <div id="lockedView"><h2>Admins only</h2><a href="skillstream-home.html">Go home</a></div>
+  <div id="adminView">
+    <div class="note"><b>Accuracy rule:</b> every entry needs a <b>source</b>. Only publish what you have checked.
+      Use <b>Draft</b> while you verify, then switch to <b>Published</b>.</div>
+    <button class="btn" onclick="openForm(null)">+ Add an entry</button>
+
+    <div id="formBox" class="card" style="margin-top:14px">
+      <h3 id="formTitle" style="margin:0 0 4px">New entry</h3>
+      <label>Title (French)</label><input id="f_title" maxlength="140">
+      <label>Summary (French, 1–2 sentences)</label><textarea id="f_summary" maxlength="600"></textarea>
+      <label>Why it matters (French, optional)</label><textarea id="f_why" maxlength="500"></textarea>
+      <label>Category</label>
+      <select id="f_cat">
+        <option value="science">Sciences</option><option value="invention">Inventions</option><option value="medicine">Médecine</option>
+        <option value="math">Mathématiques</option><option value="space">Espace</option><option value="tech">Technologie</option>
+        <option value="education">Éducation</option><option value="record">Records</option>
+      </select>
+      <label>Year (number, negative = before our era, used for ordering)</label><input id="f_year" type="number" inputmode="numeric">
+      <label>Year as shown (e.g. "vers 1450")</label><input id="f_ylabel" maxlength="40">
+      <label>People (optional)</label><input id="f_person" maxlength="140">
+      <label>Place / country (optional)</label><input id="f_country" maxlength="80">
+      <label>Source name (required)</label><input id="f_slabel" maxlength="200" placeholder="Ex. Encyclopædia Britannica, article « Gutenberg »">
+      <label>Source link (optional, https://…)</label><input id="f_surl" maxlength="500">
+      <label>Status</label><select id="f_status"><option value="draft">Draft (hidden)</option><option value="published">Published</option></select>
+      <button class="btn" id="saveBtn" onclick="save()">Save</button>
+      <button class="btn ghost" onclick="closeForm()">Cancel</button>
+      <button class="btn del" id="delBtn" onclick="removeEntry()" style="display:none">Delete this entry</button>
+    </div>
+
+    <h3 style="margin:22px 0 10px">All entries</h3>
+    <div id="list"></div>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let rows = [], editing = null;
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; setTimeout(()=>t.style.display='none', 2600); }
+function slugify(s){ return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60); }
+const $ = id => document.getElementById(id);
+
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  const { data: p } = await sb.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+  $('loadingView').style.display = 'none';
+  if(!p || p.role !== 'admin'){ $('lockedView').style.display = 'block'; return; }
+  $('adminView').style.display = 'block';
+  load();
+}
+
+async function load(){
+  const r = await sb.from('discoveries').select('*').order('year', { ascending: true, nullsFirst: false });
+  rows = r.data || [];
+  $('list').innerHTML = rows.map(d =>
+    '<div class="card"><div class="row"><b>' + esc(d.title_fr) + '</b><span class="badge b-' + esc(d.status) + '">' + esc(d.status) + '</span></div>'
+    + '<div class="muted">' + esc(d.year_label || d.year || '') + ' · ' + esc(d.category) + '</div>'
+    + '<button class="btn ghost small" style="margin-top:10px" onclick="openForm(\'' + esc(d.id) + '\')">Edit</button></div>').join('')
+    || '<div class="muted">No entries yet.</div>';
+}
+
+function openForm(id){
+  editing = id ? rows.find(r => r.id === id) : null;
+  const d = editing || {};
+  $('formTitle').textContent = editing ? 'Edit entry' : 'New entry';
+  $('f_title').value = d.title_fr || ''; $('f_summary').value = d.summary_fr || ''; $('f_why').value = d.why_fr || '';
+  $('f_cat').value = d.category || 'science'; $('f_year').value = d.year != null ? d.year : ''; $('f_ylabel').value = d.year_label || '';
+  $('f_person').value = d.person || ''; $('f_country').value = d.country || '';
+  $('f_slabel').value = d.source_label || ''; $('f_surl').value = d.source_url || '';
+  $('f_status').value = d.status || 'draft';
+  $('delBtn').style.display = editing ? 'block' : 'none';
+  $('formBox').style.display = 'block'; $('formBox').scrollIntoView({behavior:'smooth'});
+}
+function closeForm(){ $('formBox').style.display = 'none'; editing = null; }
+
+async function save(){
+  const title = $('f_title').value.trim(), summary = $('f_summary').value.trim(), slabel = $('f_slabel').value.trim();
+  if(!title || !summary || !slabel){ toast('Title, summary and source name are required.'); return; }
+  const url = $('f_surl').value.trim();
+  if(url && !/^https?:\/\//i.test(url)){ toast('The source link must start with https://'); return; }
+  const y = $('f_year').value.trim();
+  const rec = {
+    title_fr: title, summary_fr: summary, why_fr: $('f_why').value.trim() || null, category: $('f_cat').value,
+    year: y === '' ? null : parseInt(y, 10), year_label: $('f_ylabel').value.trim() || null,
+    person: $('f_person').value.trim() || null, country: $('f_country').value.trim() || null,
+    source_label: slabel, source_url: url || null, status: $('f_status').value, updated_at: new Date().toISOString()
+  };
+  const b = $('saveBtn'); b.disabled = true;
+  let r;
+  if(editing) r = await sb.from('discoveries').update(rec).eq('id', editing.id);
+  else { rec.slug = (slugify(title) + '-' + (rec.year != null ? rec.year : Date.now())).slice(0, 80); r = await sb.from('discoveries').insert(rec); }
+  b.disabled = false;
+  if(r.error){ toast('Error: ' + r.error.message); return; }
+  toast('Saved.'); closeForm(); load();
+}
+
+async function removeEntry(){
+  if(!editing || !confirm('Delete this entry permanently?')) return;
+  const r = await sb.from('discoveries').delete().eq('id', editing.id);
+  if(r.error){ toast('Error: ' + r.error.message); return; }
+  toast('Deleted.'); closeForm(); load();
+}
+init();
+</script>
+</body>
+</html>

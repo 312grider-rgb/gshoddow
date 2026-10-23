@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Découvertes et records — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:60px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px 26px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.8); line-height:1.5;}
+  header.top a{color:var(--gold); font-size:13px; text-decoration:none; display:inline-block; margin-top:10px;}
+  .wrap{padding:18px; max-width:760px; margin:0 auto;}
+  input[type=search]{width:100%; border:1.5px solid var(--line); border-radius:12px; padding:12px; font:inherit; font-size:15px; background:#fff;}
+  .chips{display:flex; gap:8px; overflow-x:auto; padding:12px 0 6px;}
+  .chip{flex:none; background:#fff; border:1.5px solid var(--line); border-radius:20px; padding:8px 13px; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer; font-family:inherit;}
+  .chip.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .era{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700; margin:22px 0 10px;}
+  .item{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px; cursor:pointer;}
+  .item .top{display:flex; gap:12px; align-items:flex-start;}
+  .yr{flex:none; min-width:74px; font-family:'Fraunces',serif; font-weight:700; color:var(--gold); font-size:15px; padding-top:2px;}
+  .item h3{margin:0 0 3px; font-size:16.5px;}
+  .cat{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--sage);}
+  .sum{font-size:14.5px; line-height:1.55; margin-top:6px;}
+  .more{display:none; margin-top:10px; border-top:1px dashed var(--line); padding-top:10px; font-size:14px; line-height:1.55;}
+  .item.open .more{display:block;}
+  .why{background:#FBF4E2; border-radius:10px; padding:10px 12px; margin-top:8px;}
+  .meta{font-size:12.5px; color:#777; margin-top:8px;}
+  .meta a{color:var(--ink);}
+  .empty{text-align:center; color:#777; padding:30px 10px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Découvertes et records</h1>
+  <p>L'histoire des inventions, des découvertes et des exploits qui ont changé la manière d'apprendre et de vivre.</p>
+  <a href="skillstream-home.html">&larr; Accueil</a>
+</header>
+<div class="wrap">
+  <input type="search" id="q" placeholder="Rechercher (ex. médecine, Curie, 1969…)">
+  <div class="chips" id="chips"></div>
+  <div id="list">Chargement…</div>
+</div>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const CATS = { science:'Sciences', invention:'Inventions', medicine:'Médecine', math:'Mathématiques', space:'Espace', tech:'Technologie', education:'Éducation', record:'Records' };
+let all = [], cat = 'all';
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function era(y){
+  if(y == null) return 'Date inconnue';
+  if(y < 0) return 'Avant notre ère';
+  const c = Math.floor((y - 1) / 100) + 1;
+  return (c === 1 ? '1er' : c + 'e') + ' siècle';
+}
+function safeUrl(u){ return /^https?:\/\//i.test(u || '') ? u : null; }
+function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+
+function render(){
+  const q = norm(document.getElementById('q').value.trim());
+  const rows = all.filter(d => (cat === 'all' || d.category === cat) &&
+    (!q || norm([d.title_fr, d.summary_fr, d.person, d.country, d.year_label, CATS[d.category]].join(' ')).includes(q)));
+  const el = document.getElementById('list');
+  if(!rows.length){ el.innerHTML = '<div class="empty">Aucun résultat.</div>'; return; }
+  let html = '', last = null;
+  rows.forEach(function(d){
+    const e = era(d.year);
+    if(e !== last){ html += '<div class="era">' + esc(e) + '</div>'; last = e; }
+    const url = safeUrl(d.source_url);
+    html += '<div class="item" onclick="this.classList.toggle(\'open\')">'
+      + '<div class="top"><div class="yr">' + esc(d.year_label || d.year || '') + '</div><div>'
+      + '<div class="cat">' + esc(CATS[d.category] || d.category) + '</div><h3>' + esc(d.title_fr) + '</h3></div></div>'
+      + '<div class="sum">' + esc(d.summary_fr) + '</div>'
+      + '<div class="more">' + (d.why_fr ? '<div class="why"><b>Pourquoi c’est important :</b> ' + esc(d.why_fr) + '</div>' : '')
+      + '<div class="meta">' + (d.person ? 'Personnes : ' + esc(d.person) + '<br>' : '') + (d.country ? 'Lieu : ' + esc(d.country) + '<br>' : '')
+      + 'Source : ' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(d.source_label) + '</a>' : esc(d.source_label)) + '</div></div></div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderChips(){
+  const present = Object.keys(CATS).filter(k => all.some(d => d.category === k));
+  document.getElementById('chips').innerHTML = ['all'].concat(present).map(k =>
+    '<button class="chip' + (k === cat ? ' on' : '') + '" data-k="' + k + '">' + (k === 'all' ? 'Tout' : CATS[k]) + '</button>').join('');
+  document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', function(){ cat = b.dataset.k; renderChips(); render(); }));
+}
+
+async function init(){
+  const r = await sb.from('discoveries')
+    .select('id, title_fr, summary_fr, why_fr, category, year, year_label, person, country, source_label, source_url')
+    .eq('status', 'published').order('year', { ascending: true, nullsFirst: false });
+  if(r.error){ document.getElementById('list').innerHTML = '<div class="empty">Impossible de charger les découvertes pour le moment.</div>'; return; }
+  all = r.data || [];
+  renderChips(); render();
+  document.getElementById('q').addEventListener('input', render);
+}
+init();
+</script>
+</body>
+</html>
