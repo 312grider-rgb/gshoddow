@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:84px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px 26px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.8); line-height:1.5;}
+  header.top a{color:var(--gold); font-size:13px; text-decoration:none; display:inline-block; margin-top:10px;}
+  .wrap{padding:18px; max-width:760px; margin:0 auto;}
+  .row{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;}
+  .row h2{margin:0; font-size:19px;}
+  button{font-family:inherit; cursor:pointer;}
+  .btn{background:var(--ink); color:#fff; border:none; border-radius:9px; padding:10px 15px; font-size:13.5px; font-weight:600;}
+  .btn.ghost{background:#fff; color:var(--ink); border:1.5px solid var(--line);}
+  .btn.small{padding:7px 11px; font-size:12.5px;}
+  .btn[disabled]{opacity:.55; cursor:default;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px;}
+  .card h3{margin:0 0 4px; font-size:17px;}
+  .topic{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--sage);}
+  .desc{font-size:14px; line-height:1.5; margin:6px 0;}
+  .meta{font-size:12.5px; color:#6B6558;}
+  .actions{display:flex; gap:8px; margin-top:10px;}
+  form.box{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:14px; display:none;}
+  form.box.show{display:block;}
+  input[type=text], textarea{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font:inherit; font-size:15px; background:#fff; margin-bottom:10px;}
+  textarea{min-height:84px; resize:vertical;}
+  .msg{font-size:13.5px; margin:8px 0; min-height:18px;}
+  .msg.err{color:#A33A2B;} .msg.ok{color:#3F6B47;}
+  .post{background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px;}
+  .post.reply{margin:8px 0 0 18px; background:#FDFBF6;}
+  [dir=rtl] .post.reply{margin:8px 18px 0 0;}
+  .post .who{font-weight:700; font-size:13.5px; color:var(--ink);}
+  .badge{display:inline-block; background:#FBF4E2; color:#8A6A1F; border-radius:8px; padding:1px 7px; font-size:11px; font-weight:700; margin-inline-start:6px;}
+  .post .body{font-size:14.5px; line-height:1.55; margin:6px 0; white-space:pre-wrap; word-wrap:break-word;}
+  .post .tools{display:flex; gap:14px; flex-wrap:wrap;}
+  .link{background:none; border:none; padding:0; color:#6B6558; font-size:12.5px; text-decoration:underline;}
+  .hiddenNote{font-size:12.5px; color:#A33A2B; font-weight:600;}
+  .post.isHidden .body{opacity:.55;}
+  .note{font-size:12.5px; color:#6B6558; margin:6px 0 12px;}
+  .empty{text-align:center; color:#6B6558; padding:30px 10px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Community</h1>
+  <p>Study together. Ask questions, share what you learn, and help each other.</p>
+  <a href="skillstream-home.html">&larr; Home</a>
+</header>
+
+<div class="wrap">
+  <!-- GROUP LIST -->
+  <div id="listView">
+    <div class="row"><h2>Study groups</h2><button class="btn small" id="newBtn" type="button">Create a group</button></div>
+    <form class="box" id="newForm">
+      <input type="text" id="gName" maxlength="60" placeholder="Group name">
+      <input type="text" id="gTopic" maxlength="40" placeholder="Topic (e.g. Math, English)">
+      <textarea id="gDesc" maxlength="400" placeholder="What is this group about? (optional)"></textarea>
+      <div style="display:flex;gap:8px"><button class="btn" id="gSave" type="submit">Create</button><button class="btn ghost" id="gCancel" type="button">Cancel</button></div>
+      <div class="msg" id="gMsg"></div>
+    </form>
+    <div id="groups"><div class="empty">Loading…</div></div>
+  </div>
+
+  <!-- ONE GROUP -->
+  <div id="groupView" style="display:none">
+    <div class="row">
+      <button class="btn ghost small" id="backBtn" type="button">&larr; All groups</button>
+      <button class="btn ghost small" id="leaveBtn" type="button">Leave group</button>
+    </div>
+    <h2 id="gTitle" data-no-i18n style="margin:4px 0"></h2>
+    <div class="desc" id="gAbout" data-no-i18n></div>
+    <div class="note">Be kind and respectful. Links are not allowed.</div>
+    <form class="box show" id="postForm">
+      <textarea id="postBody" maxlength="2000" placeholder="Write a post or ask a question…"></textarea>
+      <button class="btn" id="postBtn" type="submit">Post</button>
+      <div class="msg" id="pMsg"></div>
+    </form>
+    <div id="feed"></div>
+  </div>
+</div>
+
+<script src="js/nav.js" defer></script>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+let me = null, current = null, myRole = null, isAdmin = false, modFlag = false;
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+const KNOWN = ['Links are not allowed in group posts.','You are posting too fast. Please try again later.','This group is full.','You can own at most 5 groups.'];
+function friendly(e){
+  const m = (e && e.message) || '';
+  return KNOWN.indexOf(m) >= 0 ? m : 'Something went wrong. Please try again.';
+}
+function say(id, text, kind){ const el = $(id); el.className = 'msg' + (kind ? ' ' + kind : ''); el.textContent = text || ''; }
+
+/* ---------- list ---------- */
+async function loadGroups(){
+  const { data, error } = await sb.rpc('list_study_groups');
+  const el = $('groups');
+  if(error){ el.innerHTML = '<div class="empty">Something went wrong. Please try again.</div>'; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">No groups yet. Be the first to create one!</div>'; return; }
+  el.innerHTML = data.map(g => {
+    const n = Number(g.member_count);
+    return '<div class="card">' +
+      (g.topic ? '<div class="topic" data-no-i18n>' + esc(g.topic) + '</div>' : '') +
+      '<h3 data-no-i18n>' + esc(g.name) + '</h3>' +
+      (g.description ? '<div class="desc" data-no-i18n>' + esc(g.description) + '</div>' : '') +
+      '<div class="meta"><span>' + (n === 1 ? '1 member' : n + ' members') + '</span> · <span>by</span> <span data-no-i18n>' + esc(g.owner_name) + '</span></div>' +
+      '<div class="actions">' + (g.is_member
+         ? '<button class="btn small" data-open="' + g.id + '" type="button">Open</button>'
+         : '<button class="btn small" data-join="' + g.id + '" type="button">Join</button>') + '</div></div>';
+  }).join('');
+  el.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openGroup(b.dataset.open, data));
+  el.querySelectorAll('[data-join]').forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    const r = await sb.rpc('join_study_group', { p_group: b.dataset.join });
+    if(r.error){ alert(T(friendly(r.error))); b.disabled = false; return; }
+    const fresh = await sb.rpc('list_study_groups');
+    openGroup(b.dataset.join, fresh.data || data);
+  });
+}
+
+$('newBtn').onclick = () => { $('newForm').classList.toggle('show'); say('gMsg',''); };
+$('gCancel').onclick = () => $('newForm').classList.remove('show');
+$('newForm').onsubmit = async ev => {
+  ev.preventDefault();
+  const name = $('gName').value.trim();
+  if(name.length < 3 || name.length > 60){ say('gMsg', 'Group name must be 3 to 60 characters.', 'err'); return; }
+  $('gSave').disabled = true;
+  const { error } = await sb.rpc('create_study_group', { p_name: name, p_description: $('gDesc').value, p_topic: $('gTopic').value });
+  $('gSave').disabled = false;
+  if(error){ say('gMsg', friendly(error), 'err'); return; }
+  $('gName').value = $('gTopic').value = $('gDesc').value = '';
+  $('newForm').classList.remove('show'); say('gMsg','');
+  loadGroups();
+};
+
+/* ---------- one group ---------- */
+async function openGroup(id, groups){
+  const g = (groups || []).find(x => x.id === id);
+  if(!g) return;
+  current = g; myRole = g.my_role;
+  $('listView').style.display = 'none'; $('groupView').style.display = 'block';
+  $('gTitle').textContent = g.name; $('gAbout').textContent = g.description || '';
+  $('leaveBtn').style.display = g.my_role === 'owner' ? 'none' : '';
+  window.scrollTo(0, 0);
+  await loadFeed();
+}
+$('backBtn').onclick = () => { $('groupView').style.display = 'none'; $('listView').style.display = 'block'; current = null; loadGroups(); };
+$('leaveBtn').onclick = async () => {
+  if(!confirm(T('Leave this group?'))) return;
+  const r = await sb.from('study_group_members').delete().eq('group_id', current.id).eq('user_id', me.id);
+  if(r.error){ alert(T(friendly(r.error))); return; }
+  $('backBtn').onclick();
+};
+
+async function loadFeed(){
+  const { data, error } = await sb.rpc('group_feed', { p_group: current.id });
+  const el = $('feed');
+  if(error){ el.innerHTML = '<div class="empty">Something went wrong. Please try again.</div>'; return; }
+  const rows = data || [];
+  const tops = rows.filter(r => !r.parent_id), kids = {};
+  rows.filter(r => r.parent_id).forEach(r => (kids[r.parent_id] = kids[r.parent_id] || []).push(r));
+  if(!tops.length){ el.innerHTML = '<div class="empty">No posts yet. Start the conversation!</div>'; return; }
+  const one = (p, isReply) =>
+    '<div class="post' + (isReply ? ' reply' : '') + (p.hidden ? ' isHidden' : '') + '">' +
+      '<div><span class="who" dir="auto" data-no-i18n>' + esc(p.author_name) + '</span>' + (p.author_role === 'teacher' ? '<span class="badge">Teacher</span>' : '') + '</div>' +
+      (p.hidden ? '<div class="hiddenNote">Hidden by a moderator</div>' : '') +
+      '<div class="body" dir="auto" data-no-i18n>' + esc(p.body) + '</div>' +
+      '<div class="tools">' +
+        (!isReply ? '<button class="link" data-reply="' + p.id + '" type="button">Reply</button>' : '') +
+        (p.author_id !== me.id ? '<button class="link" data-report="' + p.id + '" type="button">Report</button>' : '') +
+        (current.my_role === 'owner' || isAdmin || modFlag ? '<button class="link" data-hide="' + p.id + '" data-to="' + (p.hidden ? 'false' : 'true') + '" type="button">' + (p.hidden ? 'Show' : 'Hide') + '</button>' : '') +
+        (p.author_id === me.id || current.my_role === 'owner' || isAdmin || modFlag ? '<button class="link" data-del="' + p.id + '" type="button">Delete</button>' : '') +
+        (p.report_count > 0 ? '<span class="meta">' + p.report_count + ' reports</span>' : '') +
+      '</div>' +
+      (isReply ? '' : '<div id="rbox-' + p.id + '"></div>') +
+    '</div>';
+  el.innerHTML = tops.map(p => one(p, false) + (kids[p.id] || []).map(k => one(k, true)).join('')).join('');
+  wire(el);
+}
+function wire(el){
+  el.querySelectorAll('[data-reply]').forEach(b => b.onclick = () => {
+    const box = $('rbox-' + b.dataset.reply);
+    if(box.innerHTML){ box.innerHTML = ''; return; }
+    box.innerHTML = '<form style="margin-top:8px"><textarea maxlength="2000" placeholder="' + esc(T('Write a reply…')) + '" style="min-height:60px"></textarea><button class="btn small" type="submit">Reply</button><div class="msg"></div></form>';
+    const f = box.querySelector('form');
+    f.onsubmit = async ev => {
+      ev.preventDefault();
+      const body = f.querySelector('textarea').value.trim(); if(!body) return;
+      const r = await sb.from('group_posts').insert({ group_id: current.id, author_id: me.id, parent_id: b.dataset.reply, body });
+      if(r.error){ const m = f.querySelector('.msg'); m.className = 'msg err'; m.textContent = friendly(r.error); return; }
+      loadFeed();
+    };
+  });
+  el.querySelectorAll('[data-report]').forEach(b => b.onclick = async () => {
+    const r = await sb.from('group_post_reports').insert({ post_id: b.dataset.report, reporter_id: me.id });
+    if(r.error && r.error.code === '23505'){ alert(T('You already reported this.')); return; }
+    if(r.error){ alert(T(friendly(r.error))); return; }
+    alert(T('Thanks, your report was sent.'));
+  });
+  el.querySelectorAll('[data-hide]').forEach(b => b.onclick = async () => {
+    const r = await sb.rpc('hide_group_post', { p_post: b.dataset.hide, p_hide: b.dataset.to === 'true' });
+    if(r.error){ alert(T(friendly(r.error))); return; }
+    loadFeed();
+  });
+  el.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    if(!confirm(T('Delete this post?'))) return;
+    const r = await sb.from('group_posts').delete().eq('id', b.dataset.del);
+    if(r.error){ alert(T(friendly(r.error))); return; }
+    loadFeed();
+  });
+}
+
+$('postForm').onsubmit = async ev => {
+  ev.preventDefault();
+  const body = $('postBody').value.trim(); if(!body) return;
+  $('postBtn').disabled = true;
+  const r = await sb.from('group_posts').insert({ group_id: current.id, author_id: me.id, body });
+  $('postBtn').disabled = false;
+  if(r.error){ say('pMsg', friendly(r.error), 'err'); return; }
+  $('postBody').value = ''; say('pMsg','');
+  loadFeed();
+};
+
+(async function init(){
+  const s = await sb.auth.getSession();
+  const session = s && s.data && s.data.session;
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  me = session.user;
+  document.querySelectorAll('textarea').forEach(a => { a.placeholder = T(a.getAttribute('placeholder') || ''); });
+  try {
+    const p = await sb.from('profiles').select('role').eq('id', me.id).maybeSingle();
+    const role = p && p.data && p.data.role;
+    isAdmin = role === 'admin'; modFlag = role === 'admin' || role === 'teacher';
+  } catch(e) {}
+  loadGroups();
+})();
+</script>
+</body>
+</html>
