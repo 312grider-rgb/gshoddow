@@ -15,6 +15,7 @@
     ai: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15v4M17 17h4"/></svg>',
     chat: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z"/></svg>',
     user: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+    teach: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>',
     more: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
     games: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11" r="1"/><circle cx="18.5" cy="14" r="1"/></svg>',
     library: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4v16M9 4v16"/><path d="M14 5l4 .8-3 14.2-4-.8z"/></svg>',
@@ -74,7 +75,8 @@
     { icon: ICON.star,     label: 'Plans and pricing',       href: 'skillstream-pricing.html' },
     { icon: ICON.image,    label: 'Showcase',                href: 'skillstream-showcase.html' },
     { icon: ICON.calendar, label: 'Calendar',                href: 'skillstream-calendar.html' },
-    { icon: ICON.trophy,   label: 'Leaderboard',             href: 'skillstream-leaderboard.html' }
+    { icon: ICON.trophy,   label: 'Leaderboard',             href: 'skillstream-leaderboard.html' },
+    { icon: ICON.teach,    label: 'Become a teacher',        href: 'skillstream-teach-apply.html' }
   ];
   var MESSAGE_PAGES = ['skillstream-messages.html', 'skillstream-community.html', 'skillstream-classrooms.html', 'skillstream-shared.html'];
   var MORE_PAGES = MORE_LINKS.map(function (l) { return l.href; }).concat(['skillstream-chess.html', 'skillstream-ludo.html', 'skillstream-challenges.html']);

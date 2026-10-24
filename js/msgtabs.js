@@ -8,7 +8,8 @@
     { label: 'Private',     href: 'skillstream-messages.html' },
     { label: 'Groups',      href: 'skillstream-community.html' },
     { label: 'Classes',     href: 'skillstream-classrooms.html' },
-    { label: 'Shared work', href: 'skillstream-shared.html' }
+    { label: 'Shared work', href: 'skillstream-shared.html' },
+    { label: 'My courses',  href: 'skillstream-courses.html' }
   ];
   function build() {
     if (document.getElementById('ln-msgtabs')) return;
