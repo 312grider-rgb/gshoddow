@@ -56,6 +56,9 @@
   .attach .chosen{font-size:12.5px; color:#6B6558; word-break:break-all;}
   .filebtn{display:inline-flex; align-items:center; gap:6px; background:#F3EEE0; border:1px solid var(--line); border-radius:9px; padding:7px 11px; font-size:13px; font-weight:600; color:var(--ink); margin:4px 0; max-width:100%;}
   .filebtn span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .rec{font-family:inherit;}
+  .rec.on{background:#FBE9E5; border-color:#C9503B; color:#A33A2B;}
+  audio{max-width:100%;}
   .empty{text-align:center; color:#6B6558; padding:30px 10px;}
 </style>
 </head>
@@ -92,7 +95,8 @@
     <div class="note">Be kind and respectful. Links are not allowed.</div>
     <form class="box show" id="postForm">
       <textarea id="postBody" maxlength="2000" placeholder="Write a post or ask a question…"></textarea>
-      <div class="attach"><label class="pick" for="postFile">📎 <span>Attach a file</span></label><input type="file" id="postFile" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.txt,.docx,.xlsx,.pptx"><span class="chosen" id="postChosen" data-no-i18n></span></div>
+      <div class="attach"><label class="pick" for="postFile">📎 <span>Attach a file</span></label><input type="file" id="postFile" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.txt,.docx,.xlsx,.pptx,.mp3,.m4a"><span class="chosen" id="postChosen" data-no-i18n></span></div>
+      <div class="attach" id="postRec"></div>
       <button class="btn" id="postBtn" type="submit">Post</button>
       <div class="msg" id="pMsg"></div>
     </form>
@@ -100,6 +104,7 @@
   </div>
 </div>
 
+<script src="js/msgtabs.js" defer></script>
 <script src="js/nav.js" defer></script>
 <script>
 const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
@@ -120,6 +125,7 @@ function say(id, text, kind){ const el = $(id); el.className = 'msg' + (kind ? '
 /* ---------- files ---------- */
 const MAX_BYTES = 5 * 1024 * 1024;
 const EXT_TYPES = { pdf:'application/pdf', png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', gif:'image/gif', txt:'text/plain',
+  webm:'audio/webm', m4a:'audio/mp4', ogg:'audio/ogg', mp3:'audio/mpeg',
   docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
@@ -146,6 +152,50 @@ async function uploadFile(f){
   if(up.error) throw up.error;
   return { file_path: path, file_name: f.name.slice(0, 120), file_type: type, file_size: f.size };
 }
+/* ---------- voice recorder ---------- */
+const MAX_SECONDS = 120;
+function makeRecorder(host){
+  const canRec = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+  host.innerHTML = canRec
+    ? '<button type="button" class="pick rec">🎤 <span>Record a voice message</span></button> <span class="chosen rstat" data-no-i18n></span> <button type="button" class="link rcancel" style="display:none">Remove</button><audio controls class="rprev" style="display:none;width:100%;margin-top:8px"></audio>'
+    : '';
+  const st = { file: null };
+  if(!canRec) return { get: () => null, reset(){} };
+  const btn = host.querySelector('.rec'), stat = host.querySelector('.rstat'), rm = host.querySelector('.rcancel'), prev = host.querySelector('.rprev');
+  let mr = null, chunks = [], timer = null, t0 = 0, stream = null;
+  const label = t => { btn.querySelector('span').textContent = T(t); };
+  const clock = () => { const s = Math.floor((Date.now() - t0) / 1000); stat.textContent = T('Recording…') + ' ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); if(s >= MAX_SECONDS) stop(); };
+  function reset(){
+    st.file = null; prev.style.display = 'none'; try { URL.revokeObjectURL(prev.src); } catch(e) {} prev.removeAttribute('src');
+    rm.style.display = 'none'; stat.textContent = ''; btn.classList.remove('on'); label('Record a voice message');
+  }
+  function stop(){ if(mr && mr.state === 'recording') mr.stop(); }
+  btn.onclick = async () => {
+    if(mr && mr.state === 'recording'){ stop(); return; }
+    reset();
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch(e){ stat.textContent = T('Microphone access was blocked. Allow the microphone in your browser settings.'); return; }
+    const pref = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'].find(m => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m));
+    mr = pref ? new MediaRecorder(stream, { mimeType: pref }) : new MediaRecorder(stream);
+    chunks = [];
+    mr.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+    mr.onstop = () => {
+      clearInterval(timer); stream.getTracks().forEach(x => x.stop());
+      const type = (mr.mimeType || pref || 'audio/webm').split(';')[0];
+      const ext = type === 'audio/mp4' ? 'm4a' : type === 'audio/ogg' ? 'ogg' : 'webm';
+      const blob = new Blob(chunks, { type });
+      btn.classList.remove('on'); label('Record a voice message');
+      if(!blob.size){ stat.textContent = ''; return; }
+      st.file = new File([blob], 'Voice message.' + ext, { type });
+      prev.src = URL.createObjectURL(blob); prev.style.display = 'block'; rm.style.display = ''; stat.textContent = '';
+    };
+    mr.start(); t0 = Date.now(); btn.classList.add('on'); label('Stop'); clock(); timer = setInterval(clock, 500);
+  };
+  rm.onclick = reset;
+  return { get: () => st.file, reset };
+}
+function isVoice(f){ return f && f.file_type && f.file_type.indexOf('audio/') === 0; }
+
 async function openFile(path){
   const w = window.open('', '_blank');
   const r = await sb.storage.from('group-files').createSignedUrl(path, 120);
@@ -226,8 +276,9 @@ async function loadFeed(){
     '<div class="post' + (isReply ? ' reply' : '') + (p.hidden ? ' isHidden' : '') + '">' +
       '<div><span class="who" dir="auto" data-no-i18n>' + esc(p.author_name) + '</span>' + (p.author_role === 'teacher' ? '<span class="badge">Teacher</span>' : '') + '</div>' +
       (p.hidden ? '<div class="hiddenNote">Hidden by a moderator</div>' : '') +
-      (p.file_path && p.body === '📎' ? '' : '<div class="body" dir="auto" data-no-i18n>' + esc(p.body) + '</div>') +
-      (p.file_path ? '<div><button class="filebtn" data-file="' + esc(p.file_path) + '" type="button">📎 <span data-no-i18n>' + esc(p.file_name || 'file') + '</span> <span class="meta" data-no-i18n>' + sizeText(p.file_size || 0) + '</span></button></div>' : '') +
+      (p.file_path && (p.body === '📎' || p.body === '🎤') ? '' : '<div class="body" dir="auto" data-no-i18n>' + esc(p.body) + '</div>') +
+      (p.file_path && isVoice(p) ? '<div class="voice"><button class="filebtn" data-audio="' + esc(p.file_path) + '" type="button">▶ <span>Play voice message</span> <span class="meta" data-no-i18n>' + sizeText(p.file_size || 0) + '</span></button></div>' : '') +
+      (p.file_path && !isVoice(p) ? '<div><button class="filebtn" data-file="' + esc(p.file_path) + '" type="button">📎 <span data-no-i18n>' + esc(p.file_name || 'file') + '</span> <span class="meta" data-no-i18n>' + sizeText(p.file_size || 0) + '</span></button></div>' : '') +
       '<div class="tools">' +
         (!isReply ? '<button class="link" data-reply="' + p.id + '" type="button">Reply</button>' : '') +
         (p.author_id !== me.id ? '<button class="link" data-report="' + p.id + '" type="button">Report</button>' : '') +
@@ -244,24 +295,31 @@ function wire(el){
   el.querySelectorAll('[data-reply]').forEach(b => b.onclick = () => {
     const box = $('rbox-' + b.dataset.reply);
     if(box.innerHTML){ box.innerHTML = ''; return; }
-    box.innerHTML = '<form style="margin-top:8px"><textarea maxlength="2000" placeholder="' + esc(T('Write a reply…')) + '" style="min-height:60px"></textarea><div class="attach"><label class="pick">📎 <span>' + esc(T('Attach a file')) + '</span><input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.txt,.docx,.xlsx,.pptx"></label><span class="chosen" data-no-i18n></span></div><button class="btn small" type="submit">Reply</button><div class="msg"></div></form>';
+    box.innerHTML = '<form style="margin-top:8px"><textarea maxlength="2000" placeholder="' + esc(T('Write a reply…')) + '" style="min-height:60px"></textarea><div class="attach"><label class="pick">📎 <span>' + esc(T('Attach a file')) + '</span><input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.txt,.docx,.xlsx,.pptx,.mp3,.m4a"></label><span class="chosen" data-no-i18n></span></div><div class="attach rhost"></div><button class="btn small" type="submit">Reply</button><div class="msg"></div></form>';
     const f = box.querySelector('form');
+    f._rec = makeRecorder(f.querySelector('.rhost'));
     f.querySelector('input[type=file]').onchange = ev => { const x = ev.target.files[0]; f.querySelector('.chosen').textContent = x ? x.name : ''; };
     f.onsubmit = async ev => {
       ev.preventDefault();
-      const fi = f.querySelector('input[type=file]'), file = fi.files[0] || null, m = f.querySelector('.msg');
+      const fi = f.querySelector('input[type=file]'), voice = f._rec && f._rec.get(), file = voice || fi.files[0] || null, m = f.querySelector('.msg');
       let body = f.querySelector('textarea').value.trim();
       if(!body && !file) return;
       const bad = checkFile(file); if(bad){ m.className = 'msg err'; m.textContent = T(bad); return; }
       const sub = f.querySelector('button[type=submit]'); sub.disabled = true;
       let meta = {}, up = null;
-      try { if(file){ m.className = 'msg'; m.textContent = T('Uploading…'); meta = await uploadFile(file); up = meta.file_path; if(!body) body = '📎'; } }
+      try { if(file){ m.className = 'msg'; m.textContent = T('Uploading…'); meta = await uploadFile(file); up = meta.file_path; if(!body) body = voice ? '🎤' : '📎'; } }
       catch(e){ sub.disabled = false; m.className = 'msg err'; m.textContent = T('Could not upload the file. Please try again.'); return; }
       const r = await sb.from('group_posts').insert(Object.assign({ group_id: current.id, author_id: me.id, parent_id: b.dataset.reply, body }, meta));
       sub.disabled = false;
       if(r.error){ if(up){ try { await sb.storage.from('group-files').remove([up]); } catch(e) {} } m.className = 'msg err'; m.textContent = T(friendly(r.error)); return; }
       loadFeed();
     };
+  });
+  el.querySelectorAll('[data-audio]').forEach(b => b.onclick = async () => {
+    const r = await sb.storage.from('group-files').createSignedUrl(b.dataset.audio, 900);
+    if(r.error || !r.data){ alert(T('Could not open the file. Please try again.')); return; }
+    const a = document.createElement('audio'); a.controls = true; a.autoplay = true; a.src = r.data.signedUrl; a.style.width = '100%';
+    b.parentNode.replaceChild(a, b);
   });
   el.querySelectorAll('[data-file]').forEach(b => b.onclick = () => openFile(b.dataset.file));
   el.querySelectorAll('[data-report]').forEach(b => b.onclick = async () => {
@@ -285,20 +343,21 @@ function wire(el){
   });
 }
 
+const postRec = makeRecorder($('postRec'));
 $('postFile').onchange = () => { const x = $('postFile').files[0]; $('postChosen').textContent = x ? x.name : ''; };
 $('postForm').onsubmit = async ev => {
   ev.preventDefault();
-  const file = $('postFile').files[0] || null;
+  const voice = postRec.get(), file = voice || $('postFile').files[0] || null;
   let body = $('postBody').value.trim(); if(!body && !file) return;
   const bad = checkFile(file); if(bad){ say('pMsg', T(bad), 'err'); return; }
   $('postBtn').disabled = true;
   let meta = {}, up = null;
-  try { if(file){ say('pMsg', T('Uploading…')); meta = await uploadFile(file); up = meta.file_path; if(!body) body = '📎'; } }
+  try { if(file){ say('pMsg', T('Uploading…')); meta = await uploadFile(file); up = meta.file_path; if(!body) body = voice ? '🎤' : '📎'; } }
   catch(e){ $('postBtn').disabled = false; say('pMsg', T('Could not upload the file. Please try again.'), 'err'); return; }
   const r = await sb.from('group_posts').insert(Object.assign({ group_id: current.id, author_id: me.id, body }, meta));
   $('postBtn').disabled = false;
   if(r.error){ if(up){ try { await sb.storage.from('group-files').remove([up]); } catch(e) {} } say('pMsg', T(friendly(r.error)), 'err'); return; }
-  $('postBody').value = ''; $('postFile').value = ''; $('postChosen').textContent = ''; say('pMsg','');
+  $('postBody').value = ''; $('postFile').value = ''; postRec.reset(); $('postChosen').textContent = ''; say('pMsg','');
   loadFeed();
 };
 

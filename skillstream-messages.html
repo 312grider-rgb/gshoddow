@@ -160,8 +160,8 @@ function showNewMessage(){
 
 async function getProfile(userId){
   if(profilesCache[userId]) return profilesCache[userId];
-  const { data } = await sb.from('public_profiles').select('full_name, role, avatar_url').eq('id', userId).maybeSingle();
-  profilesCache[userId] = data || { full_name: 'Unknown' };
+  const { data } = await sb.from('public_profiles').select('full_name, name, username, role, avatar_url').eq('id', userId).maybeSingle();
+  profilesCache[userId] = data ? Object.assign({}, data, { full_name: data.full_name || data.name || data.username || 'Member' }) : { full_name: 'Member' };
   return profilesCache[userId];
 }
 
@@ -202,10 +202,10 @@ async function loadInbox(){
   el.innerHTML = entries.map(c => {
     const initials = (c.profile.full_name || '?').trim().charAt(0).toUpperCase();
     return `
-    <div class="convo-card" onclick="openThread('${c.otherId}', '${escapeHtml(c.profile.full_name || 'Unknown').replace(/'/g,"\\'")}')">
+    <div class="convo-card" onclick="openThread('${c.otherId}', '${escapeHtml(c.profile.full_name || 'Member').replace(/'/g,"\\'")}')">
       <div class="convo-avatar">${c.profile.avatar_url ? `<img src="${c.profile.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : initials}</div>
       <div class="convo-info">
-        <div class="convo-name">${escapeHtml(c.profile.full_name || 'Unknown')}</div>
+        <div class="convo-name">${escapeHtml(c.profile.full_name || 'Member')}</div>
         <div class="convo-preview">${escapeHtml(c.lastMessage.body)}</div>
       </div>
       ${c.unread > 0 ? '<span class="unread-dot"></span>' : ''}
@@ -217,20 +217,21 @@ async function loadInbox(){
 /* ---------- NEW MESSAGE: pick anyone with a profile ---------- */
 async function loadPeople(){
   const el = document.getElementById('peopleList');
-  const { data, error } = await sb.from('public_profiles').select('id, full_name, role').neq('id', currentUser.id).limit(100);
+  const { data, error } = await sb.from('public_profiles').select('id, full_name, name, username, role').neq('id', currentUser.id).limit(100);
 
   if(error || !data || data.length === 0){
     el.innerHTML = `<div class="empty">No one else has joined yet.</div>`;
     return;
   }
 
+  data.forEach(p => { p.full_name = p.full_name || p.name || p.username || 'Member'; });
   el.innerHTML = data.map(p => {
     const initials = (p.full_name || '?').trim().charAt(0).toUpperCase();
     return `
-    <div class="person-card" onclick="openThread('${p.id}', '${escapeHtml(p.full_name || 'Unknown').replace(/'/g,"\\'")}')">
+    <div class="person-card" onclick="openThread('${p.id}', '${escapeHtml(p.full_name || 'Member').replace(/'/g,"\\'")}')">
       <div class="person-avatar">${initials}</div>
       <div>
-        <div class="person-name">${escapeHtml(p.full_name || 'Unknown')}</div>
+        <div class="person-name">${escapeHtml(p.full_name || 'Member')}</div>
         <div class="person-role">${escapeHtml(p.role || 'student')}</div>
       </div>
     </div>`;
@@ -294,6 +295,7 @@ async function sendMessage(){
 
 initAuth();
 </script>
+<script src="js/msgtabs.js" defer></script>
 <script src="js/nav.js" defer></script>
 </body>
 </html>
