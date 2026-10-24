@@ -1,5 +1,5 @@
-/* Learning Never Ends — right-to-left (Arabic) and language-switch styles. Loaded on every page. */
-#lneLang{position:fixed;left:8px;bottom:78px;z-index:50;font:600 12px/1 system-ui,sans-serif;padding:5px 8px;border-radius:999px;border:1px solid var(--border,#E9E2D2);background:var(--surface,#fff);color:var(--text,#141F38);opacity:.92;max-width:92px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+/* Learning Never Ends — right-to-left (Arabic), language-switch styles and shared polish. Loaded on every page. */
+#lneLang{position:static;display:block;margin:20px auto 24px;z-index:1;font:600 12px/1 system-ui,sans-serif;padding:5px 8px;border-radius:999px;border:1px solid var(--border,#E9E2D2);background:var(--surface,#fff);color:var(--text,#141F38);opacity:.92;max-width:92px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 html[lang="ar"] body{font-family:'Segoe UI','Noto Sans Arabic',Tahoma,'Geeza Pro',system-ui,sans-serif}
 html[lang="zh"] body{font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif}
 html[dir="rtl"] body{direction:rtl;text-align:start}
@@ -7,3 +7,10 @@ html[dir="rtl"] input,html[dir="rtl"] textarea,html[dir="rtl"] select{text-align
 html[dir="rtl"] input[type="email"],html[dir="rtl"] input[type="url"],html[dir="rtl"] input[type="password"],html[dir="rtl"] input[type="number"]{direction:ltr;text-align:right}
 html[dir="rtl"] .back,html[dir="rtl"] [class*="arrow"]{unicode-bidi:plaintext}
 html[dir="rtl"] .bell-btn{right:auto;left:18px}
+
+/* ---- Shared polish ---- */
+/* Readable small gold text on light backgrounds (bright gold stays for fills and dark headers) */
+body .section-title,body .section-title-home,body .view-card .go,body .spotlight-info .s-role,body .yr{color:#8A6A1F}
+/* Buttons used on pages that do not load css/theme.css (e.g. Profile "Save Goal") */
+.btn-primary{display:inline-block;background:var(--ink,#141F38);color:#fff;padding:11px 16px;border-radius:9px;font-size:13.5px;font-weight:600;border:none;cursor:pointer;font-family:inherit}
+.btn-gold{display:inline-block;background:var(--gold,#C9A24E);color:var(--ink,#141F38);padding:14px;border-radius:12px;font-weight:700;font-size:15px;text-align:center;border:none;cursor:pointer;font-family:inherit}
