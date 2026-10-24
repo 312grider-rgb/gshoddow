@@ -81,6 +81,9 @@
     background:var(--ink); color:#fff; border:none; padding:0 20px; border-radius:22px; font-weight:700; font-size:14px;
   }
 
+  .sec-title{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:#8A6A1F; font-weight:700; margin:18px 0 8px;}
+  a.convo-card{text-decoration:none; color:inherit;}
+  .convo-avatar.alt{background:#E8F1EA; font-size:18px;}
   .empty{ text-align:center; padding:60px 20px; color:#8a8474; font-size:14px; }
   .loading{ text-align:center; padding:30px; color:#8a8474; }
 </style>
@@ -96,6 +99,8 @@
 
   <div id="inboxView">
     <button class="new-msg-btn" onclick="showNewMessage()">+ New Message</button>
+    <div id="otherChats"></div>
+    <div class="sec-title" id="privTitle" style="display:none">Private messages</div>
     <div id="convoList"><div class="loading">Loading…</div></div>
   </div>
 
@@ -166,7 +171,47 @@ async function getProfile(userId){
 }
 
 /* ---------- INBOX: group messages by conversation partner ---------- */
+/* ---------- CLASS CHATS and STUDY GROUPS live here too ---------- */
+async function loadOtherChats(){
+  const box = document.getElementById('otherChats');
+  const classes = new Map(), groups = [];
+  try {
+    const teach = await sb.from('classrooms').select('id, name').eq('teacher_id', currentUser.id);
+    (teach.data || []).forEach(c => classes.set(c.id, c.name));
+    const mem = await sb.from('classroom_members').select('classroom_id').eq('student_id', currentUser.id);
+    const ids = (mem.data || []).map(m => m.classroom_id).filter(id => !classes.has(id));
+    if(ids.length){
+      const enr = await sb.from('classrooms').select('id, name').in('id', ids);
+      (enr.data || []).forEach(c => classes.set(c.id, c.name));
+    }
+  } catch(e) {}
+  try {
+    const g = await sb.rpc('list_study_groups');
+    (g.data || []).filter(x => x.is_member).forEach(x => groups.push(x));
+  } catch(e) {}
+  let html = '';
+  if(classes.size){
+    html += '<div class="sec-title">Class chats</div>';
+    classes.forEach((name, id) => {
+      html += `<a class="convo-card" href="skillstream-classrooms.html?open=${encodeURIComponent(id)}&tab=chat">
+        <div class="convo-avatar alt">🎓</div>
+        <div class="convo-info"><div class="convo-name" data-no-i18n>${escapeHtml(name || '')}</div><div class="convo-preview">Class chat</div></div></a>`;
+    });
+  }
+  if(groups.length){
+    html += '<div class="sec-title">Study groups</div>';
+    groups.forEach(x => {
+      html += `<a class="convo-card" href="skillstream-community.html?open=${encodeURIComponent(x.id)}">
+        <div class="convo-avatar alt">👥</div>
+        <div class="convo-info"><div class="convo-name" data-no-i18n>${escapeHtml(x.name || '')}</div><div class="convo-preview">Study group</div></div></a>`;
+    });
+  }
+  box.innerHTML = html;
+  document.getElementById('privTitle').style.display = html ? 'block' : 'none';
+}
+
 async function loadInbox(){
+  loadOtherChats();
   const el = document.getElementById('convoList');
   el.innerHTML = '<div class="loading">Loading…</div>';
 

@@ -88,6 +88,7 @@
       <button type="button" class="role-btn active" id="roleStudentBtn" onclick="setRole('student')">Learn</button>
       <button type="button" class="role-btn" id="roleTeacherBtn" onclick="setRole('teacher')">Teach</button>
     </div>
+    <div id="teachHint" style="display:none; font-size:12.5px; color:#6B6558; margin-top:8px; line-height:1.5;">Teachers are approved by our team. You will start as a learner, then apply to teach after you sign in.</div>
   </div>
 
   <label>Email</label>
@@ -141,6 +142,7 @@ function setRole(role){
   selectedRole = role;
   document.getElementById('roleStudentBtn').classList.toggle('active', role === 'student');
   document.getElementById('roleTeacherBtn').classList.toggle('active', role === 'teacher');
+  document.getElementById('teachHint').style.display = role === 'teacher' ? 'block' : 'none';
 }
 
 // If arriving with ?role=teacher OR ?mode=signup, default straight into signup mode
@@ -191,7 +193,9 @@ async function handleSubmit(){
       }
 
       await savePendingLevelTest(data.user.id);
-      window.location.href = 'skillstream-home.html';
+      let applyNext = false;
+      try { applyNext = localStorage.getItem('lne_apply_teacher') === '1'; if(applyNext) localStorage.removeItem('lne_apply_teacher'); } catch(e){}
+      window.location.href = applyNext ? 'skillstream-teach-apply.html' : 'skillstream-home.html';
 
     } else {
       const fullName = document.getElementById('fullName').value.trim();
@@ -206,7 +210,7 @@ async function handleSubmit(){
         options: {
           emailRedirectTo: window.location.origin + '/skillstream-confirm.html',
           // The database creates the profile from this data at signup (migration 033).
-          data: { full_name: fullName, name: fullName, role: selectedRole }
+          data: { full_name: fullName, name: fullName, role: 'student' }
         }
       });
 
@@ -218,6 +222,7 @@ async function handleSubmit(){
       // The profile row is created by the database at signup (migration 033).
       // The browser has no session yet, so it must not write to profiles here.
 
+      if(selectedRole === 'teacher'){ try { localStorage.setItem('lne_apply_teacher', '1'); } catch(e){} }
       showMsg('Account created! Check your email for a confirmation link before logging in.', 'success');
     }
   } catch(err){

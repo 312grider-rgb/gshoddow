@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Teacher Applications — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#B5533C; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:60px;}
+  h1,h2,h3{font-family:'Fraunces',serif;}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px 26px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px;}
+  header.top a{color:var(--gold); font-size:13px; text-decoration:none; display:inline-block; margin-top:8px;}
+  .wrap{padding:18px; max-width:760px; margin:0 auto;}
+  .tabs{display:flex; gap:8px; margin-bottom:12px;}
+  .tab{border:1.5px solid var(--line); background:#fff; border-radius:20px; padding:8px 14px; font:600 13px inherit; font-family:inherit; cursor:pointer; color:var(--ink);}
+  .tab.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px;}
+  .name{font-weight:700; font-size:16px; color:var(--ink);}
+  .meta{font-size:12.5px; color:#777; margin:2px 0 8px;}
+  .lbl{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#8A6A1F; font-weight:700; margin-top:8px;}
+  .txt{font-size:14px; line-height:1.55; white-space:pre-wrap; word-wrap:break-word;}
+  textarea{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:10px; font:inherit; font-size:14px; margin-top:10px; min-height:60px;}
+  .btns{display:flex; gap:8px; margin-top:10px;}
+  .btn{flex:1; border:0; border-radius:10px; padding:12px; font-weight:700; font-size:14px; cursor:pointer; font-family:inherit;}
+  .btn.ok{background:var(--sage); color:#fff;} .btn.no{background:#fff; color:var(--danger); border:1.5px solid var(--danger);}
+  .btn.doc{flex:none; background:#F3EEE0; color:var(--ink);}
+  .btn:disabled{opacity:.5;}
+  .badge{font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; text-transform:uppercase;}
+  .b-approved{background:#E8F1EA; color:#3E6B48;} .b-rejected{background:#FBEAE5; color:var(--danger);}
+  .empty{text-align:center; color:#777; padding:30px 10px;}
+  #lockedView,#adminView{display:none;}
+  #toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:10px; font-size:14px; display:none;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Admin</div>
+  <h1>Teacher applications</h1>
+  <a href="skillstream-admin.html">&larr; Back to Admin</a>
+</header>
+<div class="wrap">
+  <div id="loadingView">Loading…</div>
+  <div id="lockedView"><h2>Admins only</h2><a href="skillstream-home.html">Go home</a></div>
+  <div id="adminView">
+    <div class="tabs"><button class="tab on" id="tPending" type="button">Pending <span id="cnt"></span></button><button class="tab" id="tAll" type="button">History</button></div>
+    <div id="list"></div>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function toast(t){ const e = $('toast'); e.textContent = t; e.style.display = 'block'; setTimeout(() => e.style.display = 'none', 2600); }
+let view = 'pending';
+
+async function load(){
+  const r = await sb.rpc('admin_list_teacher_applications', { p_status: view === 'pending' ? 'pending' : 'all' });
+  const el = $('list');
+  if(r.error){ el.innerHTML = '<div class="empty">Could not load applications.</div>'; return; }
+  let rows = r.data || [];
+  if(view !== 'pending') rows = rows.filter(a => a.status !== 'pending');
+  if(view === 'pending') $('cnt').textContent = rows.length ? '(' + rows.length + ')' : '';
+  if(!rows.length){ el.innerHTML = '<div class="empty">' + (view === 'pending' ? 'No applications waiting.' : 'No reviewed applications yet.') + '</div>'; return; }
+  el.innerHTML = rows.map(a => '<div class="card" data-id="' + a.id + '">' +
+    '<div class="name">' + esc(a.name) + (a.status !== 'pending' ? ' <span class="badge b-' + a.status + '">' + a.status + '</span>' : '') + '</div>' +
+    '<div class="meta">' + esc(a.email) + ' · ' + new Date(a.created_at).toLocaleDateString() + '</div>' +
+    '<div class="lbl">Wants to teach</div><div class="txt">' + esc(a.subjects) + '</div>' +
+    '<div class="lbl">About</div><div class="txt">' + esc(a.bio) + '</div>' +
+    (a.experience ? '<div class="lbl">Experience</div><div class="txt">' + esc(a.experience) + '</div>' : '') +
+    (a.doc_path ? '<div class="btns"><button class="btn doc" data-doc="' + esc(a.doc_path) + '" type="button">📎 View certificate / CV</button></div>' : '') +
+    (a.status === 'pending'
+      ? '<textarea placeholder="Note to the applicant (optional, shown if you reject)"></textarea><div class="btns"><button class="btn ok" data-act="yes" type="button">Approve</button><button class="btn no" data-act="no" type="button">Reject</button></div>'
+      : (a.admin_note ? '<div class="lbl">Your note</div><div class="txt">' + esc(a.admin_note) + '</div>' : '')) +
+    '</div>').join('');
+  el.querySelectorAll('[data-doc]').forEach(b => b.onclick = async () => {
+    const w = window.open('', '_blank');
+    const s = await sb.storage.from('teacher-docs').createSignedUrl(b.dataset.doc, 120);
+    if(s.error || !s.data){ if(w) w.close(); toast('Could not open the file.'); return; }
+    if(w) w.location.href = s.data.signedUrl; else window.location.href = s.data.signedUrl;
+  });
+  el.querySelectorAll('[data-act]').forEach(b => b.onclick = async () => {
+    const card = b.closest('.card'), approve = b.dataset.act === 'yes';
+    if(!confirm(approve ? 'Approve this teacher? They will be able to create classrooms and courses.' : 'Reject this application?')) return;
+    card.querySelectorAll('button').forEach(x => x.disabled = true);
+    const note = card.querySelector('textarea').value;
+    const r2 = await sb.rpc('admin_review_teacher', { p_id: card.dataset.id, p_approve: approve, p_note: note });
+    if(r2.error){ toast('Error: ' + r2.error.message); card.querySelectorAll('button').forEach(x => x.disabled = false); return; }
+    toast(approve ? 'Teacher approved' : 'Application rejected');
+    load();
+  });
+}
+$('tPending').onclick = () => { view = 'pending'; $('tPending').classList.add('on'); $('tAll').classList.remove('on'); load(); };
+$('tAll').onclick = () => { view = 'all'; $('tAll').classList.add('on'); $('tPending').classList.remove('on'); load(); };
+
+(async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+  $('loadingView').style.display = 'none';
+  if(!profile || profile.role !== 'admin'){ $('lockedView').style.display = 'block'; return; }
+  $('adminView').style.display = 'block';
+  load();
+})();
+</script>
+</body>
+</html>

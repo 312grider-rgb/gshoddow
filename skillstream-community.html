@@ -204,8 +204,10 @@ async function openFile(path){
 }
 
 /* ---------- list ---------- */
+let lastGroups = [];
 async function loadGroups(){
   const { data, error } = await sb.rpc('list_study_groups');
+  lastGroups = data || [];
   const el = $('groups');
   if(error){ el.innerHTML = '<div class="empty">Something went wrong. Please try again.</div>'; return; }
   if(!data || !data.length){ el.innerHTML = '<div class="empty">No groups yet. Be the first to create one!</div>'; return; }
@@ -372,7 +374,9 @@ $('postForm').onsubmit = async ev => {
     const role = p && p.data && p.data.role;
     isAdmin = role === 'admin'; modFlag = role === 'admin' || role === 'teacher';
   } catch(e) {}
-  loadGroups();
+  await loadGroups();
+  const openId = new URLSearchParams(window.location.search).get('open');
+  if(openId) openGroup(openId, lastGroups);
 })();
 </script>
 </body>

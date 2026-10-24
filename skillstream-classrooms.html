@@ -128,16 +128,16 @@ textarea{resize:vertical;min-height:70px}
 .online-dot{width:9px;height:9px;border-radius:50%;background:#4ade80;margin-left:auto;flex-shrink:0}
 .roster-item{align-items:center}
 .online-tag{font-size:11px;color:var(--green);font-weight:700;margin-left:8px}
+header.top{background:linear-gradient(160deg,#141F38 0%,#1F2E52 100%);color:#FBF7EF;padding:22px 20px 26px}
+header.top .eyebrow{font-size:11.5px;letter-spacing:2.2px;text-transform:uppercase;color:#E4C583;margin-bottom:6px;font-weight:600}
+header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
 </style>
 </head>
 <body>
-<div class="topbar">
-<a class="logo" href="skillstream-dashboard.html">Learning <span>Never Ends</span></a>
-<div style="display:flex;gap:8px">
-<a class="nav-btn" href="skillstream-calendar.html">📅 Calendar</a>
-<a class="nav-btn" href="skillstream-dashboard.html">← Dashboard</a>
-</div>
-</div>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Messages</h1>
+</header>
 
 <div class="page">
 
@@ -789,7 +789,19 @@ async function gradePrompt(assignmentId, studentEmail, maxPoints) {
   try {
     me = await SSAuth.requireAuth();
     if (!me) return;
+    if (me.role !== 'teacher' && me.role !== 'admin') {
+      const cb = document.querySelector("button[onclick=\"openModal('createModal')\"]");
+      if (cb) {
+        cb.style.display = 'none';
+        const hint = document.createElement('div');
+        hint.className = 'sub';
+        hint.innerHTML = 'Only approved teachers can create classrooms. <a href="skillstream-teach-apply.html">Want to teach? Apply here</a>';
+        cb.parentNode.parentNode.insertBefore(hint, cb.parentNode.nextSibling);
+      }
+    }
     await renderList();
+    const qp = new URLSearchParams(window.location.search), openId = qp.get('open');
+    if (openId) { try { await openClass(openId); if (qp.get('tab')) switchTab(qp.get('tab')); } catch (e) { console.warn(e); } }
   } catch (e) {
     console.error('Page bootstrap error:', e);
     document.getElementById('teachingList').innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error loading page: ${e.message}</div>`;
