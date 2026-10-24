@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Découvertes et records — Paradise Of The Eternal Learners</title>
+<title>Discoveries and records — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -40,28 +42,29 @@
 <body>
 <header class="top">
   <div class="eyebrow">Learning Never Ends</div>
-  <h1>Découvertes et records</h1>
-  <p>L'histoire des inventions, des découvertes et des exploits qui ont changé la manière d'apprendre et de vivre.</p>
-  <a href="skillstream-home.html">&larr; Accueil</a>
+  <h1>Discoveries and records</h1>
+  <p>The history of the inventions, discoveries and achievements that changed how we learn and live.</p>
+  <a href="skillstream-home.html">&larr; Home</a>
 </header>
 <div class="wrap">
-  <input type="search" id="q" placeholder="Rechercher (ex. médecine, Curie, 1969…)">
+  <input type="search" id="q" placeholder="Search (e.g. medicine, Curie, 1969…)">
   <div class="chips" id="chips"></div>
-  <div id="list">Chargement…</div>
+  <div id="list">Loading…</div>
 </div>
 <script>
 const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const CATS = { science:'Sciences', invention:'Inventions', medicine:'Médecine', math:'Mathématiques', space:'Espace', tech:'Technologie', education:'Éducation', record:'Records' };
+const CATS = { science:'Science', invention:'Inventions', medicine:'Medicine', math:'Mathematics', space:'Space', tech:'Technology', education:'Education', record:'Records' };
 let all = [], cat = 'all';
 
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function era(y){
-  if(y == null) return 'Date inconnue';
-  if(y < 0) return 'Avant notre ère';
+  if(y == null) return 'Unknown date';
+  if(y < 0) return 'Before the common era';
   const c = Math.floor((y - 1) / 100) + 1;
-  return (c === 1 ? '1er' : c + 'e') + ' siècle';
+  const suf = (c % 100 >= 11 && c % 100 <= 13) ? 'th' : ({1:'st',2:'nd',3:'rd'}[c % 10] || 'th');
+  return c + suf + ' century';
 }
 function safeUrl(u){ return /^https?:\/\//i.test(u || '') ? u : null; }
 function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
@@ -71,7 +74,7 @@ function render(){
   const rows = all.filter(d => (cat === 'all' || d.category === cat) &&
     (!q || norm([d.title_fr, d.summary_fr, d.person, d.country, d.year_label, CATS[d.category]].join(' ')).includes(q)));
   const el = document.getElementById('list');
-  if(!rows.length){ el.innerHTML = '<div class="empty">Aucun résultat.</div>'; return; }
+  if(!rows.length){ el.innerHTML = '<div class="empty">No results.</div>'; return; }
   let html = '', last = null;
   rows.forEach(function(d){
     const e = era(d.year);
@@ -79,11 +82,11 @@ function render(){
     const url = safeUrl(d.source_url);
     html += '<div class="item" onclick="this.classList.toggle(\'open\')">'
       + '<div class="top"><div class="yr">' + esc(d.year_label || d.year || '') + '</div><div>'
-      + '<div class="cat">' + esc(CATS[d.category] || d.category) + '</div><h3>' + esc(d.title_fr) + '</h3></div></div>'
-      + '<div class="sum">' + esc(d.summary_fr) + '</div>'
-      + '<div class="more">' + (d.why_fr ? '<div class="why"><b>Pourquoi c’est important :</b> ' + esc(d.why_fr) + '</div>' : '')
-      + '<div class="meta">' + (d.person ? 'Personnes : ' + esc(d.person) + '<br>' : '') + (d.country ? 'Lieu : ' + esc(d.country) + '<br>' : '')
-      + 'Source : ' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(d.source_label) + '</a>' : esc(d.source_label)) + '</div></div></div>';
+      + '<div class="cat">' + esc(CATS[d.category] || d.category) + '</div><h3 data-no-i18n>' + esc(d.title_fr) + '</h3></div></div>'
+      + '<div class="sum" data-no-i18n>' + esc(d.summary_fr) + '</div>'
+      + '<div class="more">' + (d.why_fr ? '<div class="why"><b>Why it matters</b> <span data-no-i18n>' + esc(d.why_fr) + '</span></div>' : '')
+      + '<div class="meta">' + (d.person ? '<div><span>People</span>: <span data-no-i18n>' + esc(d.person) + '</span></div>' : '') + (d.country ? '<div><span>Place</span>: <span data-no-i18n>' + esc(d.country) + '</span></div>' : '')
+      + '<div><span>Source</span>: ' + (url ? '<a data-no-i18n href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(d.source_label) + '</a>' : '<span data-no-i18n>' + esc(d.source_label) + '</span>') + '</div></div></div></div>';
   });
   el.innerHTML = html;
 }
@@ -91,7 +94,7 @@ function render(){
 function renderChips(){
   const present = Object.keys(CATS).filter(k => all.some(d => d.category === k));
   document.getElementById('chips').innerHTML = ['all'].concat(present).map(k =>
-    '<button class="chip' + (k === cat ? ' on' : '') + '" data-k="' + k + '">' + (k === 'all' ? 'Tout' : CATS[k]) + '</button>').join('');
+    '<button class="chip' + (k === cat ? ' on' : '') + '" data-k="' + k + '">' + (k === 'all' ? 'All' : CATS[k]) + '</button>').join('');
   document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', function(){ cat = b.dataset.k; renderChips(); render(); }));
 }
 
@@ -99,12 +102,13 @@ async function init(){
   const r = await sb.from('discoveries')
     .select('id, title_fr, summary_fr, why_fr, category, year, year_label, person, country, source_label, source_url')
     .eq('status', 'published').order('year', { ascending: true, nullsFirst: false });
-  if(r.error){ document.getElementById('list').innerHTML = '<div class="empty">Impossible de charger les découvertes pour le moment.</div>'; return; }
+  if(r.error){ document.getElementById('list').innerHTML = '<div class="empty">Unable to load discoveries right now.</div>'; return; }
   all = r.data || [];
   renderChips(); render();
   document.getElementById('q').addEventListener('input', render);
 }
 init();
 </script>
+<script src="js/nav.js" defer></script>
 </body>
 </html>
