@@ -50,6 +50,12 @@
   .hiddenNote{font-size:12.5px; color:#A33A2B; font-weight:600;}
   .post.isHidden .body{opacity:.55;}
   .note{font-size:12.5px; color:#6B6558; margin:6px 0 12px;}
+  .attach{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 10px;}
+  .attach .pick{background:#fff; border:1.5px dashed var(--line); border-radius:9px; padding:8px 12px; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;}
+  .attach input[type=file]{display:none;}
+  .attach .chosen{font-size:12.5px; color:#6B6558; word-break:break-all;}
+  .filebtn{display:inline-flex; align-items:center; gap:6px; background:#F3EEE0; border:1px solid var(--line); border-radius:9px; padding:7px 11px; font-size:13px; font-weight:600; color:var(--ink); margin:4px 0; max-width:100%;}
+  .filebtn span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .empty{text-align:center; color:#6B6558; padding:30px 10px;}
 </style>
 </head>
@@ -86,6 +92,7 @@
     <div class="note">Be kind and respectful. Links are not allowed.</div>
     <form class="box show" id="postForm">
       <textarea id="postBody" maxlength="2000" placeholder="Write a post or ask a question…"></textarea>
+      <div class="attach"><label class="pick" for="postFile">📎 <span>Attach a file</span></label><input type="file" id="postFile" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.txt,.docx,.xlsx,.pptx"><span class="chosen" id="postChosen" data-no-i18n></span></div>
       <button class="btn" id="postBtn" type="submit">Post</button>
       <div class="msg" id="pMsg"></div>
     </form>
@@ -103,12 +110,48 @@ const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
 let me = null, current = null, myRole = null, isAdmin = false, modFlag = false;
 
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-const KNOWN = ['Links are not allowed in group posts.','You are posting too fast. Please try again later.','This group is full.','You can own at most 5 groups.'];
+const KNOWN = ['Links are not allowed in group posts.','You are posting too fast. Please try again later.','This group is full.','You can own at most 5 groups.','Invalid attachment.'];
 function friendly(e){
   const m = (e && e.message) || '';
   return KNOWN.indexOf(m) >= 0 ? m : 'Something went wrong. Please try again.';
 }
 function say(id, text, kind){ const el = $(id); el.className = 'msg' + (kind ? ' ' + kind : ''); el.textContent = text || ''; }
+
+/* ---------- files ---------- */
+const MAX_BYTES = 5 * 1024 * 1024;
+const EXT_TYPES = { pdf:'application/pdf', png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', gif:'image/gif', txt:'text/plain',
+  docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
+function fileTypeOf(f){
+  const ext = (f.name.split('.').pop() || '').toLowerCase();
+  const byExt = EXT_TYPES[ext];
+  if(!byExt) return null;
+  return byExt;   // the type is decided by the extension we allow, not by what the browser claims
+}
+function checkFile(f){
+  if(!f) return null;
+  if(f.size <= 0 || f.size > MAX_BYTES) return 'File is too large (max 5 MB).';
+  if(!fileTypeOf(f)) return 'This file type is not allowed. Use PDF, images, Word, Excel, PowerPoint or text.';
+  return null;
+}
+function sizeText(n){ return n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+async function uploadFile(f){
+  const type = fileTypeOf(f);
+  const ext = (f.name.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const base = f.name.replace(/\.[^.]*$/, '').replace(/[^A-Za-z0-9_-]+/g, '_').slice(0, 40) || 'file';
+  const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+  const path = current.id + '/' + me.id + '/' + id + '-' + base + '.' + ext;
+  const up = await sb.storage.from('group-files').upload(path, f, { contentType: type, upsert: false });
+  if(up.error) throw up.error;
+  return { file_path: path, file_name: f.name.slice(0, 120), file_type: type, file_size: f.size };
+}
+async function openFile(path){
+  const w = window.open('', '_blank');
+  const r = await sb.storage.from('group-files').createSignedUrl(path, 120);
+  if(r.error || !r.data){ if(w) w.close(); alert(T('Could not open the file. Please try again.')); return; }
+  if(w) w.location.href = r.data.signedUrl; else window.location.href = r.data.signedUrl;
+}
 
 /* ---------- list ---------- */
 async function loadGroups(){
@@ -175,7 +218,7 @@ async function loadFeed(){
   const { data, error } = await sb.rpc('group_feed', { p_group: current.id });
   const el = $('feed');
   if(error){ el.innerHTML = '<div class="empty">Something went wrong. Please try again.</div>'; return; }
-  const rows = data || [];
+  const rows = data || []; window.__feedRows = rows;
   const tops = rows.filter(r => !r.parent_id), kids = {};
   rows.filter(r => r.parent_id).forEach(r => (kids[r.parent_id] = kids[r.parent_id] || []).push(r));
   if(!tops.length){ el.innerHTML = '<div class="empty">No posts yet. Start the conversation!</div>'; return; }
@@ -183,7 +226,8 @@ async function loadFeed(){
     '<div class="post' + (isReply ? ' reply' : '') + (p.hidden ? ' isHidden' : '') + '">' +
       '<div><span class="who" dir="auto" data-no-i18n>' + esc(p.author_name) + '</span>' + (p.author_role === 'teacher' ? '<span class="badge">Teacher</span>' : '') + '</div>' +
       (p.hidden ? '<div class="hiddenNote">Hidden by a moderator</div>' : '') +
-      '<div class="body" dir="auto" data-no-i18n>' + esc(p.body) + '</div>' +
+      (p.file_path && p.body === '📎' ? '' : '<div class="body" dir="auto" data-no-i18n>' + esc(p.body) + '</div>') +
+      (p.file_path ? '<div><button class="filebtn" data-file="' + esc(p.file_path) + '" type="button">📎 <span data-no-i18n>' + esc(p.file_name || 'file') + '</span> <span class="meta" data-no-i18n>' + sizeText(p.file_size || 0) + '</span></button></div>' : '') +
       '<div class="tools">' +
         (!isReply ? '<button class="link" data-reply="' + p.id + '" type="button">Reply</button>' : '') +
         (p.author_id !== me.id ? '<button class="link" data-report="' + p.id + '" type="button">Report</button>' : '') +
@@ -200,16 +244,26 @@ function wire(el){
   el.querySelectorAll('[data-reply]').forEach(b => b.onclick = () => {
     const box = $('rbox-' + b.dataset.reply);
     if(box.innerHTML){ box.innerHTML = ''; return; }
-    box.innerHTML = '<form style="margin-top:8px"><textarea maxlength="2000" placeholder="' + esc(T('Write a reply…')) + '" style="min-height:60px"></textarea><button class="btn small" type="submit">Reply</button><div class="msg"></div></form>';
+    box.innerHTML = '<form style="margin-top:8px"><textarea maxlength="2000" placeholder="' + esc(T('Write a reply…')) + '" style="min-height:60px"></textarea><div class="attach"><label class="pick">📎 <span>' + esc(T('Attach a file')) + '</span><input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.txt,.docx,.xlsx,.pptx"></label><span class="chosen" data-no-i18n></span></div><button class="btn small" type="submit">Reply</button><div class="msg"></div></form>';
     const f = box.querySelector('form');
+    f.querySelector('input[type=file]').onchange = ev => { const x = ev.target.files[0]; f.querySelector('.chosen').textContent = x ? x.name : ''; };
     f.onsubmit = async ev => {
       ev.preventDefault();
-      const body = f.querySelector('textarea').value.trim(); if(!body) return;
-      const r = await sb.from('group_posts').insert({ group_id: current.id, author_id: me.id, parent_id: b.dataset.reply, body });
-      if(r.error){ const m = f.querySelector('.msg'); m.className = 'msg err'; m.textContent = friendly(r.error); return; }
+      const fi = f.querySelector('input[type=file]'), file = fi.files[0] || null, m = f.querySelector('.msg');
+      let body = f.querySelector('textarea').value.trim();
+      if(!body && !file) return;
+      const bad = checkFile(file); if(bad){ m.className = 'msg err'; m.textContent = T(bad); return; }
+      const sub = f.querySelector('button[type=submit]'); sub.disabled = true;
+      let meta = {}, up = null;
+      try { if(file){ m.className = 'msg'; m.textContent = T('Uploading…'); meta = await uploadFile(file); up = meta.file_path; if(!body) body = '📎'; } }
+      catch(e){ sub.disabled = false; m.className = 'msg err'; m.textContent = T('Could not upload the file. Please try again.'); return; }
+      const r = await sb.from('group_posts').insert(Object.assign({ group_id: current.id, author_id: me.id, parent_id: b.dataset.reply, body }, meta));
+      sub.disabled = false;
+      if(r.error){ if(up){ try { await sb.storage.from('group-files').remove([up]); } catch(e) {} } m.className = 'msg err'; m.textContent = T(friendly(r.error)); return; }
       loadFeed();
     };
   });
+  el.querySelectorAll('[data-file]').forEach(b => b.onclick = () => openFile(b.dataset.file));
   el.querySelectorAll('[data-report]').forEach(b => b.onclick = async () => {
     const r = await sb.from('group_post_reports').insert({ post_id: b.dataset.report, reporter_id: me.id });
     if(r.error && r.error.code === '23505'){ alert(T('You already reported this.')); return; }
@@ -225,18 +279,26 @@ function wire(el){
     if(!confirm(T('Delete this post?'))) return;
     const r = await sb.from('group_posts').delete().eq('id', b.dataset.del);
     if(r.error){ alert(T(friendly(r.error))); return; }
+    const gone = (window.__feedRows || []).find(x => x.id === b.dataset.del);
+    if(gone && gone.file_path){ try { await sb.storage.from('group-files').remove([gone.file_path]); } catch(e) {} }
     loadFeed();
   });
 }
 
+$('postFile').onchange = () => { const x = $('postFile').files[0]; $('postChosen').textContent = x ? x.name : ''; };
 $('postForm').onsubmit = async ev => {
   ev.preventDefault();
-  const body = $('postBody').value.trim(); if(!body) return;
+  const file = $('postFile').files[0] || null;
+  let body = $('postBody').value.trim(); if(!body && !file) return;
+  const bad = checkFile(file); if(bad){ say('pMsg', T(bad), 'err'); return; }
   $('postBtn').disabled = true;
-  const r = await sb.from('group_posts').insert({ group_id: current.id, author_id: me.id, body });
+  let meta = {}, up = null;
+  try { if(file){ say('pMsg', T('Uploading…')); meta = await uploadFile(file); up = meta.file_path; if(!body) body = '📎'; } }
+  catch(e){ $('postBtn').disabled = false; say('pMsg', T('Could not upload the file. Please try again.'), 'err'); return; }
+  const r = await sb.from('group_posts').insert(Object.assign({ group_id: current.id, author_id: me.id, body }, meta));
   $('postBtn').disabled = false;
-  if(r.error){ say('pMsg', friendly(r.error), 'err'); return; }
-  $('postBody').value = ''; say('pMsg','');
+  if(r.error){ if(up){ try { await sb.storage.from('group-files').remove([up]); } catch(e) {} } say('pMsg', T(friendly(r.error)), 'err'); return; }
+  $('postBody').value = ''; $('postFile').value = ''; $('postChosen').textContent = ''; say('pMsg','');
   loadFeed();
 };
 
