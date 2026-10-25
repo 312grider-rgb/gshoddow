@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Become a teacher — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#A33A2B; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:84px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px 26px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.8); line-height:1.5;}
+  header.top a{color:var(--gold); font-size:13px; text-decoration:none; display:inline-block; margin-top:10px;}
+  .wrap{padding:18px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px;}
+  .card h2{margin:0 0 8px; font-size:18px;}
+  .card p{margin:6px 0; font-size:14.5px; line-height:1.55;}
+  label{display:block; font-size:13px; font-weight:700; color:var(--ink); margin:12px 0 6px;}
+  .hint{font-size:12.5px; color:#6B6558; font-weight:400;}
+  input[type=text], textarea{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font:inherit; font-size:15px; background:#fff;}
+  textarea{min-height:96px; resize:vertical;}
+  .btn{background:var(--ink); color:#fff; border:none; border-radius:10px; padding:13px 18px; font:inherit; font-size:14.5px; font-weight:700; cursor:pointer; margin-top:16px; width:100%;}
+  .btn[disabled]{opacity:.55;}
+  .pick{display:inline-block; background:#fff; border:1.5px dashed var(--line); border-radius:9px; padding:9px 13px; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;}
+  input[type=file]{display:none;}
+  .chosen{font-size:12.5px; color:#6B6558; margin-inline-start:8px; word-break:break-all;}
+  .msg{font-size:13.5px; margin:10px 0 0; min-height:18px;}
+  .msg.err{color:var(--danger);} .msg.ok{color:#3F6B47;}
+  .badge{display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:.4px;}
+  .b-pending{background:#FBF4E2; color:#8A6A1F;} .b-rejected{background:#FBEAE5; color:var(--danger);} .b-ok{background:#E8F1EA; color:#3E6B48;}
+  .note{background:#FBF4E2; border-radius:10px; padding:10px 12px; font-size:13.5px; line-height:1.5; margin-top:10px;}
+  .links a{display:block; margin-top:8px; color:var(--ink); font-weight:600; font-size:14px;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Become a teacher</h1>
+  <p>Teachers are approved by our team. This keeps students safe and keeps teaching quality high.</p>
+  <a href="skillstream-home.html">&larr; Home</a>
+</header>
+
+<div class="wrap">
+  <div id="loading" class="card">Loading…</div>
+
+  <div id="isTeacher" class="card hidden">
+    <h2>You are a teacher</h2>
+    <p>Your account can create classrooms and courses.</p>
+    <div class="links"><a href="skillstream-classrooms.html">Open my classrooms →</a><a href="skillstream-courses.html">Open my courses →</a></div>
+  </div>
+
+  <div id="isAdmin" class="card hidden">
+    <h2>Admin account</h2>
+    <p>Admins already have teacher powers. Review applications in the admin area.</p>
+    <div class="links"><a href="skillstream-admin-teachers.html">Teacher applications →</a></div>
+  </div>
+
+  <div id="pending" class="card hidden">
+    <span class="badge b-pending">Pending review</span>
+    <h2 style="margin-top:10px">Your application was sent</h2>
+    <p>We will review it soon. You will get a notification when it is approved. Until then you can keep learning as usual.</p>
+  </div>
+
+  <div id="rejected" class="card hidden">
+    <span class="badge b-rejected">Not approved</span>
+    <h2 style="margin-top:10px">Your last application was not approved</h2>
+    <div class="note" id="rejNote"></div>
+    <p>You can improve your application and send it again below.</p>
+  </div>
+
+  <form id="form" class="card hidden">
+    <h2>Tell us about you</h2>
+    <label for="subjects">What do you want to teach? <span class="hint">(e.g. Math, English)</span></label>
+    <input type="text" id="subjects" maxlength="200">
+    <label for="bio">About you <span class="hint">(at least 20 characters)</span></label>
+    <textarea id="bio" maxlength="1000"></textarea>
+    <label for="exp">Teaching experience and qualifications <span class="hint">(optional)</span></label>
+    <textarea id="exp" maxlength="1000"></textarea>
+    <label>Certificate or CV <span class="hint">(optional, PDF or image, up to 5 MB, private)</span></label>
+    <div><label class="pick" for="doc" style="display:inline-block;margin:0">📎 <span>Attach a file</span></label><input type="file" id="doc" accept=".pdf,.png,.jpg,.jpeg,.webp"><span class="chosen" id="docName" data-no-i18n></span></div>
+    <button class="btn" id="send" type="submit">Send application</button>
+    <div class="msg" id="msg"></div>
+  </form>
+</div>
+
+<script src="js/nav.js" defer></script>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+const show = id => $(id).classList.remove('hidden');
+const hide = id => $(id).classList.add('hidden');
+let me = null;
+const KNOWN = ['Only learner accounts can apply.','You already have a pending application.','Too many applications. Please try again later.','Invalid document.'];
+function friendly(e){ const m = (e && e.message) || ''; return KNOWN.indexOf(m) >= 0 ? m : 'Something went wrong. Please try again.'; }
+function say(t, k){ const m = $('msg'); m.className = 'msg' + (k ? ' ' + k : ''); m.textContent = t || ''; }
+
+async function refresh(){
+  ['isTeacher','isAdmin','pending','rejected','form'].forEach(hide);
+  const p = await sb.from('profiles').select('role').eq('id', me.id).maybeSingle();
+  const role = p && p.data && p.data.role;
+  $('loading').classList.add('hidden');
+  if(role === 'teacher'){ show('isTeacher'); return; }
+  if(role === 'admin'){ show('isAdmin'); return; }
+  const a = await sb.rpc('my_teacher_application');
+  const last = a && a.data && a.data[0];
+  if(last && last.status === 'pending'){ show('pending'); return; }
+  if(last && last.status === 'rejected'){
+    show('rejected');
+    $('rejNote').textContent = last.admin_note || '';
+    $('rejNote').style.display = last.admin_note ? '' : 'none';
+  }
+  show('form');
+}
+
+$('doc').onchange = () => { const f = $('doc').files[0]; $('docName').textContent = f ? f.name : ''; };
+
+$('form').onsubmit = async ev => {
+  ev.preventDefault();
+  const subjects = $('subjects').value.trim(), bio = $('bio').value.trim(), exp = $('exp').value.trim();
+  if(subjects.length < 2){ say(T('Please say what you want to teach.'), 'err'); return; }
+  if(bio.length < 20){ say(T('Please write at least 20 characters about yourself.'), 'err'); return; }
+  const f = $('doc').files[0] || null;
+  const ext = f ? (f.name.split('.').pop() || '').toLowerCase() : '';
+  const types = { pdf:'application/pdf', png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp' };
+  if(f && !types[ext]){ say(T('This file type is not allowed. Use PDF or an image.'), 'err'); return; }
+  if(f && (f.size <= 0 || f.size > 5 * 1024 * 1024)){ say(T('File is too large (max 5 MB).'), 'err'); return; }
+  $('send').disabled = true; say('');
+  let path = null;
+  try {
+    if(f){
+      const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
+      path = me.id + '/' + id + '.' + ext;
+      const up = await sb.storage.from('teacher-docs').upload(path, f, { contentType: types[ext], upsert: false });
+      if(up.error) throw up.error;
+    }
+  } catch(e){ $('send').disabled = false; say(T('Could not upload the file. Please try again.'), 'err'); return; }
+  const r = await sb.rpc('apply_to_teach', { p_bio: bio, p_subjects: subjects, p_experience: exp || null, p_doc_path: path });
+  $('send').disabled = false;
+  if(r.error){
+    if(path){ try { await sb.storage.from('teacher-docs').remove([path]); } catch(e) {} }
+    say(T(friendly(r.error)), 'err'); return;
+  }
+  refresh();
+};
+
+(async function init(){
+  const s = await sb.auth.getSession();
+  const session = s && s.data && s.data.session;
+  if(!session){ window.location.href = 'skillstream-login.html?mode=signup&role=teacher'; return; }
+  me = session.user;
+  refresh();
+})();
+</script>
+</body>
+</html>
