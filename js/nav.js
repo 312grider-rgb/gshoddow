@@ -68,6 +68,7 @@
   // Available to everyone (students, teachers, admins) on every page, games included.
   var MORE_LINKS = [
     { icon: ICON.user,     label: 'Profile',                 href: 'skillstream-profile.html' },
+    { icon: ICON.ai,       label: 'My Learning',             href: 'skillstream-engine.html' },
     { icon: ICON.library,  label: 'Library',                 href: 'skillstream-library.html' },
     { icon: ICON.games,    label: 'Games',                   href: 'skillstream-games.html' },
     { icon: ICON.settings, label: 'Settings',                href: 'skillstream-settings.html' },
