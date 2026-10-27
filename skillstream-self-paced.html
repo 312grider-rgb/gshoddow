@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="css/theme.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/lne-helpers.js"></script>
 <script src="js/incentives.js?v=2"></script>
 <style>
@@ -509,7 +509,7 @@ async function loadCourses(){
   ]);
 
   if(error){
-    document.getElementById('courseGrid').innerHTML = `<div class="empty">Couldn't load courses.<br><small>${error.message}</small></div>`;
+    document.getElementById('courseGrid').innerHTML = `<div class="empty">Couldn't load courses.<br><small>${String(error.message).replace(/[&<>"']/g,'')}</small></div>`;
     return;
   }
   allCourses = data || [];
@@ -631,7 +631,7 @@ async function openCourse(courseId){
   ]);
 
   if(lErr){
-    document.getElementById('trail').innerHTML = `<div class="empty">${lErr.message}</div>`;
+    document.getElementById('trail').innerHTML = `<div class="empty">${String(lErr.message).replace(/[&<>"']/g,'')}</div>`;
     return;
   }
 

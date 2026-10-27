@@ -9,7 +9,7 @@
 <title>My Profile — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/incentives.js?v=2"></script>
 <style>
   :root{
@@ -224,7 +224,7 @@ async function initAuth(){
 async function loadProfile(){
   const { data: profile, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   if(error){
-    document.getElementById('avatarCard').innerHTML = `<div class="loading">Couldn't load profile.<br><small>${error.message}</small></div>`;
+    document.getElementById('avatarCard').innerHTML = `<div class="loading">Couldn't load profile.<br><small>${String(error.message).replace(/[&<>"']/g,'')}</small></div>`;
     return;
   }
   currentProfile = profile || { id: currentUser.id, full_name: currentUser.email, role: 'student' };
@@ -456,7 +456,7 @@ async function uploadAvatar(){
   const status = document.getElementById('avatarUploadStatus');
   status.textContent = 'Uploading…';
 
-  const path = `avatars/${currentUser.id}/${Date.now()}_${file.name}`;
+  const path = `avatars/${currentUser.id}/${Date.now()}_${String(file.name).replace(/[^A-Za-z0-9._-]/g,'_').slice(-80)}`;
 
   try{
     const { error: uploadError } = await sb.storage.from('skillstream-files').upload(path, file, { upsert: true });

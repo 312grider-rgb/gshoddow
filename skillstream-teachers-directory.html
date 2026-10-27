@@ -9,7 +9,7 @@
 <title>Our Teachers — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <style>
   :root{
     --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
@@ -83,7 +83,7 @@ async function loadTeachers(){
     .eq('role', 'teacher');
 
   if(error){
-    el.innerHTML = `<div class="empty">Couldn't load teachers.<br><small>${error.message}</small></div>`;
+    el.innerHTML = `<div class="empty">Couldn't load teachers.<br><small>${String(error.message).replace(/[&<>"']/g,'')}</small></div>`;
     return;
   }
 

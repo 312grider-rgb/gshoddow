@@ -9,7 +9,7 @@
 <title>Admin — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <style>
   :root{
     --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583; --cream:#FBF7EF; --sage:#6B8F71;
@@ -208,7 +208,7 @@ async function loadCourses(){
     .order('created_at', { ascending:false });
 
   const el = document.getElementById('courseList');
-  if(error){ el.innerHTML = `<div class="empty">${error.message}</div>`; return; }
+  if(error){ el.innerHTML = `<div class="empty">${String(error.message).replace(/[&<>"']/g,'')}</div>`; return; }
 
   allCourses = data || [];
   if(allCourses.length === 0){ el.innerHTML = '<div class="empty">No courses yet.</div>'; return; }
@@ -251,7 +251,7 @@ async function deleteCourseAdmin(id){
 async function loadUsers(){
   const { data, error } = await sb.from('profiles').select('*').order('full_name', { ascending:true });
   const el = document.getElementById('userList');
-  if(error){ el.innerHTML = `<div class="empty">${error.message}</div>`; return; }
+  if(error){ el.innerHTML = `<div class="empty">${String(error.message).replace(/[&<>"']/g,'')}</div>`; return; }
 
   allUsers = data || [];
   if(allUsers.length === 0){ el.innerHTML = '<div class="empty">No users yet.</div>'; return; }
