@@ -32,10 +32,9 @@
   .card p{margin:6px 0; font-size:14.5px; line-height:1.6;}
   label{display:block; font-size:13px; font-weight:700; color:var(--ink); margin:14px 0 6px;}
   .hint{font-size:12.5px; color:var(--muted); font-weight:400;}
-  input[type=date]{display:block; min-width:0; max-width:100%; height:48px; -webkit-appearance:none; appearance:none;}
   .card, .wrap, .row .btn{min-width:0;}
   .card{overflow-wrap:anywhere;}
-  input[type=text], input[type=date], textarea{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:15px; background:#fff; color:var(--charcoal);}
+  input[type=text], textarea{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:15px; background:#fff; color:var(--charcoal);}
   textarea{min-height:84px; resize:vertical;}
   :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
   .btn{background:var(--ink); color:#fff; border:none; border-radius:10px; padding:14px 18px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; margin-top:14px; width:100%; min-height:48px;}
@@ -140,8 +139,14 @@
       <p class="hint">Say what you want to learn. We will build a short path of steps you can tick off.</p>
       <label for="gTitle">My goal</label>
       <input type="text" id="gTitle" maxlength="120">
-      <label for="gDate">By when? <span class="hint">(optional)</span></label>
-      <input type="date" id="gDate">
+      <h3 id="lWhen" style="font-size:13px;font-family:Inter,sans-serif;margin:14px 0 6px">By when? <span class="hint">(optional)</span></h3>
+      <div class="chips" id="chipsWhen" role="group" aria-labelledby="lWhen">
+        <button type="button" class="chip" data-v="" aria-pressed="true">No date</button>
+        <button type="button" class="chip" data-v="7">In 1 week</button>
+        <button type="button" class="chip" data-v="30">In 1 month</button>
+        <button type="button" class="chip" data-v="90">In 3 months</button>
+        <button type="button" class="chip" data-v="180">In 6 months</button>
+      </div>
       <button class="btn gold" id="gBuild" type="button">Build my path</button>
       <div class="msg" id="gMsg" role="status"></div>
     </div>
@@ -234,6 +239,7 @@ function el(tag, props, kids){
 }
 function say(id, text, kind){ const m = $(id); m.className = 'msg' + (kind ? ' ' + kind : ''); m.textContent = text || ''; }
 const KNOWN = [
+  'Please write a goal of 3 to 120 characters.',
   'You can have at most 5 active goals.', 'A goal needs between 1 and 10 steps.', 'The target date is in the past.',
   'Too many requests today. Please try again tomorrow.'
 ];
@@ -304,7 +310,7 @@ function chipValue(id){
   const c = document.querySelector('#' + id + ' .chip[aria-pressed="true"]');
   return c ? c.dataset.v : null;
 }
-['chipsAge','chipsStyle','chipsLang','chipsMin'].forEach(id => {
+['chipsAge','chipsStyle','chipsLang','chipsMin','chipsWhen'].forEach(id => {
   document.querySelectorAll('#' + id + ' .chip').forEach(c => c.onclick = () => setChips(id, c.dataset.v));
 });
 function paintProfile(){
@@ -440,6 +446,13 @@ async function loadRecent(){
 }
 
 /* ---------- goals ---------- */
+function whenDate(){
+  const n = parseInt(chipValue('chipsWhen') || '', 10);
+  if(!n) return null;
+  const d = new Date(); d.setDate(d.getDate() + n);
+  const pad = x => String(x).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
 function buildGoalPrompt(title, date){
   return [
     'You are a practical learning coach.',
@@ -453,7 +466,7 @@ function buildGoalPrompt(title, date){
   ].filter(Boolean).join('\n');
 }
 async function buildPath(){
-  const title = $('gTitle').value.trim(), date = $('gDate').value || null;
+  const title = $('gTitle').value.trim(), date = whenDate();
   if(title.length < 3){ say('gMsg', T('Please write your goal.'), 'err'); return; }
   say('gMsg', '');
   draftTitle = title; draftDate = date;
@@ -480,32 +493,49 @@ $('gSave').onclick = async () => {
   $('gSave').disabled = false;
   if(r.error){ say('gPMsg', friendly(r.error), 'err'); return; }
   draftSteps = null; $('gPreview').classList.add('hidden');
-  $('gTitle').value = ''; $('gDate').value = '';
+  $('gTitle').value = ''; setChips('chipsWhen', '');
   say('gMsg', T('Your goal is saved. Tick off each step as you finish it.'), 'ok');
   loadGoals(); loadSummary();
 };
 function fmtDate(d){ try { return new Date(d + 'T00:00:00').toLocaleDateString(appLang === 'zh' ? 'zh-CN' : appLang, { year:'numeric', month:'short', day:'numeric' }); } catch(e){ return d; } }
 async function loadGoals(){
   const [g, m] = await Promise.all([
-    sb.from('learning_goals').select('id,title,target_date,status,created_at').order('created_at', { ascending:false }),
+    sb.from('learning_goals').select('id,subject,deadline,status,created_at').order('created_at', { ascending:false }),
     sb.from('goal_milestones').select('id,goal_id,position,title,done').order('position', { ascending:true })
   ]);
   const goals = (g && g.data) || [], steps = (m && m.data) || [];
   const list = $('goalList'); list.textContent = '';
   const doneBox = $('doneList'); doneBox.textContent = '';
-  const active = goals.filter(x => x.status === 'active'), done = goals.filter(x => x.status === 'done');
+  const active = goals.filter(x => x.status === 'active'), done = goals.filter(x => x.status === 'completed');
   active.forEach(goal => list.appendChild(goalCard(goal, steps.filter(s => s.goal_id === goal.id))));
   if(!active.length && !done.length){
     list.appendChild(el('div', { class:'card' }, [ el('p', { class:'hint', text:T('No goals yet. Set your first one above.') }) ]));
   }
   $('doneCard').classList.toggle('hidden', !done.length);
-  done.forEach(x => doneBox.appendChild(el('div', { class:'rec' }, [ el('span', { text:x.title, 'data-no-i18n':'' }), el('span', { class:'badge b-ok', text:T('Reached') }) ])));
+  done.forEach(x => doneBox.appendChild(el('div', { class:'rec' }, [ el('span', { text:x.subject, 'data-no-i18n':'' }), el('span', { class:'badge b-ok', text:T('Reached') }) ])));
 }
 function goalCard(goal, steps){
   const total = steps.length, doneN = steps.filter(s => s.done).length;
   const card = el('div', { class:'card goal' });
-  card.appendChild(el('h3', { text:goal.title, 'data-no-i18n':'' }));
-  if(goal.target_date) card.appendChild(el('div', { class:'meta' }, [ el('span', { text:T('By') + ' ' }), el('span', { text:fmtDate(goal.target_date), 'data-no-i18n':'' }) ]));
+  card.appendChild(el('h3', { text:goal.subject, 'data-no-i18n':'' }));
+  if(goal.deadline) card.appendChild(el('div', { class:'meta' }, [ el('span', { text:T('By') + ' ' }), el('span', { text:fmtDate(goal.deadline), 'data-no-i18n':'' }) ]));
+  if(!total){
+    const fin = el('button', { type:'button', class:'btn alt', text:T('Mark as done') });
+    fin.onclick = async () => {
+      fin.disabled = true;
+      await sb.from('learning_goals').update({ status:'completed', completed_at:new Date().toISOString() }).eq('id', goal.id);
+      loadGoals(); loadSummary();
+    };
+    card.appendChild(fin);
+    const del0 = el('button', { type:'button', class:'linkbtn', text:T('Delete this goal') });
+    del0.onclick = async () => {
+      if(!confirm(T('Delete this goal and its steps?'))) return;
+      await sb.from('learning_goals').delete().eq('id', goal.id);
+      loadGoals(); loadSummary();
+    };
+    card.appendChild(del0);
+    return card;
+  }
   const bar = el('div', { class:'bar', role:'progressbar', 'aria-valuemin':'0', 'aria-valuemax':String(total), 'aria-valuenow':String(doneN) }, [ el('i') ]);
   bar.firstChild.style.width = (total ? Math.round(doneN / total * 100) : 0) + '%';
   card.appendChild(bar);
