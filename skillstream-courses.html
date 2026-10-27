@@ -9,7 +9,7 @@
 <title>My Courses — Paradise of Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <style>
   :root{
     --ink:#141F38;
@@ -344,7 +344,7 @@ async function loadCourses(){
 
   if(error){
     document.getElementById('courseList').innerHTML =
-      `<div class="empty">Couldn't load courses.<br><small>${error.message}</small></div>`;
+      `<div class="empty">Couldn't load courses.<br><small>${String(error.message).replace(/[&<>"']/g,'')}</small></div>`;
     return;
   }
   courses = data || [];
@@ -460,7 +460,7 @@ async function uploadCourseThumb(){
   const status = document.getElementById('thumbUploadStatus');
   status.textContent = 'Uploading…';
 
-  const path = `course-thumbnails/${currentUser.id}/${Date.now()}_${file.name}`;
+  const path = `course-thumbnails/${currentUser.id}/${Date.now()}_${String(file.name).replace(/[^A-Za-z0-9._-]/g,'_').slice(-80)}`;
 
   try{
     const { error: uploadError } = await sb.storage.from('skillstream-files').upload(path, file, { upsert: true });
@@ -529,7 +529,7 @@ async function loadLessons(){
     .order('order_index', { ascending: true });
 
   if(error){
-    document.getElementById('lessonsList').innerHTML = `<div class="empty">${error.message}</div>`;
+    document.getElementById('lessonsList').innerHTML = `<div class="empty">${String(error.message).replace(/[&<>"']/g,'')}</div>`;
     return;
   }
   activeLessons = data || [];

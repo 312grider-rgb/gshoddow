@@ -301,7 +301,7 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="skillstream-auth.js"></script>
 <script src="js/msgtabs.js" defer></script>
 <script src="js/nav.js" defer></script>
@@ -345,7 +345,7 @@ async function renderList() {
       </div>`).join('') : '<div class="empty">You haven\'t joined any classes yet.</div>';
   } catch (e) {
     console.error('renderList error:', e);
-    teachEl.innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error: ${e.message}</div>`;
+    teachEl.innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error: ${String(e.message).replace(/[&<>"']/g,'')}</div>`;
     enrEl.innerHTML = '';
   }
 }
@@ -804,7 +804,7 @@ async function gradePrompt(assignmentId, studentEmail, maxPoints) {
     if (openId) { try { await openClass(openId); if (qp.get('tab')) switchTab(qp.get('tab')); } catch (e) { console.warn(e); } }
   } catch (e) {
     console.error('Page bootstrap error:', e);
-    document.getElementById('teachingList').innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error loading page: ${e.message}</div>`;
+    document.getElementById('teachingList').innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error loading page: ${String(e.message).replace(/[&<>"']/g,'')}</div>`;
   }
 })();
 </script>
