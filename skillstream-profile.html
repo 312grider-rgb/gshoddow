@@ -47,6 +47,7 @@
   }
   .role-badge.student{background:#EAF0EC; color:var(--sage);}
   .role-badge.teacher{background:#F5EAD6; color:var(--gold);}
+  .role-badge.admin{background:#E6E9F2; color:var(--ink);}
   .bio-text{font-size:17px; color:#666; margin-top:10px; line-height:1.5;}
 
   .stats-row{display:flex; gap:10px; margin-bottom:22px;}
@@ -230,7 +231,7 @@ async function loadProfile(){
   renderProfile();
   loadStats();
 
-  document.getElementById('fullName').value = currentProfile.full_name || '';
+  document.getElementById('fullName').value = realName();
   document.getElementById('bio').value = currentProfile.bio || '';
   document.getElementById('avatarUrl').value = currentProfile.avatar_url || '';
 
@@ -240,15 +241,23 @@ async function loadProfile(){
   }
 }
 
+// The person's real name: saved full name, then the name typed at signup. Email is only the last resort.
+function realName(){
+  const m = (currentUser && currentUser.user_metadata) || {};
+  const prefix = ((currentUser && currentUser.email) || '').split('@')[0];
+  const nm = currentProfile.name && currentProfile.name !== prefix ? currentProfile.name : '';
+  return (currentProfile.full_name || m.full_name || m.name || nm || '').trim();
+}
+
 function renderProfile(){
-  const initials = (currentProfile.full_name || currentUser.email || '?').trim().charAt(0).toUpperCase();
+  const initials = (realName() || currentUser.email || '?').trim().charAt(0).toUpperCase();
   const role = currentProfile.role || 'student';
   document.getElementById('avatarCard').innerHTML = `
     <div class="avatar">
       ${currentProfile.avatar_url ? `<img src="${currentProfile.avatar_url}">` : initials}
     </div>
-    <div class="name">${escapeHtml(currentProfile.full_name || currentUser.email)}</div>
-    <span class="role-badge ${role}">${role === 'teacher' ? 'Teacher' : 'Student'}</span>
+    <div class="name">${escapeHtml(realName() || currentUser.email)}</div>
+    <span class="role-badge ${role}">${role === 'teacher' ? 'Teacher' : (role === 'admin' ? 'Admin' : 'Student')}</span>
     ${currentProfile.bio ? `<div class="bio-text">${escapeHtml(currentProfile.bio)}</div>` : ''}
   `;
 }

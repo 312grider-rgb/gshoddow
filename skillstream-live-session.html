@@ -311,65 +311,31 @@ function addMsg(container, text, cls) {
   return el;
 }
 
-// AI Teacher — direct browser call to Anthropic API using a key saved in
-// localStorage. Update the key name below if your existing pages use a
-// different localStorage key for it.
-const CLAUDE_KEY_STORAGE = 'skillstream_anthropic_key';
-
-function getClaudeKey() {
-  return localStorage.getItem(CLAUDE_KEY_STORAGE) || '';
-}
-
+// AI Teacher — goes through our own protected server function (/api/ask-ai).
+// The AI key never reaches the browser; the server checks login and usage limits.
 function renderKeyNote() {
   const note = document.getElementById('keyNote');
-  if (getClaudeKey()) {
-    note.textContent = 'AI Teacher connected.';
-  } else {
-    note.innerHTML = 'No API key set yet. <a href="javascript:promptForKey()">Add your Anthropic API key</a> to enable the AI Teacher.';
-  }
+  if (note) note.textContent = 'AI Teacher connected.';
 }
 renderKeyNote();
 
-function promptForKey() {
-  const key = prompt('Paste your Anthropic API key (starts with sk-ant-...)');
-  if (key) {
-    localStorage.setItem(CLAUDE_KEY_STORAGE, key.trim());
-    renderKeyNote();
-  }
-}
-
 async function askAiTeacher(question) {
-  const key = getClaudeKey();
   const body = document.getElementById('aiPanelBody');
-  if (!key) {
-    addMsg(body, 'No API key set. Tap "Add your Anthropic API key" below to enable the AI Teacher.', 'sys');
-    return;
-  }
-
   const thinkingEl = addMsg(body, '…thinking', 'ai');
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const prompt = `You are a friendly, encouraging AI teacher helping a student in a live session called "${decodeURIComponent(sessionName)}". Keep answers clear and concise, suitable for a chat panel.\n\nStudent question: ` + String(question).slice(0, 2000);
+    const resp = await fetch('/api/ask-ai', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 500,
-        system: `You are a friendly, encouraging AI teacher helping a student in a live session called "${decodeURIComponent(sessionName)}". Keep answers clear and concise, suitable for a chat panel.`,
-        messages: [{ role: 'user', content: question }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, maxTokens: 500, feature: 'live_session' })
     });
-    const data = await resp.json();
+    let data = {};
+    try { data = await resp.json(); } catch (e) {}
     if (!resp.ok) {
-      thinkingEl.textContent = 'Error: ' + (data.error?.message || 'Could not reach the AI teacher.');
+      thinkingEl.textContent = data.error || 'Could not reach the AI teacher.';
       return;
     }
-    const text = (data.content || []).map(b => b.text || '').join('\n').trim();
-    thinkingEl.textContent = text || '(no response)';
+    thinkingEl.textContent = (data.text || '').trim() || '(no response)';
   } catch (err) {
     thinkingEl.textContent = 'Connection error — please try again.';
     console.error('AI Teacher request failed:', err);

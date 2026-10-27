@@ -260,7 +260,7 @@ async function loadUsers(){
     <div class="row-card">
       <div class="rc-top">
         <div>
-          <h3>${escapeHtml(u.full_name || 'Unnamed')}</h3>
+          <h3>${escapeHtml(u.full_name || u.name || 'Unnamed')}</h3>
           <div class="meta">${u.id === currentUser.id ? '(you)' : ''}</div>
         </div>
         <span class="badge role-${u.role || 'student'}">${u.role || 'student'}</span>
