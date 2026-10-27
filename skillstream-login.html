@@ -204,6 +204,11 @@ async function handleSubmit(){
         return;
       }
 
+      if(password.length < 8){
+        showMsg('Password must be at least 8 characters.', 'error');
+        return;
+      }
+
       const { data, error } = await sb.auth.signUp({
         email,
         password,
