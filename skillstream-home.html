@@ -678,7 +678,7 @@ async function loadSpotlight(){
     html += `
       <div class="spotlight-card">
         <span class="role-icon">🎓</span>
-        <div class="spotlight-avatar">${student.avatar_url ? `<img src="${student.avatar_url}">` : initials}</div>
+        <div class="spotlight-avatar">${student.avatar_url ? `<img src="${escapeHtml(student.avatar_url)}">` : initials}</div>
         <div class="spotlight-info">
           <div class="s-role">Student Spotlight</div>
           <div class="s-name">${escapeHtml(student.full_name || 'Learner')}</div>
@@ -692,7 +692,7 @@ async function loadSpotlight(){
     html += `
       <div class="spotlight-card">
         <span class="role-icon">🧑‍🏫</span>
-        <div class="spotlight-avatar">${teacher.avatar_url ? `<img src="${teacher.avatar_url}">` : initials}</div>
+        <div class="spotlight-avatar">${teacher.avatar_url ? `<img src="${escapeHtml(teacher.avatar_url)}">` : initials}</div>
         <div class="spotlight-info">
           <div class="s-role">Teacher Spotlight</div>
           <div class="s-name">${escapeHtml(teacher.full_name || 'Teacher')}</div>

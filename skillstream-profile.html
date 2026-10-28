@@ -254,7 +254,7 @@ function renderProfile(){
   const role = currentProfile.role || 'student';
   document.getElementById('avatarCard').innerHTML = `
     <div class="avatar">
-      ${currentProfile.avatar_url ? `<img src="${currentProfile.avatar_url}">` : initials}
+      ${currentProfile.avatar_url ? `<img src="${escapeHtml(currentProfile.avatar_url)}">` : initials}
     </div>
     <div class="name">${escapeHtml(realName() || currentUser.email)}</div>
     <span class="role-badge ${role}">${role === 'teacher' ? 'Teacher' : (role === 'admin' ? 'Admin' : 'Student')}</span>

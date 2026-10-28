@@ -105,11 +105,20 @@ function switchBoard(board){
   loadBoard();
 }
 
+function shortName(n){
+  // Privacy: show a first name and the first letter of the last name only
+  const parts = String(n || '').trim().split(/\s+/).filter(Boolean);
+  if(!parts.length) return 'Learner';
+  return parts.length > 1 ? parts[0] + ' ' + parts[parts.length - 1].charAt(0) + '.' : parts[0];
+}
+
 async function loadBoard(){
   const el = document.getElementById('boardList');
   el.innerHTML = '<div class="loading">Loading leaderboard…</div>';
 
   const column = currentBoard === 'lessons' ? 'lessons_completed_count' : 'certificates_count';
+  const sess = await sb.auth.getSession();
+  const myId = sess && sess.data && sess.data.session ? sess.data.session.user.id : null;
 
   const { data, error } = await sb
     .from('public_profiles')
@@ -117,35 +126,51 @@ async function loadBoard(){
     .eq('role', 'student')
     .gt(column, 0)
     .order(column, { ascending:false })
-    .limit(50);
+    .limit(10);
 
   if(error){
     el.innerHTML = `<div class="empty">Couldn't load leaderboard.<br><small>${String(error.message).replace(/[&<>"']/g,'')}</small></div>`;
     return;
   }
 
+  const unit = currentBoard === 'lessons' ? 'lessons' : 'certs';
+  let html = '';
+
+  // A kind personal card: your own progress, never your rank
+  if(myId){
+    const me = await sb.from('public_profiles').select(column).eq('id', myId).maybeSingle();
+    const mine = me && me.data ? (me.data[column] || 0) : 0;
+    html += `<div class="row" style="background:#FBF4E2;border-color:#E4C583;">
+      <div class="info"><div class="name">Your progress</div>
+      <div class="role">${mine > 0 ? 'Every step counts. Keep going, at your own pace.' : 'Your first one is waiting for you. Start whenever you are ready.'}</div></div>
+      <div class="score">${mine}<span class="unit">${unit}</span></div></div>`;
+  }
+
   if(!data || data.length === 0){
-    el.innerHTML = `<div class="empty">No one has ${currentBoard === 'lessons' ? 'completed a lesson' : 'earned a certificate'} yet — be the first!</div>`;
+    html += `<div class="empty">No one has ${currentBoard === 'lessons' ? 'completed a lesson' : 'earned a certificate'} yet — be the first!</div>`;
+    el.innerHTML = html;
     return;
   }
 
-  el.innerHTML = data.map((u, i) => {
+  html += '<div class="loading" style="text-align:start;padding:6px 2px 2px;">Most active learners</div>';
+  html += data.map((u, i) => {
     const rank = i + 1;
     const score = currentBoard === 'lessons' ? (u.lessons_completed_count || 0) : (u.certificates_count || 0);
-    const unit = currentBoard === 'lessons' ? 'lessons' : 'certs';
-    const initials = (u.full_name || '?').trim().charAt(0).toUpperCase();
+    const nm = shortName(u.full_name);
+    const initials = nm.charAt(0).toUpperCase();
     const topClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
     return `
     <div class="row ${topClass}">
       <div class="rank">${rank}</div>
-      <div class="avatar">${u.avatar_url ? `<img src="${u.avatar_url}">` : initials}</div>
+      <div class="avatar">${u.avatar_url ? `<img src="${escapeHtml(u.avatar_url)}">` : escapeHtml(initials)}</div>
       <div class="info">
-        <div class="name">${escapeHtml(u.full_name || 'Learner')}</div>
+        <div class="name">${escapeHtml(nm)}</div>
         <div class="role">Student</div>
       </div>
       <div class="score">${score}<span class="unit">${unit}</span></div>
     </div>`;
   }).join('');
+  el.innerHTML = html;
 }
 
 loadBoard();

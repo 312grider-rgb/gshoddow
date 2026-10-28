@@ -102,7 +102,7 @@ async function loadTeachers(){
     const courseCount = counts[t.id] || 0;
     return `
     <div class="teacher-card">
-      <div class="avatar">${t.avatar_url ? `<img src="${t.avatar_url}">` : initials}</div>
+      <div class="avatar">${t.avatar_url ? `<img src="${escapeHtml(t.avatar_url)}">` : initials}</div>
       <div class="info">
         <div class="name">${escapeHtml(t.full_name || 'Teacher')}</div>
         <div class="bio">${escapeHtml(t.bio || 'No bio yet.')}</div>
