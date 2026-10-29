@@ -1,15 +1,14 @@
 /* Learning Never Ends — one "Messages" place.
-   Adds a small tab strip to the four message pages so they feel like one area:
-   Private (1-to-1 chat) · Groups (study groups) · Classes (classroom chat) · Shared work (files shared with teachers).
+   Adds a small tab strip to the message pages so they feel like one area:
+   Private (1-to-1 chat) · Groups (study groups) · Shared work (files shared with teachers).
+   (Class chats appear in the Private inbox; classes themselves live under Learn.)
    Include with:  <script src="js/msgtabs.js" defer></script>
    It only inserts one element and never touches the page's own code. */
 (function () {
   var TABS = [
     { label: 'Private',     href: 'skillstream-messages.html' },
     { label: 'Groups',      href: 'skillstream-community.html' },
-    { label: 'Classes',     href: 'skillstream-classrooms.html' },
-    { label: 'Shared work', href: 'skillstream-shared.html' },
-    { label: 'My courses',  href: 'skillstream-courses.html' }
+    { label: 'Shared work', href: 'skillstream-shared.html' }
   ];
   function build() {
     if (document.getElementById('ln-msgtabs')) return;

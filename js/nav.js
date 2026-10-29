@@ -79,7 +79,8 @@
     { icon: ICON.trophy,   label: 'Leaderboard',             href: 'skillstream-leaderboard.html' },
     { icon: ICON.teach,    label: 'Become a teacher',        href: 'skillstream-teach-apply.html' }
   ];
-  var MESSAGE_PAGES = ['skillstream-messages.html', 'skillstream-community.html', 'skillstream-classrooms.html', 'skillstream-shared.html'];
+  var MESSAGE_PAGES = ['skillstream-messages.html', 'skillstream-community.html', 'skillstream-shared.html'];
+  var LEARN_PAGES = ['skillstream-courses.html', 'skillstream-self-paced.html', 'skillstream-academic.html', 'skillstream-classrooms.html'];
   var MORE_PAGES = MORE_LINKS.map(function (l) { return l.href; }).concat(['skillstream-chess.html', 'skillstream-ludo.html', 'skillstream-challenges.html']);
 
   function openMore() {
@@ -126,8 +127,9 @@
       else btn.href = item.href;
       var onAiFamily = item.href === 'skillstream-ai-hub.html' && current === 'skillstream-future-architect.html';
       var onMessages = item.href === 'skillstream-messages.html' && MESSAGE_PAGES.indexOf(current) >= 0;
+      var onLearn = item.href === 'skillstream-courses.html' && LEARN_PAGES.indexOf(current) >= 0;
       var onMore = item.more && MORE_PAGES.indexOf(current) >= 0;
-      btn.className = 'ln-nav-item' + (item.href === current || onAiFamily || onMessages || onMore ? ' active' : '');
+      btn.className = 'ln-nav-item' + (item.href === current || onAiFamily || onMessages || onLearn || onMore ? ' active' : '');
       btn.innerHTML = '<span class="ln-nav-icon">' + item.icon + '</span>' + item.label;
       nav.appendChild(btn);
     });

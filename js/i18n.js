@@ -190,3 +190,56 @@
     return origFetch.call(this, input, init);
   };
 })();
+
+/* ---------------------------------------------------------------------------
+   Text size: everyone can make the whole app bigger. Four steps, remembered per device.
+   Default is "Large". Uses the browser's page zoom for the whole page so every text, button and card grows together.
+   Stored only in this browser (localStorage 'lne_textsize').
+   --------------------------------------------------------------------------- */
+(function () {
+  var STEPS = [
+    { k: 'n',   z: 1,    label: 'Normal text' },
+    { k: 'l',   z: 1.15, label: 'Large text' },
+    { k: 'xl',  z: 1.3,  label: 'Extra large text' },
+    { k: 'max', z: 1.45, label: 'Maximum text' }
+  ];
+  function get() {
+    var k = 'l';
+    try { k = localStorage.getItem('lne_textsize') || 'l'; } catch (e) {}
+    for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return STEPS[i];
+    return STEPS[1];
+  }
+  function apply(step) { document.documentElement.style.zoom = step.z === 1 ? '' : String(step.z); }
+  apply(get()); // before the page paints
+
+  function t(s) { try { return (window.LNE_I18N && window.LNE_I18N.t) ? window.LNE_I18N.t(s) : s; } catch (e) { return s; } }
+  function build() {
+    if (document.getElementById('lneSize')) return;
+    var wrap = document.createElement('div');
+    wrap.id = 'lneSize'; wrap.setAttribute('role', 'group'); wrap.setAttribute('aria-label', t('Text size'));
+    wrap.style.cssText = 'display:flex;justify-content:center;gap:8px;margin:0 auto 18px;';
+    var cur = get();
+    STEPS.forEach(function (s, i) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.setAttribute('data-no-i18n', ''); b.textContent = 'A';
+      b.setAttribute('aria-label', t(s.label));
+      b.setAttribute('aria-pressed', s.k === cur.k ? 'true' : 'false');
+      b.style.cssText = 'font:700 ' + (12 + i * 3) + 'px/1 Inter,system-ui,sans-serif;min-width:44px;min-height:44px;border-radius:12px;cursor:pointer;border:1.5px solid ' +
+        (s.k === cur.k ? '#141F38' : '#E9E2D2') + ';background:' + (s.k === cur.k ? '#141F38' : '#fff') + ';color:' + (s.k === cur.k ? '#fff' : '#141F38') + ';';
+      b.onclick = function () {
+        try { localStorage.setItem('lne_textsize', s.k); } catch (e) {}
+        apply(s);
+        Array.prototype.forEach.call(wrap.children, function (c, j) {
+          var on = j === i;
+          c.setAttribute('aria-pressed', on ? 'true' : 'false');
+          c.style.background = on ? '#141F38' : '#fff'; c.style.color = on ? '#fff' : '#141F38'; c.style.borderColor = on ? '#141F38' : '#E9E2D2';
+        });
+      };
+      wrap.appendChild(b);
+    });
+    var sw = document.getElementById('lneLang');
+    if (sw && sw.parentNode) sw.parentNode.insertBefore(wrap, sw.nextSibling); else document.body.appendChild(wrap);
+  }
+  function ready() { setTimeout(build, 0); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready); else ready();
+})();
