@@ -23,7 +23,7 @@
   .stat b{display:block; font-family:'Fraunces',serif; font-size:22px; color:var(--gold);}
   .stat span{font-size:11.5px; color:rgba(251,247,239,.8);}
   .tabs{display:flex; gap:6px; padding:12px 14px 0; max-width:760px; margin:0 auto;}
-  .tab{flex:1; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:12px; padding:12px 6px; font:inherit; font-size:13.5px; font-weight:700; cursor:pointer; min-height:44px;}
+  .tab{flex:1; min-width:0; overflow-wrap:anywhere; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:12px; padding:12px 2px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; min-height:44px;}
   .tab[aria-selected="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
   .wrap{padding:14px; max-width:760px; margin:0 auto;}
   .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px;}
@@ -66,6 +66,13 @@
   .ms input{width:22px; height:22px; margin:2px 0 0; flex:none; accent-color:var(--sage);}
   .ms.done span{text-decoration:line-through; color:var(--muted);}
   .linkbtn{background:none; border:none; color:var(--danger); font:inherit; font-size:13px; font-weight:600; cursor:pointer; padding:10px 0; min-height:44px;}
+  .lvl{display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:#EFE9DA; color:var(--ink);}
+  .lvl.l3,.lvl.l4{background:#E8F1EA; color:#3E6B48;} .lvl.l0{background:#FBEAE5; color:#9A3D2B;}
+  .trow{padding:10px 0; border-top:1px solid var(--line);} .trow:first-of-type{border-top:none;}
+  .trow .tt{font-weight:600; font-size:14.5px; overflow-wrap:anywhere;}
+  .trow .bar{margin:8px 0 4px;}
+  .flash{font-family:'Fraunces',serif; font-size:21px; line-height:1.4; margin:10px 0; overflow-wrap:anywhere;}
+  .why{font-size:12.5px; color:var(--muted); line-height:1.5; margin:8px 0;}
   .loading{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:14px; padding:8px 0;}
   .spin{width:18px; height:18px; border:3px solid var(--line); border-top-color:var(--gold); border-radius:50%; animation:sp .8s linear infinite;}
   @keyframes sp{to{transform:rotate(360deg);}}
@@ -87,6 +94,7 @@
 <div class="tabs" role="tablist">
   <button class="tab" role="tab" id="tab-bt" data-tab="bt" aria-selected="true">Breakthrough</button>
   <button class="tab" role="tab" id="tab-goals" data-tab="goals" aria-selected="false">Goals</button>
+  <button class="tab" role="tab" id="tab-review" data-tab="review" aria-selected="false">Review</button>
   <button class="tab" role="tab" id="tab-me" data-tab="me" aria-selected="false">My profile</button>
 </div>
 
@@ -167,6 +175,39 @@
     <div class="card hidden" id="doneCard"><h2>Goals reached</h2><div id="doneList"></div></div>
   </section>
 
+  <!-- REVIEW -->
+  <section id="p-review" class="hidden" role="tabpanel" aria-labelledby="tab-review">
+    <div class="card" id="nextCard">
+      <h2>What to do next</h2>
+      <div id="nextBody"></div>
+    </div>
+    <div class="card hidden" id="revCard">
+      <h2>Review today</h2>
+      <div class="meta" id="revCount" data-no-i18n></div>
+      <p class="hint">Can you explain this in your own words, without looking?</p>
+      <div class="flash" id="revTopic" data-no-i18n></div>
+      <div class="why" id="revWhy"></div>
+      <div class="row">
+        <button class="btn" id="revGot" type="button">I remember</button>
+        <button class="btn alt" id="revUnsure" type="button">Not sure</button>
+      </div>
+      <div class="row">
+        <button class="btn alt" id="revForgot" type="button">I forgot</button>
+        <button class="btn alt" id="revHelp" type="button">Help me recall</button>
+      </div>
+      <div class="msg" id="revMsg" role="status"></div>
+    </div>
+    <div class="card">
+      <h2>My topics</h2>
+      <p class="hint">Levels are based on what you tell us. They show how well you feel you remember each topic. They are not a test result.</p>
+      <div id="topicList"></div>
+      <label for="newTopic">Add a topic you want to remember</label>
+      <input type="text" id="newTopic" maxlength="200">
+      <button class="btn alt" id="addTopic" type="button">Add topic</button>
+      <div class="msg" id="topicMsg" role="status"></div>
+    </div>
+  </section>
+
   <!-- PROFILE -->
   <section id="p-me" class="hidden" role="tabpanel" aria-labelledby="tab-me">
     <div class="card">
@@ -241,7 +282,8 @@ function say(id, text, kind){ const m = $(id); m.className = 'msg' + (kind ? ' '
 const KNOWN = [
   'Please write a goal of 3 to 120 characters.',
   'You can have at most 5 active goals.', 'A goal needs between 1 and 10 steps.', 'The target date is in the past.',
-  'Too many requests today. Please try again tomorrow.'
+  'Too many requests today. Please try again tomorrow.',
+  'Please write a topic of at least 2 characters.', 'You can keep at most 300 topics.', 'Topic not found.'
 ];
 function friendly(e){
   const m = (e && e.message) || '';
@@ -281,12 +323,13 @@ function profileLine(){
 /* ---------- tabs ---------- */
 function setTab(t){
   tab = t;
-  ['bt','goals','me'].forEach(x => {
+  ['bt','goals','review','me'].forEach(x => {
     $('p-' + x).classList.toggle('hidden', x !== t);
     $('tab-' + x).setAttribute('aria-selected', x === t ? 'true' : 'false');
   });
   try { history.replaceState(null, '', '#' + t); } catch(e){}
   if(t === 'goals') loadGoals();
+  if(t === 'review') loadReview();
   if(t === 'bt') loadRecent();
 }
 document.querySelectorAll('.tab').forEach(b => b.onclick = () => setTab(b.dataset.tab));
@@ -420,7 +463,7 @@ $('gotIt').onclick = async () => {
   $('gotIt').disabled = false;
   say('rMsg', T('Wonderful. That one is yours now.'), 'ok');
   $('topic').value = ''; current.attempt = 0; current.logId = null;
-  loadSummary(); loadRecent();
+  loadSummary(); loadRecent(); refreshDue();
   clearTimeout(hideTimer);
   hideTimer = setTimeout(() => { $('btResult').classList.add('hidden'); window.scrollTo({ top:0, behavior:'smooth' }); }, 1800);
 };
@@ -564,6 +607,114 @@ function goalCard(goal, steps){
   return card;
 }
 
+/* ---------- review and mastery (no AI used: plain rules) ---------- */
+const LEVELS = ['New', 'Learning', 'Practising', 'Confident', 'Mastered', 'Mastered'];
+let queue = [], qi = 0;
+function paintDue(n){
+  $('tab-review').textContent = T('Review') + (n > 0 ? ' (' + n + ')' : '');
+}
+function refreshDue(){ sb.rpc('my_review_queue').then(r => paintDue(((r && r.data) || []).length)).catch(() => {}); }
+function daysAgo(d){
+  if(!d) return null;
+  return Math.max(0, Math.round((Date.now() - new Date(d).getTime()) / 86400000));
+}
+function whyText(x){
+  const ago = daysAgo(x.last_reviewed_at);
+  if(ago === null) return T('Why now: you added this topic and have not checked it yet.');
+  return T('Why now: you last checked this') + ' ' + ago + ' ' + T('days ago. Checking just before you might forget makes it stay longer.');
+}
+function showCard(){
+  const x = queue[qi];
+  $('revCard').classList.toggle('hidden', !x);
+  if(!x) return;
+  $('revCount').textContent = T('Topic') + ' ' + (qi + 1) + ' / ' + queue.length;
+  $('revTopic').textContent = x.topic;
+  $('revWhy').textContent = whyText(x);
+  say('revMsg', '');
+  ['revGot','revUnsure','revForgot'].forEach(id => $(id).disabled = false);
+}
+async function answerReview(result){
+  const x = queue[qi]; if(!x) return;
+  ['revGot','revUnsure','revForgot'].forEach(id => $(id).disabled = true);
+  const r = await sb.rpc('record_review', { p_id: x.id, p_result: result });
+  if(r.error){ ['revGot','revUnsure','revForgot'].forEach(id => $(id).disabled = false); say('revMsg', friendly(r.error), 'err'); return; }
+  qi += 1;
+  if(qi >= queue.length){ loadReview(); } else { showCard(); }
+}
+$('revGot').onclick = () => answerReview('got_it');
+$('revUnsure').onclick = () => answerReview('unsure');
+$('revForgot').onclick = () => answerReview('forgot');
+$('revHelp').onclick = () => {
+  const x = queue[qi]; if(!x) return;
+  setTab('bt'); $('topic').value = x.topic; window.scrollTo({ top:0 });
+};
+function nextStepCard(dueN, goals, steps){
+  const b = $('nextBody'); b.textContent = '';
+  if(dueN > 0){
+    b.appendChild(el('p', { text:T('Review today') + ': ' + dueN + ' ' + (dueN === 1 ? T('topic') : T('topics')) + '.', 'data-no-i18n':'' }));
+    b.appendChild(el('div', { class:'why', text:T('Why: topics you check again just before you might forget them stay in your memory much longer. It only takes a few minutes.') }));
+    return;
+  }
+  for(let i = 0; i < goals.length; i++){
+    const st = steps.filter(s => s.goal_id === goals[i].id)[0];
+    if(st){
+      b.appendChild(el('p', { text:T('Your next step') + ':', 'data-no-i18n':'' }));
+      b.appendChild(el('p', { class:'flash', text:st.title, 'data-no-i18n':'' }));
+      b.appendChild(el('div', { class:'why' }, [ el('span', { text:T('Why: it is the next unfinished step of your goal') + ' ' }), el('span', { text:goals[i].subject, 'data-no-i18n':'' }) ]));
+      const go = el('button', { type:'button', class:'btn alt', text:T('Open my goals') });
+      go.onclick = () => setTab('goals');
+      b.appendChild(go);
+      return;
+    }
+  }
+  b.appendChild(el('p', { text:T('Nothing is due today. Solve a breakthrough, set a goal or add a topic, and your next steps will appear here.') }));
+}
+function topicRow(x){
+  const lvl = Math.min(x.box, 4);
+  const due = new Date(x.next_review_at).getTime() <= Date.now();
+  const bar = el('div', { class:'bar', role:'progressbar', 'aria-valuemin':'0', 'aria-valuemax':'5', 'aria-valuenow':String(x.box) }, [ el('i') ]);
+  bar.firstChild.style.width = Math.round(x.box / 5 * 100) + '%';
+  const del = el('button', { type:'button', class:'linkbtn', text:T('Remove') });
+  del.onclick = async () => {
+    if(!confirm(T('Remove this topic from your review list?'))) return;
+    const r = await sb.from('topic_mastery').delete().eq('id', x.id);
+    if(r.error){ say('topicMsg', friendly(r.error), 'err'); return; }
+    loadReview();
+  };
+  return el('div', { class:'trow' }, [
+    el('div', { class:'tt', text:x.topic, 'data-no-i18n':'' }),
+    el('div', { class:'meta' }, [ el('span', { class:'lvl l' + lvl, text:T(LEVELS[x.box]) }), el('span', { text:' · ' }),
+      due ? el('span', { text:T('Due now') }) : el('span', {}, [ el('span', { text:T('Next review:') + ' ' }), el('span', { text:fmtDate(String(x.next_review_at).slice(0, 10)), 'data-no-i18n':'' }) ]) ]),
+    bar, del
+  ]);
+}
+async function loadReview(){
+  const [q, all, g, m] = await Promise.all([
+    sb.rpc('my_review_queue'),
+    sb.from('topic_mastery').select('id,topic,box,next_review_at,times_reviewed').order('next_review_at', { ascending:true }).limit(300),
+    sb.from('learning_goals').select('id,subject,created_at').eq('status', 'active').order('created_at', { ascending:true }),
+    sb.from('goal_milestones').select('goal_id,title,position').eq('done', false).order('position', { ascending:true })
+  ]);
+  queue = (q && q.data) || []; qi = 0;
+  paintDue(queue.length);
+  showCard();
+  nextStepCard(queue.length, (g && g.data) || [], (m && m.data) || []);
+  const list = $('topicList'); list.textContent = '';
+  const rows = (all && all.data) || [];
+  if(!rows.length) list.appendChild(el('p', { class:'hint', text:T('No topics yet. Solve a breakthrough or add a topic and it will appear here.') }));
+  rows.forEach(x => list.appendChild(topicRow(x)));
+}
+$('addTopic').onclick = async () => {
+  const t = $('newTopic').value.trim();
+  if(t.length < 2){ say('topicMsg', T('Please write a topic of at least 2 characters.'), 'err'); return; }
+  $('addTopic').disabled = true;
+  const r = await sb.rpc('add_review_topic', { p_topic: t });
+  $('addTopic').disabled = false;
+  if(r.error){ say('topicMsg', friendly(r.error), 'err'); return; }
+  $('newTopic').value = ''; say('topicMsg', T('Added.'), 'ok');
+  loadReview();
+};
+
 /* ---------- start ---------- */
 (async function init(){
   const s = await sb.auth.getSession();
@@ -572,10 +723,12 @@ function goalCard(goal, steps){
   me = session.user;
   await loadProfile();
   loadSummary();
+  refreshDue();
   $('loading').classList.add('hidden');
   const h = (location.hash || '').replace('#', '');
-  setTab(['bt','goals','me'].indexOf(h) >= 0 ? h : 'bt');
+  setTab(['bt','goals','review','me'].indexOf(h) >= 0 ? h : 'bt');
   $('topic').placeholder = T('For example: why do we flip the second fraction when dividing?');
+  $('newTopic').placeholder = T('For example: the water cycle');
   $('gTitle').placeholder = T('For example: speak basic French in 3 months');
 })();
 </script>
