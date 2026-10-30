@@ -12,6 +12,7 @@
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/lne-helpers.js"></script>
+<script src="js/ai-history.js"></script>
 <style>
   :root{
     --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
@@ -763,6 +764,7 @@ async function askTeacher(){
   try{
     const text = await callClaude(prompt, 500);
     teacherHistory[teacherHistory.length - 1] = { role:'ai', text: text };
+    LNE_HIST.log(sb, 'teacher', message, text);
   } catch(err){
     teacherHistory[teacherHistory.length - 1] = { role:'ai', text: 'Error: ' + err.message };
   }
@@ -867,6 +869,7 @@ async function askGeneral(question){
 
     output.className = 'ai-output';
     output.innerHTML = renderMarkdown(answer);
+    LNE_HIST.log(sb, 'ask', question, answer, { oneShot:true });
 
     lastFollowups = followups;
     if(followups.length){
@@ -899,6 +902,7 @@ async function askSummarize(){
     const result = await callClaude(prompt, 500);
     output.className = 'ai-output';
     output.innerHTML = renderMarkdown(result);
+    LNE_HIST.log(sb, 'summary', 'Summarize: ' + text, result, { oneShot:true });
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -922,6 +926,7 @@ async function askQuiz(){
     const result = await callClaude(prompt, 900);
     output.className = 'ai-output';
     output.innerHTML = renderMarkdown(result);
+    LNE_HIST.log(sb, 'quiz', 'Quiz on: ' + topic, result, { oneShot:true });
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -945,6 +950,7 @@ async function askTranslate(){
     const result = await callClaude(prompt, 500);
     output.className = 'ai-output';
     output.innerHTML = renderMarkdown(result);
+    LNE_HIST.log(sb, 'translate', 'Translate: ' + text, result, { oneShot:true });
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -968,6 +974,7 @@ async function askStudyPlan(){
     const result = await callClaude(prompt, 700);
     output.className = 'ai-output';
     output.innerHTML = renderMarkdown(result);
+    LNE_HIST.log(sb, 'plan', 'Study plan for: ' + goal, result, { oneShot:true });
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -995,6 +1002,7 @@ Question: ${question}`;
     if(text === null) { output.style.display = 'none'; return; }
     output.className = 'ai-output';
     output.innerHTML = renderMarkdown(text);
+    LNE_HIST.log(sb, 'homework', question, text, { oneShot:true });
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -1020,6 +1028,7 @@ async function askCareerCoach(){
     if(text === null) { output.style.display = 'none'; return; }
     output.className = 'ai-output';
     output.innerHTML = renderMarkdown(text);
+    LNE_HIST.log(sb, 'career', 'Career coach: ' + goal, text, { oneShot:true });
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'Error: ' + err.message;
@@ -1599,6 +1608,26 @@ function exitProgram(){
 }
 
 window.lnAuthReady = initAuth(); // exposed for js/nav.js role-aware bottom nav
+
+/* Open the AI Classroom directly from a link like skillstream-ai-hub.html#classroom */
+(async function openFromHash(){
+  if(location.hash !== '#classroom') return;
+  try { await window.lnAuthReady; } catch(e){}
+  switchTab('classroom');
+})();
+
+/* Continue an earlier AI Teacher conversation from "My AI history" (?continue=<id>) */
+(async function resumeFromHistory(){
+  const id = new URLSearchParams(location.search).get('continue');
+  if(!id || !/^[0-9a-f-]{36}$/i.test(id)) return;
+  try { await window.lnAuthReady; } catch(e){}
+  const c = await LNE_HIST.load(sb, id);
+  if(!c || c.tool !== 'teacher' || !c.messages.length) return;
+  teacherHistory = c.messages;
+  LNE_HIST.setConversation('teacher', c.id);
+  switchTab('teacher');
+  renderTeacherChat();
+})();
 </script>
 
 <script>

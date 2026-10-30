@@ -200,6 +200,16 @@
 .subject-icon-btn .lbl{font-size:10.5px; font-weight:600; color:var(--charcoal); text-align:center; line-height:1.2;}
 .subject-icon-btn.active{background:var(--gold); border-color:var(--gold);}
 .subject-icon-btn.active .lbl{color:var(--ink);}
+  #aiLessons .ail{background:#fff; border:1px solid #E9E2D2; border-radius:14px; padding:16px; margin-bottom:16px; overflow-wrap:anywhere;}
+  #aiLessons h2{margin:0 0 4px; font-size:18px; font-family:'Fraunces',serif; color:var(--ink);}
+  #aiLessons .sub{font-size:13px; color:#6B6558; margin:0 0 10px; line-height:1.5;}
+  #aiLessons a.row{display:block; text-decoration:none; color:inherit; padding:11px 0; border-top:1px solid #E9E2D2; min-height:44px;}
+  #aiLessons a.row:first-of-type{border-top:none;}
+  #aiLessons .rt{font-weight:700; color:var(--ink); font-size:14.5px; line-height:1.4;}
+  #aiLessons .rm{font-size:12.5px; color:#6B6558; margin-top:3px;}
+  #aiLessons .bar{height:8px; background:#EFE9DA; border-radius:6px; overflow:hidden; margin-top:6px;}
+  #aiLessons .bar i{display:block; height:100%; background:#6B8F71;}
+  #aiLessons a.more{display:inline-block; margin-top:8px; color:var(--ink); font-weight:700; font-size:13.5px; padding:10px 0; min-height:44px;}
 </style>
 </head>
 <body>
@@ -212,6 +222,7 @@
 </header>
 
 <div class="wrap">
+  <div id="aiLessons"></div>
   <div id="courseList"><div class="loading">Loading your courses…</div></div>
 </div>
 
@@ -327,11 +338,62 @@ async function initAuth(){
     return;
   }
   currentUser = session.user;
+  loadAiLessons();
   loadCourses();
 
   sb.auth.onAuthStateChange((event, session)=>{
     if(!session){ window.location.href = 'skillstream-login.html'; }
   });
+}
+
+/* ---------- AI LESSONS (AI Classroom program + AI Teacher conversations) ---------- */
+function aiEl(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+async function loadAiLessons(){
+  const host = document.getElementById('aiLessons');
+  if(!host) return;
+  try {
+    const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+    const [convs, prog] = await Promise.all([
+      sb.from('ai_conversations').select('id,title,updated_at').eq('tool', 'teacher').order('updated_at', { ascending:false }).limit(5),
+      sb.from('classroom_progress').select('program_id,current_lesson_index,stage').eq('user_id', currentUser.id).maybeSingle()
+    ]);
+    let program = null;
+    if(prog && prog.data && prog.data.program_id){
+      const pr = await sb.from('classroom_programs').select('id,goal,lesson_titles').eq('id', prog.data.program_id).maybeSingle();
+      program = pr && pr.data ? pr.data : null;
+    }
+    const talks = (convs && convs.data) || [];
+    const box = aiEl('div', { class:'ail' });
+    box.appendChild(aiEl('h2', { text:T('My AI lessons') }));
+    box.appendChild(aiEl('p', { class:'sub', text:T('Your lessons with the AI Teacher and the AI Classroom, saved for you.') }));
+    if(program){
+      const total = (program.lesson_titles || []).length || 1;
+      const done = prog.data.stage === 'complete' ? total : Math.min(prog.data.current_lesson_index || 0, total);
+      const a = aiEl('a', { class:'row', href:'skillstream-ai-hub.html#classroom' }, [
+        aiEl('div', { class:'rt', text:program.goal, 'data-no-i18n':'' }),
+        aiEl('div', { class:'rm' }, [ aiEl('span', { text:T('AI Classroom') + ' · ' }), aiEl('span', { text:done + ' / ' + total, 'data-no-i18n':'' }), aiEl('span', { text:' ' + T('lessons done') }) ]),
+        aiEl('div', { class:'bar' }, [ aiEl('i') ])
+      ]);
+      a.querySelector('.bar i').style.width = Math.round(done / total * 100) + '%';
+      box.appendChild(a);
+    }
+    talks.forEach(x => box.appendChild(aiEl('a', { class:'row', href:'skillstream-ai-history.html?open=' + x.id }, [
+      aiEl('div', { class:'rt', text:x.title, 'data-no-i18n':'' }),
+      aiEl('div', { class:'rm', text:T('AI Teacher') })
+    ])));
+    if(!program && !talks.length){
+      box.appendChild(aiEl('a', { class:'row', href:'skillstream-ai-hub.html' }, [ aiEl('div', { class:'rt', text:T('Start a lesson with the AI Teacher') }) ]));
+      box.appendChild(aiEl('a', { class:'row', href:'skillstream-ai-hub.html#classroom' }, [ aiEl('div', { class:'rt', text:T('Build a program in the AI Classroom') }) ]));
+    }
+    box.appendChild(aiEl('a', { class:'more', href:'skillstream-ai-history.html', text:T('See all my AI history') + ' →' }));
+    host.textContent = '';
+    host.appendChild(box);
+  } catch(e){ /* optional section: never blocks the page */ }
 }
 
 /* ---------- LOAD COURSES ---------- */

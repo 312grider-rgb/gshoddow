@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/lne-helpers.js"></script>
+<script src="js/ai-history.js"></script>
 <script src="https://meet.jit.si/external_api.js"></script>
 <style>
   :root{
@@ -428,6 +429,7 @@ Answer only with your response — no "AI Teacher:" prefix.`;
     if(!text) throw new Error('Empty response from AI');
 
     aiChatHistory.push({ role:'ai', text: text });
+    LNE_HIST.log(sb, 'live', transcript, text);
     renderAiChat();
     document.getElementById('micStatus').textContent = 'Tap the mic and ask a question';
 

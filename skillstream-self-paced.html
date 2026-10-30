@@ -12,6 +12,7 @@
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/lne-helpers.js"></script>
+<script src="js/ai-history.js"></script>
 <script src="js/incentives.js?v=2"></script>
 <style>
   :root{
@@ -843,6 +844,7 @@ async function askAI(mode){
 
     output.className = 'ai-output';
     output.textContent = data.text || 'No response received — try again.';
+    if(data.text) LNE_HIST.log(sb, 'tutor', (question || mode) + ' — ' + activeLesson.title + ' (' + activeCourse.title + ')', data.text, { oneShot:true });
   } catch(err){
     output.className = 'ai-output';
     output.textContent = 'AI Tutor error: ' + err.message;

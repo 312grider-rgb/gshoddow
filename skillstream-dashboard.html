@@ -12,6 +12,7 @@
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/lne-helpers.js"></script>
+<script src="js/ai-history.js"></script>
 <script src="js/incentives.js?v=2"></script>
 <style>
   :root{
@@ -884,6 +885,7 @@ async function handleDashVoiceQuestion(transcript){
     if(data.error) throw new Error(data.error);
 
     dashChatHistory.push({ role:'ai', text: data.text });
+    LNE_HIST.log(sb, 'teacher', transcript, data.text);
     renderDashChat();
     document.getElementById('dashMicStatus').textContent = 'Tap the mic and ask a question';
     speakDashAi(data.text);

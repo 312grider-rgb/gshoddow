@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My AI history — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px 22px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:14px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; overflow-wrap:anywhere;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;}
+  .chip{border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:999px; padding:10px 14px; font:inherit; font-size:13.5px; font-weight:600; cursor:pointer; min-height:44px;}
+  .chip[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .item{display:block; width:100%; text-align:start; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:10px; font:inherit; cursor:pointer; color:var(--charcoal);}
+  .item .t{font-weight:700; color:var(--ink); font-size:15px; line-height:1.4;}
+  .item .m{font-size:12.5px; color:var(--muted); margin-top:4px;}
+  .btn{background:var(--ink); color:#fff; border:none; border-radius:10px; padding:13px 16px; font:inherit; font-size:14.5px; font-weight:700; cursor:pointer; min-height:46px;}
+  .btn.alt{background:#fff; color:var(--ink); border:1.5px solid var(--ink);}
+  .btn.danger{background:#fff; color:var(--danger); border:1.5px solid var(--danger);}
+  .row{display:flex; flex-wrap:wrap; gap:10px; margin:12px 0;}
+  .bubble{max-width:92%; padding:11px 13px; border-radius:14px; margin:8px 0; line-height:1.6; font-size:14.5px; white-space:pre-wrap; overflow-wrap:anywhere;}
+  .bubble.user{background:var(--ink); color:#fff; margin-inline-start:auto; border-end-end-radius:4px;}
+  .bubble.ai{background:#F3EEE2; color:var(--charcoal); border-end-start-radius:4px;}
+  .note{background:#FBF4E2; border-radius:10px; padding:10px 12px; font-size:13.5px; line-height:1.5; margin:10px 0;}
+  .hint{font-size:13px; color:var(--muted); line-height:1.5;}
+  .hidden{display:none;}
+  .loading{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:14px; padding:8px 0;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  .msg{font-size:13.5px; min-height:18px; margin-top:8px;} .msg.err{color:var(--danger);}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>My AI history</h1>
+  <p>Every AI conversation you have is saved here, only for you. Read it again or continue it.</p>
+</header>
+
+<div class="wrap">
+  <div id="listView">
+    <div class="chips" id="chips" role="group">
+      <button type="button" class="chip" data-f="all" aria-pressed="true">All</button>
+      <button type="button" class="chip" data-f="teacher" aria-pressed="false">AI Teacher</button>
+      <button type="button" class="chip" data-f="tools" aria-pressed="false">Study tools</button>
+      <button type="button" class="chip" data-f="tutor" aria-pressed="false">Lesson tutor</button>
+      <button type="button" class="chip" data-f="live" aria-pressed="false">Live class</button>
+    </div>
+    <div id="loading" class="card"><div class="loading"><span>Loading…</span></div></div>
+    <div id="list"></div>
+    <div id="clearWrap" class="hidden"><button class="btn danger" id="clearAll" type="button">Delete all my AI history</button></div>
+    <div class="msg err" id="listMsg" role="status"></div>
+  </div>
+
+  <div id="viewView" class="hidden">
+    <button class="btn alt" id="back" type="button">Back to my history</button>
+    <div class="card" style="margin-top:12px">
+      <h2 id="vTitle" data-no-i18n style="margin:0 0 4px;font-size:18px"></h2>
+      <div class="hint"><span id="vTool"></span> · <span id="vDate" data-no-i18n></span></div>
+      <div id="vMsgs" data-no-i18n style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn hidden" id="cont" type="button">Continue this conversation</button>
+        <button class="btn danger" id="del" type="button">Delete this conversation</button>
+      </div>
+      <div class="msg err" id="vMsg" role="status"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/nav.js" defer></script>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+const appLang = (window.LNE_I18N && LNE_I18N.lang) || 'en';
+const TOOL_LABEL = { teacher:'AI Teacher', ask:'Ask and Explain', homework:'Homework Helper', summary:'Summarize', quiz:'Quiz', translate:'Translate', plan:'Study Plan', career:'Career Coach', tutor:'Lesson tutor', live:'Live class' };
+const TOOLS_GROUP = ['ask','homework','summary','quiz','translate','plan','career'];
+let me = null, filter = 'all', current = null;
+
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function fmt(d){ try { return new Date(d).toLocaleString(appLang === 'zh' ? 'zh-CN' : appLang, { dateStyle:'medium', timeStyle:'short' }); } catch(e){ return String(d); } }
+
+async function loadList(){
+  $('listMsg').textContent = '';
+  let q = sb.from('ai_conversations').select('id,tool,title,message_count,updated_at').order('updated_at', { ascending:false }).limit(100);
+  if(filter === 'tools') q = q.in('tool', TOOLS_GROUP); else if(filter !== 'all') q = q.eq('tool', filter);
+  const r = await q;
+  $('loading').classList.add('hidden');
+  const box = $('list'); box.textContent = '';
+  if(r.error){ $('listMsg').textContent = T('Could not load your history. Please try again.'); return; }
+  const rows = r.data || [];
+  $('clearWrap').classList.toggle('hidden', !rows.length && filter === 'all');
+  if(!rows.length){
+    box.appendChild(el('div', { class:'card' }, [ el('p', { class:'hint', text:T('Nothing here yet. Your AI conversations will appear here automatically.') }) ]));
+    return;
+  }
+  rows.forEach(x => {
+    const b = el('button', { type:'button', class:'item' }, [
+      el('div', { class:'t', text:x.title, 'data-no-i18n':'' }),
+      el('div', { class:'m' }, [ el('span', { text:T(TOOL_LABEL[x.tool] || x.tool) }), el('span', { text:' · ' }), el('span', { text:fmt(x.updated_at), 'data-no-i18n':'' }) ])
+    ]);
+    b.onclick = () => openConv(x.id);
+    box.appendChild(b);
+  });
+}
+
+async function openConv(id){
+  const c = await sb.from('ai_conversations').select('id,tool,title,updated_at').eq('id', id).maybeSingle();
+  if(!c || !c.data){ $('listMsg').textContent = T('This conversation was not found.'); return; }
+  const m = await sb.from('ai_messages').select('role,content,created_at').eq('conversation_id', id).order('created_at', { ascending:true });
+  current = c.data;
+  $('vTitle').textContent = c.data.title;
+  $('vTool').textContent = T(TOOL_LABEL[c.data.tool] || c.data.tool);
+  $('vDate').textContent = fmt(c.data.updated_at);
+  const box = $('vMsgs'); box.textContent = '';
+  ((m && m.data) || []).forEach(x => box.appendChild(el('div', { class:'bubble ' + (x.role === 'user' ? 'user' : 'ai'), text:x.content })));
+  $('cont').classList.toggle('hidden', c.data.tool !== 'teacher');
+  $('vMsg').textContent = '';
+  $('listView').classList.add('hidden'); $('viewView').classList.remove('hidden');
+  window.scrollTo({ top:0 });
+  try { history.replaceState(null, '', '?open=' + id); } catch(e){}
+}
+function showList(){
+  current = null; $('viewView').classList.add('hidden'); $('listView').classList.remove('hidden');
+  try { history.replaceState(null, '', location.pathname); } catch(e){}
+  loadList();
+}
+
+$('back').onclick = showList;
+$('cont').onclick = () => { if(current) location.href = 'skillstream-ai-hub.html?continue=' + current.id; };
+$('del').onclick = async () => {
+  if(!current || !confirm(T('Delete this conversation? This cannot be undone.'))) return;
+  const r = await sb.from('ai_conversations').delete().eq('id', current.id);
+  if(r.error){ $('vMsg').textContent = T('Could not delete. Please try again.'); return; }
+  showList();
+};
+$('clearAll').onclick = async () => {
+  if(!confirm(T('Delete all your AI history? This cannot be undone.'))) return;
+  const r = await sb.from('ai_conversations').delete().eq('user_id', me.id);
+  if(r.error){ $('listMsg').textContent = T('Could not delete. Please try again.'); return; }
+  loadList();
+};
+document.querySelectorAll('#chips .chip').forEach(c => c.onclick = () => {
+  filter = c.dataset.f;
+  document.querySelectorAll('#chips .chip').forEach(x => x.setAttribute('aria-pressed', x === c ? 'true' : 'false'));
+  loadList();
+});
+
+(async function init(){
+  const s = await sb.auth.getSession();
+  const session = s && s.data && s.data.session;
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  me = session.user;
+  const open = new URLSearchParams(location.search).get('open');
+  if(open && /^[0-9a-f-]{36}$/i.test(open)){ await openConv(open); }
+  loadList();
+})();
+</script>
+</body>
+</html>
