@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Opportunities — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; --danger:#A33A2B; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:#2B2B2B;}
+  header.top{background:var(--ink); color:var(--cream); padding:18px 16px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700;}
+  header.top h1{margin:4px 0 6px; font-size:22px; font-family:'Fraunces',serif;}
+  header.top a{color:var(--gold); font-size:13px; text-decoration:none;}
+  .wrap{padding:14px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px; overflow-wrap:anywhere;}
+  .card h2{margin:0 0 8px; font-size:17px; font-family:'Fraunces',serif; color:var(--ink);}
+  label{display:block; font-size:13px; font-weight:700; margin:12px 0 5px; color:var(--ink);}
+  input[type=text],select,textarea{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font:inherit; font-size:15px; background:#fff;}
+  textarea{min-height:90px;}
+  .inl{display:flex; align-items:center; gap:8px; font-weight:600; margin:12px 0 0;} .inl input{width:auto;}
+  .btn{border:0; border-radius:10px; padding:12px 14px; font-weight:700; font-size:14px; cursor:pointer; background:var(--ink); color:#fff; margin-top:12px; margin-inline-end:8px; font-family:inherit;}
+  .btn.alt{background:#fff; color:var(--ink); border:1.5px solid var(--ink);} .btn.del{background:var(--danger);}
+  .btn:disabled{opacity:.5;}
+  .name{font-weight:700; font-size:15px; color:var(--ink);}
+  .meta{font-size:12.5px; color:#6B6558; margin-top:2px; line-height:1.5;}
+  .msg{font-size:13.5px; margin-top:10px; min-height:18px;} .msg.err{color:var(--danger);} .msg.ok{color:#3F6B47;}
+  #lockedView,#adminView{display:none;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Admin</div>
+  <h1>Opportunities</h1>
+  <a href="skillstream-admin.html">&larr; Back to Admin</a>
+</header>
+<div class="wrap">
+  <div id="loadingView">Loading…</div>
+  <div id="lockedView"><h2>Admins only</h2><a href="skillstream-home.html">Go home</a></div>
+  <div id="adminView">
+    <div class="card">
+      <h2 id="formTitle">Add an opportunity</h2>
+      <p class="meta">Only add what you have checked yourself. Mark it Verified only if you wrote how you checked it. Students see these exactly as written.</p>
+      <label for="oKind">Type</label>
+      <select id="oKind"><option value="scholarship">Scholarship</option><option value="program">Program</option></select>
+      <label for="oTitle">Title (5 to 140 characters)</label>
+      <input id="oTitle" type="text" maxlength="140">
+      <label for="oProvider">Provider (who offers it)</label>
+      <input id="oProvider" type="text" maxlength="100">
+      <label for="oDesc">Description (up to 1500 characters)</label>
+      <textarea id="oDesc" maxlength="1500"></textarea>
+      <label for="oCountry">Country</label>
+      <input id="oCountry" type="text" maxlength="60">
+      <label for="oLevel">Level</label>
+      <select id="oLevel"><option value="any">Any</option><option value="school">School</option><option value="university">University</option><option value="adult">Adults</option></select>
+      <label for="oDeadline">Deadline (year-month-day, for example 2027-03-31, or empty)</label>
+      <input id="oDeadline" type="text" inputmode="numeric" dir="ltr" maxlength="10">
+      <label for="oUrl">Official apply link (must start with https://)</label>
+      <input id="oUrl" type="text" inputmode="url" autocapitalize="none" dir="ltr" maxlength="300">
+      <label for="oReq">What the student needs (one per line, up to 8)</label>
+      <textarea id="oReq"></textarea>
+      <label class="inl"><input id="oVer" type="checkbox"> Verified by our team</label>
+      <label for="oVerNote">How you checked it (needed if verified)</label>
+      <input id="oVerNote" type="text" maxlength="300">
+      <label class="inl"><input id="oSpon" type="checkbox"> Sponsored (a paid placement)</label>
+      <label for="oStatus">Status</label>
+      <select id="oStatus"><option value="draft">Draft (hidden)</option><option value="published">Published</option><option value="closed">Closed</option></select>
+      <button class="btn" id="oSave" type="button">Save</button>
+      <button class="btn alt" id="oCancel" type="button" style="display:none">Cancel edit</button>
+      <div class="msg" id="oMsg" role="status"></div>
+    </div>
+    <div class="card"><h2>Reports from students</h2><div id="reports"></div></div>
+    <div id="list"></div>
+  </div>
+</div>
+<script>
+const sb = window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co', 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+const $ = id => document.getElementById(id);
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+let EDIT = null, ROWS = [];
+function msg(t, ok){ const m = $('oMsg'); m.className = 'msg ' + (ok ? 'ok' : 'err'); m.textContent = t; }
+function clearForm(){
+  EDIT = null; $('formTitle').textContent = 'Add an opportunity'; $('oCancel').style.display = 'none';
+  ['oTitle','oProvider','oDesc','oCountry','oDeadline','oUrl','oReq','oVerNote'].forEach(i => { $(i).value = ''; });
+  $('oKind').value = 'scholarship'; $('oLevel').value = 'any'; $('oStatus').value = 'draft'; $('oVer').checked = false; $('oSpon').checked = false;
+}
+function edit(o){
+  EDIT = o.id; $('formTitle').textContent = 'Edit opportunity'; $('oCancel').style.display = 'inline-block';
+  $('oKind').value = o.kind; $('oTitle').value = o.title || ''; $('oProvider').value = o.provider || ''; $('oDesc').value = o.description || '';
+  $('oCountry').value = o.country || ''; $('oLevel').value = o.level || 'any'; $('oDeadline').value = o.deadline || ''; $('oUrl').value = o.apply_url || '';
+  $('oReq').value = (o.requirements || []).join('\n'); $('oVer').checked = !!o.verified; $('oVerNote').value = o.verified_note || '';
+  $('oSpon').checked = !!o.sponsored; $('oStatus').value = o.status;
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+async function loadAll(){
+  const r = await sb.from('opportunities').select('*').order('created_at', { ascending:false }).limit(300);
+  const box = $('list'); box.textContent = '';
+  if(r.error){ box.appendChild(el('div', { class:'card', text:'Could not load opportunities.' })); return; }
+  ROWS = r.data || [];
+  if(!ROWS.length){ box.appendChild(el('div', { class:'card', text:'Nothing added yet.' })); }
+  ROWS.forEach(o => {
+    const c = el('div', { class:'card' }, [
+      el('div', { class:'name', text:o.title }),
+      el('div', { class:'meta', text:o.kind + ' · ' + o.status + (o.verified ? ' · verified' : '') + (o.sponsored ? ' · sponsored' : '') + (o.deadline ? ' · deadline ' + o.deadline : '') })
+    ]);
+    const e = el('button', { class:'btn alt', type:'button', text:'Edit' }); e.onclick = () => edit(o);
+    const d = el('button', { class:'btn del', type:'button', text:'Delete' });
+    d.onclick = async () => {
+      if(!confirm('Delete "' + o.title + '" for good? Saves and reports on it are deleted too.')) return;
+      const x = await sb.rpc('admin_delete_opportunity', { p_id:o.id });
+      if(x.error){ msg(x.error.message, false); return; }
+      msg('Deleted.', true); if(EDIT === o.id) clearForm(); loadAll(); loadReports();
+    };
+    c.appendChild(e); c.appendChild(d); box.appendChild(c);
+  });
+}
+async function loadReports(){
+  const r = await sb.rpc('admin_list_opportunity_reports');
+  const box = $('reports'); box.textContent = '';
+  if(r.error){ box.appendChild(el('div', { class:'meta', text:'Could not load reports.' })); return; }
+  if(!(r.data || []).length){ box.appendChild(el('div', { class:'meta', text:'No reports.' })); return; }
+  r.data.forEach(x => box.appendChild(el('div', { style:'margin:8px 0;' }, [
+    el('div', { class:'name', text:x.title }),
+    el('div', { class:'meta', text:x.reports + ' report(s). Latest: ' + x.last_reason })
+  ])));
+}
+$('oCancel').onclick = () => { clearForm(); msg('', true); };
+$('oSave').onclick = async () => {
+  msg('', true);
+  const reqs = $('oReq').value.split('\n').map(x => x.trim()).filter(Boolean);
+  if(reqs.length > 8){ msg('Please list at most 8 requirements.', false); return; }
+  $('oSave').disabled = true;
+  const r = await sb.rpc('admin_save_opportunity', {
+    p_id:EDIT, p_kind:$('oKind').value, p_title:$('oTitle').value, p_provider:$('oProvider').value, p_description:$('oDesc').value,
+    p_country:$('oCountry').value, p_level:$('oLevel').value, p_deadline:$('oDeadline').value.trim(), p_apply_url:$('oUrl').value.trim(),
+    p_requirements:reqs, p_verified:$('oVer').checked, p_verified_note:$('oVerNote').value, p_sponsored:$('oSpon').checked, p_status:$('oStatus').value
+  });
+  $('oSave').disabled = false;
+  if(r.error){ msg(r.error.message || 'Could not save.', false); return; }
+  msg('Saved.', true); clearForm(); loadAll();
+};
+(async function(){
+  const s = await sb.auth.getSession();
+  if(!s.data.session){ window.location.href = 'skillstream-login.html'; return; }
+  const p = await sb.from('profiles').select('role').eq('id', s.data.session.user.id).maybeSingle();
+  $('loadingView').style.display = 'none';
+  if(!p.data || p.data.role !== 'admin'){ $('lockedView').style.display = 'block'; return; }
+  $('adminView').style.display = 'block'; loadAll(); loadReports();
+})();
+</script>
+</body>
+</html>

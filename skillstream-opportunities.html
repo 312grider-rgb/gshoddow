@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opportunities — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:14px; max-width:760px; margin:0 auto;}
+  .note{background:#FBF4E2; border-radius:12px; padding:11px 13px; font-size:13.5px; line-height:1.55; margin-bottom:12px;}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+  .chip{border:1.5px solid var(--line); background:#fff; border-radius:20px; padding:9px 14px; font:inherit; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer; min-height:40px;}
+  .chip[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .filters{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px;}
+  select{border:1.5px solid var(--line); border-radius:10px; padding:10px; font:inherit; font-size:14px; background:#fff; max-width:100%; min-height:40px;}
+  .chk{font-size:13.5px; display:flex; align-items:center; gap:6px; min-height:40px;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px; overflow-wrap:anywhere; min-width:0;}
+  .card h2{margin:0 0 6px; font-size:18px; line-height:1.35;}
+  .meta{font-size:12.5px; color:var(--muted); line-height:1.5;}
+  .badges{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;}
+  .badge{display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;}
+  .b-ver{background:#E8F1EA; color:#3E6B48;} .b-unver{background:#F1EEE6; color:#6B6558;}
+  .b-spon{background:#FBF4E2; color:#8A6A1F;} .b-late{background:#FBEAE5; color:#9A3D2B;} .b-soon{background:#FBF4E2; color:#8A6A1F;} .b-ok{background:#EAF0FA; color:#2A4A85;}
+  .desc{font-size:14px; line-height:1.55; margin:8px 0;}
+  .req h3{font-size:14px; margin:10px 0 4px;}
+  .req ul{margin:0; padding-inline-start:20px; font-size:13.5px; line-height:1.6;}
+  .vnote{font-size:12.5px; color:#3E6B48; margin-top:6px;}
+  .row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .btn{border:0; border-radius:10px; padding:11px 14px; font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; min-height:44px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;}
+  .btn.main{background:var(--ink); color:#fff;} .btn.alt{background:#fff; color:var(--ink); border:1.5px solid var(--ink);}
+  .btn.link{background:none; color:var(--muted); font-weight:600; text-decoration:underline; padding:11px 6px;}
+  .btn:disabled{opacity:.5;}
+  .warn{font-size:12.5px; color:#7a4a1a; background:#FFF6E8; border-radius:10px; padding:8px 10px; margin-top:8px; line-height:1.5;}
+  .rep{margin-top:10px;} .rep input{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font:inherit; font-size:14px; margin-bottom:8px;}
+  .msg{font-size:13px; margin-top:8px; min-height:16px;} .msg.err{color:var(--danger);} .msg.ok{color:#3E6B48;}
+  .hidden{display:none;}
+  .empty{text-align:center; color:var(--muted); padding:26px 10px; font-size:14px;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Opportunities</h1>
+  <p>Scholarships and training programs, checked by our team where we say so.</p>
+</header>
+
+<div class="wrap">
+  <div class="note">We cannot promise you a place, a job or money. Always check the official website, and never pay anyone to apply.</div>
+  <div id="loading" class="card">Loading…</div>
+  <div id="err" class="card hidden"><p class="meta">Could not load opportunities. Please try again.</p></div>
+  <div id="main" class="hidden">
+    <div class="chips" role="group" aria-label="Type">
+      <button class="chip" type="button" data-f="all" aria-pressed="true">All</button>
+      <button class="chip" type="button" data-f="scholarship" aria-pressed="false">Scholarships</button>
+      <button class="chip" type="button" data-f="program" aria-pressed="false">Programs</button>
+      <button class="chip" type="button" data-f="saved" aria-pressed="false">Saved</button>
+    </div>
+    <div class="filters">
+      <select id="fCountry" aria-label="Country"><option value="">All countries</option></select>
+      <label class="chk"><input type="checkbox" id="fClosed"> <span>Show closed</span></label>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script src="js/nav.js" defer></script>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+const appLang = (window.LNE_I18N && LNE_I18N.lang) || 'en';
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function fmtDate(d){ try { return new Date(d + 'T00:00:00').toLocaleDateString(appLang === 'zh' ? 'zh-CN' : appLang, { month:'short', day:'numeric', year:'numeric' }); } catch(e){ return String(d); } }
+function dayDiff(d){ const t = new Date(); t.setHours(0,0,0,0); return Math.round((new Date(d + 'T00:00:00') - t) / 86400000); }
+const safeUrl = u => typeof u === 'string' && /^https:\/\/[^\s"'<>`\\]+$/.test(u) ? u : null;
+const LEVELS = { school:'School', university:'University', adult:'Adults' };
+
+let ALL = [], SAVED = {}, FILTER = 'all';
+
+function badge(cls, text, raw){ return el('span', raw ? { class:'badge ' + cls, text, 'data-no-i18n':'' } : { class:'badge ' + cls, text:T(text) }); }
+
+function card(o){
+  const c = el('div', { class:'card' });
+  const b = el('div', { class:'badges' });
+  b.appendChild(badge('b-ok', o.kind === 'scholarship' ? 'Scholarship' : 'Program'));
+  b.appendChild(o.verified ? badge('b-ver', 'Verified by our team') : badge('b-unver', 'Not verified'));
+  if(o.sponsored) b.appendChild(badge('b-spon', 'Sponsored'));
+  const closed = o.status === 'closed';
+  if(closed) b.appendChild(badge('b-late', 'Closed'));
+  else if(o.deadline){
+    const d = dayDiff(o.deadline);
+    if(d < 0) b.appendChild(badge('b-late', 'Deadline passed'));
+    else if(d <= 14) b.appendChild(badge('b-soon', d + ' ' + T(d === 1 ? 'day left' : 'days left'), true));
+  }
+  c.appendChild(b);
+  c.appendChild(el('h2', { text:o.title, 'data-no-i18n':'' }));
+  const meta = [];
+  if(o.provider) meta.push(o.provider);
+  if(o.country) meta.push(o.country);
+  const metaEl = el('div', { class:'meta' }, [ el('span', { text:meta.join(' · '), 'data-no-i18n':'' }) ]);
+  if(LEVELS[o.level]){ metaEl.appendChild(el('span', { text:(meta.length ? ' · ' : '') + T('For') + ' ' + T(LEVELS[o.level]).toLowerCase(), 'data-no-i18n':'' })); }
+  c.appendChild(metaEl);
+  if(o.deadline) c.appendChild(el('div', { class:'meta', text:T('Deadline') + ': ' + fmtDate(o.deadline), 'data-no-i18n':'' }));
+  if(o.description) c.appendChild(el('div', { class:'desc', text:o.description, 'data-no-i18n':'' }));
+  const reqs = o.requirements || [];
+  if(reqs.length){
+    const r = el('div', { class:'req' }, [ el('h3', { text:'What you need' }) ]);
+    const ul = el('ul'); reqs.forEach(x => ul.appendChild(el('li', { text:x, 'data-no-i18n':'' }))); r.appendChild(ul); c.appendChild(r);
+  }
+  if(o.verified && o.verified_note) c.appendChild(el('div', { class:'vnote', text:T('How we checked') + ': ' + o.verified_note, 'data-no-i18n':'' }));
+
+  const msg = el('div', { class:'msg', role:'status' });
+  const row = el('div', { class:'row' });
+  const url = safeUrl(o.apply_url);
+  if(url && !closed){
+    row.appendChild(el('a', { class:'btn main', href:url, target:'_blank', rel:'noopener noreferrer', text:T('Apply on the official site') }));
+  }
+  const saved = !!SAVED[o.id];
+  const sv = el('button', { class:'btn alt', type:'button', 'aria-pressed':saved ? 'true' : 'false', text:T(saved ? 'Saved' : 'Save') });
+  sv.onclick = async () => {
+    sv.disabled = true; msg.className = 'msg'; msg.textContent = '';
+    const want = !SAVED[o.id];
+    const r = await sb.rpc('save_opportunity', { p_id:o.id, p_save:want });
+    sv.disabled = false;
+    if(r.error){ msg.className = 'msg err'; msg.textContent = r.error.message || T('Something went wrong. Please try again.'); return; }
+    if(want) SAVED[o.id] = true; else delete SAVED[o.id];
+    sv.setAttribute('aria-pressed', want ? 'true' : 'false'); sv.textContent = T(want ? 'Saved' : 'Save');
+    if(FILTER === 'saved') render();
+  };
+  row.appendChild(sv);
+  if((o.requirements || []).length){
+    const pl = el('button', { class:'btn alt', type:'button', text:T('Make a plan from the requirements') });
+    pl.onclick = async () => {
+      pl.disabled = true; msg.className = 'msg'; msg.textContent = '';
+      const r = await sb.rpc('opportunity_to_goal', { p_id:o.id });
+      pl.disabled = false;
+      if(r.error){ msg.className = 'msg err'; msg.textContent = r.error.message || T('Something went wrong. Please try again.'); return; }
+      msg.className = 'msg ok'; msg.textContent = T('Your plan is ready. Open My Learning to see it.');
+    };
+    row.appendChild(pl);
+  }
+  const rp = el('button', { class:'btn link', type:'button', text:T('Report a problem') });
+  row.appendChild(rp);
+  c.appendChild(row);
+  if(url && !closed) c.appendChild(el('div', { class:'warn', text:T('This opens another website. Check that it is the official site. Real scholarships never ask you to pay to apply.') }));
+
+  const rep = el('div', { class:'rep hidden' });
+  const inp = el('input', { type:'text', maxlength:'300', 'aria-label':T('What is wrong?'), placeholder:T('What is wrong?') });
+  const send = el('button', { class:'btn main', type:'button', text:T('Send report') });
+  rep.appendChild(inp); rep.appendChild(send);
+  rp.onclick = () => { rep.classList.toggle('hidden'); if(!rep.classList.contains('hidden')) inp.focus(); };
+  send.onclick = async () => {
+    const reason = inp.value.trim();
+    msg.className = 'msg';
+    if(reason.length < 3){ msg.className = 'msg err'; msg.textContent = T('Please tell us what is wrong.'); return; }
+    send.disabled = true;
+    const r = await sb.rpc('report_opportunity', { p_id:o.id, p_reason:reason });
+    send.disabled = false;
+    if(r.error){ msg.className = 'msg err'; msg.textContent = r.error.message || T('Something went wrong. Please try again.'); return; }
+    inp.value = ''; rep.classList.add('hidden'); msg.className = 'msg ok'; msg.textContent = T('Thank you. Our team will look at it.');
+  };
+  c.appendChild(rep); c.appendChild(msg);
+  return c;
+}
+
+function render(){
+  const box = $('list'); box.textContent = '';
+  const country = $('fCountry').value, showClosed = $('fClosed').checked;
+  const rows = ALL.filter(o => {
+    if(!showClosed && (o.status === 'closed' || (o.deadline && dayDiff(o.deadline) < 0))) return false;
+    if(country && o.country !== country) return false;
+    if(FILTER === 'saved') return !!SAVED[o.id];
+    if(FILTER === 'scholarship' || FILTER === 'program') return o.kind === FILTER;
+    return true;
+  });
+  if(!rows.length){
+    box.appendChild(el('div', { class:'empty', text:T(FILTER === 'saved' ? 'You have not saved anything yet.' : 'Nothing here yet. New opportunities are added regularly.') }));
+    return;
+  }
+  rows.forEach(o => box.appendChild(card(o)));
+}
+
+document.querySelectorAll('.chip').forEach(b => b.onclick = () => {
+  FILTER = b.getAttribute('data-f');
+  document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  render();
+});
+$('fCountry').onchange = render; $('fClosed').onchange = render;
+
+async function load(){
+  const s = await sb.auth.getSession();
+  const session = s && s.data && s.data.session;
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  const [op, sv] = await Promise.all([
+    sb.from('opportunities').select('*').in('status', ['published','closed']).order('deadline', { ascending:true, nullsFirst:false }).limit(300),
+    sb.from('opportunity_saves').select('opportunity_id')
+  ]);
+  if(op.error) throw op.error;
+  ALL = op.data || [];
+  (sv.data || []).forEach(x => { SAVED[x.opportunity_id] = true; });
+  const cs = {}; ALL.forEach(o => { if(o.country) cs[o.country] = true; });
+  Object.keys(cs).sort().forEach(c => { const op2 = el('option', { value:c, text:c, 'data-no-i18n':'' }); $('fCountry').appendChild(op2); });
+  $('loading').classList.add('hidden'); $('main').classList.remove('hidden');
+  render();
+}
+load().catch(e => { try { console.error('LNE error', e); } catch(x){} $('loading').classList.add('hidden'); $('err').classList.remove('hidden'); });
+</script>
+</body>
+</html>
