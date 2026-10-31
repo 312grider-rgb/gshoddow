@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My school — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream); overflow-wrap:anywhere;}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:14px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; overflow-wrap:anywhere; min-width:0;}
+  .card h2{margin:0 0 8px; font-size:18px;}
+  .card p{margin:6px 0; font-size:14.5px; line-height:1.6;}
+  label{display:block; font-size:13px; font-weight:700; color:var(--ink); margin:14px 0 6px;}
+  .hint{font-size:12.5px; color:var(--muted); line-height:1.5;}
+  input[type=text]{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:16px; background:#fff; color:var(--charcoal); letter-spacing:1px; text-transform:uppercase;}
+  select{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:15px; background:#fff; color:var(--charcoal);}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  .btn{background:var(--ink); color:#fff; border:none; border-radius:10px; padding:14px 18px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; margin-top:14px; width:100%; min-height:48px;}
+  .btn.alt{background:#fff; color:var(--ink); border:1.5px solid var(--ink);}
+  .btn.gold{background:var(--gold); color:var(--ink);}
+  .btn[disabled]{opacity:.55; cursor:default;}
+  .msg{font-size:13.5px; margin:10px 0 0; min-height:18px; line-height:1.5;}
+  .msg.err{color:var(--danger);} .msg.ok{color:#3F6B47;}
+  .note{background:#FBF4E2; border-radius:10px; padding:10px 12px; font-size:13.5px; line-height:1.55; margin:10px 0;}
+  .hidden{display:none;}
+  .row{padding:12px 0; border-top:1px solid var(--line);} .row:first-of-type{border-top:none;}
+  .row .t{font-weight:700; color:var(--ink); font-size:15px; overflow-wrap:anywhere;}
+  .row .m{font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.5;}
+  .row a{color:inherit; text-decoration:none;}
+  .code{font-family:ui-monospace,Menlo,monospace; font-size:22px; letter-spacing:3px; font-weight:700; color:var(--ink); direction:ltr; text-align:center; background:#F7F3EA; border-radius:10px; padding:10px; margin:6px 0;}
+  .linkbtn{background:none; border:none; color:var(--danger); font:inherit; font-size:13px; font-weight:600; cursor:pointer; padding:10px 12px 10px 0; min-height:44px;}
+  .pct{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;}
+  .pill{font-size:12px; background:#F3EEE2; border-radius:999px; padding:4px 10px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1 id="title">My school</h1>
+  <p id="sub">Your school, your classes and your teachers in one place.</p>
+</header>
+
+<div class="wrap">
+  <div id="loading" class="card">Loading…</div>
+  <div id="err" class="card hidden"><p class="hint">Could not load your school. Please try again.</p></div>
+
+  <div id="joinView" class="hidden">
+    <div class="card">
+      <h2>Join your school</h2>
+      <p class="hint">Your school gives you a code. Teachers get a teacher code and students get a student code.</p>
+      <label for="code">School code</label>
+      <input type="text" id="code" maxlength="8" autocapitalize="characters" autocomplete="off" dir="ltr">
+      <button class="btn gold" id="joinBtn" type="button">Join</button>
+      <div class="msg" id="joinMsg" role="status"></div>
+    </div>
+    <div class="note">Does your school not have an account yet? Ask your school to contact us.</div>
+  </div>
+
+  <div id="memberView" class="hidden">
+    <div class="card">
+      <h2 id="roleLine"></h2>
+      <div id="classes"></div>
+    </div>
+
+    <div class="card hidden" id="addCard">
+      <h2>Add one of my classes</h2>
+      <p class="hint">Classes you add show up in your school. The school administrator sees only class totals, never an individual student's work.</p>
+      <select id="mine" aria-label="My classes"></select>
+      <button class="btn alt" id="addBtn" type="button">Add this class to my school</button>
+      <div class="msg" id="addMsg" role="status"></div>
+    </div>
+
+    <div class="card hidden" id="codesCard">
+      <h2>Join codes</h2>
+      <p class="hint">Share the teacher code only with your teachers. Share the student code with students.</p>
+      <label>Teacher code</label><div class="code" id="tcode" data-no-i18n></div>
+      <label>Student code</label><div class="code" id="scode" data-no-i18n></div>
+      <button class="btn alt" id="newCodes" type="button">Make new codes</button>
+      <div class="msg" id="codeMsg" role="status"></div>
+    </div>
+
+    <div class="card hidden" id="reportCard">
+      <h2>School report</h2>
+      <p class="hint">Totals only. Attendance covers the last 30 days. No individual student's grades or work are shown.</p>
+      <div class="pct" id="totals"></div>
+      <div id="report"></div>
+    </div>
+
+    <div class="card hidden" id="peopleCard">
+      <h2>People in my school</h2>
+      <div id="people"></div>
+    </div>
+
+    <div class="card">
+      <button class="linkbtn" id="leave" type="button">Leave this school</button>
+      <div class="msg" id="leaveMsg" role="status"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/nav.js" defer></script>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+const ROLE = { admin:'You are the school administrator', teacher:'You are a teacher here', student:'You are a student here' };
+const KNOWN = ['That code was not found.', 'Only approved teachers can use the teacher code.', 'You are already in a school.',
+  'Too many requests today. Please try again tomorrow.', 'You can only add your own classes.', 'This class is already in a school.',
+  'Only teachers of a school can add classes.', 'The only school administrator cannot leave.', 'Person not found.', 'Use Leave school instead.'];
+let me = null, school = null;
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function say(id, text, kind){ const m = $(id); m.className = 'msg' + (kind ? ' ' + kind : ''); m.textContent = text || ''; }
+function friendly(e){
+  const m = (e && e.message) || '';
+  if(KNOWN.indexOf(m) >= 0) return T(m);
+  try { console.error('LNE error', e); } catch(x){}
+  const code = e && (e.code || e.status) ? ' (' + String(e.code || e.status).slice(0, 12) + ')' : '';
+  return T('Something went wrong. Please try again.') + code;
+}
+const pct = v => (v === null || v === undefined) ? '—' : v + '%';
+
+function paintClasses(){
+  const box = $('classes'); box.textContent = '';
+  const rows = school.classes || [];
+  if(!rows.length){ box.appendChild(el('p', { class:'hint', text:T('No classes in your school yet.') })); return; }
+  rows.forEach(c => {
+    const row = el('div', { class:'row' });
+    row.appendChild(el('a', { href:'skillstream-classrooms.html' }, [ el('div', { class:'t', text:c.name, 'data-no-i18n':'' }) ]));
+    row.appendChild(el('div', { class:'m' }, [ el('span', { text:c.subject || T('General'), 'data-no-i18n':'' }), el('span', { text:' · ' }), el('span', { text:c.students + ' ' + T('students'), 'data-no-i18n':'' }) ]));
+    if(c.mine || school.role === 'admin'){
+      const rm = el('button', { type:'button', class:'linkbtn', text:T('Remove from school') });
+      rm.onclick = async () => {
+        if(!confirm(T('Remove this class from the school? The class itself is not deleted.'))) return;
+        const r = await sb.rpc('remove_class_from_school', { p_class:c.id });
+        if(r.error){ say('addMsg', friendly(r.error), 'err'); return; }
+        loadSchool();
+      };
+      row.appendChild(rm);
+    }
+    box.appendChild(row);
+  });
+}
+async function paintAddClass(){
+  const can = school.role === 'teacher' || school.role === 'admin';
+  $('addCard').classList.toggle('hidden', !can);
+  if(!can) return;
+  const r = await sb.from('classrooms').select('id,name').eq('teacher_id', me.id);
+  const inSchool = (school.classes || []).map(c => c.id);
+  const sel = $('mine'); sel.textContent = '';
+  const free = ((r && r.data) || []).filter(c => inSchool.indexOf(c.id) < 0);
+  free.forEach(c => sel.appendChild(el('option', { value:c.id, text:c.name })));
+  $('addBtn').disabled = !free.length;
+  say('addMsg', free.length ? '' : T('You have no classes to add. Create a class first.'));
+}
+async function paintAdmin(){
+  const isAdmin = school.role === 'admin';
+  ['codesCard','reportCard','peopleCard'].forEach(i => $(i).classList.toggle('hidden', !isAdmin));
+  if(!isAdmin) return;
+  $('tcode').textContent = school.teacher_code; $('scode').textContent = school.student_code;
+  const [rep, ppl] = await Promise.all([ sb.rpc('school_report'), sb.rpc('school_people') ]);
+  const tot = $('totals'); tot.textContent = ''; const rb = $('report'); rb.textContent = '';
+  if(rep.data){
+    tot.appendChild(el('span', { class:'pill' }, [ el('span', { text:T('Teachers') + ' ' }), el('span', { text:String(rep.data.teachers), 'data-no-i18n':'' }) ]));
+    tot.appendChild(el('span', { class:'pill' }, [ el('span', { text:T('Students') + ' ' }), el('span', { text:String(rep.data.students), 'data-no-i18n':'' }) ]));
+    (rep.data.classes || []).forEach(c => {
+      const row = el('div', { class:'row' });
+      row.appendChild(el('div', { class:'t', text:c.name, 'data-no-i18n':'' }));
+      const p = el('div', { class:'pct' });
+      [['Students', c.students], ['Assignments', c.assignments], ['Average grade', pct(c.average_grade_pct)], ['Work handed in', pct(c.completion_pct)], ['Attendance', pct(c.attendance_pct)]].forEach(x =>
+        p.appendChild(el('span', { class:'pill' }, [ el('span', { text:T(x[0]) + ' ' }), el('span', { text:String(x[1]), 'data-no-i18n':'' }) ])));
+      row.appendChild(p); rb.appendChild(row);
+    });
+    if(!(rep.data.classes || []).length) rb.appendChild(el('p', { class:'hint', text:T('No classes in your school yet.') }));
+  } else { rb.appendChild(el('p', { class:'hint', text:T('Could not load the report.') })); }
+  const pb = $('people'); pb.textContent = '';
+  ((ppl && ppl.data) || []).forEach(x => {
+    const row = el('div', { class:'row' });
+    row.appendChild(el('div', { class:'t', text:x.name, 'data-no-i18n':'' }));
+    row.appendChild(el('div', { class:'m', text:T(x.role === 'admin' ? 'School administrator' : x.role === 'teacher' ? 'Teacher' : 'Student') }));
+    if(x.user_id !== me.id){
+      const rm = el('button', { type:'button', class:'linkbtn', text:T('Remove from school') });
+      rm.onclick = async () => {
+        if(!confirm(T('Remove this person from the school?'))) return;
+        const r = await sb.rpc('school_remove_member', { p_user:x.user_id });
+        if(r.error){ say('codeMsg', friendly(r.error), 'err'); return; }
+        loadSchool();
+      };
+      row.appendChild(rm);
+    }
+    pb.appendChild(row);
+  });
+}
+async function loadSchool(){
+  const r = await sb.rpc('my_school');
+  if(r.error) throw r.error;
+  school = r.data;
+  $('loading').classList.add('hidden');
+  if(!school){ $('joinView').classList.remove('hidden'); $('memberView').classList.add('hidden'); return; }
+  $('joinView').classList.add('hidden'); $('memberView').classList.remove('hidden');
+  $('title').textContent = school.name; $('title').setAttribute('data-no-i18n', '');
+  $('roleLine').textContent = T(ROLE[school.role]);
+  paintClasses(); await paintAddClass(); await paintAdmin();
+}
+$('joinBtn').onclick = async () => {
+  const code = $('code').value.trim();
+  if(code.length < 6){ say('joinMsg', T('Please type your school code.'), 'err'); return; }
+  $('joinBtn').disabled = true;
+  const r = await sb.rpc('join_school', { p_code:code });
+  $('joinBtn').disabled = false;
+  if(r.error){ say('joinMsg', friendly(r.error), 'err'); return; }
+  say('joinMsg', ''); loadSchool();
+};
+$('addBtn').onclick = async () => {
+  const id = $('mine').value; if(!id) return;
+  $('addBtn').disabled = true;
+  const r = await sb.rpc('add_class_to_school', { p_class:id });
+  if(r.error){ $('addBtn').disabled = false; say('addMsg', friendly(r.error), 'err'); return; }
+  loadSchool();
+};
+$('newCodes').onclick = async () => {
+  if(!confirm(T('Make new codes? The old codes will stop working.'))) return;
+  const r = await sb.rpc('school_new_codes');
+  if(r.error){ say('codeMsg', friendly(r.error), 'err'); return; }
+  say('codeMsg', T('New codes are ready.'), 'ok'); loadSchool();
+};
+$('leave').onclick = async () => {
+  if(!confirm(T('Leave this school?'))) return;
+  const r = await sb.rpc('leave_school');
+  if(r.error){ say('leaveMsg', friendly(r.error), 'err'); return; }
+  $('title').textContent = T('My school'); $('title').removeAttribute('data-no-i18n'); loadSchool();
+};
+(async function init(){
+  try {
+    const s = await sb.auth.getSession();
+    const session = s && s.data && s.data.session;
+    if(!session){ window.location.href = 'skillstream-login.html'; return; }
+    me = session.user;
+    $('code').placeholder = T('For example: 7F3A9C21');
+    await loadSchool();
+  } catch(e){ try { console.error('LNE error', e); } catch(x){} $('loading').classList.add('hidden'); $('err').classList.remove('hidden'); }
+})();
+</script>
+</body>
+</html>

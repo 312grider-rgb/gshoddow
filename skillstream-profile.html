@@ -471,19 +471,22 @@ async function uploadAvatar(){
 }
 
 async function saveProfile(){
-  const payload = {
-    id: currentUser.id,
+  // Only the fields this form edits. The role is never sent from here (it is controlled on the server).
+  const fields = {
     full_name: document.getElementById('fullName').value.trim(),
     bio: document.getElementById('bio').value.trim(),
-    avatar_url: document.getElementById('avatarUrl').value.trim(),
-    role: currentProfile.role || 'student'
+    avatar_url: document.getElementById('avatarUrl').value.trim()
   };
   if((currentProfile.role || 'student') === 'student'){
-    payload.grade_level = document.getElementById('gradeLevel').value || null;
+    fields.grade_level = document.getElementById('gradeLevel').value || null;
   }
-  const { error } = await sb.from('profiles').upsert(payload, { onConflict: 'id' });
-  if(error){ toast('Error: ' + error.message); return; }
-  currentProfile = { ...currentProfile, ...payload };
+  let res = await sb.from('profiles').update(fields).eq('id', currentUser.id).select('id');
+  if(!res.error && (!res.data || !res.data.length)){
+    // No profile row yet: create it (email is required by the table)
+    res = await sb.from('profiles').upsert(Object.assign({ id: currentUser.id, email: currentUser.email, role: currentProfile.role || 'student' }, fields), { onConflict: 'id' });
+  }
+  if(res.error){ toast('Error: ' + res.error.message); return; }
+  currentProfile = { ...currentProfile, ...fields };
   renderProfile();
   toast('Profile updated');
 }

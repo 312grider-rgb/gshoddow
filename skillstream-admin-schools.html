@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Schools — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --line:#E9E2D2; --danger:#A33A2B; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:#2B2B2B;}
+  header.top{background:var(--ink); color:var(--cream); padding:18px 16px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700;}
+  header.top h1{margin:4px 0 6px; font-size:22px; font-family:'Fraunces',serif;}
+  header.top a{color:var(--gold); font-size:13px; text-decoration:none;}
+  .wrap{padding:14px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px; overflow-wrap:anywhere;}
+  .card h2{margin:0 0 8px; font-size:17px; font-family:'Fraunces',serif; color:var(--ink);}
+  label{display:block; font-size:13px; font-weight:700; margin:12px 0 5px; color:var(--ink);}
+  input{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:15px;}
+  .btn{width:100%; border:0; border-radius:10px; padding:13px; font-weight:700; font-size:15px; cursor:pointer; background:var(--ink); color:#fff; margin-top:14px; font-family:inherit;}
+  .btn:disabled{opacity:.5;}
+  .name{font-weight:700; font-size:16px; color:var(--ink);}
+  .meta{font-size:12.5px; color:#6B6558; margin-top:2px;}
+  .msg{font-size:13.5px; margin-top:10px; min-height:18px;} .msg.err{color:var(--danger);} .msg.ok{color:#3F6B47;}
+  #lockedView,#adminView{display:none;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Admin</div>
+  <h1>Schools</h1>
+  <a href="skillstream-admin.html">&larr; Back to Admin</a>
+</header>
+<div class="wrap">
+  <div id="loadingView">Loading…</div>
+  <div id="lockedView"><h2>Admins only</h2><a href="skillstream-home.html">Go home</a></div>
+  <div id="adminView">
+    <div class="card">
+      <h2>Create a school</h2>
+      <p class="meta">The owner must already have an account. They become the school administrator and get the join codes in My school.</p>
+      <label for="sName">School name</label>
+      <input id="sName" type="text" maxlength="100">
+      <label for="sCountry">Country (optional)</label>
+      <input id="sCountry" type="text" maxlength="60">
+      <label for="sOwner">Owner's account email</label>
+      <input id="sOwner" type="email" inputmode="email" autocapitalize="none" dir="ltr">
+      <button class="btn" id="sCreate" type="button">Create school</button>
+      <div class="msg" id="sMsg" role="status"></div>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+<script>
+const sb = window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co', 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+const $ = id => document.getElementById(id);
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+async function loadList(){
+  const r = await sb.rpc('admin_list_schools');
+  const box = $('list'); box.textContent = '';
+  if(r.error){ box.appendChild(el('div', { class:'card', text:'Could not load schools.' })); return; }
+  const rows = r.data || [];
+  if(!rows.length){ box.appendChild(el('div', { class:'card', text:'No schools yet.' })); return; }
+  rows.forEach(s => box.appendChild(el('div', { class:'card' }, [
+    el('div', { class:'name', text:s.name }),
+    el('div', { class:'meta', text:(s.country || '—') + ' · ' + s.teachers + ' teachers · ' + s.students + ' students · ' + s.classes + ' classes' })
+  ])));
+}
+$('sCreate').onclick = async () => {
+  const name = $('sName').value.trim(), email = $('sOwner').value.trim();
+  const m = $('sMsg'); m.className = 'msg'; m.textContent = '';
+  if(name.length < 3 || !email){ m.className = 'msg err'; m.textContent = 'Please write the school name and the owner email.'; return; }
+  $('sCreate').disabled = true;
+  const r = await sb.rpc('admin_create_school', { p_name:name, p_country:$('sCountry').value.trim(), p_owner_email:email });
+  $('sCreate').disabled = false;
+  if(r.error){ m.className = 'msg err'; m.textContent = r.error.message || 'Could not create the school.'; return; }
+  m.className = 'msg ok'; m.textContent = 'School created. The owner can open More, then My school.';
+  $('sName').value = ''; $('sCountry').value = ''; $('sOwner').value = ''; loadList();
+};
+(async function(){
+  const s = await sb.auth.getSession();
+  if(!s.data.session){ window.location.href = 'skillstream-login.html'; return; }
+  const p = await sb.from('profiles').select('role').eq('id', s.data.session.user.id).maybeSingle();
+  $('loadingView').style.display = 'none';
+  if(!p.data || p.data.role !== 'admin'){ $('lockedView').style.display = 'block'; return; }
+  $('adminView').style.display = 'block'; loadList();
+})();
+</script>
+</body>
+</html>
