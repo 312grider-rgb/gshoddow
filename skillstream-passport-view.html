@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Shared Passport — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --charcoal:#2B2B2B; --line:#E9E2D2; --muted:#6B6558; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:40px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream); overflow-wrap:anywhere;}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:14px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; overflow-wrap:anywhere; min-width:0;}
+  .card p{margin:6px 0; font-size:14.5px; line-height:1.6;}
+  .note{background:#FBF4E2; border-radius:10px; padding:10px 12px; font-size:13.5px; line-height:1.55; margin:10px 0;}
+  .hint{font-size:12.5px; color:var(--muted); line-height:1.5;}
+  .hidden{display:none;}
+  .badge{display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:.3px; margin-inline-end:6px;}
+  .t-self{background:#FBF4E2; color:#8A6A1F;} .t-recorded{background:#E8F1EA; color:#3E6B48;} .t-reviewed{background:#E3ECF7; color:#24518C;}
+  .k{background:#EFE9DA; color:var(--ink);}
+  .entry h3{margin:6px 0 4px; font-size:16.5px;}
+  .entry .desc{font-size:14px; line-height:1.55; white-space:pre-wrap;}
+  .entry a{color:var(--ink); font-weight:600;}
+  .tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .tag{font-size:12px; background:#F3EEE2; border-radius:8px; padding:3px 8px;}
+  a.home{display:inline-block; margin-top:6px; color:var(--ink); font-weight:700;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1 id="who" data-no-i18n></h1>
+  <p id="sub">A passport shared by a learner.</p>
+</header>
+<div class="wrap">
+  <div id="loading" class="card">Loading…</div>
+  <div id="bad" class="card hidden"><p>This link is not valid or has expired.</p><a class="home" href="index.html">Learning Never Ends</a></div>
+  <div id="ok" class="hidden">
+    <div class="note">Entries marked "Said by me" are the learner's own claims. Only entries marked "Recorded by the app" were seen by the app. This is not a certificate and nobody has accredited it.</div>
+    <div id="list"></div>
+  </div>
+</div>
+<script>
+const sb = window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co', 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+const appLang = (window.LNE_I18N && LNE_I18N.lang) || 'en';
+const TRUST = { self:'Said by me', recorded:'Recorded by the app', reviewed:'Reviewed by a teacher' };
+const KIND = { project:'Project', skill:'Skill', milestone:'Milestone' };
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function safeUrl(u){ return typeof u === 'string' && /^https:\/\/[^\s"'<>`\\]+$/.test(u) ? u : null; }
+function fmtDate(d){ try { return new Date(d).toLocaleDateString(appLang === 'zh' ? 'zh-CN' : appLang, { year:'numeric', month:'short', day:'numeric' }); } catch(e){ return String(d); } }
+(async function(){
+  const t = new URLSearchParams(location.search).get('t');
+  let data = null;
+  if(t && /^[0-9a-f]{64}$/.test(t)){
+    try { const r = await sb.rpc('get_shared_passport', { p_token:t }); data = r && r.data; } catch(e){}
+  }
+  $('loading').classList.add('hidden');
+  if(!data){ $('bad').classList.remove('hidden'); $('who').textContent = ''; return; }
+  $('who').textContent = data.name;
+  const box = $('list');
+  const rows = data.entries || [];
+  if(!rows.length) box.appendChild(el('div', { class:'card' }, [ el('p', { class:'hint', text:T('This learner has not shared any entries yet.') }) ]));
+  rows.forEach(x => {
+    const c = el('div', { class:'card entry' });
+    c.appendChild(el('div', {}, [ el('span', { class:'badge t-' + (TRUST[x.trust_level] ? x.trust_level : 'self'), text:T(TRUST[x.trust_level] || TRUST.self) }), el('span', { class:'badge k', text:T(KIND[x.kind] || x.kind) }) ]));
+    c.appendChild(el('h3', { text:x.title, 'data-no-i18n':'' }));
+    if(x.description) c.appendChild(el('div', { class:'desc', text:x.description, 'data-no-i18n':'' }));
+    const u = safeUrl(x.evidence_url);
+    if(u) c.appendChild(el('p', {}, [ el('a', { href:u, target:'_blank', rel:'noopener noreferrer nofollow', text:u, dir:'ltr', 'data-no-i18n':'' }) ]));
+    if((x.skill_tags || []).length){ const g = el('div', { class:'tags' }); x.skill_tags.forEach(s => g.appendChild(el('span', { class:'tag', text:s, 'data-no-i18n':'' }))); c.appendChild(g); }
+    c.appendChild(el('div', { class:'hint', text:fmtDate(x.created_at), 'data-no-i18n':'' }));
+    box.appendChild(c);
+  });
+  $('ok').classList.remove('hidden');
+})();
+</script>
+</body>
+</html>

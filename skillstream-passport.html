@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Passport — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:14px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; overflow-wrap:anywhere; min-width:0;}
+  .card h2{margin:0 0 8px; font-size:18px;}
+  .card p{margin:6px 0; font-size:14.5px; line-height:1.6;}
+  label{display:block; font-size:13px; font-weight:700; color:var(--ink); margin:14px 0 6px;}
+  .hint{font-size:12.5px; color:var(--muted); font-weight:400; line-height:1.5;}
+  input[type=text], input[type=url], textarea{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:15px; background:#fff; color:var(--charcoal);}
+  textarea{min-height:84px; resize:vertical;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  .btn{background:var(--ink); color:#fff; border:none; border-radius:10px; padding:14px 18px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; margin-top:14px; width:100%; min-height:48px;}
+  .btn.alt{background:#fff; color:var(--ink); border:1.5px solid var(--ink);}
+  .btn.gold{background:var(--gold); color:var(--ink);}
+  .btn[disabled]{opacity:.55; cursor:default;}
+  .row{display:flex; gap:10px; flex-wrap:wrap;} .row .btn{margin-top:14px; flex:1 1 140px;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:999px; padding:10px 14px; font:inherit; font-size:13.5px; font-weight:600; cursor:pointer; min-height:44px;}
+  .chip[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .msg{font-size:13.5px; margin:10px 0 0; min-height:18px; line-height:1.5;}
+  .msg.err{color:var(--danger);} .msg.ok{color:#3F6B47;}
+  .note{background:#FBF4E2; border-radius:10px; padding:10px 12px; font-size:13.5px; line-height:1.55; margin:10px 0;}
+  .hidden{display:none;}
+  .stats{display:flex; gap:8px; margin-top:12px;}
+  .stat{flex:1; background:rgba(255,255,255,.08); border-radius:12px; padding:10px 6px; text-align:center;}
+  .stat b{display:block; font-family:'Fraunces',serif; font-size:22px; color:var(--gold);}
+  .stat span{font-size:11.5px; color:rgba(251,247,239,.85);}
+  .badge{display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:.3px; margin-inline-end:6px;}
+  .t-self{background:#FBF4E2; color:#8A6A1F;} .t-recorded{background:#E8F1EA; color:#3E6B48;} .t-reviewed{background:#E3ECF7; color:#24518C;}
+  .k{background:#EFE9DA; color:var(--ink);}
+  .entry h3{margin:6px 0 4px; font-size:16.5px;}
+  .entry .desc{font-size:14px; line-height:1.55; white-space:pre-wrap;}
+  .entry a{color:var(--ink); font-weight:600;}
+  .tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .tag{font-size:12px; background:#F3EEE2; border-radius:8px; padding:3px 8px;}
+  .share-row{display:flex; align-items:center; gap:10px; min-height:44px; margin-top:8px; font-size:14px; cursor:pointer;}
+  .share-row input{width:22px; height:22px; flex:none; accent-color:var(--sage);}
+  .linkbtn{background:none; border:none; color:var(--danger); font:inherit; font-size:13px; font-weight:600; cursor:pointer; padding:10px 12px 10px 0; min-height:44px;}
+  .linkbtn.edit{color:var(--ink);}
+  ul.legend{margin:8px 0; padding-inline-start:20px; font-size:14px; line-height:1.7;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>My Passport</h1>
+  <p>A private record of what you can do. You decide what, if anything, to share.</p>
+  <div class="stats" aria-live="polite">
+    <div class="stat"><b id="stAll">0</b><span>Entries</span></div>
+    <div class="stat"><b id="stRec">0</b><span>Recorded by the app</span></div>
+    <div class="stat"><b id="stShared">0</b><span>Shared</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="loading" class="card">Loading…</div>
+
+  <div id="main" class="hidden">
+    <div class="card">
+      <h2>How to read your passport</h2>
+      <ul class="legend">
+        <li><span class="badge t-self">Said by me</span> You wrote it. It is your own claim.</li>
+        <li><span class="badge t-recorded">Recorded by the app</span> The app saw it happen, for example a goal with every step ticked.</li>
+        <li><span class="badge t-reviewed">Reviewed by a teacher</span> A teacher checked it. This is coming in a later update.</li>
+      </ul>
+      <div class="note">This passport is not a certificate. Nobody has accredited it, and it does not promise a job, a scholarship or a result.</div>
+    </div>
+
+    <div class="card" id="formCard">
+      <h2 id="formTitle">Add to my passport</h2>
+      <p class="hint">Write something you really did or can do, and add a link to show it if you have one.</p>
+      <label for="eTitle">What is it?</label>
+      <input type="text" id="eTitle" maxlength="120">
+      <div id="kindWrap">
+        <label id="lKind">Type</label>
+        <div class="chips" id="chipsKind" role="group" aria-labelledby="lKind">
+          <button type="button" class="chip" data-v="project" aria-pressed="true">Project</button>
+          <button type="button" class="chip" data-v="skill" aria-pressed="false">Skill</button>
+          <button type="button" class="chip" data-v="milestone" aria-pressed="false">Milestone</button>
+        </div>
+      </div>
+      <label for="eDesc">What did you do or learn? <span class="hint">(optional)</span></label>
+      <textarea id="eDesc" maxlength="1000"></textarea>
+      <label for="eUrl">A link that shows it <span class="hint">(optional, must start with https://)</span></label>
+      <input type="url" id="eUrl" maxlength="300" inputmode="url" dir="ltr">
+      <label for="eTags">Skills <span class="hint">(optional, separate with commas, up to 5)</span></label>
+      <input type="text" id="eTags" maxlength="200">
+      <div class="row">
+        <button class="btn gold" id="eSave" type="button">Add to my passport</button>
+        <button class="btn alt hidden" id="eCancel" type="button">Cancel</button>
+      </div>
+      <div class="msg" id="eMsg" role="status"></div>
+    </div>
+
+    <div id="list"></div>
+
+    <div class="card">
+      <h2>Share my passport</h2>
+      <p class="hint">Only entries you tick "In my share link" can be seen. Visitors see your first name and the first letter of your last name, nothing else. The link stops working after 30 days, and you can switch it off at any time.</p>
+      <div id="shareBox"></div>
+      <div class="msg" id="sMsg" role="status"></div>
+    </div>
+
+    <div class="card">
+      <h2>Take my passport with me</h2>
+      <p class="hint">Download a copy of everything in your passport. It is yours.</p>
+      <button class="btn alt" id="dl" type="button">Download my passport</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/nav.js" defer></script>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+const appLang = (window.LNE_I18N && LNE_I18N.lang) || 'en';
+const TRUST = { self:'Said by me', recorded:'Recorded by the app', reviewed:'Reviewed by a teacher' };
+const KIND = { project:'Project', skill:'Skill', milestone:'Milestone' };
+const KNOWN = ['Please write a title of 3 to 120 characters.', 'Invalid type.', 'Your passport is full (200 entries).',
+  'Too many requests today. Please try again tomorrow.', 'Entry not found.'];
+let me = null, entries = [], share = null, editing = null, kind = 'project';
+
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function say(id, text, kind){ const m = $(id); m.className = 'msg' + (kind ? ' ' + kind : ''); m.textContent = text || ''; }
+function friendly(e){
+  const m = (e && e.message) || '';
+  if(KNOWN.indexOf(m) >= 0) return T(m);
+  if(/violates check constraint/i.test(m) && /evidence_url/.test(m)) return T('The link must start with https:// and have no spaces.');
+  try { console.error('LNE error', e); } catch(x){}
+  const code = e && (e.code || e.status) ? ' (' + String(e.code || e.status).slice(0, 12) + ')' : '';
+  return T('Something went wrong. Please try again.') + code;
+}
+function fmtDate(d){ try { return new Date(d).toLocaleDateString(appLang === 'zh' ? 'zh-CN' : appLang, { year:'numeric', month:'short', day:'numeric' }); } catch(e){ return String(d); } }
+function safeUrl(u){ return typeof u === 'string' && /^https:\/\/[^\s"'<>`\\]+$/.test(u) ? u : null; }
+function parseTags(s){ return String(s || '').split(/[,،]/).map(x => x.trim()).filter(x => x.length >= 2).slice(0, 5); }
+
+function setKind(k){
+  kind = k;
+  document.querySelectorAll('#chipsKind .chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.v === k ? 'true' : 'false'));
+}
+document.querySelectorAll('#chipsKind .chip').forEach(c => c.onclick = () => setKind(c.dataset.v));
+
+function paintStats(){
+  $('stAll').textContent = entries.length;
+  $('stRec').textContent = entries.filter(x => x.trust_level !== 'self').length;
+  $('stShared').textContent = entries.filter(x => x.shared).length;
+}
+function entryCard(x){
+  const c = el('div', { class:'card entry' });
+  c.appendChild(el('div', {}, [ el('span', { class:'badge t-' + x.trust_level, text:T(TRUST[x.trust_level] || x.trust_level) }), el('span', { class:'badge k', text:T(KIND[x.kind] || x.kind) }) ]));
+  c.appendChild(el('h3', { text:x.title, 'data-no-i18n':'' }));
+  if(x.description) c.appendChild(el('div', { class:'desc', text:x.description, 'data-no-i18n':'' }));
+  const u = safeUrl(x.evidence_url);
+  if(u) c.appendChild(el('p', {}, [ el('a', { href:u, target:'_blank', rel:'noopener noreferrer', text:u, dir:'ltr', 'data-no-i18n':'' }) ]));
+  if((x.skill_tags || []).length){
+    const t = el('div', { class:'tags' }); x.skill_tags.forEach(s => t.appendChild(el('span', { class:'tag', text:s, 'data-no-i18n':'' }))); c.appendChild(t);
+  }
+  const cb = el('input', { type:'checkbox' }); cb.checked = !!x.shared;
+  cb.onchange = async () => {
+    cb.disabled = true;
+    const r = await sb.rpc('set_passport_shared', { p_id:x.id, p_shared:cb.checked });
+    cb.disabled = false;
+    if(r.error){ cb.checked = !cb.checked; say('sMsg', friendly(r.error), 'err'); return; }
+    x.shared = cb.checked; paintStats();
+  };
+  c.appendChild(el('label', { class:'share-row' }, [ cb, el('span', { text:T('In my share link') }) ]));
+  const acts = el('div', {});
+  if(x.trust_level === 'self'){
+    const ed = el('button', { type:'button', class:'linkbtn edit', text:T('Edit') });
+    ed.onclick = () => startEdit(x);
+    acts.appendChild(ed);
+  }
+  const del = el('button', { type:'button', class:'linkbtn', text:T('Delete') });
+  del.onclick = async () => {
+    if(!confirm(T('Delete this entry? This cannot be undone.'))) return;
+    const r = await sb.from('passport_entries').delete().eq('id', x.id);
+    if(r.error){ say('sMsg', friendly(r.error), 'err'); return; }
+    loadAll();
+  };
+  acts.appendChild(del);
+  c.appendChild(acts);
+  return c;
+}
+function paintList(){
+  const box = $('list'); box.textContent = '';
+  if(!entries.length){
+    box.appendChild(el('div', { class:'card' }, [ el('p', { class:'hint', text:T('Nothing here yet. Add your first entry above. Goals you finish and topics you master will appear here by themselves.') }) ]));
+    return;
+  }
+  entries.forEach(x => box.appendChild(entryCard(x)));
+}
+function startEdit(x){
+  editing = x;
+  $('formTitle').textContent = T('Edit this entry');
+  $('eTitle').value = x.title; $('eDesc').value = x.description || ''; $('eUrl').value = x.evidence_url || ''; $('eTags').value = (x.skill_tags || []).join(', ');
+  setKind(x.kind); $('kindWrap').classList.add('hidden');
+  $('eSave').textContent = T('Save changes'); $('eCancel').classList.remove('hidden');
+  $('formCard').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+function resetForm(){
+  editing = null;
+  $('formTitle').textContent = T('Add to my passport');
+  ['eTitle','eDesc','eUrl','eTags'].forEach(i => $(i).value = '');
+  setKind('project'); $('kindWrap').classList.remove('hidden');
+  $('eSave').textContent = T('Add to my passport'); $('eCancel').classList.add('hidden');
+}
+$('eCancel').onclick = () => { resetForm(); say('eMsg', ''); };
+$('eSave').onclick = async () => {
+  const title = $('eTitle').value.trim(), desc = $('eDesc').value.trim(), url = $('eUrl').value.trim(), tags = parseTags($('eTags').value);
+  if(title.length < 3){ say('eMsg', T('Please write a title of 3 to 120 characters.'), 'err'); return; }
+  if(url && !safeUrl(url)){ say('eMsg', T('The link must start with https:// and have no spaces.'), 'err'); return; }
+  $('eSave').disabled = true;
+  const r = editing
+    ? await sb.rpc('update_passport_entry', { p_id:editing.id, p_title:title, p_desc:desc, p_url:url, p_tags:tags })
+    : await sb.rpc('add_passport_entry', { p_title:title, p_kind:kind, p_desc:desc, p_url:url, p_tags:tags });
+  $('eSave').disabled = false;
+  if(r.error){ say('eMsg', friendly(r.error), 'err'); return; }
+  say('eMsg', editing ? T('Saved.') : T('Added to your passport.'), 'ok');
+  resetForm(); loadAll();
+};
+
+/* ---------- sharing ---------- */
+function shareUrl(token){ return location.origin + '/skillstream-passport-view.html?t=' + token; }
+function paintShare(){
+  const b = $('shareBox'); b.textContent = '';
+  const live = share && new Date(share.expires_at).getTime() > Date.now();
+  if(!live){
+    const mk = el('button', { type:'button', class:'btn gold', text:T('Create my share link') });
+    mk.onclick = async () => {
+      mk.disabled = true;
+      const r = await sb.rpc('create_passport_share');
+      if(r.error){ mk.disabled = false; say('sMsg', friendly(r.error), 'err'); return; }
+      say('sMsg', ''); loadShare();
+    };
+    b.appendChild(mk);
+    return;
+  }
+  const inp = el('input', { type:'text', readonly:'', value:shareUrl(share.token), dir:'ltr', 'aria-label':T('My share link') });
+  inp.onfocus = () => inp.select();
+  b.appendChild(inp);
+  b.appendChild(el('p', { class:'hint' }, [ el('span', { text:T('Works until') + ' ' }), el('span', { text:fmtDate(share.expires_at), 'data-no-i18n':'' }) ]));
+  const row = el('div', { class:'row' });
+  const cp = el('button', { type:'button', class:'btn', text:T('Copy link') });
+  cp.onclick = async () => {
+    try { await navigator.clipboard.writeText(inp.value); say('sMsg', T('Copied.'), 'ok'); }
+    catch(e){ inp.focus(); inp.select(); say('sMsg', T('Press and hold the link to copy it.'), ''); }
+  };
+  const off = el('button', { type:'button', class:'btn alt', text:T('Switch off my link') });
+  off.onclick = async () => {
+    if(!confirm(T('Switch off your share link? People who have it will no longer see your passport.'))) return;
+    const r = await sb.from('passport_shares').delete().eq('user_id', me.id);
+    if(r.error){ say('sMsg', friendly(r.error), 'err'); return; }
+    say('sMsg', T('Your link is off.'), 'ok'); share = null; paintShare();
+  };
+  row.appendChild(cp); row.appendChild(off); b.appendChild(row);
+}
+async function loadShare(){
+  const r = await sb.from('passport_shares').select('token,expires_at').maybeSingle();
+  share = r && r.data ? r.data : null; paintShare();
+}
+
+/* ---------- download ---------- */
+$('dl').onclick = () => {
+  const out = { format:'lne-passport', version:1, exported_at:new Date().toISOString(),
+    note:'Self-reported entries are claims by the learner. Only entries marked "recorded" were seen by the app. This is not a certificate.',
+    entries: entries.map(x => ({ title:x.title, type:x.kind, description:x.description, evidence_url:x.evidence_url, skills:x.skill_tags, trust:x.trust_level, shared:x.shared, created_at:x.created_at })) };
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type:'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'my-passport.json';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+
+async function loadAll(){
+  const r = await sb.from('passport_entries').select('id,title,kind,description,evidence_url,skill_tags,trust_level,shared,created_at').order('created_at', { ascending:false });
+  entries = (r && r.data) || []; paintStats(); paintList();
+}
+(async function init(){
+  const s = await sb.auth.getSession();
+  const session = s && s.data && s.data.session;
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  me = session.user;
+  try { await sb.rpc('sync_passport'); } catch(e){}
+  await loadAll(); await loadShare();
+  $('loading').classList.add('hidden'); $('main').classList.remove('hidden');
+  $('eTitle').placeholder = T('For example: I built a small website');
+})();
+</script>
+</body>
+</html>
