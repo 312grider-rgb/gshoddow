@@ -39,6 +39,18 @@ html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;fo
 .nav-btn:hover{border-color:var(--accent);color:var(--text)}
 .page{max-width:760px;margin:0 auto;padding:28px 18px 60px}
 .hidden{display:none !important}
+.att-date{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.att-day{flex:1;text-align:center;font-weight:800;font-size:14px;min-width:0}
+.att-hint{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 10px}
+.att-row{padding:10px 0;border-top:1px solid var(--border)}
+.att-row:first-child{border-top:none}
+.att-name{font-weight:700;font-size:14px;overflow-wrap:anywhere}
+.att-stats{font-size:11.5px;color:var(--muted);margin:2px 0 6px}
+.att-chips{display:flex;flex-wrap:wrap;gap:6px}
+.att-chip{border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:8px 12px;font-size:12.5px;font-weight:700;cursor:pointer;min-height:40px;font-family:inherit}
+.att-chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.att-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.att-actions .btn{flex:1 1 140px}
 h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:4px}
 .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
 .action-row{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
@@ -173,6 +185,7 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
       <div class="tab" data-tab="grades" onclick="switchTab('grades')">Grades</div>
       <div class="tab" data-tab="chat" onclick="switchTab('chat')">Chat</div>
       <div class="tab" data-tab="people" onclick="switchTab('people')">People</div>
+      <div class="tab hidden" data-tab="attendance" id="tabAttBtn" onclick="switchTab('attendance')">Attendance</div>
     </div>
 
     <div id="tab-stream">
@@ -200,6 +213,22 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
       <div style="display:flex;gap:8px;margin-top:10px">
         <input type="text" id="chatInput" placeholder="Message the class…" style="flex:1" onkeydown="if(event.key==='Enter'){sendChat();}"/>
         <button class="btn btn-primary" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+
+    <div id="tab-attendance" class="hidden">
+      <div class="card">
+        <div class="att-date">
+          <button type="button" class="btn btn-ghost" id="attPrev" aria-label="Previous day">&#8249;</button>
+          <div class="att-day" id="attDay" data-no-i18n></div>
+          <button type="button" class="btn btn-ghost" id="attNext" aria-label="Next day">&#8250;</button>
+        </div>
+        <div class="att-hint">Tap a status for each student, then save. Only you can see the whole class. Each student sees only their own marks.</div>
+        <div id="attList"></div>
+        <div class="att-actions">
+          <button type="button" class="btn btn-ghost" id="attAll">Mark everyone present</button>
+          <button type="button" class="btn btn-primary" id="attSave">Save attendance</button>
+        </div>
       </div>
     </div>
 
@@ -414,6 +443,7 @@ async function renderDetail() {
   document.getElementById('dName').textContent = c.name;
   document.getElementById('dMeta').textContent = (c.subject || 'General') + ' · ' + (teaching ? 'You are the teacher' : 'Taught by ' + c.teacherName);
   document.getElementById('dCodeBox').classList.toggle('hidden', !teaching);
+  document.getElementById('tabAttBtn').classList.toggle('hidden', !teaching);
   document.getElementById('dCode').textContent = c.code;
 
   // Stream tab
@@ -552,10 +582,71 @@ function renderAssignment(c, a, teaching) {
 
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  ['stream', 'assignments', 'quizzes', 'grades', 'chat', 'people'].forEach(t => document.getElementById('tab-' + t).classList.toggle('hidden', t !== name));
+  ['stream', 'assignments', 'quizzes', 'grades', 'chat', 'people', 'attendance'].forEach(t => document.getElementById('tab-' + t).classList.toggle('hidden', t !== name));
+  if (name === 'attendance') renderAttendance();
   if (name === 'grades') renderGrades();
   if (name === 'chat') renderChat();
 }
+
+/* ---------- ATTENDANCE (teacher only; marks are saved by a database function that checks the teacher) ---------- */
+const ATT_STATUS = [['present','Present'],['late','Late'],['absent','Absent'],['excused','Excused']];
+let attOffset = 0, attMarks = {}, attHist = {};
+function attIso(off) { const d = new Date(); d.setDate(d.getDate() + off); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function attLabel(off) {
+  const d = new Date(); d.setDate(d.getDate() + off);
+  const base = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  return off === 0 ? base : base;
+}
+async function renderAttendance() {
+  const c = currentClassroom; if (!c || !isTeacherOfCurrent(c)) return;
+  const db = SSAuth.client;
+  document.getElementById('attDay').textContent = attLabel(attOffset);
+  document.getElementById('attNext').disabled = attOffset >= 0;
+  document.getElementById('attPrev').disabled = attOffset <= -60;
+  const day = attIso(attOffset), since = attIso(-60);
+  const r = await db.from('class_attendance').select('student_id,day,status').eq('classroom_id', c.id).gte('day', since);
+  const rows = (r && r.data) || [];
+  attMarks = {}; attHist = {};
+  rows.forEach(x => {
+    if (x.day === day) attMarks[x.student_id] = x.status;
+    attHist[x.student_id] = attHist[x.student_id] || { present:0, late:0, absent:0, excused:0 };
+    if (attHist[x.student_id][x.status] !== undefined) attHist[x.student_id][x.status]++;
+  });
+  paintAttendance();
+}
+function paintAttendance() {
+  const c = currentClassroom, box = document.getElementById('attList'); box.textContent = '';
+  if (!c.students.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'No students enrolled yet. Share the class code!'; box.appendChild(e); return; }
+  c.students.forEach(s => {
+    const row = document.createElement('div'); row.className = 'att-row';
+    const nm = document.createElement('div'); nm.className = 'att-name'; nm.textContent = s.name; nm.setAttribute('data-no-i18n', ''); row.appendChild(nm);
+    const h = attHist[s.email] || { present:0, late:0, absent:0, excused:0 };
+    const st = document.createElement('div'); st.className = 'att-stats'; st.setAttribute('data-no-i18n', '');
+    st.textContent = ATT_STATUS.map(a => ((window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(a[1]) : a[1]) + ' ' + h[a[0]]).join(' · ');
+    row.appendChild(st);
+    const chips = document.createElement('div'); chips.className = 'att-chips'; chips.setAttribute('role', 'group');
+    ATT_STATUS.forEach(a => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'att-chip'; b.textContent = a[1];
+      b.setAttribute('aria-pressed', attMarks[s.email] === a[0] ? 'true' : 'false');
+      b.onclick = () => { attMarks[s.email] = a[0]; chips.querySelectorAll('.att-chip').forEach((x, i) => x.setAttribute('aria-pressed', ATT_STATUS[i][0] === a[0] ? 'true' : 'false')); };
+      chips.appendChild(b);
+    });
+    row.appendChild(chips); box.appendChild(row);
+  });
+}
+document.getElementById('attPrev').onclick = () => { if (attOffset > -60) { attOffset--; renderAttendance(); } };
+document.getElementById('attNext').onclick = () => { if (attOffset < 0) { attOffset++; renderAttendance(); } };
+document.getElementById('attAll').onclick = () => { const c = currentClassroom; if (!c) return; c.students.forEach(s => { attMarks[s.email] = 'present'; }); paintAttendance(); };
+document.getElementById('attSave').onclick = async () => {
+  const c = currentClassroom; if (!c) return;
+  const marks = c.students.filter(s => attMarks[s.email]).map(s => ({ student_id: s.email, status: attMarks[s.email] }));
+  if (!marks.length) { showToast('Mark at least one student first.', true); return; }
+  const btn = document.getElementById('attSave'); btn.disabled = true;
+  const r = await SSAuth.client.rpc('mark_attendance', { p_class: c.id, p_day: attIso(attOffset), p_marks: marks });
+  btn.disabled = false;
+  if (r.error) { showToast('Could not save attendance. Please try again.', true); return; }
+  showToast('Attendance saved.'); renderAttendance();
+};
 
 /* ---------- QUIZZES ---------- */
 function renderQuizzes() {

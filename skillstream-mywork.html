@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My work — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .stats{display:flex; gap:8px; margin-top:12px;}
+  .stat{flex:1; background:rgba(255,255,255,.08); border-radius:12px; padding:10px 6px; text-align:center;}
+  .stat b{display:block; font-family:'Fraunces',serif; font-size:22px; color:var(--gold);}
+  .stat span{font-size:11.5px; color:rgba(251,247,239,.85);}
+  .wrap{padding:14px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; overflow-wrap:anywhere; min-width:0;}
+  .card h2{margin:0 0 8px; font-size:18px;}
+  .hint{font-size:13px; color:var(--muted); line-height:1.5;}
+  .item{display:block; padding:12px 0; border-top:1px solid var(--line); color:inherit; text-decoration:none;}
+  .item:first-of-type{border-top:none;}
+  .item .t{font-weight:700; color:var(--ink); font-size:15px; line-height:1.4;}
+  .item .m{font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.5;}
+  .item .fb{font-size:13.5px; background:#F7F3EA; border-radius:10px; padding:8px 10px; margin-top:6px; white-space:pre-wrap; line-height:1.5;}
+  .badge{display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; margin-inline-start:6px;}
+  .b-late{background:#FBEAE5; color:#9A3D2B;} .b-soon{background:#FBF4E2; color:#8A6A1F;} .b-ok{background:#E8F1EA; color:#3E6B48;}
+  .note{background:#FBF4E2; border-radius:10px; padding:10px 12px; font-size:13.5px; line-height:1.55; margin:10px 0;}
+  a.go{display:inline-block; margin-top:8px; color:var(--ink); font-weight:700;}
+  .hidden{display:none;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>My work</h1>
+  <p>Everything your teachers asked of you, from all your classes, in one place.</p>
+  <div class="stats" aria-live="polite">
+    <div class="stat"><b id="stTodo">0</b><span>To do</span></div>
+    <div class="stat"><b id="stWait">0</b><span>Waiting for a grade</span></div>
+    <div class="stat"><b id="stGraded">0</b><span>Graded</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="loading" class="card">Loading…</div>
+  <div id="err" class="card hidden"><p class="hint">Could not load your work. Please try again.</p></div>
+  <div id="main" class="hidden">
+    <div id="noClass" class="card hidden">
+      <h2>No classes yet</h2>
+      <p class="hint">When you join a class with a code from your teacher, its assignments and quizzes appear here.</p>
+      <a class="go" href="skillstream-classrooms.html">Go to my classes</a>
+    </div>
+    <div class="card" id="cTodo"><h2>To do</h2><div id="lTodo"></div></div>
+    <div class="card" id="cQuiz"><h2>Quizzes to take</h2><div id="lQuiz"></div></div>
+    <div class="card" id="cWait"><h2>Waiting for your teacher</h2><div id="lWait"></div></div>
+    <div class="card" id="cGraded"><h2>Graded</h2><div id="lGraded"></div></div>
+    <div class="card" id="cAtt"><h2>My attendance</h2><p class="hint">Only you and your teacher can see this. It covers the last 60 days.</p><div id="lAtt"></div></div>
+  </div>
+</div>
+
+<script src="js/nav.js" defer></script>
+<script>
+const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+const appLang = (window.LNE_I18N && LNE_I18N.lang) || 'en';
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function fmtDate(d){ try { return new Date(String(d).length <= 10 ? d + 'T00:00:00' : d).toLocaleDateString(appLang === 'zh' ? 'zh-CN' : appLang, { month:'short', day:'numeric', year:'numeric' }); } catch(e){ return String(d); } }
+function dayDiff(due){ const t = new Date(); t.setHours(0,0,0,0); return Math.round((new Date(due + 'T00:00:00') - t) / 86400000); }
+const STATUS = [['present','Present'],['late','Late'],['absent','Absent'],['excused','Excused']];
+
+function fill(listId, cardId, rows, emptyText){
+  const box = $(listId); box.textContent = '';
+  if(!rows.length){ box.appendChild(el('p', { class:'hint', text:T(emptyText) })); return; }
+  rows.forEach(r => box.appendChild(r));
+}
+function item(title, cls, parts, extra){
+  const a = el('a', { class:'item', href:'skillstream-classrooms.html' });
+  const t = el('div', { class:'t' }, [ el('span', { text:title, 'data-no-i18n':'' }) ].concat(extra || []));
+  a.appendChild(t);
+  a.appendChild(el('div', { class:'m' }, parts));
+  return a;
+}
+const span = (text, noI18n) => el('span', noI18n ? { text, 'data-no-i18n':'' } : { text });
+
+async function load(){
+  const s = await sb.auth.getSession();
+  const session = s && s.data && s.data.session;
+  if(!session){ window.location.href = 'skillstream-login.html'; return; }
+  const me = session.user;
+  const mem = await sb.from('classroom_members').select('classroom_id').eq('student_id', me.id);
+  if(mem.error) throw mem.error;
+  const ids = ((mem.data) || []).map(x => x.classroom_id);
+  $('loading').classList.add('hidden'); $('main').classList.remove('hidden');
+  if(!ids.length){
+    $('noClass').classList.remove('hidden');
+    ['cTodo','cQuiz','cWait','cGraded','cAtt'].forEach(i => $(i).classList.add('hidden'));
+    return;
+  }
+  const since = new Date(); since.setDate(since.getDate() - 60);
+  const sinceIso = since.getFullYear() + '-' + String(since.getMonth() + 1).padStart(2, '0') + '-' + String(since.getDate()).padStart(2, '0');
+  const [cl, as, su, qz, qr, at] = await Promise.all([
+    sb.from('classrooms').select('id,name').in('id', ids),
+    sb.from('assignments').select('id,classroom_id,title,due_date,points').in('classroom_id', ids).order('due_date', { ascending:true }),
+    sb.from('submissions').select('assignment_id,grade,feedback,submitted_at,graded_at').eq('user_id', me.id),
+    sb.from('quizzes').select('id,classroom_id,title').in('classroom_id', ids),
+    sb.from('quiz_results').select('quiz_id,score').eq('user_id', me.id),
+    sb.from('class_attendance').select('classroom_id,status,day').eq('student_id', me.id).gte('day', sinceIso)
+  ]);
+  [cl, as, su, qz, qr].forEach(r => { if(r.error) throw r.error; });
+  const names = {}; (cl.data || []).forEach(c => { names[c.id] = c.name; });
+  const subs = {}; (su.data || []).forEach(x => { subs[x.assignment_id] = x; });
+  const done = {}; (qr.data || []).forEach(x => { done[x.quiz_id] = x; });
+
+  const todo = [], wait = [], graded = [];
+  (as.data || []).forEach(a => {
+    const sub = subs[a.id];
+    const cls = span(names[a.classroom_id] || '', true);
+    if(!sub){
+      const parts = [ cls ];
+      const extra = [];
+      if(a.due_date){
+        const d = dayDiff(a.due_date);
+        parts.push(span(' · ')); parts.push(span(T('Due') + ' ' + fmtDate(a.due_date), true));
+        if(d < 0) extra.push(el('span', { class:'badge b-late', text:T('Overdue') }));
+        else if(d <= 2) extra.push(el('span', { class:'badge b-soon', text:T('Due soon') }));
+      }
+      todo.push(item(a.title, '', parts, extra));
+    } else if(sub.grade === null || sub.grade === undefined){
+      wait.push(item(a.title, '', [ cls, span(' · '), span(T('Sent') + ' ' + fmtDate(sub.submitted_at), true) ]));
+    } else {
+      const it = item(a.title, '', [ cls, span(' · '), span(T('Grade') + ': ' + sub.grade + (a.points ? ' / ' + a.points : ''), true) ]);
+      if(sub.feedback) it.appendChild(el('div', { class:'fb', text:sub.feedback, 'data-no-i18n':'' }));
+      graded.push(it);
+    }
+  });
+  const quizzes = (qz.data || []).filter(q => !done[q.id]).map(q => item(q.title, '', [ span(names[q.classroom_id] || '', true) ]));
+
+  fill('lTodo', 'cTodo', todo, 'Nothing to do right now. Well done!');
+  fill('lQuiz', 'cQuiz', quizzes, 'No quizzes waiting.');
+  fill('lWait', 'cWait', wait, 'Nothing is waiting for a grade.');
+  fill('lGraded', 'cGraded', graded, 'No graded work yet.');
+  $('stTodo').textContent = todo.length + quizzes.length; $('stWait').textContent = wait.length; $('stGraded').textContent = graded.length;
+
+  // attendance per class
+  const per = {};
+  (at.data || []).forEach(x => { per[x.classroom_id] = per[x.classroom_id] || { present:0, late:0, absent:0, excused:0 }; if(per[x.classroom_id][x.status] !== undefined) per[x.classroom_id][x.status]++; });
+  const att = [];
+  Object.keys(per).forEach(cid => {
+    const h = per[cid];
+    att.push(item(names[cid] || '', '', [ span(STATUS.map(s => T(s[1]) + ' ' + h[s[0]]).join(' · '), true) ]));
+  });
+  fill('lAtt', 'cAtt', att, 'No attendance has been marked yet.');
+}
+load().catch(e => { try { console.error('LNE error', e); } catch(x){} $('loading').classList.add('hidden'); $('err').classList.remove('hidden'); });
+</script>
+</body>
+</html>
