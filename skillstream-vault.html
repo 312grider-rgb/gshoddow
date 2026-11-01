@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>My Vault — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:#2B2B2B; padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:14px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px; overflow-wrap:anywhere; min-width:0;}
+  .hint{font-size:13px; color:var(--muted); line-height:1.55;}
+  input[type=text],input[type=search],select,textarea{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:15px; background:#fff;}
+  textarea{min-height:180px; line-height:1.5;}
+  label.f{display:block; font-size:13px; font-weight:700; margin:12px 0 5px; color:var(--ink);}
+  .btn{border:0; border-radius:10px; padding:12px 14px; font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; min-height:44px; background:var(--ink); color:#fff; margin-top:10px; margin-inline-end:8px;}
+  .btn.alt{background:#fff; color:var(--ink); border:1.5px solid var(--ink);} .btn.del{background:#fff; color:var(--danger); border:1.5px solid var(--danger);}
+  .btn:disabled{opacity:.5;}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;}
+  .chip{border:1.5px solid var(--line); background:#fff; border-radius:20px; padding:8px 13px; font:inherit; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer; min-height:38px;}
+  .chip[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .note{display:block; width:100%; text-align:start; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px; cursor:pointer; font:inherit; color:inherit; overflow-wrap:anywhere;}
+  .note .t{font-weight:700; color:var(--ink); font-size:15px;}
+  .note .s{font-size:13px; color:var(--muted); margin-top:4px; line-height:1.5;}
+  .note .m{font-size:11.5px; color:var(--muted); margin-top:6px;}
+  .inl{display:flex; align-items:center; gap:8px; margin-top:12px; font-weight:600; font-size:14px;} .inl input{width:auto;}
+  .msg{font-size:13.5px; margin-top:10px; min-height:18px;} .msg.err{color:var(--danger);} .msg.ok{color:#3E6B48;}
+  .hidden{display:none;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>My Vault</h1>
+  <p>A private place for your notes, questions, ideas and useful links. Only you can read it.</p>
+</header>
+<div class="wrap">
+  <div id="loading" class="card">Loading…</div>
+  <div id="err" class="card hidden"><p class="hint">Could not load your Vault. Please try again.</p></div>
+
+  <div id="listView" class="hidden">
+    <button class="btn" id="newBtn" type="button">New note</button>
+    <input id="q" type="search" maxlength="80" aria-label="Search my notes" placeholder="Search my notes" style="margin-top:10px">
+    <div class="chips" id="tagChips" role="group" aria-label="Tags"></div>
+    <div id="notes"></div>
+    <button class="btn alt hidden" id="more" type="button">Show more</button>
+    <div class="card" style="margin-top:16px">
+      <p class="hint" style="margin:0">Your notes are private. Teachers, parents, schools and our team cannot read them. You can download them or delete them all at any time.</p>
+      <button class="btn alt" id="exportBtn" type="button">Download my notes</button>
+      <button class="btn del" id="wipeBtn" type="button">Delete all my notes</button>
+      <div class="msg" id="listMsg" role="status"></div>
+    </div>
+  </div>
+
+  <div id="editView" class="card hidden">
+    <label class="f" for="eTitle">Title</label>
+    <input id="eTitle" type="text" maxlength="120">
+    <label class="f" for="eKind">Type</label>
+    <select id="eKind"><option value="note">Note</option><option value="question">Question</option><option value="idea">Idea</option><option value="resource">Useful link or resource</option></select>
+    <label class="f" for="eBody">Your text</label>
+    <textarea id="eBody" maxlength="5000"></textarea>
+    <label class="f" for="eTags">Tags (separate with commas, up to 5)</label>
+    <input id="eTags" type="text" maxlength="200">
+    <label class="inl"><input type="checkbox" id="ePin"> <span>Keep at the top</span></label>
+    <div>
+      <button class="btn" id="eSave" type="button">Save</button>
+      <button class="btn alt" id="eBack" type="button">Back</button>
+      <button class="btn alt hidden" id="eReview" type="button">Add to my review topics</button>
+      <button class="btn del hidden" id="eDel" type="button">Delete</button>
+    </div>
+    <div class="msg" id="eMsg" role="status"></div>
+  </div>
+</div>
+<script src="js/nav.js" defer></script>
+<script>
+const sb = window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co', 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+const appLang = (window.LNE_I18N && LNE_I18N.lang) || 'en';
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function say(id, text, ok){ const m = $(id); m.className = 'msg ' + (ok ? 'ok' : 'err'); m.textContent = text; }
+function fmtDate(d){ try { return new Date(d).toLocaleDateString(appLang === 'zh' ? 'zh-CN' : appLang, { month:'short', day:'numeric', year:'numeric' }); } catch(e){ return String(d); } }
+const KIND = { note:'Note', question:'Question', idea:'Idea', resource:'Useful link or resource' };
+let EDIT = null, TAG = '', OFFSET = 0, TIMER = null;
+
+function show(v){ ['listView','editView'].forEach(i => $(i).classList.toggle('hidden', i !== v)); }
+
+async function loadTags(){
+  const r = await sb.rpc('vault_tags'); const box = $('tagChips'); box.textContent = '';
+  if(r.error || !(r.data || []).length) return;
+  const all = el('button', { class:'chip', type:'button', 'aria-pressed':TAG === '' ? 'true' : 'false', text:T('All') });
+  all.onclick = () => { TAG = ''; loadTags(); loadList(true); };
+  box.appendChild(all);
+  r.data.forEach(t => {
+    const b = el('button', { class:'chip', type:'button', 'aria-pressed':TAG === t.tag ? 'true' : 'false', text:t.tag, 'data-no-i18n':'' });
+    b.onclick = () => { TAG = TAG === t.tag ? '' : t.tag; loadTags(); loadList(true); };
+    box.appendChild(b);
+  });
+}
+async function loadList(reset){
+  if(reset) OFFSET = 0;
+  const r = await sb.rpc('vault_list', { p_q:$('q').value.trim(), p_tag:TAG, p_offset:OFFSET });
+  if(r.error) throw r.error;
+  const box = $('notes'); if(reset) box.textContent = '';
+  const rows = r.data || [];
+  if(reset && !rows.length){
+    box.appendChild(el('div', { class:'card' }, [ el('p', { class:'hint', style:'margin:0', text:T($('q').value.trim() || TAG ? 'No notes match.' : 'Your Vault is empty. Press New note to write your first one.') }) ]));
+  }
+  rows.forEach(n => {
+    const b = el('button', { class:'note', type:'button' }, [
+      el('div', { class:'t', text:(n.pinned ? '★ ' : '') + n.title, 'data-no-i18n':'' }),
+      n.snippet ? el('div', { class:'s', text:n.snippet, 'data-no-i18n':'' }) : el('span'),
+      el('div', { class:'m' }, [ el('span', { text:T(KIND[n.kind] || 'Note') }), el('span', { text:' · ' + fmtDate(n.updated_at) + (n.tags && n.tags.length ? ' · ' + n.tags.join(', ') : ''), 'data-no-i18n':'' }) ])
+    ]);
+    b.onclick = () => openNote(n.id);
+    box.appendChild(b);
+  });
+  OFFSET += rows.length;
+  $('more').classList.toggle('hidden', rows.length < 50);
+}
+function blank(){
+  EDIT = null; $('eTitle').value = ''; $('eKind').value = 'note'; $('eBody').value = ''; $('eTags').value = ''; $('ePin').checked = false; $('eMsg').textContent = '';
+  $('eDel').classList.add('hidden'); $('eReview').classList.add('hidden');
+}
+async function openNote(id){
+  const r = await sb.from('vault_notes').select('*').eq('id', id).maybeSingle();
+  if(r.error || !r.data){ say('listMsg', T('Something went wrong. Please try again.'), false); return; }
+  blank(); const n = r.data; EDIT = n.id;
+  $('eTitle').value = n.title; $('eKind').value = n.kind; $('eBody').value = n.body || ''; $('eTags').value = (n.tags || []).join(', '); $('ePin').checked = !!n.pinned;
+  $('eDel').classList.remove('hidden'); $('eReview').classList.remove('hidden');
+  show('editView'); window.scrollTo(0, 0);
+}
+$('newBtn').onclick = () => { blank(); show('editView'); $('eTitle').focus(); };
+$('eBack').onclick = async () => { show('listView'); await loadTags(); await loadList(true); };
+$('eSave').onclick = async () => {
+  const title = $('eTitle').value.trim();
+  if(!title){ say('eMsg', T('Please write a title.'), false); return; }
+  const tags = $('eTags').value.split(',').map(x => x.trim()).filter(Boolean);
+  if(tags.length > 5){ say('eMsg', T('Please use at most 5 tags.'), false); return; }
+  $('eSave').disabled = true;
+  const r = await sb.rpc('vault_save', { p_id:EDIT, p_kind:$('eKind').value, p_title:title, p_body:$('eBody').value, p_tags:tags, p_pinned:$('ePin').checked });
+  $('eSave').disabled = false;
+  if(r.error){ say('eMsg', r.error.message || T('Something went wrong. Please try again.'), false); return; }
+  EDIT = r.data; $('eDel').classList.remove('hidden'); $('eReview').classList.remove('hidden');
+  say('eMsg', T('Saved.'), true);
+};
+$('eDel').onclick = async () => {
+  if(!EDIT || !confirm(T('Delete this note for good?'))) return;
+  const r = await sb.rpc('vault_delete', { p_id:EDIT });
+  if(r.error){ say('eMsg', r.error.message, false); return; }
+  blank(); show('listView'); await loadTags(); await loadList(true);
+};
+$('eReview').onclick = async () => {
+  const r = await sb.rpc('add_review_topic', { p_topic:$('eTitle').value.trim() });
+  if(r.error){ say('eMsg', r.error.message || T('Something went wrong. Please try again.'), false); return; }
+  say('eMsg', T('Added. Find it in My Learning, under Review.'), true);
+};
+$('more').onclick = () => loadList(false).catch(() => say('listMsg', T('Something went wrong. Please try again.'), false));
+$('q').oninput = () => { clearTimeout(TIMER); TIMER = setTimeout(() => loadList(true).catch(() => {}), 350); };
+$('exportBtn').onclick = async () => {
+  const r = await sb.rpc('vault_export');
+  if(r.error || !r.data){ say('listMsg', T('Something went wrong. Please try again.'), false); return; }
+  const blob = new Blob([JSON.stringify(r.data, null, 2)], { type:'application/json' });
+  const a = el('a', { href:URL.createObjectURL(blob), download:'my-vault.json' });
+  document.body.appendChild(a); a.click(); a.remove();
+  say('listMsg', T('Your notes were downloaded.'), true);
+};
+$('wipeBtn').onclick = async () => {
+  if(!confirm(T('Delete ALL your notes for good? This cannot be undone.'))) return;
+  if(!confirm(T('Are you really sure?'))) return;
+  const r = await sb.rpc('vault_delete_all');
+  if(r.error){ say('listMsg', r.error.message, false); return; }
+  say('listMsg', T('All your notes were deleted.'), true); await loadTags(); await loadList(true);
+};
+(async function(){
+  const s = await sb.auth.getSession();
+  if(!(s.data && s.data.session)){ window.location.href = 'skillstream-login.html'; return; }
+  await loadTags(); await loadList(true);
+  $('loading').classList.add('hidden'); show('listView');
+})().catch(e => { try { console.error('LNE error', e); } catch(x){} $('loading').classList.add('hidden'); $('err').classList.remove('hidden'); });
+</script>
+</body>
+</html>
