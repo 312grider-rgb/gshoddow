@@ -69,6 +69,7 @@
   var MORE_LINKS = [
     { icon: ICON.user,     label: 'Profile',                 href: 'skillstream-profile.html' },
     { icon: ICON.ai,       label: 'My Learning',             href: 'skillstream-engine.html' },
+    { icon: ICON.library,  label: 'My Vault',                href: 'skillstream-vault.html' },
     { icon: ICON.book,     label: 'My work',                 href: 'skillstream-mywork.html' },
     { icon: ICON.home,     label: 'My school',               href: 'skillstream-school.html' },
     { icon: ICON.user,     label: 'My family',               href: 'skillstream-family.html' },
