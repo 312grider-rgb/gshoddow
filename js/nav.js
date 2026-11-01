@@ -73,6 +73,7 @@
     { icon: ICON.home,     label: 'My school',               href: 'skillstream-school.html' },
     { icon: ICON.star,     label: 'My Passport',             href: 'skillstream-passport.html' },
     { icon: ICON.library,  label: 'Opportunities',           href: 'skillstream-opportunities.html' },
+    { icon: ICON.chat,     label: 'Send feedback',           href: 'skillstream-feedback.html' },
     { icon: ICON.chat,     label: 'My AI history',           href: 'skillstream-ai-history.html' },
     { icon: ICON.library,  label: 'Library',                 href: 'skillstream-library.html' },
     { icon: ICON.games,    label: 'Games',                   href: 'skillstream-games.html' },
