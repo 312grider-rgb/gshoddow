@@ -13,6 +13,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/lne-helpers.js"></script>
 <script src="js/ai-history.js"></script>
+<script src="js/voice.js" defer></script>
 <style>
   :root{
     --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
@@ -35,7 +36,7 @@
 
   .wrap{padding:20px;}
 
-  .tabs{display:flex; gap:8px; margin-bottom:20px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;}
   .tab-btn{
     flex:1; background:#fff; border:none; padding:15px 8px; border-radius:14px;
     font-size:17px; font-weight:700; color:var(--ink); cursor:pointer; box-shadow:var(--shadow-soft);
@@ -99,7 +100,7 @@
     margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
   }
 .subject-icon-grid{
-  display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:4px;
+  display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin-bottom:4px;
 }
 .subject-icon-btn{
   display:flex; flex-direction:column; align-items:center; gap:4px; width:100%;
@@ -108,7 +109,7 @@
 }
 .subject-icon-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
 .subject-icon-btn .icon{font-size:22px;}
-.subject-icon-btn .lbl{font-size:14.5px; font-weight:600; color:var(--charcoal); text-align:center; line-height:1.2;}
+.subject-icon-btn .lbl{font-size:14.5px; font-weight:600; color:var(--charcoal); text-align:center; line-height:1.2; overflow-wrap:anywhere; min-width:0; max-width:100%;}
 .subject-icon-btn.active{background:var(--gold); border-color:var(--gold);}
 .subject-icon-btn.active .lbl{color:var(--ink);}
 .back-link{display:block; text-align:center; margin-top:6px; font-size:16.5px; font-weight:600; color:var(--ink); text-decoration:none;}
