@@ -62,6 +62,22 @@
 
   <div id="stage"><canvas id="cv" role="img" aria-label="Whiteboard"></canvas></div>
 
+  <div class="panel hidden" id="player" style="margin-top:0">
+    <div class="row">
+      <button class="act" id="prev" type="button">Back</button>
+      <span id="stepNo" class="lbl" data-no-i18n></span>
+      <button class="act main" id="next" type="button">Next</button>
+      <button class="act" id="play" type="button">Play</button>
+      <button class="act" id="listen" type="button">Listen</button>
+    </div>
+    <div class="say" id="say" aria-live="polite" data-no-i18n></div>
+    <div class="row">
+      <button class="act main" id="toMine" type="button">Copy to my board</button>
+      <button class="act" id="full2" type="button">Full screen</button>
+    </div>
+    <div id="transcript"></div>
+  </div>
+
   <!-- MY BOARD -->
   <div id="pDraw">
     <div class="panel">
@@ -106,21 +122,6 @@
       </div>
       <p class="hint" style="margin:0">Each board uses 1 of your AI requests for the day.</p>
       <div class="msg" id="aiMsg" role="status"></div>
-    </div>
-    <div class="panel hidden" id="player">
-      <div class="row">
-        <button class="act" id="prev" type="button">Back</button>
-        <span id="stepNo" class="lbl" data-no-i18n></span>
-        <button class="act main" id="next" type="button">Next</button>
-        <button class="act" id="play" type="button">Play</button>
-        <button class="act" id="listen" type="button">Listen</button>
-      </div>
-      <div class="say" id="say" aria-live="polite" data-no-i18n></div>
-      <div class="row">
-        <button class="act main" id="toMine" type="button">Copy to my board</button>
-        <button class="act" id="full2" type="button">Full screen</button>
-      </div>
-      <div id="transcript"></div>
     </div>
   </div>
 </div>
@@ -461,13 +462,13 @@ $('explain').onclick = async () => {
     if(!b){ say('aiMsg', T('The AI could not make a board for this. Try asking in a different way.'), false); return; }
     ai = b; aiIdx = 0; say('aiMsg', '', true); $('player').classList.remove('hidden');
     try { LNE_HIST.log(sb, 'ask', 'Whiteboard: ' + topic, b.title + '\n' + b.steps.map(s => s.say).filter(Boolean).join('\n'), { oneShot:true }); } catch(e){}
-    showStep(0, true); renderTranscript();
+    showStep(0, true); renderTranscript(); $('stage').scrollIntoView({ block:'start' }); startPlay(false);
   } catch(e){ say('aiMsg', e.message || T('Something went wrong. Please try again.'), false); }
   finally { $('explain').disabled = false; }
 };
 const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 function showStep(i, animate){
-  stopSpeak(); stopPlay();
+  stopSpeak(); stopPlay(); ++playToken;
   aiIdx = Math.max(0, Math.min(ai.steps.length - 1, i));
   $('stepNo').textContent = (aiIdx + 1) + ' / ' + ai.steps.length;
   $('say').textContent = ai.steps[aiIdx].say || ai.title;
@@ -493,28 +494,34 @@ function renderTranscript(){
 }
 $('prev').onclick = () => showStep(aiIdx - 1, false);
 $('next').onclick = () => showStep(aiIdx + 1, true);
-let playing = false, playT = null;
+let playing = false, playT = null, playVoice = false;
 function stopPlay(){ playing = false; clearTimeout(playT); $('play').textContent = T('Play'); }
 const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 if(!canSpeak) $('listen').classList.add('hidden');
 function stopSpeak(){ try { if(canSpeak) speechSynthesis.cancel(); } catch(e){} }
-function speakStep(done){
-  if(!canSpeak || !ai){ if(done) playT = setTimeout(done, 4500); return; }
-  const txt = ai.steps[aiIdx].say; if(!txt){ if(done) playT = setTimeout(done, 2500); return; }
-  stopSpeak(); const u = new SpeechSynthesisUtterance(txt); u.lang = SPEECH[appLang] || 'en-US'; u.rate = 0.95;
-  u.onend = () => { if(done) playT = setTimeout(done, 900); }; u.onerror = () => { if(done) playT = setTimeout(done, 1500); };
-  speechSynthesis.speak(u);
+function readMs(txt){ return Math.max(4000, Math.min(9000, (txt || '').length * 70 + 2500)); }
+function speakOnce(txt){
+  if(!canSpeak || !txt) return;
+  stopSpeak(); const u = new SpeechSynthesisUtterance(txt); u.lang = SPEECH[appLang] || 'en-US'; u.rate = 0.95; speechSynthesis.speak(u);
 }
-$('listen').onclick = () => speakStep(null);
-$('play').onclick = () => {
-  if(playing){ stopPlay(); stopSpeak(); return; }
-  playing = true; $('play').textContent = T('Pause');
-  if(aiIdx === ai.steps.length - 1) showStep(0, true), playing = true, $('play').textContent = T('Pause');
-  (function go(){
-    if(!playing) return;
-    speakStep(() => { if(!playing) return; if(aiIdx >= ai.steps.length - 1){ stopPlay(); return; } const n = aiIdx + 1; const wasPlaying = playing; showStep(n, true); playing = wasPlaying; $('play').textContent = T('Pause'); go(); });
-  })();
-};
+$('listen').onclick = () => { if(ai) speakOnce(ai.steps[aiIdx].say); };
+function goNext(token){
+  if(!playing || token !== playToken) return;
+  if(aiIdx >= ai.steps.length - 1){ stopPlay(); return; }
+  showStep(aiIdx + 1, true); playing = true; $('play').textContent = T('Pause'); schedule(playToken);
+}
+let playToken = 0;
+function schedule(token){
+  const txt = ai.steps[aiIdx].say;
+  if(playVoice) speakOnce(txt);
+  clearTimeout(playT); playT = setTimeout(() => goNext(token), readMs(txt) + ai.steps[aiIdx].items.length * 260);
+}
+function startPlay(withVoice){
+  playVoice = !!withVoice;
+  if(aiIdx >= ai.steps.length - 1) showStep(0, true);
+  playing = true; $('play').textContent = T('Pause'); schedule(++playToken);
+}
+$('play').onclick = () => { if(playing){ stopPlay(); stopSpeak(); return; } startPlay(true); };
 $('toMine').onclick = () => {
   const list = aiItemsUpTo(aiIdx); if(!list.length) return;
   pushUndo(); items = list.map(x => Object.assign({}, x)).slice(0, MAX_ITEMS); setMode('draw'); save_auto(); say('msg', T('Copied. You can now change it on your board.'), true);
@@ -524,7 +531,7 @@ $('toMine').onclick = () => {
 function setMode(m){
   mode = m; stopPlay(); stopSpeak(); anim = null; preview = null; drag = null;
   $('tabDraw').setAttribute('aria-selected', m === 'draw' ? 'true' : 'false'); $('tabAi').setAttribute('aria-selected', m === 'ai' ? 'true' : 'false');
-  $('pDraw').classList.toggle('hidden', m !== 'draw'); $('pAi').classList.toggle('hidden', m !== 'ai');
+  $('pDraw').classList.toggle('hidden', m !== 'draw'); $('pAi').classList.toggle('hidden', m !== 'ai'); $('player').classList.toggle('hidden', !(m === 'ai' && ai));
   cv.style.touchAction = m === 'draw' ? 'none' : 'pan-y';
   if(m === 'ai' && ai) showStep(aiIdx, false); else redraw();
 }
