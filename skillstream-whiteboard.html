@@ -431,6 +431,27 @@ function layoutFix(steps){
     });
   });
 }
+function segHitsRect(x1, y1, x2, y2, r){
+  let t0 = 0, t1 = 1; const dx = x2 - x1, dy = y2 - y1;
+  const P = [-dx, dx, -dy, dy], Q = [x1 - r[0], r[2] - x1, y1 - r[1], r[3] - y1];
+  for(let i = 0; i < 4; i++){
+    if(P[i] === 0){ if(Q[i] < 0) return false; }
+    else { const t = Q[i] / P[i]; if(P[i] < 0){ if(t > t1) return false; if(t > t0) t0 = t; } else { if(t < t0) return false; if(t < t1) t1 = t; } }
+  }
+  return t0 < t1;
+}
+function dropCrossingLines(steps){
+  const texts = [], boxes = [];
+  steps.forEach(st => st.items.forEach(it => { if(it.t === 'text') texts.push(bbox(it)); else if(it.t === 'box') boxes.push(bbox(it)); }));
+  const shrink = (r, d) => [r[0] + d, r[1] + d, r[2] - d, r[3] - d];
+  const near = (r, x, y, d) => x >= r[0] - d && x <= r[2] + d && y >= r[1] - d && y <= r[3] + d;
+  steps.forEach(st => { st.items = st.items.filter(it => {
+    if(it.t !== 'line' && it.t !== 'arrow') return true;
+    if(texts.some(r => segHitsRect(it.x1, it.y1, it.x2, it.y2, shrink(r, 2)))) return false;
+    if(boxes.some(r => !near(r, it.x1, it.y1, 14) && !near(r, it.x2, it.y2, 14) && segHitsRect(it.x1, it.y1, it.x2, it.y2, shrink(r, 6)))) return false;
+    return true;
+  }); });
+}
 function fitToBoard(steps){
   let a = 1e9, b = 1e9, c = -1e9, d = -1e9, any = false;
   steps.forEach(st => st.items.forEach(it => { const q = bbox(it); a = Math.min(a, q[0]); b = Math.min(b, q[1]); c = Math.max(c, q[2]); d = Math.max(d, q[3]); any = true; }));
@@ -455,7 +476,7 @@ function parseBoard(text){
     if(its.length || sayTxt) steps.push({ say:sayTxt, clear:!!st.clear, items:its });
   });
   if(!steps.some(s => s.items.length)) return null;
-  layoutFix(steps); fitToBoard(steps);
+  layoutFix(steps); dropCrossingLines(steps); fitToBoard(steps);
   return { title:(typeof obj.title === 'string' && obj.title.trim() ? obj.title.trim() : 'Board').slice(0, 100), steps };
 }
 function buildPrompt(topic){
