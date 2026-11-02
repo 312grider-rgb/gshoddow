@@ -414,6 +414,34 @@ function cleanItem(r){
   else return null;
   return o;
 }
+function overlaps(a, b, pad){ return a[0] < b[2] - pad && a[2] > b[0] + pad && a[1] < b[3] - pad && a[3] > b[1] + pad; }
+function layoutFix(steps){
+  const boxes = [];
+  steps.forEach(st => st.items.forEach(it => { if(it.t === 'box') boxes.push(bbox(it)); }));
+  let placed = boxes.slice();
+  steps.forEach(st => {
+    if(st.clear) placed = boxes.slice();
+    st.items.forEach(it => {
+      if(it.t === 'text'){
+        let b = bbox(it), n = 0;
+        while(n < 14){ const hit = placed.find(q => overlaps(b, q, 3)); if(!hit) break; it.y = hit[3] + 8; b = bbox(it); n++; }
+        if(b[3] > H - 10){ it.size = Math.max(14, Math.floor(it.size * 0.75)); b = bbox(it); }
+        placed.push(b);
+      }
+    });
+  });
+}
+function fitToBoard(steps){
+  let a = 1e9, b = 1e9, c = -1e9, d = -1e9, any = false;
+  steps.forEach(st => st.items.forEach(it => { const q = bbox(it); a = Math.min(a, q[0]); b = Math.min(b, q[1]); c = Math.max(c, q[2]); d = Math.max(d, q[3]); any = true; }));
+  if(!any) return;
+  const bw = Math.max(40, c - a), bh = Math.max(40, d - b), M = 36;
+  let f = Math.min((W - 2 * M) / bw, (H - 2 * M) / bh); f = Math.max(0.5, Math.min(1.5, f));
+  if(Math.abs(f - 1) < 0.12 && a >= 0 && b >= 0 && c <= W && d <= H) return;
+  const offx = (W - bw * f) / 2, offy = Math.max(M, (H - bh * f) / 2);
+  const fn = (x, y) => [(x - a) * f + offx, (y - b) * f + offy];
+  steps.forEach(st => { st.items = transformItems(st.items, fn, f); });
+}
 function parseBoard(text){
   let s = String(text || '').trim().replace(/^```[a-z]*\s*/i, '').replace(/```\s*$/i, '');
   const a = s.indexOf('{'), b = s.lastIndexOf('}'); if(a < 0 || b <= a) return null;
@@ -427,14 +455,18 @@ function parseBoard(text){
     if(its.length || sayTxt) steps.push({ say:sayTxt, clear:!!st.clear, items:its });
   });
   if(!steps.some(s => s.items.length)) return null;
+  layoutFix(steps); fitToBoard(steps);
   return { title:(typeof obj.title === 'string' && obj.title.trim() ? obj.title.trim() : 'Board').slice(0, 100), steps };
 }
 function buildPrompt(topic){
+  const ex = '{"title":"Water cycle","steps":[{"say":"The sun heats the sea.","items":[{"t":"text","x":40,"y":40,"s":"Water cycle","size":34,"c":"blue"},{"t":"box","x":60,"y":300,"w":220,"h":90,"s":"Sea","c":"blue"},{"t":"circle","x":480,"y":120,"r":50,"f":true,"c":"orange"}]},{"say":"Water rises as vapour.","items":[{"t":"arrow","x1":170,"y1":290,"x2":170,"y2":190,"c":"orange"},{"t":"text","x":190,"y":220,"s":"vapour rises","size":22,"c":"orange"}]}]}';
   return 'You are a teacher explaining on a whiteboard, one step at a time.\n' +
   'Topic: ' + topic.replace(/[\r\n]+/g, ' ') + '\n' +
   'Write ALL text (titles, labels and narration) in ' + (LANG_NAMES[appLang] || 'English') + '.\n' +
   'Reply with ONE JSON object only: no markdown, no code fences, no extra words.\n' +
-  'The canvas is ' + W + ' wide and ' + H + ' tall (origin top-left, units are pixels). Keep every item inside the canvas with a 30 unit margin. Items must not overlap. Use simple layouts in rows or columns.\n' +
+  'The canvas is ' + W + ' wide and ' + H + ' tall (origin top-left, units are pixels). Use the WHOLE canvas: spread the content over its full width and height, with a 40 unit margin.\n' +
+  'LAYOUT RULES (very important): a text item needs about size*0.6 units of width per character and size*1.3 units of height per line. Leave at least 30 units of empty space between items. Never draw a line or arrow through text, and never put text on top of other text or inside a line. Put arrows only in empty space between items. Place items in clear rows and columns, for example rows 90 units apart. ' +
+  'For arithmetic and equations, write each line of working as its own text item in a column, one below the other, and explain in "say" - do not try to draw long division bars. Use at most 5 items of text per step.\n' +
   'Format: {"title":"...","steps":[{"say":"1-2 short sentences the teacher says","clear":false,"items":[ ... ]}]}\n' +
   'Use 4 to 6 steps with 2 to 6 items each. Step 1 writes the title near the top. Later steps ADD to the board; set "clear":true only to start a fresh board.\n' +
   'Colours: black, blue, red, green, orange, purple. Item types:\n' +
@@ -444,7 +476,8 @@ function buildPrompt(topic){
   '{"t":"rect","x":..,"y":..,"w":..,"h":..,"c":"green","f":true}\n' +
   '{"t":"circle","x":..,"y":..,"r":..,"c":"red","f":false}\n' +
   '{"t":"box","x":..,"y":..,"w":..,"h":..,"s":"short label","c":"blue"}\n' +
-  'Use boxes with short labels (max 4 words) and arrows between them for processes. Be accurate and simple. If the topic is hard to draw, make a clear concept map.';
+  'Use boxes with short labels (max 4 words) and arrows between them for processes. Be accurate and simple. If the topic is hard to draw, make a clear concept map.\n' +
+  'Small example of the style (for a different topic): ' + ex;
 }
 async function callAI(prompt){
   const r = await fetch('/api/ask-ai', { method:'POST', headers:await aiHeaders(sb), body:JSON.stringify({ prompt, maxTokens:3500, feature:'board' }) });
