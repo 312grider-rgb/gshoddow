@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whiteboard — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<script src="js/lne-helpers.js"></script>
+<script src="js/ai-history.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; --sage:#6B8F71; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:#2B2B2B; padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:20px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:12px; max-width:1100px; margin:0 auto;}
+  .tabs{display:flex; gap:8px; margin-bottom:10px;}
+  .tab{flex:1; border:1.5px solid var(--line); background:#fff; border-radius:12px; padding:11px 8px; font:inherit; font-size:14px; font-weight:700; color:var(--ink); cursor:pointer; min-height:46px;}
+  .tab[aria-selected="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  #stage{display:flex; justify-content:center; background:#EFEAE0; border:1px solid var(--line); border-radius:14px; padding:8px; margin-bottom:10px; overflow:hidden;}
+  #stage:fullscreen{background:#EFEAE0; align-items:center; padding:0; border-radius:0;}
+  canvas{display:block; background:#fff; border-radius:8px; box-shadow:0 1px 6px rgba(0,0,0,.12);}
+  .panel{background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:12px; min-width:0; overflow-wrap:anywhere;}
+  .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:6px 0;}
+  .tool,.act{min-width:44px; min-height:44px; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:6px 10px; font:inherit; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer;}
+  .tool[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .act.main{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .act:disabled{opacity:.45;}
+  .act.del{color:var(--danger); border-color:var(--danger);}
+  .sw{width:44px; height:44px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 1.5px var(--line); cursor:pointer; padding:0;}
+  .sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink);}
+  .lbl{font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-inline-end:4px;}
+  input[type=text]{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:15px;}
+  .hint{font-size:13px; color:var(--muted); line-height:1.55;}
+  .msg{font-size:13.5px; margin-top:8px; min-height:18px;} .msg.err{color:var(--danger);} .msg.ok{color:#3E6B48;}
+  .say{background:#FBF4E2; border-radius:12px; padding:12px; font-size:16px; line-height:1.6; margin:8px 0;}
+  .saved{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 0; border-top:1px solid var(--line);}
+  .saved:first-of-type{border-top:0;}
+  #transcript ol{margin:6px 0 0; padding-inline-start:22px; font-size:14px; line-height:1.6;}
+  .hidden{display:none !important;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Whiteboard</h1>
+  <p>Draw and write on your own board, or ask the AI to explain something step by step on the board.</p>
+</header>
+<div class="wrap">
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabDraw" type="button" role="tab" aria-selected="true">My board</button>
+    <button class="tab" id="tabAi" type="button" role="tab" aria-selected="false">AI explains</button>
+  </div>
+
+  <div id="stage"><canvas id="cv" role="img" aria-label="Whiteboard"></canvas></div>
+
+  <!-- MY BOARD -->
+  <div id="pDraw">
+    <div class="panel">
+      <div class="row" role="group" aria-label="Tools" id="tools"></div>
+      <div class="row"><span class="lbl">Colour</span><span id="colors" class="row" style="margin:0"></span></div>
+      <div class="row"><span class="lbl">Size</span><span id="sizes" class="row" style="margin:0"></span></div>
+      <div id="textBar" class="row hidden">
+        <input id="textIn" type="text" maxlength="80" aria-label="Text" style="flex:1; min-width:140px">
+        <button class="act main" id="textAdd" type="button">Add text</button>
+      </div>
+      <div class="row">
+        <button class="act" id="undo" type="button">Undo</button>
+        <button class="act" id="redo" type="button">Redo</button>
+        <button class="act del" id="clear" type="button">Clear</button>
+        <button class="act" id="shape" type="button">Wide / Tall</button>
+        <button class="act" id="full" type="button">Full screen</button>
+      </div>
+      <div class="row">
+        <button class="act main" id="save" type="button">Save board</button>
+        <button class="act" id="png" type="button">Download picture</button>
+      </div>
+      <div id="nameBar" class="row hidden">
+        <input id="nameIn" type="text" maxlength="40" aria-label="Board name" style="flex:1; min-width:140px">
+        <button class="act main" id="nameOk" type="button">Save</button>
+      </div>
+      <div class="msg" id="msg" role="status"></div>
+    </div>
+    <div class="panel">
+      <h3 style="margin:0 0 6px; font-size:16px">My saved boards</h3>
+      <p class="hint" style="margin:0 0 6px">They are kept on this phone only.</p>
+      <div id="savedList"></div>
+    </div>
+  </div>
+
+  <!-- AI BOARD -->
+  <div id="pAi" class="hidden">
+    <div class="panel">
+      <label for="topic" class="lbl">What should the AI explain?</label>
+      <input id="topic" type="text" maxlength="200" placeholder="e.g. How does the water cycle work?" style="margin-top:6px">
+      <div class="row">
+        <button class="act main" id="explain" type="button">Explain on the board</button>
+      </div>
+      <p class="hint" style="margin:0">Each board uses 1 of your AI requests for the day.</p>
+      <div class="msg" id="aiMsg" role="status"></div>
+    </div>
+    <div class="panel hidden" id="player">
+      <div class="row">
+        <button class="act" id="prev" type="button">Back</button>
+        <span id="stepNo" class="lbl" data-no-i18n></span>
+        <button class="act main" id="next" type="button">Next</button>
+        <button class="act" id="play" type="button">Play</button>
+        <button class="act" id="listen" type="button">Listen</button>
+      </div>
+      <div class="say" id="say" aria-live="polite" data-no-i18n></div>
+      <div class="row">
+        <button class="act main" id="toMine" type="button">Copy to my board</button>
+        <button class="act" id="full2" type="button">Full screen</button>
+      </div>
+      <div id="transcript"></div>
+    </div>
+  </div>
+</div>
+<script src="js/nav.js" defer></script>
+<script>
+const sb = window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co', 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+const appLang = (window.LNE_I18N && LNE_I18N.lang) || 'en';
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function say(id, text, ok){ const m = $(id); m.className = 'msg ' + (ok ? 'ok' : 'err'); m.textContent = text; }
+
+/* ================= board model ================= */
+const COLORS = { black:'#1B1B1B', blue:'#1F5FBF', red:'#C0392B', green:'#2E7D32', orange:'#E67E22', purple:'#7B3FA0' };
+const COLOR_NAMES = Object.keys(COLORS);
+const FONT = "'Inter','Segoe UI',Tahoma,'Noto Sans Arabic','Noto Sans SC',Arial,sans-serif";
+const MAX_ITEMS = 500, MAX_PTS = 2000;
+let W = innerWidth < 700 ? 600 : 1000, H = innerWidth < 700 ? 800 : 600;
+let items = [], undoS = [], redoS = [];
+let mode = 'draw', tool = 'pen', color = 'black', sizeIdx = 1, scale = 1, dpr = 1;
+let ai = null, aiIdx = 0, anim = null;
+
+const cv = $('cv'), ctx = cv.getContext('2d');
+const mctx = document.createElement('canvas').getContext('2d');
+
+function fit(){
+  const stage = $('stage'), fs = document.fullscreenElement === stage;
+  const maxW = Math.max(200, (fs ? innerWidth : stage.clientWidth - 16));
+  const maxH = Math.max(200, fs ? innerHeight : innerHeight * 0.68);
+  scale = Math.min(maxW / W, maxH / H);
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  const cw = Math.floor(W * scale), ch = Math.floor(H * scale);
+  cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
+  cv.width = Math.floor(cw * dpr); cv.height = Math.floor(ch * dpr);
+  redraw();
+}
+
+/* ---- text helpers ---- */
+const CJK = /[　-鿿豈-﫿]/;
+function wrapLines(c, s, maxW){
+  const out = [];
+  String(s).split('\n').forEach(par => {
+    const units = CJK.test(par) ? Array.from(par) : par.split(/\s+/);
+    const glue = CJK.test(par) ? '' : ' ';
+    let line = '';
+    units.forEach(u => {
+      const t = line ? line + glue + u : u;
+      if(c.measureText(t).width <= maxW || !line){
+        if(c.measureText(t).width > maxW && !CJK.test(par)){      // one very long word: split by characters
+          let cur = line ? line + glue : '';
+          Array.from(u).forEach(ch => { if(c.measureText(cur + ch).width > maxW && cur){ out.push(cur); cur = ch; } else cur += ch; });
+          line = cur;
+        } else line = t;
+      } else { out.push(line); line = u; }
+    });
+    out.push(line);
+  });
+  return out;
+}
+function setFont(c, size, weight){ c.font = (weight || 600) + ' ' + size + 'px ' + FONT; }
+
+function layoutText(c, it){
+  const size = it.size || 28; setFont(c, size);
+  const maxW = Math.max(40, it.w || (W - (it.x || 0) - 20));
+  const lines = wrapLines(c, it.s, maxW), lh = size * 1.25;
+  const wid = Math.min(maxW, Math.max.apply(null, lines.map(l => c.measureText(l).width).concat([10])));
+  return { lines, lh, wid, hei: lines.length * lh, size };
+}
+function bbox(it){
+  if(it.t === 'text'){ const L = layoutText(mctx, it); const x0 = it.a === 'c' ? it.x - L.wid / 2 : it.x; return [x0, it.y, x0 + L.wid, it.y + L.hei]; }
+  if(it.t === 'rect' || it.t === 'box') return [it.x, it.y, it.x + it.w, it.y + it.h];
+  if(it.t === 'circle') return [it.x - it.r, it.y - it.r, it.x + it.r, it.y + it.r];
+  if(it.t === 'line' || it.t === 'arrow') return [Math.min(it.x1, it.x2), Math.min(it.y1, it.y2), Math.max(it.x1, it.x2), Math.max(it.y1, it.y2)];
+  if(it.t === 'pen'){ let a = 1e9, b = 1e9, c = -1e9, d = -1e9; it.pts.forEach(p => { a = Math.min(a, p[0]); b = Math.min(b, p[1]); c = Math.max(c, p[0]); d = Math.max(d, p[1]); }); return [a, b, c, d]; }
+  return [0, 0, 0, 0];
+}
+
+/* ---- drawing one item; k = progress 0..1 ---- */
+function drawItem(c, it, k){
+  c.save();
+  const col = COLORS[it.c] || COLORS.black;
+  c.strokeStyle = col; c.fillStyle = col; c.lineWidth = it.lw || 4; c.lineCap = 'round'; c.lineJoin = 'round';
+  if(k < 1 && it.t !== 'line' && it.t !== 'arrow' && it.t !== 'pen') c.globalAlpha = Math.max(0.05, k);
+  if(it.t === 'pen'){
+    const p = it.pts;
+    if(p.length === 1){ c.beginPath(); c.arc(p[0][0], p[0][1], (it.lw || 4) / 2, 0, 7); c.fill(); }
+    else if(p.length > 1){
+      c.beginPath(); c.moveTo(p[0][0], p[0][1]);
+      for(let i = 1; i < p.length - 1; i++){ const mx = (p[i][0] + p[i + 1][0]) / 2, my = (p[i][1] + p[i + 1][1]) / 2; c.quadraticCurveTo(p[i][0], p[i][1], mx, my); }
+      c.lineTo(p[p.length - 1][0], p[p.length - 1][1]); c.stroke();
+    }
+  } else if(it.t === 'line' || it.t === 'arrow'){
+    const ex = it.x1 + (it.x2 - it.x1) * k, ey = it.y1 + (it.y2 - it.y1) * k;
+    c.beginPath(); c.moveTo(it.x1, it.y1); c.lineTo(ex, ey); c.stroke();
+    if(it.t === 'arrow' && k > 0.85){
+      const a = Math.atan2(it.y2 - it.y1, it.x2 - it.x1), h = 12 + (it.lw || 4) * 2;
+      c.beginPath(); c.moveTo(it.x2, it.y2); c.lineTo(it.x2 - h * Math.cos(a - 0.45), it.y2 - h * Math.sin(a - 0.45));
+      c.moveTo(it.x2, it.y2); c.lineTo(it.x2 - h * Math.cos(a + 0.45), it.y2 - h * Math.sin(a + 0.45)); c.stroke();
+    }
+  } else if(it.t === 'rect' || it.t === 'box'){
+    if(it.f){ c.save(); c.globalAlpha *= 0.15; c.fillRect(it.x, it.y, it.w, it.h); c.restore(); }
+    c.strokeRect(it.x, it.y, it.w, it.h);
+    if(it.t === 'box' && it.s){
+      let size = it.size || 26, L;
+      for(; size >= 11; size -= 2){ setFont(c, size); L = wrapLines(c, it.s, it.w - 14); if(L.length * size * 1.25 <= it.h - 8 && L.every(l => c.measureText(l).width <= it.w - 10)) break; }
+      setFont(c, size); c.textAlign = 'center'; c.textBaseline = 'middle';
+      const lh = size * 1.25, y0 = it.y + it.h / 2 - (L.length - 1) * lh / 2;
+      L.forEach((l, i) => c.fillText(l, it.x + it.w / 2, y0 + i * lh));
+    }
+  } else if(it.t === 'circle'){
+    c.beginPath(); c.arc(it.x, it.y, it.r, 0, Math.PI * 2);
+    if(it.f){ c.save(); c.globalAlpha *= 0.15; c.fill(); c.restore(); }
+    c.stroke();
+  } else if(it.t === 'text'){
+    const L = layoutText(c, it); setFont(c, L.size); c.textBaseline = 'top'; c.textAlign = it.a === 'c' ? 'center' : 'left';
+    L.lines.forEach((l, i) => c.fillText(l, it.x, it.y + i * L.lh));
+  }
+  c.restore();
+}
+
+function currentItems(){ return mode === 'ai' ? aiItemsUpTo(aiIdx) : items; }
+function aiItemsUpTo(idx){
+  let out = [];
+  if(!ai) return out;
+  for(let i = 0; i <= idx && i < ai.steps.length; i++){ if(ai.steps[i].clear) out = []; out = out.concat(ai.steps[i].items); }
+  return out;
+}
+let preview = null;
+function redraw(){
+  ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  const list = currentItems();
+  list.forEach((it, i) => { const k = anim && anim.item === it ? anim.k : 1; if(!(anim && anim.pending && anim.pending.has(it))) drawItem(ctx, it, k); });
+  if(preview) drawItem(ctx, preview, 1);
+  cv.setAttribute('aria-label', mode === 'ai' && ai ? ai.title : T('Whiteboard'));
+}
+
+/* ================= interactive drawing ================= */
+const TOOLS = [['pen','Pen'],['eraser','Eraser'],['line','Line'],['arrow','Arrow'],['rect','Box'],['circle','Circle'],['text','Text']];
+const SIZES = [['S', 3, 22], ['M', 6, 32], ['L', 10, 46]];
+function buildControls(){
+  TOOLS.forEach(t => { const b = el('button', { class:'tool', type:'button', 'data-t':t[0], 'aria-pressed':t[0] === tool ? 'true' : 'false', text:T(t[1]) }); b.onclick = () => setTool(t[0]); $('tools').appendChild(b); });
+  COLOR_NAMES.forEach(n => { const b = el('button', { class:'sw', type:'button', 'data-c':n, 'aria-label':T(n[0].toUpperCase() + n.slice(1)), 'aria-pressed':n === color ? 'true' : 'false', style:'background:' + COLORS[n] }); b.onclick = () => { color = n; document.querySelectorAll('.sw').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); }; $('colors').appendChild(b); });
+  SIZES.forEach((s, i) => { const b = el('button', { class:'tool', type:'button', 'data-s':String(i), 'aria-pressed':i === sizeIdx ? 'true' : 'false', text:s[0], 'data-no-i18n':'' }); b.onclick = () => { sizeIdx = i; document.querySelectorAll('[data-s]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); }; $('sizes').appendChild(b); });
+}
+function setTool(t){ tool = t; document.querySelectorAll('#tools .tool').forEach(x => x.setAttribute('aria-pressed', x.getAttribute('data-t') === t ? 'true' : 'false')); $('textBar').classList.toggle('hidden', t !== 'text'); pendingText = null; }
+let pendingText = null;
+
+function pushUndo(){ undoS.push(items.slice()); if(undoS.length > 60) undoS.shift(); redoS = []; syncBtns(); }
+function syncBtns(){ $('undo').disabled = !undoS.length; $('redo').disabled = !redoS.length; }
+function addItem(it){
+  if(items.length >= MAX_ITEMS){ say('msg', T('The board is full. Clear some of it first.'), false); return false; }
+  pushUndo(); items = items.concat([it]); save_auto(); redraw(); return true;
+}
+$('undo').onclick = () => { if(!undoS.length) return; redoS.push(items); items = undoS.pop(); syncBtns(); redraw(); save_auto(); };
+$('redo').onclick = () => { if(!redoS.length) return; undoS.push(items); items = redoS.pop(); syncBtns(); redraw(); save_auto(); };
+$('clear').onclick = () => { if(!items.length) return; if(!confirm(T('Clear the whole board?'))) return; pushUndo(); items = []; redraw(); save_auto(); };
+
+function pos(e){ const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(W, (e.clientX - r.left) / scale)), Math.max(0, Math.min(H, (e.clientY - r.top) / scale))]; }
+function dist2seg(px, py, x1, y1, x2, y2){ const dx = x2 - x1, dy = y2 - y1, l = dx * dx + dy * dy; let t = l ? ((px - x1) * dx + (py - y1) * dy) / l : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy)); }
+function hit(it, x, y, r){
+  if(it.t === 'pen'){ if(it.pts.length === 1) return Math.hypot(x - it.pts[0][0], y - it.pts[0][1]) <= r; for(let i = 1; i < it.pts.length; i++) if(dist2seg(x, y, it.pts[i-1][0], it.pts[i-1][1], it.pts[i][0], it.pts[i][1]) <= r) return true; return false; }
+  if(it.t === 'line' || it.t === 'arrow') return dist2seg(x, y, it.x1, it.y1, it.x2, it.y2) <= r;
+  if(it.t === 'circle') return Math.abs(Math.hypot(x - it.x, y - it.y) - it.r) <= r || (it.f && Math.hypot(x - it.x, y - it.y) <= it.r);
+  const b = bbox(it); return x >= b[0] - r && x <= b[2] + r && y >= b[1] - r && y <= b[3] + r;
+}
+let drag = null, erasedAny = false;
+cv.addEventListener('pointerdown', e => {
+  if(mode !== 'draw' || !e.isPrimary) return;
+  e.preventDefault(); const p = pos(e);
+  try { cv.setPointerCapture(e.pointerId); } catch(x){}
+  if(tool === 'text'){ pendingText = p; $('textBar').classList.remove('hidden'); $('textIn').focus(); say('msg', T('Type your text and press Add text.'), true); drag = null; return; }
+  if(tool === 'eraser'){ erasedAny = false; drag = { erase:true }; eraseAt(p); return; }
+  drag = { start:p, last:p, pts:[p] };
+  if(tool === 'pen'){ preview = { t:'pen', pts:[p], c:color, lw:SIZES[sizeIdx][1] }; redraw(); }
+});
+cv.addEventListener('pointermove', e => {
+  if(!drag || mode !== 'draw') return; e.preventDefault();
+  const p = pos(e);
+  if(drag.erase){ eraseAt(p); return; }
+  if(tool === 'pen'){
+    if(Math.hypot(p[0] - drag.last[0], p[1] - drag.last[1]) < 1.5 || preview.pts.length >= MAX_PTS) return;
+    preview.pts.push(p); drag.last = p; redraw();
+  } else {
+    const s = drag.start, lw = SIZES[sizeIdx][1];
+    if(tool === 'line' || tool === 'arrow') preview = { t:tool, x1:s[0], y1:s[1], x2:p[0], y2:p[1], c:color, lw };
+    else if(tool === 'rect') preview = { t:'rect', x:Math.min(s[0], p[0]), y:Math.min(s[1], p[1]), w:Math.abs(p[0] - s[0]), h:Math.abs(p[1] - s[1]), c:color, lw };
+    else if(tool === 'circle') preview = { t:'circle', x:s[0], y:s[1], r:Math.hypot(p[0] - s[0], p[1] - s[1]), c:color, lw };
+    redraw();
+  }
+});
+function endDrag(){
+  if(!drag) return;
+  if(drag.erase){ drag = null; return; }
+  const pv = preview; preview = null; drag = null;
+  if(!pv){ redraw(); return; }
+  const tiny = (pv.t === 'rect' && (pv.w < 6 || pv.h < 6)) || (pv.t === 'circle' && pv.r < 4) || ((pv.t === 'line' || pv.t === 'arrow') && Math.hypot(pv.x2 - pv.x1, pv.y2 - pv.y1) < 6);
+  if(tiny){ redraw(); return; }
+  addItem(pv);
+}
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+function eraseAt(p){
+  for(let i = items.length - 1; i >= 0; i--){
+    if(hit(items[i], p[0], p[1], 14)){
+      if(!erasedAny){ pushUndo(); erasedAny = true; }
+      items = items.slice(0, i).concat(items.slice(i + 1)); redraw(); save_auto(); return;
+    }
+  }
+}
+$('textAdd').onclick = () => {
+  const s = $('textIn').value.trim();
+  if(!s){ say('msg', T('Please write some text first.'), false); return; }
+  const p = pendingText || [W * 0.1, H * 0.1];
+  if(addItem({ t:'text', x:p[0], y:p[1], s:s.slice(0, 80), size:SIZES[sizeIdx][2], c:color, a:'l', w:Math.max(80, W - p[0] - 20) })){ $('textIn').value = ''; pendingText = null; say('msg', '', true); }
+};
+$('textIn').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('textAdd').click(); } });
+
+/* ---- wide / tall ---- */
+function transformItems(list, f, sc){
+  return list.map(it => {
+    const o = Object.assign({}, it);
+    if(o.pts) o.pts = o.pts.map(p => f(p[0], p[1]));
+    ['x','x1','x2'].forEach(k => { if(o[k] !== undefined){ const yk = k === 'x' ? 'y' : k === 'x1' ? 'y1' : 'y2'; const q = f(o[k], o[yk]); o[k] = q[0]; o[yk] = q[1]; } });
+    ['w','h','r','size'].forEach(k => { if(o[k] !== undefined) o[k] = o[k] * sc; });
+    if(o.lw !== undefined) o.lw = Math.max(2, o.lw * sc);
+    return o;
+  });
+}
+$('shape').onclick = () => {
+  const nW = H, nH = W, sc = Math.min(nW / W, nH / H), ox = (nW - W * sc) / 2, oy = (nH - H * sc) / 2;
+  const f = (x, y) => [x * sc + ox, y * sc + oy];
+  items = transformItems(items, f, sc); undoS = []; redoS = []; syncBtns();
+  W = nW; H = nH; fit(); save_auto();
+};
+function toFull(){ const s = $('stage'); if(s.requestFullscreen) s.requestFullscreen().catch(() => {}); }
+$('full').onclick = toFull; $('full2').onclick = toFull;
+if(!$('stage').requestFullscreen){ $('full').classList.add('hidden'); $('full2').classList.add('hidden'); }
+document.addEventListener('fullscreenchange', fit);
+let rz = null; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(fit, 150); });
+
+/* ---- saving (this phone only) ---- */
+const KEY = 'lne_boards_v1', AUTO = 'lne_board_auto_v1';
+function loadBoards(){ try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; } catch(e){ return []; } }
+function storeBoards(list){ try { localStorage.setItem(KEY, JSON.stringify(list)); return true; } catch(e){ return false; } }
+let autoT = null;
+function save_auto(){ clearTimeout(autoT); autoT = setTimeout(() => { try { localStorage.setItem(AUTO, JSON.stringify({ W, H, items })); } catch(e){} }, 400); }
+function renderSaved(){
+  const box = $('savedList'); box.textContent = ''; const list = loadBoards();
+  if(!list.length){ box.appendChild(el('p', { class:'hint', style:'margin:0', text:T('No saved boards yet.') })); return; }
+  list.forEach(b => {
+    const open = el('button', { class:'act', type:'button', text:T('Open') });
+    open.onclick = () => { W = b.W; H = b.H; items = b.items; undoS = []; redoS = []; syncBtns(); setMode('draw'); fit(); say('msg', T('Board opened.'), true); };
+    const del = el('button', { class:'act del', type:'button', text:T('Delete') });
+    del.onclick = () => { if(!confirm(T('Delete this board?'))) return; storeBoards(loadBoards().filter(x => x.id !== b.id)); renderSaved(); };
+    box.appendChild(el('div', { class:'saved' }, [ el('b', { text:b.name, 'data-no-i18n':'' }), el('span', {}, [ open, del ]) ]));
+  });
+}
+$('save').onclick = () => { if(!items.length){ say('msg', T('The board is empty.'), false); return; } $('nameBar').classList.remove('hidden'); $('nameIn').value = T('Board') + ' ' + (loadBoards().length + 1); $('nameIn').focus(); };
+$('nameOk').onclick = () => {
+  const name = $('nameIn').value.trim().slice(0, 40) || T('Board'); const list = loadBoards();
+  if(list.length >= 20){ say('msg', T('You can keep at most 20 saved boards. Delete one first.'), false); return; }
+  list.unshift({ id:String(Date.now()) + Math.random().toString(36).slice(2, 6), name, W, H, items, updated:Date.now() });
+  if(!storeBoards(list)){ say('msg', T('Could not save: this phone has no free space for it.'), false); return; }
+  $('nameBar').classList.add('hidden'); renderSaved(); say('msg', T('Saved on this phone.'), true);
+};
+$('png').onclick = () => {
+  const list = currentItems(); if(!list.length){ say('msg', T('The board is empty.'), false); return; }
+  const oc = document.createElement('canvas'); oc.width = W * 2; oc.height = H * 2; const c = oc.getContext('2d');
+  c.setTransform(2, 0, 0, 2, 0, 0); c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); list.forEach(it => drawItem(c, it, 1));
+  oc.toBlob(b => { if(!b) return; const a = el('a', { href:URL.createObjectURL(b), download:'whiteboard.png' }); document.body.appendChild(a); a.click(); a.remove(); say('msg', T('Picture downloaded.'), true); }, 'image/png');
+};
+
+/* ================= AI board ================= */
+const LANG_NAMES = { en:'English', ar:'Arabic', fr:'French', es:'Spanish', zh:'Simplified Chinese' };
+const SPEECH = { en:'en-US', ar:'ar-SA', fr:'fr-FR', es:'es-ES', zh:'zh-CN' };
+function num(v, lo, hi, d){ v = Number(v); if(!isFinite(v)) return d; return Math.max(lo, Math.min(hi, v)); }
+function cleanItem(r){
+  if(!r || typeof r !== 'object') return null;
+  const c = COLORS[r.c] ? r.c : 'black', t = String(r.t || '');
+  const o = { t, c, lw:4 };
+  if(t === 'text'){ if(typeof r.s !== 'string' || !r.s.trim()) return null; Object.assign(o, { x:num(r.x, 0, W, 30), y:num(r.y, 0, H, 30), s:r.s.trim().slice(0, 140), size:num(r.size, 14, 56, 26), a:r.a === 'c' ? 'c' : 'l', w:num(r.w, 60, W, W - num(r.x, 0, W, 30) - 20) }); }
+  else if(t === 'line' || t === 'arrow') Object.assign(o, { x1:num(r.x1, 0, W, 0), y1:num(r.y1, 0, H, 0), x2:num(r.x2, 0, W, 0), y2:num(r.y2, 0, H, 0) });
+  else if(t === 'rect' || t === 'box'){ Object.assign(o, { x:num(r.x, 0, W, 0), y:num(r.y, 0, H, 0), w:num(r.w, 10, W, 100), h:num(r.h, 10, H, 60), f:!!r.f }); if(t === 'box') { o.s = typeof r.s === 'string' ? r.s.trim().slice(0, 80) : ''; o.size = num(r.size, 12, 40, 26); } }
+  else if(t === 'circle') Object.assign(o, { x:num(r.x, 0, W, W / 2), y:num(r.y, 0, H, H / 2), r:num(r.r, 4, Math.min(W, H) / 2, 40), f:!!r.f });
+  else return null;
+  return o;
+}
+function parseBoard(text){
+  let s = String(text || '').trim().replace(/^```[a-z]*\s*/i, '').replace(/```\s*$/i, '');
+  const a = s.indexOf('{'), b = s.lastIndexOf('}'); if(a < 0 || b <= a) return null;
+  let obj; try { obj = JSON.parse(s.slice(a, b + 1)); } catch(e){ return null; }
+  if(!obj || !Array.isArray(obj.steps)) return null;
+  const steps = [];
+  obj.steps.slice(0, 8).forEach(st => {
+    if(!st || typeof st !== 'object') return;
+    const its = (Array.isArray(st.items) ? st.items : []).slice(0, 14).map(cleanItem).filter(Boolean);
+    const sayTxt = typeof st.say === 'string' ? st.say.trim().slice(0, 400) : '';
+    if(its.length || sayTxt) steps.push({ say:sayTxt, clear:!!st.clear, items:its });
+  });
+  if(!steps.some(s => s.items.length)) return null;
+  return { title:(typeof obj.title === 'string' && obj.title.trim() ? obj.title.trim() : 'Board').slice(0, 100), steps };
+}
+function buildPrompt(topic){
+  return 'You are a teacher explaining on a whiteboard, one step at a time.\n' +
+  'Topic: ' + topic.replace(/[\r\n]+/g, ' ') + '\n' +
+  'Write ALL text (titles, labels and narration) in ' + (LANG_NAMES[appLang] || 'English') + '.\n' +
+  'Reply with ONE JSON object only: no markdown, no code fences, no extra words.\n' +
+  'The canvas is ' + W + ' wide and ' + H + ' tall (origin top-left, units are pixels). Keep every item inside the canvas with a 30 unit margin. Items must not overlap. Use simple layouts in rows or columns.\n' +
+  'Format: {"title":"...","steps":[{"say":"1-2 short sentences the teacher says","clear":false,"items":[ ... ]}]}\n' +
+  'Use 4 to 6 steps with 2 to 6 items each. Step 1 writes the title near the top. Later steps ADD to the board; set "clear":true only to start a fresh board.\n' +
+  'Colours: black, blue, red, green, orange, purple. Item types:\n' +
+  '{"t":"text","x":..,"y":..,"s":"...","size":20-40,"c":"blue","a":"l","w":max width}\n' +
+  '{"t":"line","x1":..,"y1":..,"x2":..,"y2":..,"c":"black"}\n' +
+  '{"t":"arrow","x1":..,"y1":..,"x2":..,"y2":..,"c":"black"}\n' +
+  '{"t":"rect","x":..,"y":..,"w":..,"h":..,"c":"green","f":true}\n' +
+  '{"t":"circle","x":..,"y":..,"r":..,"c":"red","f":false}\n' +
+  '{"t":"box","x":..,"y":..,"w":..,"h":..,"s":"short label","c":"blue"}\n' +
+  'Use boxes with short labels (max 4 words) and arrows between them for processes. Be accurate and simple. If the topic is hard to draw, make a clear concept map.';
+}
+async function callAI(prompt){
+  const r = await fetch('/api/ask-ai', { method:'POST', headers:await aiHeaders(sb), body:JSON.stringify({ prompt, maxTokens:3500, feature:'board' }) });
+  let d; try { d = await r.json(); } catch(e){ throw new Error(T('Something went wrong. Please try again.')); }
+  if(d.error) throw new Error(d.error);
+  return d.text;
+}
+$('explain').onclick = async () => {
+  const topic = $('topic').value.trim();
+  if(topic.length < 3){ say('aiMsg', T('Please write what you want explained.'), false); return; }
+  $('explain').disabled = true; say('aiMsg', T('Drawing your board…'), true);
+  try {
+    const text = await callAI(buildPrompt(topic));
+    const b = parseBoard(text);
+    if(!b){ say('aiMsg', T('The AI could not make a board for this. Try asking in a different way.'), false); return; }
+    ai = b; aiIdx = 0; say('aiMsg', '', true); $('player').classList.remove('hidden');
+    try { LNE_HIST.log(sb, 'ask', 'Whiteboard: ' + topic, b.title + '\n' + b.steps.map(s => s.say).filter(Boolean).join('\n'), { oneShot:true }); } catch(e){}
+    showStep(0, true); renderTranscript();
+  } catch(e){ say('aiMsg', e.message || T('Something went wrong. Please try again.'), false); }
+  finally { $('explain').disabled = false; }
+};
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function showStep(i, animate){
+  stopSpeak(); stopPlay();
+  aiIdx = Math.max(0, Math.min(ai.steps.length - 1, i));
+  $('stepNo').textContent = (aiIdx + 1) + ' / ' + ai.steps.length;
+  $('say').textContent = ai.steps[aiIdx].say || ai.title;
+  $('prev').disabled = aiIdx === 0; $('next').disabled = aiIdx === ai.steps.length - 1;
+  const fresh = ai.steps[aiIdx].items.slice();
+  if(animate && !reduce && fresh.length) animateItems(fresh); else { anim = null; redraw(); }
+}
+function animateItems(list){
+  const pending = new Set(list), t0 = performance.now(); anim = { item:null, k:1, pending };
+  const gap = 260, dur = 380;
+  (function frame(now){
+    const t = now - t0; let alive = false;
+    list.forEach((it, i) => { const s = t - i * gap; if(s >= 0) pending.delete(it); else alive = true; });
+    const idx = Math.min(list.length - 1, Math.floor(t / gap)), cur = list[idx], k = Math.min(1, (t - idx * gap) / dur);
+    anim.item = cur; anim.k = k; redraw();
+    if(t < (list.length - 1) * gap + dur && anim && anim.pending === pending) requestAnimationFrame(frame); else { anim = null; redraw(); }
+  })(t0);
+}
+function renderTranscript(){
+  const t = $('transcript'); t.textContent = '';
+  const ol = el('ol'); ai.steps.forEach(s => { if(s.say) ol.appendChild(el('li', { text:s.say, 'data-no-i18n':'' })); });
+  t.appendChild(el('h3', { text:T('Everything said on the board'), style:'margin:10px 0 0; font-size:15px' })); t.appendChild(ol);
+}
+$('prev').onclick = () => showStep(aiIdx - 1, false);
+$('next').onclick = () => showStep(aiIdx + 1, true);
+let playing = false, playT = null;
+function stopPlay(){ playing = false; clearTimeout(playT); $('play').textContent = T('Play'); }
+const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+if(!canSpeak) $('listen').classList.add('hidden');
+function stopSpeak(){ try { if(canSpeak) speechSynthesis.cancel(); } catch(e){} }
+function speakStep(done){
+  if(!canSpeak || !ai){ if(done) playT = setTimeout(done, 4500); return; }
+  const txt = ai.steps[aiIdx].say; if(!txt){ if(done) playT = setTimeout(done, 2500); return; }
+  stopSpeak(); const u = new SpeechSynthesisUtterance(txt); u.lang = SPEECH[appLang] || 'en-US'; u.rate = 0.95;
+  u.onend = () => { if(done) playT = setTimeout(done, 900); }; u.onerror = () => { if(done) playT = setTimeout(done, 1500); };
+  speechSynthesis.speak(u);
+}
+$('listen').onclick = () => speakStep(null);
+$('play').onclick = () => {
+  if(playing){ stopPlay(); stopSpeak(); return; }
+  playing = true; $('play').textContent = T('Pause');
+  if(aiIdx === ai.steps.length - 1) showStep(0, true), playing = true, $('play').textContent = T('Pause');
+  (function go(){
+    if(!playing) return;
+    speakStep(() => { if(!playing) return; if(aiIdx >= ai.steps.length - 1){ stopPlay(); return; } const n = aiIdx + 1; const wasPlaying = playing; showStep(n, true); playing = wasPlaying; $('play').textContent = T('Pause'); go(); });
+  })();
+};
+$('toMine').onclick = () => {
+  const list = aiItemsUpTo(aiIdx); if(!list.length) return;
+  pushUndo(); items = list.map(x => Object.assign({}, x)).slice(0, MAX_ITEMS); setMode('draw'); save_auto(); say('msg', T('Copied. You can now change it on your board.'), true);
+};
+
+/* ================= tabs ================= */
+function setMode(m){
+  mode = m; stopPlay(); stopSpeak(); anim = null; preview = null; drag = null;
+  $('tabDraw').setAttribute('aria-selected', m === 'draw' ? 'true' : 'false'); $('tabAi').setAttribute('aria-selected', m === 'ai' ? 'true' : 'false');
+  $('pDraw').classList.toggle('hidden', m !== 'draw'); $('pAi').classList.toggle('hidden', m !== 'ai');
+  cv.style.touchAction = m === 'draw' ? 'none' : 'pan-y';
+  if(m === 'ai' && ai) showStep(aiIdx, false); else redraw();
+}
+$('tabDraw').onclick = () => setMode('draw'); $('tabAi').onclick = () => setMode('ai');
+
+/* ================= start ================= */
+buildControls(); syncBtns(); renderSaved();
+try { const a = JSON.parse(localStorage.getItem(AUTO) || 'null'); if(a && Array.isArray(a.items) && a.W && a.H){ W = a.W; H = a.H; items = a.items.slice(0, MAX_ITEMS); } } catch(e){}
+setMode('draw'); fit();
+(async function(){ const s = await sb.auth.getSession(); if(!(s.data && s.data.session)) window.location.href = 'skillstream-login.html'; })();
+</script>
+</body>
+</html>
