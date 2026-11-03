@@ -122,6 +122,7 @@
       </div>
       <p class="hint" style="margin:0">Each board uses 1 of your AI requests for the day.</p>
       <div class="msg" id="aiMsg" role="status"></div>
+      <details id="aiDetails" class="hidden"><summary class="hint">Technical details</summary><pre id="aiRaw" data-no-i18n style="white-space:pre-wrap; font-size:12px; background:#F7F3EA; padding:8px; border-radius:8px; max-height:200px; overflow:auto"></pre></details>
     </div>
   </div>
 </div>
@@ -463,10 +464,44 @@ function fitToBoard(steps){
   const fn = (x, y) => [(x - a) * f + offx, (y - b) * f + offy];
   steps.forEach(st => { st.items = transformItems(st.items, fn, f); });
 }
+function tidyJson(t){ return String(t).replace(/[\u0000-\u001f]+/g, ' ').replace(/,\s*([}\]])/g, '$1'); }
+// index just after the matching closer of the { or [ at position a; -1 if the text ends first (cut-off reply)
+function balancedEnd(str, a){
+  let depth = 0, inStr = false, esc = false;
+  for(let i = a; i < str.length; i++){
+    const ch = str[i];
+    if(inStr){ if(esc) esc = false; else if(ch === '\\') esc = true; else if(ch === '"') inStr = false; continue; }
+    if(ch === '"') inStr = true;
+    else if(ch === '{' || ch === '[') depth++;
+    else if(ch === '}' || ch === ']'){ depth--; if(depth === 0) return i + 1; }
+  }
+  return -1;
+}
+function extractBoardObject(raw){
+  const s = String(raw || '').replace(/```[a-z]*/gi, ' ');
+  // 1) a complete JSON object that has "steps"
+  let from = 0;
+  for(let n = 0; n < 6; n++){
+    const a = s.indexOf('{', from); if(a < 0) break;
+    const e = balancedEnd(s, a);
+    if(e > 0){ try { const o = JSON.parse(tidyJson(s.slice(a, e))); if(o && Array.isArray(o.steps)) return o; } catch(x){} }
+    from = a + 1;
+  }
+  // 2) a cut-off reply: keep every step that was finished
+  const k = s.search(/"steps"\s*:\s*\[/); if(k < 0) return null;
+  let pos = s.indexOf('[', k) + 1; const steps = [];
+  for(let n = 0; n < 12; n++){
+    const a = s.indexOf('{', pos); if(a < 0) break;
+    const e = balancedEnd(s, a); if(e < 0) break;
+    try { steps.push(JSON.parse(tidyJson(s.slice(a, e)))); } catch(x){}
+    pos = e;
+  }
+  if(!steps.length) return null;
+  const tm = s.match(/"title"\s*:\s*"([^"]{1,100})"/);
+  return { title:tm ? tm[1] : 'Board', steps };
+}
 function parseBoard(text){
-  let s = String(text || '').trim().replace(/^```[a-z]*\s*/i, '').replace(/```\s*$/i, '');
-  const a = s.indexOf('{'), b = s.lastIndexOf('}'); if(a < 0 || b <= a) return null;
-  let obj; try { obj = JSON.parse(s.slice(a, b + 1)); } catch(e){ return null; }
+  const obj = extractBoardObject(text);
   if(!obj || !Array.isArray(obj.steps)) return null;
   const steps = [];
   obj.steps.slice(0, 8).forEach(st => {
@@ -501,10 +536,14 @@ function buildPrompt(topic){
   'Small example of the style (for a different topic): ' + ex;
 }
 async function callAI(prompt){
-  const r = await fetch('/api/ask-ai', { method:'POST', headers:await aiHeaders(sb), body:JSON.stringify({ prompt, maxTokens:3500, feature:'board' }) });
+  const r = await fetch('/api/ask-ai', { method:'POST', headers:await aiHeaders(sb), body:JSON.stringify({ prompt, maxTokens:6000, feature:'board' }) });
   let d; try { d = await r.json(); } catch(e){ throw new Error(T('Something went wrong. Please try again.')); }
   if(d.error) throw new Error(d.error);
   return d.text;
+}
+function showDetails(raw){
+  const d = $('aiDetails'); d.classList.remove('hidden'); d.removeAttribute('open');
+  $('aiRaw').textContent = String(raw == null ? '(no answer)' : raw).slice(0, 1500) + (String(raw || '').length > 1500 ? ' …' : '');
 }
 $('explain').onclick = async () => {
   const topic = $('topic').value.trim();
@@ -513,7 +552,8 @@ $('explain').onclick = async () => {
   try {
     const text = await callAI(buildPrompt(topic));
     const b = parseBoard(text);
-    if(!b){ say('aiMsg', T('The AI could not make a board for this. Try asking in a different way.'), false); return; }
+    if(!b){ say('aiMsg', T('The AI could not make a board for this. Try asking in a different way.'), false); showDetails(text); return; }
+    $('aiDetails').classList.add('hidden');
     ai = b; aiIdx = 0; say('aiMsg', '', true); $('player').classList.remove('hidden');
     try { LNE_HIST.log(sb, 'ask', 'Whiteboard: ' + topic, b.title + '\n' + b.steps.map(s => s.say).filter(Boolean).join('\n'), { oneShot:true }); } catch(e){}
     showStep(0, true); renderTranscript(); $('stage').scrollIntoView({ block:'start' }); startPlay(false);
