@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Record a lesson — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<script src="js/lne-board.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; --sage:#6B8F71; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:#2B2B2B; padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:20px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:12px; max-width:1100px; margin:0 auto;}
+  #stage{display:flex; justify-content:center; background:#EFEAE0; border:1px solid var(--line); border-radius:14px; padding:8px; margin-bottom:10px; overflow:hidden;}
+  canvas{display:block; background:#fff; border-radius:8px; box-shadow:0 1px 6px rgba(0,0,0,.12);}
+  .panel{background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:12px; min-width:0; overflow-wrap:anywhere;}
+  .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:6px 0;}
+  .tool,.act{min-width:44px; min-height:44px; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:6px 10px; font:inherit; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer;}
+  .tool[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .act.main{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .act.rec{background:var(--danger); color:#fff; border-color:var(--danger);}
+  .act:disabled{opacity:.45;}
+  .act.del{color:var(--danger); border-color:var(--danger);}
+  .sw{width:44px; height:44px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 1.5px var(--line); cursor:pointer; padding:0;}
+  .sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink);}
+  .lbl{font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-inline-end:4px;}
+  input[type=text],textarea,select{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:15px; background:#fff;}
+  textarea{min-height:64px; resize:vertical;}
+  .hint{font-size:13px; color:var(--muted); line-height:1.55;}
+  .msg{font-size:13.5px; margin-top:8px; min-height:18px;} .msg.err{color:var(--danger);} .msg.ok{color:#3E6B48;}
+  .bar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:#fff; border:1px solid var(--line); border-radius:14px; padding:8px 12px; margin-bottom:10px; position:sticky; top:0; z-index:5; box-shadow:0 2px 8px rgba(0,0,0,.08);}
+  .dot{width:14px; height:14px; border-radius:50%; background:#bbb; flex:none;}
+  .dot.on{background:var(--danger); animation:pulse 1.2s infinite;}
+  .dot.pause{background:var(--gold);}
+  @keyframes pulse{50%{opacity:.35;}}
+  @media (prefers-reduced-motion: reduce){ .dot.on{animation:none;} }
+  .timer{font-variant-numeric:tabular-nums; font-weight:700; font-size:18px; color:var(--ink);}
+  .scene{border-top:1px solid var(--line); padding:10px 0;}
+  .scene:first-of-type{border-top:0;}
+  .scene .meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:6px;}
+  .pill{background:#FBF4E2; border-radius:999px; padding:3px 10px; font-size:12.5px; font-weight:700; color:#8A6A1F;}
+  .hidden{display:none !important;}
+  .chk{display:flex; gap:8px; align-items:center; font-size:14px; min-height:44px;}
+  .chk input{width:22px; height:22px;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  #pv{margin-top:8px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Record a lesson</h1>
+  <p>Talk and write on the board. Your students replay it in your class, on any phone, with very little data.</p>
+</header>
+<div class="wrap">
+
+  <!-- 1. SETUP -->
+  <div class="panel" id="pSetup">
+    <div id="noClass" class="hidden">
+      <p class="hint" style="margin:0">Only the teacher of a class can record a lesson. Create a class first.</p>
+      <div class="row"><a class="act main" href="skillstream-classrooms.html" style="text-decoration:none; display:inline-flex; align-items:center">Go to my classes</a></div>
+    </div>
+    <div id="setupForm" class="hidden">
+      <label for="classSel" class="lbl">Class</label>
+      <select id="classSel"></select>
+      <label for="titleIn" class="lbl" style="display:block; margin-top:10px">Lesson title</label>
+      <input id="titleIn" type="text" maxlength="120" placeholder="e.g. Adding fractions, part 1">
+      <label for="noteIn" class="lbl" style="display:block; margin-top:10px">Note for students (optional)</label>
+      <textarea id="noteIn" maxlength="500" placeholder="e.g. Watch this before Thursday and write down one question."></textarea>
+      <div class="row"><button class="act main" id="startBtn" type="button">Start</button></div>
+      <p class="hint" style="margin:0">Tip: record in short scenes (one idea each). You can pause, and you can redo just one scene.</p>
+    </div>
+    <div class="msg" id="setupMsg" role="status"></div>
+  </div>
+
+  <div id="draftBox" class="panel hidden">
+    <p style="margin:0 0 8px"><b>You have an unfinished lesson on this phone.</b></p>
+    <p class="hint" style="margin:0" id="draftInfo" data-no-i18n></p>
+    <div class="row"><button class="act main" id="draftGo" type="button">Continue it</button><button class="act del" id="draftDel" type="button">Discard it</button></div>
+  </div>
+
+  <!-- 2. RECORDING STUDIO -->
+  <div id="studio" class="hidden">
+    <div class="bar" id="statusBar">
+      <span class="dot" id="dot"></span>
+      <span id="stateTxt" class="lbl" style="margin:0">Ready</span>
+      <span class="timer" id="timer" data-no-i18n>0:00</span>
+      <span class="hint" id="leftTxt" data-no-i18n></span>
+      <span class="row" style="margin:0; margin-inline-start:auto">
+        <button class="act rec" id="bRec" type="button">Record</button>
+        <button class="act" id="bPause" type="button">Pause</button>
+        <button class="act main" id="bFinish" type="button">Finish scene</button>
+      </span>
+    </div>
+    <div id="stage"><canvas id="cv" role="img" aria-label="Lesson board"></canvas></div>
+
+    <div class="panel" id="ctl">
+      <label class="chk"><input type="checkbox" id="cleanScene"> <span>Start this scene on a clean board</span></label>
+      <div class="msg" id="msg" role="status"></div>
+    </div>
+
+    <div class="panel">
+      <div class="row" role="group" aria-label="Tools" id="tools"></div>
+      <div class="row"><span class="lbl">Colour</span><span id="colors" class="row" style="margin:0"></span></div>
+      <div class="row"><span class="lbl">Size</span><span id="sizes" class="row" style="margin:0"></span></div>
+      <div id="textBar" class="row hidden">
+        <input id="textIn" type="text" maxlength="80" aria-label="Text" style="flex:1; min-width:140px">
+        <button class="act main" id="textAdd" type="button">Add text</button>
+      </div>
+      <div class="row">
+        <button class="act" id="undo" type="button">Undo</button>
+        <button class="act" id="redo" type="button">Redo</button>
+        <button class="act" id="shape" type="button">Wide / Tall</button>
+      </div>
+      <p class="hint" style="margin:0">Undo and the eraser only change what you drew in this scene.</p>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin:0 0 6px; font-size:16px">Your scenes</h3>
+      <div id="sceneList"></div>
+      <p class="hint" id="noScenes" style="margin:0">No scene yet. Press Record, talk and write, then press Finish scene.</p>
+    </div>
+
+    <div class="panel hidden" id="pPost">
+      <h3 style="margin:0 0 6px; font-size:16px">Post your lesson</h3>
+      <p class="hint" style="margin:0" id="postInfo" data-no-i18n></p>
+      <div class="row">
+        <button class="act" id="bPreview" type="button">Watch it first</button>
+        <button class="act main" id="bPost" type="button">Post to my class</button>
+      </div>
+      <div id="pv" class="hidden">
+        <div id="pvStage" style="display:flex; justify-content:center; background:#EFEAE0; border-radius:10px; padding:6px"><canvas id="pvCv" role="img" aria-label="Lesson preview"></canvas></div>
+        <div class="row"><button class="act main" id="pvPlay" type="button">Play</button><span class="timer" id="pvTime" data-no-i18n></span></div>
+      </div>
+      <div class="msg" id="postMsg" role="status"></div>
+      <div id="done" class="hidden">
+        <div class="row">
+          <a class="act main" id="doneLink" href="#" style="text-decoration:none; display:inline-flex; align-items:center">Open the lesson</a>
+          <button class="act" id="shareBtn" type="button">Share link</button>
+        </div>
+        <p class="hint" style="margin:0">Students of this class will see it in Lessons. You can also send the link in your WhatsApp group: only your class can open it.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/nav.js" defer></script>
+<script>
+const sb = window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co', 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function say(id, text, ok){ const m = $(id); m.className = 'msg ' + (ok ? 'ok' : 'err'); m.textContent = text; }
+const B = window.LNEBoard, COLORS = B.COLORS, COLOR_NAMES = Object.keys(COLORS);
+const MAX_MS = 20 * 60 * 1000, MIN_SCENE_MS = 2000, MAX_SCENES = 12, MAX_AUDIO = 4 * 1024 * 1024, MAX_JSON = 380000;
+const SIZES = [['S', 3, 22], ['M', 6, 32], ['L', 10, 46]];
+const TOOLS = [['pen','Pen'],['eraser','Eraser'],['line','Line'],['arrow','Arrow'],['rect','Box'],['circle','Circle'],['text','Text']];
+
+let me = null, classes = [], meta = { classId:null, title:'', note:'' };
+let W = innerWidth < 700 ? 600 : 1000, H = innerWidth < 700 ? 800 : 600;
+let scenes = [];                 // finished scenes: { title, say, ms, blob, mime, clear, items }
+let cur = null;                  // the scene being made
+let tool = 'pen', color = 'black', sizeIdx = 1, scale = 1, dpr = 1, preview = null, drag = null, erasedAny = false, pendingText = null;
+const cv = $('cv'), ctx = cv.getContext('2d');
+
+/* ---------- the scene being made ---------- */
+function newCur(insertAt, clean){
+  return { state:'idle', items:[], undoS:[], redoS:[], clear:!!clean, insertAt:insertAt, acc:0, tick:0, recorder:null, chunks:[], stream:null, mime:'', noVoice:false, voiceDenied:false };
+}
+function clock(){ return cur.acc + (cur.state === 'rec' ? performance.now() - cur.tick : 0); }
+function usedMs(){ return scenes.reduce((a, s) => a + s.ms, 0); }
+function baseItems(){
+  let out = [];
+  for(let i = 0; i < cur.insertAt && i < scenes.length; i++){ if(scenes[i].clear) out = []; out = out.concat(scenes[i].items); }
+  return cur.clear ? [] : out;
+}
+
+/* ---------- drawing the board ---------- */
+function fit(){
+  const stage = $('stage');
+  const maxW = Math.max(200, stage.clientWidth - 16), maxH = Math.max(200, innerHeight * 0.58);
+  scale = Math.min(maxW / W, maxH / H); dpr = Math.min(2, window.devicePixelRatio || 1);
+  const cw = Math.floor(W * scale), ch = Math.floor(H * scale);
+  cv.style.width = cw + 'px'; cv.style.height = ch + 'px'; cv.width = Math.floor(cw * dpr); cv.height = Math.floor(ch * dpr);
+  redraw();
+}
+function redraw(){
+  ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  if(!cur) return;
+  baseItems().forEach(it => B.drawItem(ctx, it, 1, W));
+  cur.items.forEach(it => B.drawItem(ctx, it, 1, W));
+  if(preview) B.drawItem(ctx, preview, 1, W);
+}
+let rz = null; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(fit, 150); });
+
+/* ---------- tools ---------- */
+function buildControls(){
+  TOOLS.forEach(t => { const b = el('button', { class:'tool', type:'button', 'data-t':t[0], 'aria-pressed':t[0] === tool ? 'true' : 'false', text:T(t[1]) }); b.onclick = () => setTool(t[0]); $('tools').appendChild(b); });
+  COLOR_NAMES.forEach(n => { const b = el('button', { class:'sw', type:'button', 'data-c':n, 'aria-label':T(n[0].toUpperCase() + n.slice(1)), 'aria-pressed':n === color ? 'true' : 'false', style:'background:' + COLORS[n] }); b.onclick = () => { color = n; document.querySelectorAll('.sw').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); }; $('colors').appendChild(b); });
+  SIZES.forEach((s, i) => { const b = el('button', { class:'tool', type:'button', 'data-s':String(i), 'aria-pressed':i === sizeIdx ? 'true' : 'false', text:s[0], 'data-no-i18n':'' }); b.onclick = () => { sizeIdx = i; document.querySelectorAll('[data-s]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); }; $('sizes').appendChild(b); });
+}
+function setTool(t){ tool = t; document.querySelectorAll('#tools .tool').forEach(x => x.setAttribute('aria-pressed', x.getAttribute('data-t') === t ? 'true' : 'false')); $('textBar').classList.toggle('hidden', t !== 'text'); pendingText = null; }
+function syncBtns(){ if(!cur) return; $('undo').disabled = !cur.undoS.length; $('redo').disabled = !cur.redoS.length; }
+function pushUndo(){ cur.undoS.push(cur.items.slice()); if(cur.undoS.length > 60) cur.undoS.shift(); cur.redoS = []; syncBtns(); }
+const r1 = v => Math.round(v * 10) / 10;
+function roundItem(it){
+  const o = Object.assign({}, it);
+  ['x','y','x1','y1','x2','y2','w','h','r'].forEach(k => { if(typeof o[k] === 'number') o[k] = r1(o[k]); });
+  if(o.pts) o.pts = o.pts.map(p => [r1(p[0]), r1(p[1])]);
+  return o;
+}
+function addItem(it, startAt){
+  if(!cur) return false;
+  const total = cur.items.length + scenes.reduce((a, s) => a + s.items.length, 0);
+  if(cur.items.length >= 300 || total >= 780){ say('msg', T('The lesson has too many drawings. Finish this scene or draw less.'), false); return false; }
+  const now = Math.round(clock());
+  it = roundItem(it);
+  it.at = Math.round(startAt === undefined ? now : startAt);
+  it.d = cur.state === 'rec' ? Math.max(0, Math.min(20000, now - it.at)) : 0;
+  pushUndo(); cur.items = cur.items.concat([it]); redraw(); return true;
+}
+$('undo').onclick = () => { if(!cur || !cur.undoS.length) return; cur.redoS.push(cur.items); cur.items = cur.undoS.pop(); syncBtns(); redraw(); };
+$('redo').onclick = () => { if(!cur || !cur.redoS.length) return; cur.undoS.push(cur.items); cur.items = cur.redoS.pop(); syncBtns(); redraw(); };
+
+function pos(e){ const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(W, (e.clientX - r.left) / scale)), Math.max(0, Math.min(H, (e.clientY - r.top) / scale))]; }
+function dist2seg(px, py, x1, y1, x2, y2){ const dx = x2 - x1, dy = y2 - y1, l = dx * dx + dy * dy; let t = l ? ((px - x1) * dx + (py - y1) * dy) / l : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy)); }
+function hit(it, x, y, r){
+  if(it.t === 'pen'){ if(it.pts.length === 1) return Math.hypot(x - it.pts[0][0], y - it.pts[0][1]) <= r; for(let i = 1; i < it.pts.length; i++) if(dist2seg(x, y, it.pts[i-1][0], it.pts[i-1][1], it.pts[i][0], it.pts[i][1]) <= r) return true; return false; }
+  if(it.t === 'line' || it.t === 'arrow') return dist2seg(x, y, it.x1, it.y1, it.x2, it.y2) <= r;
+  if(it.t === 'circle') return Math.abs(Math.hypot(x - it.x, y - it.y) - it.r) <= r || (it.f && Math.hypot(x - it.x, y - it.y) <= it.r);
+  const b = B.bbox(it, W); return x >= b[0] - r && x <= b[2] + r && y >= b[1] - r && y <= b[3] + r;
+}
+cv.addEventListener('pointerdown', e => {
+  if(!cur || !e.isPrimary) return;
+  e.preventDefault(); const p = pos(e);
+  try { cv.setPointerCapture(e.pointerId); } catch(x){}
+  if(tool === 'text'){ pendingText = p; $('textBar').classList.remove('hidden'); $('textIn').focus(); say('msg', T('Type your text and press Add text.'), true); drag = null; return; }
+  if(tool === 'eraser'){ erasedAny = false; drag = { erase:true }; eraseAt(p); return; }
+  drag = { start:p, last:p, at:Math.round(clock()) };
+  if(tool === 'pen'){ preview = { t:'pen', pts:[p], c:color, lw:SIZES[sizeIdx][1] }; redraw(); }
+});
+cv.addEventListener('pointermove', e => {
+  if(!drag) return; e.preventDefault();
+  const p = pos(e);
+  if(drag.erase){ eraseAt(p); return; }
+  if(tool === 'pen'){
+    if(Math.hypot(p[0] - drag.last[0], p[1] - drag.last[1]) < 1.5 || preview.pts.length >= 1500) return;
+    preview.pts.push(p); drag.last = p; redraw();
+  } else {
+    const s = drag.start, lw = SIZES[sizeIdx][1];
+    if(tool === 'line' || tool === 'arrow') preview = { t:tool, x1:s[0], y1:s[1], x2:p[0], y2:p[1], c:color, lw };
+    else if(tool === 'rect') preview = { t:'rect', x:Math.min(s[0], p[0]), y:Math.min(s[1], p[1]), w:Math.abs(p[0] - s[0]), h:Math.abs(p[1] - s[1]), c:color, lw };
+    else if(tool === 'circle') preview = { t:'circle', x:s[0], y:s[1], r:Math.hypot(p[0] - s[0], p[1] - s[1]), c:color, lw };
+    redraw();
+  }
+});
+function endDrag(){
+  if(!drag) return;
+  if(drag.erase){ drag = null; return; }
+  const pv = preview, st = drag.at; preview = null; drag = null;
+  if(!pv){ redraw(); return; }
+  const tiny = (pv.t === 'rect' && (pv.w < 6 || pv.h < 6)) || (pv.t === 'circle' && pv.r < 4) || ((pv.t === 'line' || pv.t === 'arrow') && Math.hypot(pv.x2 - pv.x1, pv.y2 - pv.y1) < 6);
+  if(tiny){ redraw(); return; }
+  addItem(pv, st);
+}
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+function eraseAt(p){
+  for(let i = cur.items.length - 1; i >= 0; i--){
+    if(hit(cur.items[i], p[0], p[1], 14)){
+      if(!erasedAny){ pushUndo(); erasedAny = true; }
+      cur.items = cur.items.slice(0, i).concat(cur.items.slice(i + 1)); redraw(); return;
+    }
+  }
+}
+$('textAdd').onclick = () => {
+  const s = $('textIn').value.trim();
+  if(!s){ say('msg', T('Please write some text first.'), false); return; }
+  const p = pendingText || [W * 0.1, H * 0.1];
+  const t0 = Math.round(clock());
+  if(addItem({ t:'text', x:p[0], y:p[1], s:s.slice(0, 80), size:SIZES[sizeIdx][2], c:color, a:'l', w:Math.max(80, W - p[0] - 20) }, t0)){
+    cur.items[cur.items.length - 1].d = cur.state === 'rec' ? 300 : 0;
+    $('textIn').value = ''; pendingText = null; say('msg', '', true);
+  }
+};
+$('textIn').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('textAdd').click(); } });
+$('cleanScene').onchange = () => { if(cur){ cur.clear = $('cleanScene').checked; redraw(); } };
+$('shape').onclick = () => {
+  if(scenes.length || cur.items.length || cur.state !== 'idle'){ say('msg', T('You can only change the board shape before you draw or record.'), false); return; }
+  const t = W; W = H; H = t; fit();
+};
+
+/* ---------- recording ---------- */
+function pickMime(){
+  if(!window.MediaRecorder) return '';
+  const c = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+  for(const m of c){ try { if(MediaRecorder.isTypeSupported(m)) return m; } catch(e){} }
+  return '';
+}
+const canMic = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+let wake = null;
+async function keepAwake(on){
+  try { if(on){ if(navigator.wakeLock && !wake) wake = await navigator.wakeLock.request('screen'); } else if(wake){ await wake.release(); wake = null; } } catch(e){ wake = null; }
+}
+function fmt(ms){ const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function syncUi(){
+  const st = cur ? cur.state : 'idle';
+  $('dot').className = 'dot' + (st === 'rec' ? ' on' : st === 'paused' ? ' pause' : '');
+  $('stateTxt').textContent = st === 'rec' ? T('Recording') : st === 'paused' ? T('Paused') : T('Ready');
+  $('bRec').textContent = st === 'paused' ? T('Resume') : T('Record');
+  $('bRec').classList.toggle('hidden', st === 'rec');
+  $('bPause').classList.toggle('hidden', st !== 'rec');
+  $('bFinish').classList.toggle('hidden', st === 'idle');
+  $('cleanScene').disabled = st !== 'idle' && cur.items.length > 0;
+  $('statusBar').setAttribute('role', 'status');
+}
+function tickUi(){
+  if(!cur) return;
+  $('timer').textContent = fmt(clock());
+  const left = MAX_MS - usedMs() - clock();
+  $('leftTxt').textContent = left < 120000 ? (fmt(Math.max(0, left)) + ' ' + T('left')) : '';
+  if(cur.state === 'rec' && left <= 0){ say('msg', T('You reached 20 minutes. This is the end of the lesson.'), false); finishScene(); }
+}
+setInterval(tickUi, 250);
+
+async function startRec(){
+  if(!cur) return;
+  if(scenes.length >= MAX_SCENES && cur.insertAt >= scenes.length){ say('msg', T('A lesson can have at most 12 scenes.'), false); return; }
+  if(usedMs() >= MAX_MS){ say('msg', T('The lesson is already 20 minutes long. Post it, or delete a scene.'), false); return; }
+  if(cur.state === 'paused'){
+    if(cur.recorder && cur.recorder.state === 'paused'){ try { cur.recorder.resume(); } catch(e){} }
+    cur.state = 'rec'; cur.tick = performance.now(); keepAwake(true); syncUi(); say('msg', '', true); return;
+  }
+  // first start of this scene
+  cur.mime = pickMime(); cur.chunks = [];
+  if(canMic && cur.mime && !cur.noVoice){
+    try {
+      cur.stream = await navigator.mediaDevices.getUserMedia({ audio:{ channelCount:1, echoCancellation:true, noiseSuppression:true } });
+      const rec = new MediaRecorder(cur.stream, { mimeType:cur.mime, audioBitsPerSecond:24000 });
+      rec.ondataavailable = ev => { if(ev.data && ev.data.size) cur.chunks.push(ev.data); };
+      cur.recorder = rec; rec.start(1000);
+    } catch(e){
+      cur.voiceDenied = true; releaseMic();
+      showNoVoice(); return;
+    }
+  } else if(!cur.noVoice){
+    showNoVoice(); return;
+  }
+  cur.state = 'rec'; cur.acc = cur.acc; cur.tick = performance.now(); keepAwake(true); syncUi(); say('msg', '', true);
+}
+function showNoVoice(){
+  say('msg', T('The microphone is not available. You can allow it in the browser settings, or record this scene without voice.'), false);
+  if(!$('noVoiceBtn')){
+    const b = el('button', { class:'act', type:'button', id:'noVoiceBtn', text:T('Record without voice') });
+    b.onclick = () => { cur.noVoice = true; b.remove(); say('msg', '', true); startRec(); };
+    $('ctl').insertBefore(b, $('msg'));
+  }
+}
+function releaseMic(){
+  try { if(cur && cur.stream) cur.stream.getTracks().forEach(t => t.stop()); } catch(e){}
+  if(cur){ cur.stream = null; }
+}
+function pauseRec(){
+  if(!cur || cur.state !== 'rec') return;
+  cur.acc += performance.now() - cur.tick; cur.state = 'paused';
+  if(cur.recorder && cur.recorder.state === 'recording'){ try { cur.recorder.pause(); } catch(e){} }
+  keepAwake(false); syncUi();
+}
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden && cur && cur.state === 'rec'){ pauseRec(); say('msg', T('Paused, because you left the page. Press Resume to continue.'), false); }
+});
+function stopRecorder(){
+  return new Promise(res => {
+    const r = cur.recorder;
+    if(!r || r.state === 'inactive'){ res(); return; }
+    r.onstop = () => res();
+    try { r.stop(); } catch(e){ res(); }
+  });
+}
+async function finishScene(){
+  if(!cur || cur.state === 'idle') return;
+  if(cur.state === 'rec'){ cur.acc += performance.now() - cur.tick; cur.state = 'paused'; }
+  const ms = Math.round(cur.acc);
+  await stopRecorder(); releaseMic(); keepAwake(false);
+  if(ms < MIN_SCENE_MS){
+    say('msg', T('That scene was too short (under 2 seconds), so it was not kept.'), false);
+    cur = newCur(cur.insertAt, cur.clear); $('cleanScene').checked = cur.clear; syncUi(); redraw(); syncBtns(); return;
+  }
+  let blob = null;
+  if(cur.chunks.length){ blob = new Blob(cur.chunks, { type:cur.mime.split(';')[0] }); }
+  if(blob && blob.size > MAX_AUDIO){ say('msg', T('This scene is too large. Record shorter scenes.'), false); blob = null; cur.items = cur.items; return; }
+  const s = { title:'', say:'', ms, blob, mime:cur.mime ? cur.mime.split(';')[0] : '', clear:cur.clear, items:cur.items };
+  const at = cur.insertAt;
+  scenes.splice(at, 0, s);
+  s.title = T('Scene') + ' ' + (at + 1);
+  const next = Math.min(scenes.length, at + 1);
+  cur = newCur(scenes.length, false);       // next scene goes to the end
+  $('cleanScene').checked = false;
+  say('msg', T('Scene saved. Record the next one, or post your lesson below.'), true);
+  renderScenes(); syncUi(); redraw(); syncBtns(); saveDraft();
+}
+$('bRec').onclick = startRec; $('bPause').onclick = pauseRec; $('bFinish').onclick = finishScene;
+
+/* ---------- scenes list ---------- */
+function renderScenes(){
+  const box = $('sceneList'); box.textContent = '';
+  $('noScenes').classList.toggle('hidden', scenes.length > 0);
+  scenes.forEach((s, i) => {
+    const ti = el('input', { type:'text', maxlength:'60', 'aria-label':T('Scene title'), value:s.title }); ti.oninput = () => { s.title = ti.value.slice(0, 60); };
+    ti.onchange = saveDraft;
+    const ca = el('textarea', { maxlength:'300', 'aria-label':T('Text for students (optional)'), placeholder:T('Text for students (optional)') }); ca.value = s.say; ca.oninput = () => { s.say = ca.value.slice(0, 300); }; ca.onchange = saveDraft;
+    const redo = el('button', { class:'act', type:'button', text:T('Redo this scene') });
+    redo.onclick = () => redoScene(i);
+    const del = el('button', { class:'act del', type:'button', text:T('Delete') });
+    del.onclick = () => { if(!confirm(T('Delete this scene?'))) return; scenes.splice(i, 1); cur = newCur(scenes.length, false); renderScenes(); syncUi(); redraw(); updatePost(); saveDraft(); };
+    box.appendChild(el('div', { class:'scene' }, [
+      el('div', { class:'meta' }, [ el('span', { class:'pill', text:String(i + 1), 'data-no-i18n':'' }), el('span', { class:'pill', text:fmt(s.ms), 'data-no-i18n':'' }), el('span', { class:'hint', text:s.blob ? '' : T('No voice') }) ]),
+      ti, el('div', { style:'height:6px' }), ca, el('div', { class:'row' }, [ redo, del ])
+    ]));
+  });
+  updatePost();
+}
+function redoScene(i){
+  if(cur && cur.state !== 'idle'){ say('msg', T('Finish the scene you are recording first.'), false); return; }
+  if(!confirm(T('Record this scene again? The old recording of it will be removed.'))) return;
+  const old = scenes.splice(i, 1)[0];
+  cur = newCur(i, old.clear); $('cleanScene').checked = old.clear;
+  renderScenes(); syncUi(); redraw(); syncBtns(); saveDraft();
+  say('msg', T('Ready. Press Record to record this scene again.'), true);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ---------- unfinished lesson kept on this phone (IndexedDB) ---------- */
+const DB = 'lne_rec_draft_v1';
+function idb(){ return new Promise((res, rej) => { try { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore('d'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch(e){ rej(e); } }); }
+async function idbPut(k, v){ try { const db = await idb(); return await new Promise((res, rej) => { const tx = db.transaction('d', 'readwrite'); tx.objectStore('d').put(v, k); tx.oncomplete = () => res(true); tx.onerror = () => rej(tx.error); }); } catch(e){ return false; } }
+async function idbGet(k){ try { const db = await idb(); return await new Promise((res, rej) => { const r = db.transaction('d').objectStore('d').get(k); r.onsuccess = () => res(r.result || null); r.onerror = () => rej(r.error); }); } catch(e){ return null; } }
+async function idbDel(k){ try { const db = await idb(); await new Promise(res => { const tx = db.transaction('d', 'readwrite'); tx.objectStore('d').delete(k); tx.oncomplete = () => res(); tx.onerror = () => res(); }); } catch(e){} }
+function draftKey(){ return 'class:' + meta.classId; }
+async function saveDraft(){
+  if(!meta.classId) return;
+  if(!scenes.length){ await idbDel(draftKey()); return; }
+  await idbPut(draftKey(), { meta, W, H, saved:Date.now(), scenes:scenes.map(s => ({ title:s.title, say:s.say, ms:s.ms, blob:s.blob, mime:s.mime, clear:s.clear, items:s.items })) });
+}
+
+/* ---------- review + post ---------- */
+function totalItemsJson(){ return JSON.stringify(scenes.map(s => ({ items:s.items }))).length; }
+function updatePost(){
+  $('pPost').classList.toggle('hidden', !scenes.length);
+  if(!scenes.length) return;
+  const bytes = scenes.reduce((a, s) => a + (s.blob ? s.blob.size : 0), 0);
+  $('postInfo').textContent = scenes.length + ' ' + T('scenes') + ' · ' + fmt(usedMs()) + ' · ' + (bytes / 1048576).toFixed(1) + ' MB';
+}
+let pvPlayer = null, pvUrls = [];
+$('bPreview').onclick = () => {
+  if(!scenes.length) return;
+  if(pvPlayer){ pvPlayer.destroy(); pvPlayer = null; }
+  pvUrls.forEach(u => URL.revokeObjectURL(u)); pvUrls = [];
+  const data = scenes.map(s => ({ title:s.title, say:s.say, ms:s.ms, audio:s.blob ? 'x' : null, clear:s.clear, items:s.items }));
+  $('pv').classList.remove('hidden');
+  pvPlayer = B.player({
+    canvas:$('pvCv'), w:W, h:H, scenes:data,
+    loadAudio:i => { const b = scenes[i] && scenes[i].blob; if(!b) return Promise.resolve(null); const u = URL.createObjectURL(b); pvUrls.push(u); return Promise.resolve(u); },
+    onTime:ms => { $('pvTime').textContent = fmt(ms) + ' / ' + fmt(usedMs()); },
+    onState:p => { $('pvPlay').textContent = p ? T('Pause') : T('Play'); }
+  });
+  pvPlayer.size(Math.max(200, $('pvStage').clientWidth - 12), Math.max(200, innerHeight * 0.5));
+  $('pvTime').textContent = '0:00 / ' + fmt(usedMs());
+  $('pvPlay').onclick = () => pvPlayer.toggle();
+  pvPlayer.play();
+};
+function newId(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16)); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+  const h = Array.from(b, x => x.toString(16).padStart(2, '0')).join(''); return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+}
+let posting = false;
+$('bPost').onclick = async () => {
+  if(posting || !scenes.length) return;
+  if(cur && cur.state !== 'idle'){ say('postMsg', T('Finish the scene you are recording first.'), false); return; }
+  if(totalItemsJson() > MAX_JSON){ say('postMsg', T('This lesson has too many drawings. Redo a scene with simpler drawings.'), false); return; }
+  if(!confirm(T('Post this lesson to your class now?'))) return;
+  posting = true; $('bPost').disabled = true; $('bPreview').disabled = true;
+  const id = newId(), uid = me.id, uploaded = [];
+  try {
+    const payload = [];
+    for(let i = 0; i < scenes.length; i++){
+      const s = scenes[i]; let path = null;
+      if(s.blob){
+        const ext = s.mime === 'audio/mp4' ? 'm4a' : s.mime === 'audio/ogg' ? 'ogg' : 'webm';
+        path = meta.classId + '/' + uid + '/' + id + '/' + (i + 1) + '.' + ext;
+        say('postMsg', T('Uploading') + ' ' + (i + 1) + ' / ' + scenes.length + '…', true);
+        const up = await sb.storage.from('lesson-audio').upload(path, s.blob, { contentType:s.mime, upsert:false });
+        if(up.error) throw up.error;
+        uploaded.push(path);
+      }
+      payload.push({ title:(s.title || '').trim().slice(0, 60) || (T('Scene') + ' ' + (i + 1)), say:(s.say || '').trim().slice(0, 300), ms:s.ms, audio:path, clear:!!s.clear, items:s.items });
+    }
+    say('postMsg', T('Posting…'), true);
+    const r = await sb.rpc('create_class_lesson', { p_id:id, p_class:meta.classId, p_title:meta.title, p_note:meta.note || null, p_w:W, p_h:H, p_scenes:payload });
+    if(r.error) throw r.error;
+    await idbDel(draftKey());
+    say('postMsg', T('Your lesson is posted. Your students can watch it now.'), true);
+    const link = new URL('skillstream-lessons.html', location.href); link.searchParams.set('l', id);
+    $('doneLink').href = link.pathname.split('/').pop() + '?l=' + id; $('done').classList.remove('hidden'); $('shareBtn').dataset.url = link.href;
+    scenes = []; cur = newCur(0, false); renderScenes(); redraw();
+    $('bPost').classList.add('hidden'); $('bPreview').classList.add('hidden'); $('pPost').classList.remove('hidden');
+  } catch(e){
+    if(uploaded.length){ try { await sb.storage.from('lesson-audio').remove(uploaded); } catch(x){} }
+    say('postMsg', (e && e.message) ? e.message : T('Something went wrong. Please try again.'), false);
+    $('bPost').disabled = false; $('bPreview').disabled = false;
+  } finally { posting = false; }
+};
+$('shareBtn').onclick = async () => {
+  const url = $('shareBtn').dataset.url; if(!url) return;
+  try {
+    if(navigator.share){ await navigator.share({ title:meta.title, text:meta.title, url }); return; }
+    await navigator.clipboard.writeText(url); say('postMsg', T('Link copied.'), true);
+  } catch(e){ say('postMsg', url, true); }
+};
+
+/* ---------- setup ---------- */
+function enterStudio(){
+  $('pSetup').classList.add('hidden'); $('draftBox').classList.add('hidden'); $('studio').classList.remove('hidden');
+  cur = newCur(scenes.length, false); buildControlsOnce(); fit(); renderScenes(); syncUi(); syncBtns();
+}
+let built = false; function buildControlsOnce(){ if(!built){ buildControls(); built = true; } }
+$('startBtn').onclick = async () => {
+  const title = $('titleIn').value.trim();
+  if(title.length < 3){ say('setupMsg', T('Please write a title (at least 3 characters).'), false); return; }
+  meta = { classId:$('classSel').value, title, note:$('noteIn').value.trim().slice(0, 500) };
+  scenes = []; enterStudio();
+};
+async function init(){
+  const s = await sb.auth.getSession();
+  if(!(s.data && s.data.session)){ window.location.href = 'skillstream-login.html'; return; }
+  me = s.data.session.user;
+  const r = await sb.from('classrooms').select('id,name').eq('teacher_id', me.id).order('name');
+  classes = r.data || [];
+  if(r.error || !classes.length){ $('noClass').classList.remove('hidden'); return; }
+  $('setupForm').classList.remove('hidden');
+  classes.forEach(c => $('classSel').appendChild(el('option', { value:c.id, text:c.name, 'data-no-i18n':'' })));
+  const want = new URLSearchParams(location.search).get('class');
+  if(want && classes.some(c => c.id === want)) $('classSel').value = want;
+  const d = await idbGet('class:' + $('classSel').value);
+  showDraft(d);
+  $('classSel').onchange = async () => showDraft(await idbGet('class:' + $('classSel').value));
+}
+let draftData = null;
+function showDraft(d){
+  draftData = d && Array.isArray(d.scenes) && d.scenes.length ? d : null;
+  $('draftBox').classList.toggle('hidden', !draftData);
+  if(draftData) $('draftInfo').textContent = (draftData.meta && draftData.meta.title ? draftData.meta.title + ' · ' : '') + draftData.scenes.length + ' ' + T('scenes') + ' · ' + fmt(draftData.scenes.reduce((a, x) => a + (x.ms || 0), 0));
+}
+$('draftGo').onclick = () => {
+  if(!draftData) return;
+  meta = Object.assign({ classId:$('classSel').value, title:'', note:'' }, draftData.meta || {}); meta.classId = $('classSel').value;
+  W = draftData.W === 1000 ? 1000 : 600; H = W === 1000 ? 600 : 800;
+  scenes = draftData.scenes.map(x => ({ title:String(x.title || '').slice(0, 60), say:String(x.say || '').slice(0, 300), ms:Number(x.ms) || 0, blob:x.blob || null, mime:x.mime || '', clear:!!x.clear, items:B.cleanScenes([{ items:x.items }], W, H)[0].items }));
+  $('titleIn').value = meta.title; enterStudio();
+};
+$('draftDel').onclick = async () => { if(!confirm(T('Discard this unfinished lesson?'))) return; await idbDel('class:' + $('classSel').value); showDraft(null); };
+addEventListener('beforeunload', e => { if(cur && cur.state !== 'idle'){ e.preventDefault(); e.returnValue = ''; } });
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lessons — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<script src="js/lne-board.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; --sage:#6B8F71; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:#2B2B2B; padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:20px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream); overflow-wrap:anywhere;}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5; overflow-wrap:anywhere;}
+  .wrap{padding:12px; max-width:900px; margin:0 auto;}
+  .panel{background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:12px; min-width:0; overflow-wrap:anywhere;}
+  .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:6px 0;}
+  .act{min-width:44px; min-height:44px; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:6px 12px; font:inherit; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;}
+  .act.main{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .act.del{color:var(--danger); border-color:var(--danger);}
+  .act:disabled{opacity:.45;}
+  .lbl{font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.8px;}
+  input[type=text],textarea,select{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:15px; background:#fff;}
+  textarea{min-height:64px; resize:vertical;}
+  .hint{font-size:13px; color:var(--muted); line-height:1.55;}
+  .msg{font-size:13.5px; margin-top:8px; min-height:18px;} .msg.err{color:var(--danger);} .msg.ok{color:#3E6B48;}
+  .pill{background:#FBF4E2; border-radius:999px; padding:3px 10px; font-size:12.5px; font-weight:700; color:#8A6A1F; white-space:nowrap;}
+  .pill.ok{background:#E3F0E5; color:#2E6B3A;}
+  .pill.warn{background:#FBE6E1; color:var(--danger);}
+  .item{display:block; text-decoration:none; color:inherit; border-top:1px solid var(--line); padding:12px 2px; cursor:pointer;}
+  .item:first-of-type{border-top:0;}
+  .item b{color:var(--ink); font-size:16px;}
+  #stage{display:flex; justify-content:center; background:#EFEAE0; border:1px solid var(--line); border-radius:14px; padding:8px; margin-bottom:10px; overflow:hidden;}
+  canvas{display:block; background:#fff; border-radius:8px; box-shadow:0 1px 6px rgba(0,0,0,.12);}
+  input[type=range]{width:100%; height:44px; accent-color:var(--ink);}
+  .timer{font-variant-numeric:tabular-nums; font-weight:700; color:var(--ink);}
+  .tabs{display:flex; gap:8px; margin-bottom:10px;}
+  .tab{flex:1; border:1.5px solid var(--line); background:#fff; border-radius:12px; padding:10px 6px; font:inherit; font-size:14px; font-weight:700; color:var(--ink); cursor:pointer; min-height:46px;}
+  .tab[aria-selected="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .ctrl{position:sticky; bottom:76px; z-index:4; box-shadow:0 -2px 10px rgba(0,0,0,.1); padding:4px 12px 10px;}
+  .ctrl .act{white-space:nowrap; min-width:0; padding:6px 10px;}
+  @media (min-width:900px){ .ctrl{bottom:8px;} }
+  .chips{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px;}
+  .chip{flex:none; border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:6px 12px; min-height:40px; font:inherit; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer; max-width:60vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .chip[aria-current="true"]{background:var(--gold); border-color:var(--gold);}
+  .q{border-top:1px solid var(--line); padding:10px 0;}
+  .q:first-of-type{border-top:0;}
+  .q .ans{background:#EAF3EC; border-radius:10px; padding:8px 10px; margin-top:6px; font-size:14px;}
+  .hidden{display:none !important;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1 id="h1">Lessons</h1>
+  <p id="hp">Recorded lessons from your teachers. Watch them any time, and ask a question at the exact moment you need help.</p>
+</header>
+<div class="wrap">
+  <div class="msg" id="loadMsg" role="status">Loading…</div>
+
+  <!-- LIST -->
+  <div id="vList" class="hidden">
+    <div class="panel">
+      <label for="classSel" class="lbl">Class</label>
+      <select id="classSel"></select>
+      <div class="row" id="teachRow"></div>
+    </div>
+    <div class="panel"><div id="lessonList"></div><p class="hint" id="noLessons" style="margin:0"></p></div>
+    <div class="panel hidden" id="noClassBox"><p class="hint" style="margin:0">You are not in a class yet.</p><div class="row"><a class="act main" href="skillstream-classrooms.html">Go to my classes</a></div></div>
+  </div>
+
+  <!-- PLAYER -->
+  <div id="vPlay" class="hidden">
+    <div class="row"><a class="act" id="backBtn" href="skillstream-lessons.html">← All lessons</a></div>
+    <div id="stage"><canvas id="cv" role="img" aria-label="Lesson board"></canvas></div>
+    <div class="panel ctrl">
+      <input type="range" id="seek" min="0" max="1000" value="0" step="1" aria-label="Position in the lesson">
+      <div class="row" style="flex-wrap:nowrap; margin:0">
+        <button class="act main" id="bPlay" type="button">Play</button>
+        <button class="act" id="bBack" type="button" aria-label="Back 10 seconds" title="Back 10 seconds">↺ 10</button>
+        <select id="rate" aria-label="Speed" style="width:auto; padding:10px 6px"><option value="1">1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="0.75">0.75x</option></select>
+        <span class="timer" id="time" data-no-i18n style="margin-inline-start:auto; font-size:13.5px; white-space:nowrap">0:00</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="chips" id="chips" role="group" aria-label="Scenes"></div>
+      <div class="row hidden" id="resumeRow"><button class="act" id="bResume" type="button"></button></div>
+      <div class="msg" id="pMsg" role="status" style="margin-top:0"></div>
+    </div>
+    <div class="panel hidden" id="noteBox"><p style="margin:0" id="noteTxt" data-no-i18n></p></div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tabText" type="button" role="tab" aria-selected="true">Text</button>
+      <button class="tab" id="tabAsk" type="button" role="tab" aria-selected="false">Questions</button>
+      <button class="tab hidden" id="tabTeach" type="button" role="tab" aria-selected="false">Teacher</button>
+    </div>
+
+    <div id="pText" class="panel"></div>
+
+    <div id="pAsk" class="hidden">
+      <div class="panel" id="askBox">
+        <label for="qIn" class="lbl">Ask your teacher</label>
+        <textarea id="qIn" maxlength="300" placeholder="Write your question here"></textarea>
+        <div class="row"><button class="act main" id="qSend" type="button">Ask at this moment</button><span class="timer" id="qAt" data-no-i18n></span></div>
+        <div class="msg" id="qMsg" role="status"></div>
+      </div>
+      <div class="panel"><div id="qList"></div><p class="hint" id="noQ" style="margin:0">No questions yet.</p></div>
+    </div>
+
+    <div id="pTeach" class="hidden">
+      <div class="panel">
+        <div class="row">
+          <button class="act main" id="shareBtn" type="button">Share link</button>
+          <button class="act del" id="delBtn" type="button">Delete this lesson</button>
+        </div>
+        <p class="hint" style="margin:0">Only the students of this class can open the link, even if it is shared by mistake.</p>
+        <div class="msg" id="tMsg" role="status"></div>
+      </div>
+      <div class="panel"><h3 style="margin:0 0 6px; font-size:16px">Who watched</h3><div id="watchers"></div></div>
+    </div>
+  </div>
+</div>
+<script src="js/nav.js" defer></script>
+<script>
+const sb = window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co', 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function say(id, text, ok){ const m = $(id); m.className = 'msg ' + (ok ? 'ok' : 'err'); m.textContent = text; }
+function fmt(ms){ const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+const B = window.LNEBoard;
+const ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+let me = null, classes = [];
+const qs = new URLSearchParams(location.search);
+
+/* =============== LIST =============== */
+async function loadClasses(){
+  const t = await sb.from('classrooms').select('id,name').eq('teacher_id', me.id).order('name');
+  const m = await sb.from('classroom_members').select('classroom_id').eq('student_id', me.id);
+  const ids = ((m.data) || []).map(x => x.classroom_id);
+  let st = [];
+  if(ids.length){ const r = await sb.from('classrooms').select('id,name').in('id', ids).order('name'); st = r.data || []; }
+  const seen = {}; classes = [];
+  (t.data || []).forEach(c => { seen[c.id] = 1; classes.push({ id:c.id, name:c.name, teacher:true }); });
+  st.forEach(c => { if(!seen[c.id]) classes.push({ id:c.id, name:c.name, teacher:false }); });
+}
+async function showList(){
+  $('vList').classList.remove('hidden');
+  if(!classes.length){ $('classSel').closest('.panel').classList.add('hidden'); $('noLessons').closest('.panel').classList.add('hidden'); $('noClassBox').classList.remove('hidden'); return; }
+  classes.forEach(c => $('classSel').appendChild(el('option', { value:c.id, text:c.name, 'data-no-i18n':'' })));
+  const want = qs.get('c'); if(want && classes.some(c => c.id === want)) $('classSel').value = want;
+  $('classSel').onchange = loadLessons; await loadLessons();
+}
+async function loadLessons(){
+  const cid = $('classSel').value, cls = classes.find(c => c.id === cid);
+  $('teachRow').textContent = '';
+  if(cls && cls.teacher) $('teachRow').appendChild(el('a', { class:'act main', href:'skillstream-record.html?class=' + encodeURIComponent(cid), text:T('Record a lesson') }));
+  const box = $('lessonList'); box.textContent = ''; $('noLessons').textContent = '';
+  const r = await sb.rpc('list_class_lessons', { p_class:cid });
+  if(r.error){ $('noLessons').textContent = r.error.message; return; }
+  const rows = r.data || [];
+  if(!rows.length){ $('noLessons').textContent = cls && cls.teacher ? T('No lessons yet. Press Record a lesson to make your first one.') : T('Your teacher has not posted a lesson yet.'); return; }
+  rows.forEach(l => {
+    const pills = [ el('span', { class:'pill', text:fmt(l.duration_ms), 'data-no-i18n':'' }), el('span', { class:'pill', text:l.scene_count + ' ' + T('scenes'), 'data-no-i18n':'' }) ];
+    if(cls && cls.teacher){
+      pills.push(el('span', { class:'pill', text:l.viewers + ' ' + T('watched'), 'data-no-i18n':'' }));
+      if(Number(l.open_questions) > 0) pills.push(el('span', { class:'pill warn', text:l.open_questions + ' ' + T('questions waiting'), 'data-no-i18n':'' }));
+    } else if(l.my_done) pills.push(el('span', { class:'pill ok', text:T('Finished') }));
+    else if(l.my_ms > 0) pills.push(el('span', { class:'pill', text:T('Started') }));
+    const a = el('a', { class:'item', href:'skillstream-lessons.html?l=' + l.id }, [
+      el('b', { text:l.title, 'data-no-i18n':'' }),
+      l.note ? el('div', { class:'hint', text:l.note, 'data-no-i18n':'' }) : el('span'),
+      el('div', { class:'row' }, pills),
+      el('div', { class:'hint', text:new Date(l.created_at).toLocaleDateString(), 'data-no-i18n':'' })
+    ]);
+    box.appendChild(a);
+  });
+}
+
+/* =============== PLAYER =============== */
+let lesson = null, scenesData = [], player = null, lastSent = 0, sentAt = 0, qRows = [];
+const CACHE = 'lne-lesson-audio-v1';
+async function audioUrl(path){
+  const key = new Request(location.origin + '/__lesson/' + path);
+  try {
+    if(window.caches){
+      const c = await caches.open(CACHE), hit = await c.match(key);
+      if(hit){ return URL.createObjectURL(await hit.blob()); }
+    }
+  } catch(e){}
+  const s = await sb.storage.from('lesson-audio').createSignedUrl(path, 3600);
+  if(s.error || !s.data) throw (s.error || new Error('no url'));
+  const res = await fetch(s.data.signedUrl);
+  if(!res.ok) throw new Error('download failed');
+  const blob = await res.blob();
+  try {
+    if(window.caches){
+      const c = await caches.open(CACHE);
+      await c.put(key, new Response(blob, { headers:{ 'Content-Type':blob.type || 'audio/webm' } }));
+      const ks = await c.keys(); if(ks.length > 40) for(let i = 0; i < ks.length - 40; i++) await c.delete(ks[i]);
+    }
+  } catch(e){}
+  return URL.createObjectURL(blob);
+}
+async function openLesson(id){
+  $('vPlay').classList.remove('hidden');
+  const r = await sb.rpc('get_class_lesson', { p_id:id });
+  if(r.error || !r.data){ $('vPlay').classList.add('hidden'); say('loadMsg', (r.error && r.error.message) || T('Lesson not found.'), false); $('loadMsg').insertAdjacentElement('afterend', el('a', { class:'act', href:'skillstream-lessons.html', text:T('← All lessons') })); return; }
+  lesson = r.data;
+  const W = lesson.w, H = lesson.h;
+  scenesData = B.cleanScenes(lesson.scenes, W, H);
+  $('h1').textContent = lesson.title; $('h1').setAttribute('data-no-i18n', '');
+  $('hp').textContent = lesson.teacher_name || ''; $('hp').setAttribute('data-no-i18n', '');
+  document.title = lesson.title;
+  $('backBtn').href = 'skillstream-lessons.html?c=' + encodeURIComponent(lesson.classroom_id);
+  if(lesson.note){ $('noteBox').classList.remove('hidden'); $('noteTxt').textContent = lesson.note; }
+  const cv = $('cv'), stage = $('stage');
+  const total = scenesData.reduce((a, s) => a + s.ms, 0);
+  player = B.player({
+    canvas:cv, w:W, h:H, scenes:scenesData,
+    loadAudio:i => audioUrl(scenesData[i].audio).then(u => { preloadNext(i + 1); return u; }),
+    onAudioError:() => say('pMsg', T('The voice could not be loaded. The board still plays.'), false),
+    onTime:(ms, si) => { $('seek').value = String(Math.round(ms / Math.max(1, total) * 1000)); $('time').textContent = fmt(ms) + ' / ' + fmt(total); $('qAt').textContent = fmt(ms); markChip(si); report(ms); },
+    onState:p => { $('bPlay').textContent = p ? T('Pause') : T('Play'); if(!p) report(player.position(), true); },
+    onEnd:() => { report(total, true); }
+  });
+  const size = () => player.size(Math.max(200, stage.clientWidth - 16), Math.max(200, innerHeight * 0.5));
+  size(); let rz = null; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(size, 150); });
+  $('seek').oninput = () => player.seek(Number($('seek').value) / 1000 * total);
+  $('bPlay').onclick = () => player.toggle();
+  $('bBack').onclick = () => player.seek(Math.max(0, player.position() - 10000));
+  $('rate').onchange = () => player.setRate(Number($('rate').value));
+  const chips = $('chips');
+  scenesData.forEach((s, i) => { const b = el('button', { class:'chip', type:'button', text:(i + 1) + '. ' + (s.title || T('Scene')), 'data-no-i18n':'' }); b.onclick = () => player.goScene(i); chips.appendChild(b); });
+  if(scenesData.length < 2) chips.classList.add('hidden');
+  if(!lesson.is_teacher && lesson.my_ms > 3000 && lesson.my_ms < total - 3000){
+    $('resumeRow').classList.remove('hidden'); $('bResume').textContent = T('Continue from') + ' ' + fmt(lesson.my_ms);
+    $('bResume').onclick = () => { player.seek(lesson.my_ms); $('resumeRow').classList.add('hidden'); player.play(); };
+  }
+  if(!scenesData.some(s => s.audio)) say('pMsg', T('This lesson has no voice. Read the Text tab as you watch.'), true);
+  renderText();
+  $('tabText').onclick = () => tab('Text'); $('tabAsk').onclick = () => tab('Ask'); $('tabTeach').onclick = () => tab('Teach');
+  if(lesson.is_teacher){ $('tabTeach').classList.remove('hidden'); $('askBox').classList.add('hidden'); setupTeacher(); }
+  $('qSend').onclick = sendQuestion;
+  await loadQuestions();
+  if(!lesson.is_teacher) preloadNext(0);
+}
+function preloadNext(i){ const s = scenesData[i]; if(!s || !s.audio) return; audioUrl(s.audio).then(u => { try { URL.revokeObjectURL(u); } catch(e){} }, () => {}); }
+let chipI = -1;
+function markChip(i){ if(i === chipI) return; chipI = i; Array.from($('chips').children).forEach((c, k) => { if(k === i) c.setAttribute('aria-current', 'true'); else c.removeAttribute('aria-current'); }); }
+function report(ms, force){
+  if(lesson.is_teacher) return;
+  const now = Date.now();
+  if(!force && now - sentAt < 15000) return;
+  if(!force && ms <= lastSent) return;
+  sentAt = now; lastSent = Math.max(lastSent, ms);
+  sb.rpc('class_lesson_progress', { p_id:lesson.id, p_ms:Math.round(ms) }).then(() => {}, () => {});
+}
+function tab(n){
+  ['Text', 'Ask', 'Teach'].forEach(k => { $('tab' + k).setAttribute('aria-selected', k === n ? 'true' : 'false'); $('p' + k).classList.toggle('hidden', k !== n); });
+  if(n === 'Teach') loadWatchers();
+}
+function renderText(){
+  const box = $('pText'); box.textContent = '';
+  scenesData.forEach((s, i) => {
+    const texts = []; s.items.forEach(it => { if((it.t === 'text' || it.t === 'box') && it.s) texts.push(it.s); });
+    const h = el('button', { class:'chip', type:'button', text:(i + 1) + '. ' + (s.title || T('Scene')), 'data-no-i18n':'' }); h.onclick = () => { player.goScene(i); window.scrollTo({ top:0, behavior:'smooth' }); };
+    const kids = [ h ];
+    if(s.say) kids.push(el('p', { text:s.say, style:'margin:8px 0 0', 'data-no-i18n':'' }));
+    if(texts.length){ const ul = el('ul', { style:'margin:6px 0 0; padding-inline-start:22px' }); texts.forEach(t => ul.appendChild(el('li', { text:t, 'data-no-i18n':'' }))); kids.push(ul); }
+    if(!s.say && !texts.length) kids.push(el('p', { class:'hint', text:T('Voice and drawing only.'), style:'margin:8px 0 0' }));
+    box.appendChild(el('div', { class:'q' }, kids));
+  });
+}
+
+/* ---- questions ---- */
+async function loadQuestions(){
+  const r = await sb.rpc('list_class_lesson_questions', { p_id:lesson.id });
+  qRows = r.data || [];
+  const box = $('qList'); box.textContent = ''; $('noQ').classList.toggle('hidden', qRows.length > 0);
+  qRows.forEach(q => {
+    const head = el('div', { class:'row' }, [
+      el('button', { class:'chip', type:'button', text:'▶ ' + fmt(q.at_ms), 'data-no-i18n':'' }),
+      q.mine ? el('span', { class:'pill', text:T('You') }) : el('span'),
+      q.author_name ? el('span', { class:'hint', text:q.author_name, 'data-no-i18n':'' }) : el('span'),
+      q.hidden ? el('span', { class:'pill warn', text:T('Hidden') }) : el('span'),
+      (!q.answered && lesson.is_teacher) ? el('span', { class:'pill warn', text:T('Waiting for an answer') }) : (!q.answered && q.mine ? el('span', { class:'pill', text:T('Waiting for an answer') }) : el('span'))
+    ]);
+    head.firstChild.onclick = () => { player.seek(Math.max(0, q.at_ms - 2000)); window.scrollTo({ top:0, behavior:'smooth' }); };
+    const kids = [ head, el('div', { text:q.body, 'data-no-i18n':'' }) ];
+    if(q.answered) kids.push(el('div', { class:'ans', text:q.answer, 'data-no-i18n':'' }));
+    if(lesson.is_teacher){
+      const ai = el('textarea', { maxlength:'500', 'aria-label':T('Your answer'), placeholder:T('Your answer') }); ai.value = q.answer || '';
+      const send = el('button', { class:'act main', type:'button', text:q.answered ? T('Change the answer') : T('Send answer') });
+      send.onclick = async () => { send.disabled = true; const r2 = await sb.rpc('answer_class_lesson_question', { p_id:q.id, p_answer:ai.value }); if(r2.error){ say('tMsg', r2.error.message, false); send.disabled = false; return; } await loadQuestions(); };
+      const hide = el('button', { class:'act', type:'button', text:q.hidden ? T('Show') : T('Hide') });
+      hide.onclick = async () => { await sb.rpc('hide_class_lesson_question', { p_id:q.id, p_hidden:!q.hidden }); await loadQuestions(); };
+      kids.push(ai, el('div', { class:'row' }, [ send, hide ]));
+    }
+    box.appendChild(el('div', { class:'q' }, kids));
+  });
+}
+async function sendQuestion(){
+  const body = $('qIn').value.trim();
+  if(body.length < 3){ say('qMsg', T('Please write your question (at least 3 characters).'), false); return; }
+  $('qSend').disabled = true;
+  const r = await sb.rpc('ask_class_lesson_question', { p_id:lesson.id, p_at_ms:Math.round(player.position()), p_body:body });
+  $('qSend').disabled = false;
+  if(r.error){ say('qMsg', r.error.message, false); return; }
+  $('qIn').value = ''; say('qMsg', T('Your question was sent to your teacher.'), true); await loadQuestions();
+}
+
+/* ---- teacher tools ---- */
+function setupTeacher(){
+  $('shareBtn').onclick = async () => {
+    const url = new URL('skillstream-lessons.html', location.href); url.searchParams.set('l', lesson.id);
+    try { if(navigator.share){ await navigator.share({ title:lesson.title, text:lesson.title, url:url.href }); return; } await navigator.clipboard.writeText(url.href); say('tMsg', T('Link copied.'), true); }
+    catch(e){ say('tMsg', url.href, true); }
+  };
+  $('delBtn').onclick = async () => {
+    if(!confirm(T('Delete this lesson for everyone? This cannot be undone.'))) return;
+    $('delBtn').disabled = true;
+    const paths = (lesson.scenes || []).map(s => s && s.audio).filter(x => typeof x === 'string');
+    if(paths.length){ const rm = await sb.storage.from('lesson-audio').remove(paths); if(rm.error){ say('tMsg', rm.error.message, false); $('delBtn').disabled = false; return; } }
+    const r = await sb.rpc('delete_class_lesson', { p_id:lesson.id });
+    if(r.error){ say('tMsg', r.error.message, false); $('delBtn').disabled = false; return; }
+    location.href = 'skillstream-lessons.html?c=' + encodeURIComponent(lesson.classroom_id);
+  };
+}
+async function loadWatchers(){
+  const box = $('watchers'); box.textContent = '';
+  const r = await sb.rpc('class_lesson_watchers', { p_id:lesson.id });
+  if(r.error){ box.appendChild(el('p', { class:'hint', text:r.error.message })); return; }
+  const rows = r.data || [];
+  if(!rows.length){ box.appendChild(el('p', { class:'hint', text:T('No students in this class yet.') })); return; }
+  const done = rows.filter(x => x.done).length, opened = rows.filter(x => x.opened).length;
+  box.appendChild(el('p', { class:'hint', text:opened + ' / ' + rows.length + ' ' + T('opened') + ' · ' + done + ' ' + T('finished'), 'data-no-i18n':'' }));
+  rows.forEach(x => {
+    box.appendChild(el('div', { class:'row', style:'justify-content:space-between; border-top:1px solid #E9E2D2; padding-top:6px' }, [
+      el('span', { text:x.student_name, 'data-no-i18n':'' }),
+      el('span', { class:'pill' + (x.done ? ' ok' : x.opened ? '' : ' warn'), text:x.done ? T('Finished') : x.opened ? (T('Watched') + ' ' + fmt(x.furthest_ms)) : T('Not opened'), 'data-no-i18n':'' })
+    ]));
+  });
+}
+
+/* =============== START =============== */
+(async function(){
+  const id = qs.get('l');
+  const s = await sb.auth.getSession();
+  if(!(s.data && s.data.session)){
+    try { if(id && ID_RE.test(id)) localStorage.setItem('lne_after_login', 'skillstream-lessons.html?l=' + id); } catch(e){}
+    window.location.href = 'skillstream-login.html'; return;
+  }
+  me = s.data.session.user;
+  try {
+    if(id && ID_RE.test(id)){ $('loadMsg').textContent = ''; await openLesson(id); }
+    else { await loadClasses(); $('loadMsg').textContent = ''; await showList(); }
+  } catch(e){ say('loadMsg', T('Something went wrong. Please try again.'), false); }
+})();
+</script>
+</body>
+</html>
