@@ -379,13 +379,19 @@ async function loadTeacherSpaces(){
   }
 }
 
+function greetName(full){
+  var TITLE = /^(mr|mrs|ms|miss|mx|dr|prof|eng|engr|sir|madam|mme|mlle|m|sr|sra|أستاذ|الأستاذ|الأستاذة|أ|د|م|دكتور|الدكتور|دكتورة|مهندس|المهندس|السيد|السيدة)\.?$/i;
+  var parts = String(full || '').trim().split(/\s+/).filter(Boolean);
+  while(parts.length > 0 && TITLE.test(parts[0])) parts.shift();
+  return parts[0] || '';
+}
 async function initAuth(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ window.location.href = 'skillstream-login.html'; return; }
   currentUser = session.user;
 
   const { data: profile } = await sb.from('profiles').select('full_name').eq('id', currentUser.id).maybeSingle();
-  document.getElementById('greeting').textContent = 'Welcome back' + (profile?.full_name ? ', ' + profile.full_name.split(' ')[0] : '');
+  { const gn = greetName(profile?.full_name); document.getElementById('greeting').textContent = 'Welcome back' + (gn ? ', ' + gn : ''); }
 
   loadDashboard();
   loadStreak();

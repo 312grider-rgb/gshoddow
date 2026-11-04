@@ -430,6 +430,7 @@ function renderCourses(){
         <div>
           <h3>${escapeHtml(c.title)}</h3>
           <div class="meta">${escapeHtml(c.category || 'General')} · ${lessonCount} lesson${lessonCount===1?'':'s'}</div>
+          ${lessonCount === 0 ? '<div class="meta" style="color:#8A6A1F;margin-top:4px">' + ((window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t('No lessons yet. Tap Manage Lessons to add the first one.') : 'No lessons yet. Tap Manage Lessons to add the first one.') + '</div>' : ''}
         </div>
         <span class="badge ${c.is_published ? 'live' : 'draft'}">${c.is_published ? 'Published' : 'Draft'}</span>
       </div>
