@@ -71,6 +71,7 @@
     { icon: ICON.ai,       label: 'My Learning',             href: 'skillstream-engine.html' },
     { icon: ICON.library,  label: 'My Vault',                href: 'skillstream-vault.html' },
     { icon: ICON.chat,     label: 'Whiteboard',              href: 'skillstream-whiteboard.html' },
+    { icon: ICON.book,     label: 'Lessons',                 href: 'skillstream-lessons.html' },
     { icon: ICON.book,     label: 'My work',                 href: 'skillstream-mywork.html' },
     { icon: ICON.home,     label: 'My school',               href: 'skillstream-school.html' },
     { icon: ICON.user,     label: 'My family',               href: 'skillstream-family.html' },
