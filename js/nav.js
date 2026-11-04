@@ -41,8 +41,10 @@
       '.ln-sheet{width:100%;max-height:80vh;overflow:auto;background:#FBF7EF;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 30px rgba(20,31,56,.25)}' +
       '.ln-sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-weight:700;color:#141F38;font-size:16px}' +
       '.ln-sheet-x{background:#fff;border:1px solid #E9E2D2;border-radius:9px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;color:#141F38;cursor:pointer}' +
-      '.ln-sheet-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
-      '.ln-sheet-item{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E9E2D2;border-radius:12px;padding:13px 12px;color:#141F38;font-size:13.5px;font-weight:600;text-decoration:none}' +
+      '.ln-sheet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}' +
+      '.ln-sheet-h{font-size:11.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:#6B6558;margin:16px 2px 8px}' +
+      '.ln-sheet-head + .ln-sheet-h{margin-top:0}' +
+      '.ln-sheet-item{min-width:0;overflow-wrap:break-word;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E9E2D2;border-radius:12px;padding:13px 9px;color:#141F38;font-size:13.5px;font-weight:600;text-decoration:none}' +
       '.ln-sheet-item.active{border-color:#C9A24E;background:#FBF4E2}' +
       '.ln-sheet-item svg{flex:none;color:#8A6A1F}' +
       '@media (min-width:900px){.ln-bottom-nav{display:none}}';
@@ -66,29 +68,40 @@
   ];
 
   // Available to everyone (students, teachers, admins) on every page, games included.
-  var MORE_LINKS = [
-    { icon: ICON.user,     label: 'Profile',                 href: 'skillstream-profile.html' },
-    { icon: ICON.ai,       label: 'My Learning',             href: 'skillstream-engine.html' },
-    { icon: ICON.library,  label: 'My Vault',                href: 'skillstream-vault.html' },
-    { icon: ICON.chat,     label: 'Whiteboard',              href: 'skillstream-whiteboard.html' },
-    { icon: ICON.book,     label: 'Lessons',                 href: 'skillstream-lessons.html' },
-    { icon: ICON.book,     label: 'My work',                 href: 'skillstream-mywork.html' },
-    { icon: ICON.home,     label: 'My school',               href: 'skillstream-school.html' },
-    { icon: ICON.user,     label: 'My family',               href: 'skillstream-family.html' },
-    { icon: ICON.star,     label: 'My Passport',             href: 'skillstream-passport.html' },
-    { icon: ICON.library,  label: 'Opportunities',           href: 'skillstream-opportunities.html' },
-    { icon: ICON.chat,     label: 'Send feedback',           href: 'skillstream-feedback.html' },
-    { icon: ICON.chat,     label: 'My AI history',           href: 'skillstream-ai-history.html' },
-    { icon: ICON.library,  label: 'Library',                 href: 'skillstream-library.html' },
-    { icon: ICON.games,    label: 'Games',                   href: 'skillstream-games.html' },
-    { icon: ICON.settings, label: 'Settings',                href: 'skillstream-settings.html' },
-    { icon: ICON.compass,  label: 'Discoveries and records', href: 'skillstream-discoveries.html' },
-    { icon: ICON.star,     label: 'Plans and pricing',       href: 'skillstream-pricing.html' },
-    { icon: ICON.image,    label: 'Showcase',                href: 'skillstream-showcase.html' },
-    { icon: ICON.calendar, label: 'Calendar',                href: 'skillstream-calendar.html' },
-    { icon: ICON.trophy,   label: 'Leaderboard',             href: 'skillstream-leaderboard.html' },
-    { icon: ICON.teach,    label: 'Become a teacher',        href: 'skillstream-teach-apply.html' }
+  var MORE_SECTIONS = [
+    { title: 'Learn', links: [
+      { icon: ICON.ai,       label: 'My Learning',             href: 'skillstream-engine.html' },
+      { icon: ICON.book,     label: 'Lessons',                 href: 'skillstream-lessons.html' },
+      { icon: ICON.book,     label: 'My work',                 href: 'skillstream-mywork.html' },
+      { icon: ICON.chat,     label: 'Whiteboard',              href: 'skillstream-whiteboard.html' },
+      { icon: ICON.library,  label: 'Library',                 href: 'skillstream-library.html' },
+      { icon: ICON.calendar, label: 'Calendar',                href: 'skillstream-calendar.html' },
+      { icon: ICON.home,     label: 'My school',               href: 'skillstream-school.html' },
+      { icon: ICON.compass,  label: 'Discoveries and records', href: 'skillstream-discoveries.html' }
+    ] },
+    { title: 'My world', links: [
+      { icon: ICON.user,     label: 'Profile',                 href: 'skillstream-profile.html' },
+      { icon: ICON.star,     label: 'My Passport',             href: 'skillstream-passport.html' },
+      { icon: ICON.library,  label: 'My Vault',                href: 'skillstream-vault.html' },
+      { icon: ICON.user,     label: 'My family',               href: 'skillstream-family.html' },
+      { icon: ICON.chat,     label: 'My AI history',           href: 'skillstream-ai-history.html' },
+      { icon: ICON.library,  label: 'Opportunities',           href: 'skillstream-opportunities.html' }
+    ] },
+    { title: 'Community and play', links: [
+      { icon: ICON.image,    label: 'Showcase',                href: 'skillstream-showcase.html' },
+      { icon: ICON.games,    label: 'Games',                   href: 'skillstream-games.html' },
+      { icon: ICON.trophy,   label: 'Leaderboard',             href: 'skillstream-leaderboard.html' }
+    ] },
+    { title: 'Account and help', links: [
+      { icon: ICON.settings, label: 'Settings',                href: 'skillstream-settings.html' },
+      { icon: ICON.star,     label: 'Plans and pricing',       href: 'skillstream-pricing.html' },
+      { icon: ICON.chat,     label: 'Send feedback',           href: 'skillstream-feedback.html' },
+      { icon: ICON.teach,    label: 'Become a teacher',        href: 'skillstream-teach-apply.html' }
+    ] }
   ];
+  // Flat list of every link (used to know which pages belong under "More")
+  var MORE_LINKS = [];
+  MORE_SECTIONS.forEach(function (sec) { sec.links.forEach(function (l) { MORE_LINKS.push(l); }); });
   var MESSAGE_PAGES = ['skillstream-messages.html', 'skillstream-community.html', 'skillstream-shared.html'];
   var LEARN_PAGES = ['skillstream-courses.html', 'skillstream-self-paced.html', 'skillstream-academic.html', 'skillstream-classrooms.html'];
   var MORE_PAGES = MORE_LINKS.map(function (l) { return l.href; }).concat(['skillstream-chess.html', 'skillstream-ludo.html', 'skillstream-challenges.html']);
@@ -103,16 +116,23 @@
     var head = document.createElement('div');
     head.className = 'ln-sheet-head';
     head.innerHTML = '<span>More</span><button type="button" class="ln-sheet-x">Close</button>';
-    var grid = document.createElement('div');
-    grid.className = 'ln-sheet-grid';
-    MORE_LINKS.forEach(function (l) {
-      var a = document.createElement('a');
-      a.href = l.href;
-      a.className = 'ln-sheet-item' + (l.href === current ? ' active' : '');
-      a.innerHTML = l.icon + '<span>' + l.label + '</span>';
-      grid.appendChild(a);
+    sheet.appendChild(head);
+    MORE_SECTIONS.forEach(function (sec) {
+      var h = document.createElement('div');
+      h.className = 'ln-sheet-h';
+      h.textContent = sec.title;
+      var grid = document.createElement('div');
+      grid.className = 'ln-sheet-grid';
+      sec.links.forEach(function (l) {
+        var a = document.createElement('a');
+        a.href = l.href;
+        a.className = 'ln-sheet-item' + (l.href === current ? ' active' : '');
+        a.innerHTML = l.icon + '<span>' + l.label + '</span>';
+        grid.appendChild(a);
+      });
+      sheet.appendChild(h); sheet.appendChild(grid);
     });
-    sheet.appendChild(head); sheet.appendChild(grid); bg.appendChild(sheet);
+    bg.appendChild(sheet);
     function close() { bg.remove(); document.removeEventListener('keydown', onKey); }
     function onKey(e) { if (e.key === 'Escape') close(); }
     bg.addEventListener('click', function (e) { if (e.target === bg) close(); });
