@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community — Learning Never Ends</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="css/theme.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583; --cream:#FBF7EF; --charcoal:#2B2B2B; --line:#E9E2D2; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); -webkit-font-smoothing:antialiased; padding-bottom:30px;}
+  h1{font-family:'Syne',sans-serif;}
+  header.top{background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%); color:var(--cream); padding:22px 20px 26px;}
+  header.top .eyebrow{font-size:11.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px; font-weight:600;}
+  header.top h1{margin:0; font-size:24px;}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1 id="hubTitle">Community</h1>
+  <p id="hubIntro"></p>
+</header>
+<div class="hub-wrap" id="hubRoot" aria-live="polite"></div>
+<script src="js/nav.js" defer></script>
+<script src="js/hubs.js" defer></script>
+<script>
+// Who is this? (the bottom tabs and some cards differ for teachers). Not signed in: go to login.
+(function(){
+  var sb = window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co', 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+  var done; window.lnAuthReady = new Promise(function(r){ done = r; });
+  function show(role){ if(window.LNE_HUB) LNE_HUB.render('community', role); else addEventListener('DOMContentLoaded', function(){ LNE_HUB.render('community', role); }); }
+  var cached = ''; try { cached = localStorage.getItem('lne_role') || ''; } catch(e){}
+  (async function(){
+    var s = await sb.auth.getSession();
+    if(!(s.data && s.data.session)){ location.href = 'skillstream-login.html'; return; }
+    var role = cached === 'teacher' ? 'teacher' : 'student';
+    show(role);                              // show something at once, then correct it if the real role differs
+    try {
+      var r = await sb.from('profiles').select('role').eq('id', s.data.session.user.id).maybeSingle();
+      var real = r && r.data && r.data.role === 'teacher' ? 'teacher' : 'student';
+      window.currentProfile = { role: real }; try { localStorage.setItem('lne_role', real); } catch(e){}
+      if(real !== role) show(real);
+    } catch(e){}
+    done();
+  })();
+})();
+</script>
+</body>
+</html>
