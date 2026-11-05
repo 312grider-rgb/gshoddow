@@ -215,6 +215,26 @@ async function audioUrl(path){
   } catch(e){}
   return URL.createObjectURL(blob);
 }
+const MCACHE = 'lne-lesson-media-v1';
+async function imageUrl(path){      // a lesson picture: from this phone's saved copy if it has one, otherwise one small download
+  const key = new Request(location.origin + '/__lessonpic/' + path);
+  try {
+    if(window.caches){ const c = await caches.open(MCACHE), hit = await c.match(key); if(hit) return URL.createObjectURL(await hit.blob()); }
+  } catch(e){}
+  const s = await sb.storage.from('lesson-media').createSignedUrl(path, 3600);
+  if(s.error || !s.data) throw (s.error || new Error('no url'));
+  const res = await fetch(s.data.signedUrl);
+  if(!res.ok) throw new Error('download failed');
+  const blob = await res.blob();
+  try {
+    if(window.caches){
+      const c = await caches.open(MCACHE);
+      await c.put(key, new Response(blob, { headers:{ 'Content-Type':'image/jpeg' } }));
+      const ks = await c.keys(); if(ks.length > 60) for(let i = 0; i < ks.length - 60; i++) await c.delete(ks[i]);
+    }
+  } catch(e){}
+  return URL.createObjectURL(blob);
+}
 async function openLesson(id){
   $('vPlay').classList.remove('hidden');
   const r = await sb.rpc('get_class_lesson', { p_id:id });
@@ -233,6 +253,8 @@ async function openLesson(id){
     canvas:cv, w:W, h:H, scenes:scenesData,
     loadAudio:i => audioUrl(scenesData[i].audio).then(u => { preloadNext(i + 1); return u; }),
     onAudioError:() => say('pMsg', T('The voice could not be loaded. The board still plays.'), false),
+    loadImage:src => imageUrl(src),
+    onImageError:() => say('pMsg', T('A picture could not be loaded. The rest of the lesson still plays.'), false),
     onTime:(ms, si) => { $('seek').value = String(Math.round(ms / Math.max(1, total) * 1000)); $('time').textContent = fmt(ms) + ' / ' + fmt(total); $('qAt').textContent = fmt(ms); markChip(si); report(ms); },
     onState:p => { $('bPlay').textContent = p ? T('Pause') : T('Play'); if(!p) report(player.position(), true); },
     onEnd:() => { report(total, true); }
@@ -334,6 +356,8 @@ function setupTeacher(){
     if(!confirm(T('Delete this lesson for everyone? This cannot be undone.'))) return;
     $('delBtn').disabled = true;
     const paths = (lesson.scenes || []).map(s => s && s.audio).filter(x => typeof x === 'string');
+    const pics = []; (lesson.scenes || []).forEach(sc => ((sc && sc.items) || []).forEach(it => { if(it && it.t === 'image' && typeof it.src === 'string' && !pics.includes(it.src)) pics.push(it.src); }));
+    if(pics.length){ const rm2 = await sb.storage.from('lesson-media').remove(pics); if(rm2.error){ say('tMsg', rm2.error.message, false); $('delBtn').disabled = false; return; } }
     if(paths.length){ const rm = await sb.storage.from('lesson-audio').remove(paths); if(rm.error){ say('tMsg', rm.error.message, false); $('delBtn').disabled = false; return; } }
     const r = await sb.rpc('delete_class_lesson', { p_id:lesson.id });
     if(r.error){ say('tMsg', r.error.message, false); $('delBtn').disabled = false; return; }
