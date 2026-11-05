@@ -7,7 +7,18 @@
   var COLORS = { black: '#1B1B1B', blue: '#1F5FBF', red: '#C0392B', green: '#2E7D32', orange: '#E67E22', purple: '#7B3FA0' };
   var FONT = "'Inter','Segoe UI',Tahoma,'Noto Sans Arabic','Noto Sans SC',Arial,sans-serif";
   var CJK = /[　-鿿豈-﫿]/;
-  var TYPES = { pen: 1, line: 1, arrow: 1, rect: 1, box: 1, circle: 1, text: 1 };
+  var TYPES = { pen: 1, line: 1, arrow: 1, rect: 1, box: 1, circle: 1, text: 1, image: 1 };
+  /* pictures: items only hold a name (src); the loaded picture lives here. A name is either 'local:xxxx' (on the teacher's phone before posting)
+     or a storage path <class>/<teacher>/<lesson>/<n>.jpg (in a posted lesson). */
+  var IMGS = {};
+  var SRC_OK = /^(local:[a-z0-9]{4,16}|[A-Za-z0-9-]{1,40}\/[A-Za-z0-9-]{1,40}\/[A-Za-z0-9-]{1,40}\/[0-9]{1,2}\.jpg)$/;
+  function setImage(src, img) { IMGS[src] = img; }
+  function getImage(src) { return IMGS[src] || null; }
+  function imageSrcs(scenes) {
+    var seen = {}, out = [];
+    (scenes || []).forEach(function (s) { (s.items || []).forEach(function (it) { if (it && it.t === 'image' && it.src && !seen[it.src]) { seen[it.src] = 1; out.push(it.src); } }); });
+    return out;
+  }
   var mctx = document.createElement('canvas').getContext('2d');
 
   function num(v, lo, hi, d) { v = Number(v); if (!isFinite(v)) return d; return Math.max(lo, Math.min(hi, v)); }
@@ -78,6 +89,10 @@
       c.beginPath(); c.arc(it.x, it.y, it.r, 0, Math.PI * 2);
       if (it.f) { c.save(); c.globalAlpha *= 0.15; c.fill(); c.restore(); }
       c.stroke();
+    } else if (it.t === 'image') {
+      var im = IMGS[it.src];
+      if (im && (im.complete !== false) && (im.naturalWidth || im.width)) { try { c.drawImage(im, it.x, it.y, it.w, it.h); } catch (e) {} }
+      else { c.save(); c.fillStyle = '#EFEAE0'; c.fillRect(it.x, it.y, it.w, it.h); c.strokeStyle = '#CFC7B5'; c.lineWidth = 2; c.strokeRect(it.x, it.y, it.w, it.h); c.restore(); }
     } else if (it.t === 'text') {
       var T = layoutText(c, it, W); setFont(c, T.size); c.textBaseline = 'top'; c.textAlign = it.a === 'c' ? 'center' : 'left';
       T.lines.forEach(function (l, i3) { c.fillText(l, it.x, it.y + i3 * T.lh); });
@@ -87,7 +102,7 @@
 
   function bbox(it, W) {
     if (it.t === 'text') { var L = layoutText(mctx, it, W); var wid = Math.max.apply(null, L.lines.map(function (l) { return mctx.measureText(l).width; }).concat([10])); var x0 = it.a === 'c' ? it.x - wid / 2 : it.x; return [x0, it.y, x0 + wid, it.y + L.lines.length * L.lh]; }
-    if (it.t === 'rect' || it.t === 'box') return [it.x, it.y, it.x + it.w, it.y + it.h];
+    if (it.t === 'rect' || it.t === 'box' || it.t === 'image') return [it.x, it.y, it.x + it.w, it.y + it.h];
     if (it.t === 'circle') return [it.x - it.r, it.y - it.r, it.x + it.r, it.y + it.r];
     if (it.t === 'line' || it.t === 'arrow') return [Math.min(it.x1, it.x2), Math.min(it.y1, it.y2), Math.max(it.x1, it.x2), Math.max(it.y1, it.y2)];
     if (it.t === 'pen') { var a = 1e9, b = 1e9, c = -1e9, d = -1e9; (it.pts || []).forEach(function (p) { a = Math.min(a, p[0]); b = Math.min(b, p[1]); c = Math.max(c, p[0]); d = Math.max(d, p[1]); }); return [a, b, c, d]; }
@@ -110,6 +125,10 @@
     } else if (t === 'rect' || t === 'box') {
       o.x = num(r.x, 0, W, 0); o.y = num(r.y, 0, H, 0); o.w = num(r.w, 4, W, 100); o.h = num(r.h, 4, H, 60); o.f = !!r.f;
       if (t === 'box') { o.s = typeof r.s === 'string' ? r.s.trim().slice(0, 80) : ''; o.size = num(r.size, 11, 40, 26); }
+    } else if (t === 'image') {
+      if (typeof r.src !== 'string' || !SRC_OK.test(r.src)) return null;
+      o.src = r.src; o.x = num(r.x, 0, W, 0); o.y = num(r.y, 0, H, 0); o.w = num(r.w, 10, W, W); o.h = num(r.h, 10, H, H);
+      if (o.x + o.w > W) o.w = Math.max(10, W - o.x); if (o.y + o.h > H) o.h = Math.max(10, H - o.y);
     } else if (t === 'circle') {
       o.x = num(r.x, 0, W, W / 2); o.y = num(r.y, 0, H, H / 2); o.r = num(r.r, 2, Math.max(W, H), 40); o.f = !!r.f;
     }
@@ -139,6 +158,16 @@
     var scale = 1, dpr = 1, idx = 0, sceneT = 0, playing = false, rate = 1, last = 0, raf = 0, destroyed = false;
     var audio = null, audioIdx = -1, audioUrls = {}, loadSeq = 0, key = '';
     try { audio = new Audio(); audio.preload = 'auto'; } catch (e) { audio = null; }
+    // pictures: fetch the ones this lesson uses (the page gives a loader that returns a short-lived link); redraw when each one arrives
+    if (o.loadImage) {
+      imageSrcs(scenes).forEach(function (src) {
+        if (IMGS[src]) return;
+        o.loadImage(src).then(function (url) {
+          if (!url || destroyed) return;
+          var im = new Image(); im.onload = function () { IMGS[src] = im; if (!destroyed) draw(true); }; im.onerror = function () { if (o.onImageError) o.onImageError(src); }; im.src = url;
+        }, function () { if (o.onImageError) o.onImageError(src); });
+      });
+    }
 
     function itemsAt(i, t) {
       var out = [];
@@ -358,5 +387,5 @@
     return items.map(function (it) { return cleanItem(it, W, H); }).filter(Boolean);
   }
 
-  window.LNEBoard = { COLORS: COLORS, drawItem: drawItem, bbox: bbox, cleanItem: cleanItem, cleanScenes: cleanScenes, parseDrawing: parseDrawing, parseSay: parseSay, wrapLines: wrapLines, layoutText: layoutText, player: player, num: num };
+  window.LNEBoard = { COLORS: COLORS, drawItem: drawItem, bbox: bbox, cleanItem: cleanItem, cleanScenes: cleanScenes, setImage: setImage, getImage: getImage, imageSrcs: imageSrcs, parseDrawing: parseDrawing, parseSay: parseSay, wrapLines: wrapLines, layoutText: layoutText, player: player, num: num };
 })();
