@@ -37,109 +37,42 @@
       '.ln-nav-item .ln-nav-icon{display:flex;line-height:0}' +
       '.ln-nav-item.active{color:#141F38}' +
       '.ln-nav-item.active svg{stroke-width:2.4}' +
-      '.ln-sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(20,31,56,.45);display:flex;align-items:flex-end}' +
-      '.ln-sheet{width:100%;max-height:80vh;overflow:auto;background:#FBF7EF;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 30px rgba(20,31,56,.25)}' +
-      '.ln-sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-weight:700;color:#141F38;font-size:16px}' +
-      '.ln-sheet-x{background:#fff;border:1px solid #E9E2D2;border-radius:9px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;color:#141F38;cursor:pointer}' +
-      '.ln-sheet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}' +
-      '.ln-sheet-h{font-size:11.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:#6B6558;margin:16px 2px 8px}' +
-      '.ln-sheet-head + .ln-sheet-h{margin-top:0}' +
-      '.ln-sheet-item{min-width:0;overflow-wrap:break-word;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E9E2D2;border-radius:12px;padding:13px 9px;color:#141F38;font-size:13.5px;font-weight:600;text-decoration:none}' +
-      '.ln-sheet-item.active{border-color:#C9A24E;background:#FBF4E2}' +
-      '.ln-sheet-item svg{flex:none;color:#8A6A1F}' +
-      '@media (min-width:900px){.ln-bottom-nav{display:none}}';
+      // wide screens: the same five places, as a centred bar (before, the bar was hidden there)
+      '@media (min-width:900px){.ln-bottom-nav{left:50%;right:auto;transform:translateX(-50%);width:min(560px,92vw);border:1px solid #E9E2D2;border-bottom:0;border-radius:18px 18px 0 0;box-shadow:0 -4px 18px rgba(20,31,56,.08)}}';
     document.head.appendChild(st);
   }
 
+  window.LNE_ICONS = ICON;   // the hub pages reuse these icons
+  ICON.people = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8"/><path d="M18 14.7c2 .6 3.3 2.3 3.6 5.3"/></svg>';
+
+  // Five places, the same for everyone: Home · Learn (Teach for teachers) · AI · Community · Profile.
+  // Learn, Community and Profile are hub pages that group the existing pages (see js/hubs.js).
   var LEARNER_ITEMS = [
-    { icon: ICON.home, label: 'Home',    href: 'skillstream-dashboard.html' },
-    { icon: ICON.book, label: 'Learn',   href: 'skillstream-courses.html' },
-    { icon: ICON.ai, label: 'AI',      href: 'skillstream-ai-hub.html' },
-    { icon: ICON.chat, label: 'Messages',href: 'skillstream-messages.html' },
-    { icon: ICON.more, label: 'More', more: true }
+    { icon: ICON.home,   label: 'Home',      href: 'skillstream-dashboard.html' },
+    { icon: ICON.book,   label: 'Learn',     href: 'skillstream-hub-learn.html' },
+    { icon: ICON.ai,     label: 'AI',        href: 'skillstream-ai-hub.html' },
+    { icon: ICON.people, label: 'Community', href: 'skillstream-hub-community.html' },
+    { icon: ICON.user,   label: 'Profile',   href: 'skillstream-hub-profile.html' }
   ];
-
   var TEACHER_ITEMS = [
-    { icon: ICON.home, label: 'Home',    href: 'skillstream-teacher-dashboard.html' },
-    { icon: ICON.book, label: 'Courses', href: 'skillstream-courses.html' },
-    { icon: ICON.ai, label: 'AI',      href: 'skillstream-ai-hub.html' },
-    { icon: ICON.chat, label: 'Messages',href: 'skillstream-messages.html' },
-    { icon: ICON.more, label: 'More', more: true }
+    { icon: ICON.home,   label: 'Home',      href: 'skillstream-teacher-dashboard.html' },
+    { icon: ICON.teach,  label: 'Teach',     href: 'skillstream-hub-learn.html' },
+    { icon: ICON.ai,     label: 'AI',        href: 'skillstream-ai-hub.html' },
+    { icon: ICON.people, label: 'Community', href: 'skillstream-hub-community.html' },
+    { icon: ICON.user,   label: 'Profile',   href: 'skillstream-hub-profile.html' }
   ];
 
-  // Available to everyone (students, teachers, admins) on every page, games included.
-  var MORE_SECTIONS = [
-    { title: 'Learn', links: [
-      { icon: ICON.ai,       label: 'My Learning',             href: 'skillstream-engine.html' },
-      { icon: ICON.book,     label: 'Lessons',                 href: 'skillstream-lessons.html' },
-      { icon: ICON.book,     label: 'My work',                 href: 'skillstream-mywork.html' },
-      { icon: ICON.chat,     label: 'Whiteboard',              href: 'skillstream-whiteboard.html' },
-      { icon: ICON.library,  label: 'Library',                 href: 'skillstream-library.html' },
-      { icon: ICON.calendar, label: 'Calendar',                href: 'skillstream-calendar.html' },
-      { icon: ICON.home,     label: 'My school',               href: 'skillstream-school.html' },
-      { icon: ICON.compass,  label: 'Discoveries and records', href: 'skillstream-discoveries.html' }
-    ] },
-    { title: 'My world', links: [
-      { icon: ICON.user,     label: 'Profile',                 href: 'skillstream-profile.html' },
-      { icon: ICON.star,     label: 'My Passport',             href: 'skillstream-passport.html' },
-      { icon: ICON.library,  label: 'My Vault',                href: 'skillstream-vault.html' },
-      { icon: ICON.user,     label: 'My family',               href: 'skillstream-family.html' },
-      { icon: ICON.chat,     label: 'My AI history',           href: 'skillstream-ai-history.html' },
-      { icon: ICON.library,  label: 'Opportunities',           href: 'skillstream-opportunities.html' }
-    ] },
-    { title: 'Community and play', links: [
-      { icon: ICON.image,    label: 'Showcase',                href: 'skillstream-showcase.html' },
-      { icon: ICON.games,    label: 'Games',                   href: 'skillstream-games.html' },
-      { icon: ICON.trophy,   label: 'Leaderboard',             href: 'skillstream-leaderboard.html' }
-    ] },
-    { title: 'Account and help', links: [
-      { icon: ICON.settings, label: 'Settings',                href: 'skillstream-settings.html' },
-      { icon: ICON.star,     label: 'Plans and pricing',       href: 'skillstream-pricing.html' },
-      { icon: ICON.chat,     label: 'Send feedback',           href: 'skillstream-feedback.html' },
-      { icon: ICON.teach,    label: 'Become a teacher',        href: 'skillstream-teach-apply.html' }
-    ] }
-  ];
-  // Flat list of every link (used to know which pages belong under "More")
-  var MORE_LINKS = [];
-  MORE_SECTIONS.forEach(function (sec) { sec.links.forEach(function (l) { MORE_LINKS.push(l); }); });
-  var MESSAGE_PAGES = ['skillstream-messages.html', 'skillstream-community.html', 'skillstream-shared.html'];
-  var LEARN_PAGES = ['skillstream-courses.html', 'skillstream-self-paced.html', 'skillstream-academic.html', 'skillstream-classrooms.html'];
-  var MORE_PAGES = MORE_LINKS.map(function (l) { return l.href; }).concat(['skillstream-chess.html', 'skillstream-ludo.html', 'skillstream-challenges.html']);
-
-  function openMore() {
-    if (document.getElementById('ln-sheet-bg')) return;
-    var current = currentFile();
-    var bg = document.createElement('div');
-    bg.className = 'ln-sheet-bg'; bg.id = 'ln-sheet-bg';
-    var sheet = document.createElement('div');
-    sheet.className = 'ln-sheet';
-    var head = document.createElement('div');
-    head.className = 'ln-sheet-head';
-    head.innerHTML = '<span>More</span><button type="button" class="ln-sheet-x">Close</button>';
-    sheet.appendChild(head);
-    MORE_SECTIONS.forEach(function (sec) {
-      var h = document.createElement('div');
-      h.className = 'ln-sheet-h';
-      h.textContent = sec.title;
-      var grid = document.createElement('div');
-      grid.className = 'ln-sheet-grid';
-      sec.links.forEach(function (l) {
-        var a = document.createElement('a');
-        a.href = l.href;
-        a.className = 'ln-sheet-item' + (l.href === current ? ' active' : '');
-        a.innerHTML = l.icon + '<span>' + l.label + '</span>';
-        grid.appendChild(a);
-      });
-      sheet.appendChild(h); sheet.appendChild(grid);
-    });
-    bg.appendChild(sheet);
-    function close() { bg.remove(); document.removeEventListener('keydown', onKey); }
-    function onKey(e) { if (e.key === 'Escape') close(); }
-    bg.addEventListener('click', function (e) { if (e.target === bg) close(); });
-    head.querySelector('button').addEventListener('click', close);
-    document.addEventListener('keydown', onKey);
-    document.body.appendChild(bg);
-  }
+  // Which pages belong under which tab (so the right tab is highlighted on every page)
+  var GROUPS = {
+    'skillstream-hub-learn.html': ['skillstream-hub-learn.html', 'skillstream-courses.html', 'skillstream-self-paced.html', 'skillstream-academic.html', 'skillstream-classrooms.html',
+      'skillstream-engine.html', 'skillstream-lessons.html', 'skillstream-record.html', 'skillstream-mywork.html', 'skillstream-library.html', 'skillstream-calendar.html',
+      'skillstream-school.html', 'skillstream-teachers-directory.html', 'skillstream-focus.html', 'skillstream-live-session.html', 'skillstream-live-video.html', 'skillstream-session-detail.html'],
+    'skillstream-ai-hub.html': ['skillstream-ai-hub.html', 'skillstream-future-architect.html'],
+    'skillstream-hub-community.html': ['skillstream-hub-community.html', 'skillstream-messages.html', 'skillstream-community.html', 'skillstream-shared.html', 'skillstream-whiteboard.html',
+      'skillstream-showcase.html', 'skillstream-games.html', 'skillstream-leaderboard.html', 'skillstream-challenges.html', 'skillstream-recognition.html', 'skillstream-chess.html', 'skillstream-ludo.html'],
+    'skillstream-hub-profile.html': ['skillstream-hub-profile.html', 'skillstream-profile.html', 'skillstream-passport.html', 'skillstream-vault.html', 'skillstream-family.html',
+      'skillstream-discoveries.html', 'skillstream-opportunities.html', 'skillstream-ai-history.html', 'skillstream-settings.html', 'skillstream-pricing.html', 'skillstream-feedback.html', 'skillstream-teach-apply.html']
+  };
 
   function currentFile() {
     var path = window.location.pathname.split('/').pop();
@@ -152,14 +85,12 @@
     var nav = document.createElement('nav');
     nav.className = 'ln-bottom-nav';
     items.forEach(function (item) {
-      var btn = document.createElement(item.more ? 'button' : 'a');
-      if (item.more) { btn.type = 'button'; btn.addEventListener('click', openMore); }
-      else btn.href = item.href;
-      var onAiFamily = item.href === 'skillstream-ai-hub.html' && current === 'skillstream-future-architect.html';
-      var onMessages = item.href === 'skillstream-messages.html' && MESSAGE_PAGES.indexOf(current) >= 0;
-      var onLearn = item.href === 'skillstream-courses.html' && LEARN_PAGES.indexOf(current) >= 0;
-      var onMore = item.more && MORE_PAGES.indexOf(current) >= 0;
-      btn.className = 'ln-nav-item' + (item.href === current || onAiFamily || onMessages || onLearn || onMore ? ' active' : '');
+      var btn = document.createElement('a');
+      btn.href = item.href;
+      var grp = item.href && GROUPS[item.href];
+      var on = item.href === current || (grp && grp.indexOf(current) >= 0);
+      btn.className = 'ln-nav-item' + (on ? ' active' : '');
+      if (on) btn.setAttribute('aria-current', 'page');
       btn.innerHTML = '<span class="ln-nav-icon">' + item.icon + '</span>' + item.label;
       nav.appendChild(btn);
     });
@@ -175,7 +106,10 @@
     // Guess from the filename first (works even on pages that don't load
     // SSAuth at all, e.g. skillstream-teacher-dashboard.html today).
     var fname = currentFile();
-    var guessedItems = /teacher/i.test(fname) ? TEACHER_ITEMS : LEARNER_ITEMS;
+    // On other pages, use the role this phone saw last time (saved below), so a teacher keeps the teacher tabs everywhere.
+    var savedRole = ''; try { savedRole = localStorage.getItem('lne_role') || ''; } catch (e) {}
+    function remember(role) { try { if (role) localStorage.setItem('lne_role', role === 'teacher' ? 'teacher' : 'student'); } catch (e) {} }
+    var guessedItems = (/teacher/i.test(fname) || savedRole === 'teacher') ? TEACHER_ITEMS : LEARNER_ITEMS;
     render(guessedItems);
 
     // If SSAuth IS present, trust the real role once it resolves, in case
@@ -184,6 +118,7 @@
       window.SSAuth.ready.then(function () {
         var user = window.SSAuth.currentUser && window.SSAuth.currentUser();
         if (!user) return;
+        remember(user.role);
         var correctItems = user.role === 'teacher' ? TEACHER_ITEMS : LEARNER_ITEMS;
         if (correctItems !== guessedItems) {
           var old = document.querySelector('.ln-bottom-nav');
@@ -203,6 +138,7 @@
       window.lnAuthReady.then(function () {
         var profile = window.currentProfile;
         if (!profile || !profile.role) return;
+        remember(profile.role);
         var correctItems = profile.role === 'teacher' ? TEACHER_ITEMS : LEARNER_ITEMS;
         if (correctItems !== guessedItems) {
           var old = document.querySelector('.ln-bottom-nav');
