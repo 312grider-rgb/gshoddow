@@ -156,8 +156,9 @@ const mctx = document.createElement('canvas').getContext('2d');
 
 function fit(){
   const stage = $('stage'), fs = document.fullscreenElement === stage;
-  const maxW = Math.max(200, (fs ? innerWidth : stage.clientWidth - 16));
-  const maxH = Math.max(200, fs ? innerHeight : innerHeight * 0.68);
+  const zf = parseFloat(document.documentElement.style.zoom) || 1;   // text-size setting zooms the page
+  const maxW = Math.max(200, (fs ? innerWidth / zf : stage.clientWidth - 16));
+  const maxH = Math.max(200, fs ? innerHeight / zf : innerHeight * 0.68 / zf);
   scale = Math.min(maxW / W, maxH / H);
   dpr = Math.min(1.5, window.devicePixelRatio || 1);
   const cw = Math.floor(W * scale), ch = Math.floor(H * scale);
@@ -316,7 +317,8 @@ $('undo').onclick = () => { if(!undoS.length) return; redoS.push(items); items =
 $('redo').onclick = () => { if(!redoS.length) return; undoS.push(items); items = redoS.pop(); syncBtns(); redraw(); save_auto(); };
 $('clear').onclick = () => { if(!items.length) return; if(!confirm(T('Clear the whole board?'))) return; pushUndo(); items = []; redraw(); save_auto(); };
 
-function pos(e){ const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(W, (e.clientX - r.left) / scale)), Math.max(0, Math.min(H, (e.clientY - r.top) / scale))]; }
+// uses the size the board has ON SCREEN, so it stays exact when the phone's text-size setting zooms the whole page
+function pos(e){ const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(W, (e.clientX - r.left) / (r.width || 1) * W)), Math.max(0, Math.min(H, (e.clientY - r.top) / (r.height || 1) * H))]; }
 function dist2seg(px, py, x1, y1, x2, y2){ const dx = x2 - x1, dy = y2 - y1, l = dx * dx + dy * dy; let t = l ? ((px - x1) * dx + (py - y1) * dy) / l : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy)); }
 const BH = new WeakMap();
 function hitBox(it){ let b = BH.get(it); if(!b){ b = bbox(it); BH.set(it, b); } return b; }
