@@ -30,11 +30,15 @@
     });
     return out;
   }
+  var LT = new WeakMap();   // remembers how a text item was wrapped (measuring text is the slowest part of drawing)
   function layoutText(c, it, W) {
     var size = it.size || 28; setFont(c, size);
     var maxW = Math.max(40, it.w || (W - (it.x || 0) - 20));
+    var key = size + '|' + maxW + '|' + it.s, h = LT.get(it);
+    if (h && h.key === key) return h.L;
     var lines = wrapLines(c, it.s, maxW), lh = size * 1.25;
-    return { lines: lines, lh: lh, size: size };
+    var L = { lines: lines, lh: lh, size: size };
+    LT.set(it, { key: key, L: L }); return L;
   }
 
   /* draw one item; k = progress 0..1 */
