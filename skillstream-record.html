@@ -21,7 +21,8 @@
   header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
   .wrap{padding:12px; max-width:1100px; margin:0 auto;}
   #stage{display:flex; justify-content:center; background:#EFEAE0; border:1px solid var(--line); border-radius:14px; padding:8px; margin-bottom:10px; overflow:hidden;}
-  canvas{display:block; background:#fff; border-radius:8px; box-shadow:0 1px 6px rgba(0,0,0,.12);}
+  canvas{display:block; background:#fff; border-radius:8px; box-shadow:0 1px 6px rgba(0,0,0,.12); touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;}
+  #stage{overscroll-behavior:contain;}
   .panel{background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:12px; min-width:0; overflow-wrap:anywhere;}
   .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:6px 0;}
   .tool,.act{min-width:44px; min-height:44px; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:6px 10px; font:inherit; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer;}
@@ -53,6 +54,9 @@
   .chk input{width:22px; height:22px;}
   :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
   #pv{margin-top:8px;}
+  .meter{height:14px; background:#EFEAE0; border-radius:999px; overflow:hidden; flex:1; min-width:120px; border:1px solid var(--line);}
+  .meter i{display:block; height:100%; width:0; background:#3E6B48; transition:width .08s linear;}
+  .meter.low i{background:var(--gold);} .meter.hot i{background:var(--danger);}
 </style>
 </head>
 <body>
@@ -106,6 +110,12 @@
     <div class="panel" id="ctl">
       <label class="chk"><input type="checkbox" id="cleanScene"> <span>Start this scene on a clean board</span></label>
       <div class="msg" id="msg" role="status"></div>
+    </div>
+
+    <div class="panel" id="voicePanel">
+      <div class="row"><span class="lbl">Voice</span><span class="meter" id="meter" role="img" aria-label="Voice level"><i id="meterFill"></i></span><span class="hint" id="meterTxt" style="min-width:84px" aria-live="polite"></span></div>
+      <div class="row"><button class="act" id="testVoice" type="button">Test your voice (5 seconds)</button><audio id="testAudio" controls class="hidden" style="width:100%"></audio></div>
+      <p class="hint" style="margin:0">For a clear voice: hold the phone a hand's width from your mouth, speak towards it, and record in a quiet room. Earphones with a microphone also help.</p>
     </div>
 
     <div class="panel">
@@ -165,7 +175,7 @@ function el(tag, props, kids){
 }
 function say(id, text, ok){ const m = $(id); m.className = 'msg ' + (ok ? 'ok' : 'err'); m.textContent = text; }
 const B = window.LNEBoard, COLORS = B.COLORS, COLOR_NAMES = Object.keys(COLORS);
-const MAX_MS = 20 * 60 * 1000, MIN_SCENE_MS = 2000, MAX_SCENES = 12, MAX_AUDIO = 4 * 1024 * 1024, MAX_JSON = 380000;
+const MAX_MS = 20 * 60 * 1000, MIN_SCENE_MS = 2000, MAX_SCENES = 12, MAX_AUDIO = 4 * 1024 * 1024, SCENE_MAX_MS = 12 * 60 * 1000, VOICE_BPS = 32000, MAX_JSON = 380000;
 const SIZES = [['S', 3, 22], ['M', 6, 32], ['L', 10, 46]];
 const TOOLS = [['pen','Pen'],['eraser','Eraser'],['line','Line'],['arrow','Arrow'],['rect','Box'],['circle','Circle'],['text','Text']];
 
@@ -226,7 +236,8 @@ function redrawErasing(){
   if(wait <= 0){ eraseLast = performance.now(); redrawSoon(); }
   else if(!eraseTmr){ eraseTmr = setTimeout(() => { eraseTmr = 0; eraseLast = performance.now(); redrawSoon(); }, wait); }
 }
-let rz = null; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(fit, 150); });
+// the board must not change size while you draw: phone address bars and keyboards change only the height, so only a width change (turning the phone) refits it
+let rz = null, lastIW = innerWidth; addEventListener('resize', () => { if(innerWidth === lastIW) return; lastIW = innerWidth; clearTimeout(rz); rz = setTimeout(fit, 150); });
 
 /* ---------- tools ---------- */
 function buildControls(){
@@ -356,9 +367,67 @@ function tickUi(){
   $('timer').textContent = fmt(clock());
   const left = MAX_MS - usedMs() - clock();
   $('leftTxt').textContent = left < 120000 ? (fmt(Math.max(0, left)) + ' ' + T('left')) : '';
+  if(cur.state === 'rec' && clock() >= SCENE_MAX_MS){ say('msg', T('This scene reached 12 minutes, so it was finished. Start a new scene to continue.'), false); finishScene(); return; }
   if(cur.state === 'rec' && left <= 0){ say('msg', T('You reached 20 minutes. This is the end of the lesson.'), false); finishScene(); }
 }
 setInterval(tickUi, 250);
+
+/* ---------- voice quality: gentle filters, live level, 5-second test ---------- */
+// no echo filter (nobody plays sound back here, and it makes voices thin); light noise filter; automatic level so quiet voices are lifted
+const MIC_OPTS = { channelCount:1, echoCancellation:false, noiseSuppression:true, autoGainControl:true };
+let mAc = null, mRaf = 0, mPeak = 0;
+function setMeter(v){
+  const m = $('meter'); $('meterFill').style.width = Math.round(Math.min(1, v) * 100) + '%';
+  m.classList.toggle('low', v > 0.02 && v < 0.12); m.classList.toggle('hot', v > 0.9);
+}
+function stopMeter(){
+  if(mRaf){ cancelAnimationFrame(mRaf); mRaf = 0; }
+  try { if(mAc) mAc.close(); } catch(e){}
+  mAc = null; setMeter(0);
+}
+function startMeter(stream){
+  stopMeter(); mPeak = 0;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+    mAc = new AC(); const an = mAc.createAnalyser(); an.fftSize = 512;
+    mAc.createMediaStreamSource(stream).connect(an);
+    const buf = new Uint8Array(an.fftSize); let lastTxt = 0;
+    const loop = () => {
+      an.getByteTimeDomainData(buf); let sum = 0;
+      for(let i = 0; i < buf.length; i++){ const d = (buf[i] - 128) / 128; sum += d * d; }
+      const lvl = Math.min(1, Math.sqrt(sum / buf.length) * 4); mPeak = Math.max(mPeak * 0.995, lvl); setMeter(lvl);
+      const now = performance.now();
+      if(now - lastTxt > 400){ lastTxt = now; $('meterTxt').textContent = mPeak < 0.08 ? T('Too quiet') : mPeak > 0.9 ? T('Too loud') : T('Good'); }
+      mRaf = requestAnimationFrame(loop);
+    };
+    mRaf = requestAnimationFrame(loop);
+  } catch(e){ stopMeter(); }
+}
+let testing = false;
+$('testVoice').onclick = async () => {
+  if(testing || (cur && cur.state === 'rec')) return;
+  const mime = pickMime();
+  if(!canMic || !mime){ say('msg', T('The microphone is not available. You can allow it in the browser settings, or record this scene without voice.'), false); return; }
+  testing = true; const b = $('testVoice'); b.disabled = true; let stream = null;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio:MIC_OPTS });
+    startMeter(stream);
+    const chunks = [], rec = new MediaRecorder(stream, { mimeType:mime, audioBitsPerSecond:VOICE_BPS });
+    rec.ondataavailable = ev => { if(ev.data && ev.data.size) chunks.push(ev.data); };
+    rec.start(500);
+    let left = 5; b.textContent = T('Speak now') + ' … ' + left;
+    await new Promise(res => { const t = setInterval(() => { left--; if(left <= 0){ clearInterval(t); res(); } else b.textContent = T('Speak now') + ' … ' + left; }, 1000); });
+    await new Promise(res => { rec.onstop = res; try { rec.stop(); } catch(e){ res(); } });
+    const a = $('testAudio'); if(a.src) URL.revokeObjectURL(a.src);
+    a.src = URL.createObjectURL(new Blob(chunks, { type:mime.split(';')[0] })); a.classList.remove('hidden'); a.play().catch(() => {});
+    $('meterTxt').textContent = mPeak < 0.08 ? T('Too quiet') : mPeak > 0.9 ? T('Too loud') : T('Good');
+  } catch(e){
+    say('msg', T('The microphone is not available. You can allow it in the browser settings, or record this scene without voice.'), false);
+  }
+  try { if(stream) stream.getTracks().forEach(t => t.stop()); } catch(e){}
+  if(!(cur && cur.state === 'rec')){ const keep = $('meterTxt').textContent; stopMeter(); $('meterTxt').textContent = keep; }
+  b.textContent = T('Test your voice (5 seconds)'); b.disabled = false; testing = false;
+};
 
 async function startRec(){
   if(!cur) return;
@@ -372,8 +441,9 @@ async function startRec(){
   cur.mime = pickMime(); cur.chunks = [];
   if(canMic && cur.mime && !cur.noVoice){
     try {
-      cur.stream = await navigator.mediaDevices.getUserMedia({ audio:{ channelCount:1, echoCancellation:true, noiseSuppression:true } });
-      const rec = new MediaRecorder(cur.stream, { mimeType:cur.mime, audioBitsPerSecond:24000 });
+      cur.stream = await navigator.mediaDevices.getUserMedia({ audio:MIC_OPTS });
+      startMeter(cur.stream);
+      const rec = new MediaRecorder(cur.stream, { mimeType:cur.mime, audioBitsPerSecond:VOICE_BPS });
       rec.ondataavailable = ev => { if(ev.data && ev.data.size) cur.chunks.push(ev.data); };
       cur.recorder = rec; rec.start(1000);
     } catch(e){
@@ -394,6 +464,7 @@ function showNoVoice(){
   }
 }
 function releaseMic(){
+  stopMeter();
   try { if(cur && cur.stream) cur.stream.getTracks().forEach(t => t.stop()); } catch(e){}
   if(cur){ cur.stream = null; }
 }

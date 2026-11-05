@@ -26,7 +26,8 @@
   .tab[aria-selected="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
   #stage{display:flex; justify-content:center; background:#EFEAE0; border:1px solid var(--line); border-radius:14px; padding:8px; margin-bottom:10px; overflow:hidden;}
   #stage:fullscreen{background:#EFEAE0; align-items:center; padding:0; border-radius:0;}
-  canvas{display:block; background:#fff; border-radius:8px; box-shadow:0 1px 6px rgba(0,0,0,.12);}
+  canvas{display:block; background:#fff; border-radius:8px; box-shadow:0 1px 6px rgba(0,0,0,.12); touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;}
+  #stage{overscroll-behavior:contain;}
   .panel{background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:12px; min-width:0; overflow-wrap:anywhere;}
   .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:6px 0;}
   .tool,.act{min-width:44px; min-height:44px; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:6px 10px; font:inherit; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer;}
@@ -398,7 +399,8 @@ function toFull(){ const s = $('stage'); if(s.requestFullscreen) s.requestFullsc
 $('full').onclick = toFull; $('full2').onclick = toFull;
 if(!$('stage').requestFullscreen){ $('full').classList.add('hidden'); $('full2').classList.add('hidden'); }
 document.addEventListener('fullscreenchange', fit);
-let rz = null; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(fit, 150); });
+// the board must not change size while you draw: phone address bars and keyboards change only the height, so only a width change (turning the phone) refits it
+let rz = null, lastIW = innerWidth; addEventListener('resize', () => { if(innerWidth === lastIW) return; lastIW = innerWidth; clearTimeout(rz); rz = setTimeout(fit, 150); });
 
 /* ---- saving (this phone only) ---- */
 const KEY = 'lne_boards_v1', AUTO = 'lne_board_auto_v1';
