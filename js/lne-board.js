@@ -246,5 +246,117 @@
     };
   }
 
-  window.LNEBoard = { COLORS: COLORS, drawItem: drawItem, bbox: bbox, cleanItem: cleanItem, cleanScenes: cleanScenes, wrapLines: wrapLines, layoutText: layoutText, player: player, num: num };
+  /* ---------- AI drawing: read the reply safely, tidy the layout, fit it into a free area ---------- */
+  function tidyJson(t) { return String(t).replace(/[\u0000-\u001f]+/g, ' ').replace(/,\s*([}\]])/g, '$1'); }
+  function balancedEnd(str, a) {   // index just after the matching closer of the { or [ at a; -1 if the text ends first
+    var depth = 0, inStr = false, esc = false;
+    for (var i = a; i < str.length; i++) {
+      var ch = str[i];
+      if (inStr) { if (esc) esc = false; else if (ch === '\\') esc = true; else if (ch === '"') inStr = false; continue; }
+      if (ch === '"') inStr = true;
+      else if (ch === '{' || ch === '[') depth++;
+      else if (ch === '}' || ch === ']') { depth--; if (depth === 0) return i + 1; }
+    }
+    return -1;
+  }
+  function extractItems(raw) {
+    var s = String(raw || '').replace(/```[a-z]*/gi, ' '), from = 0, n, a, e, o;
+    for (n = 0; n < 6; n++) {                                  // a complete {"items":[...]} (or {"steps":[{items}]}) object
+      a = s.indexOf('{', from); if (a < 0) break;
+      e = balancedEnd(s, a);
+      if (e > 0) {
+        try {
+          o = JSON.parse(tidyJson(s.slice(a, e)));
+          if (o && Array.isArray(o.items)) return o.items;
+          if (o && Array.isArray(o.steps)) { var all = []; o.steps.forEach(function (st) { if (st && Array.isArray(st.items)) all = all.concat(st.items); }); if (all.length) return all; }
+        } catch (x) {}
+      }
+      from = a + 1;
+    }
+    var k = s.search(/"items"\s*:\s*\[/); if (k < 0) return null;    // a cut-off reply: keep every finished item
+    var pos = s.indexOf('[', k) + 1, out = [];
+    for (n = 0; n < 40; n++) {
+      a = s.indexOf('{', pos); if (a < 0) break;
+      e = balancedEnd(s, a); if (e < 0) break;
+      try { out.push(JSON.parse(tidyJson(s.slice(a, e)))); } catch (x) {}
+      pos = e;
+    }
+    return out.length ? out : null;
+  }
+  function segHitsRect(x1, y1, x2, y2, r) {
+    var t0 = 0, t1 = 1, dx = x2 - x1, dy = y2 - y1, P = [-dx, dx, -dy, dy], Q = [x1 - r[0], r[2] - x1, y1 - r[1], r[3] - y1];
+    for (var i = 0; i < 4; i++) {
+      if (P[i] === 0) { if (Q[i] < 0) return false; }
+      else { var t = Q[i] / P[i]; if (P[i] < 0) { if (t > t1) return false; if (t > t0) t0 = t; } else { if (t < t0) return false; if (t < t1) t1 = t; } }
+    }
+    return t0 < t1;
+  }
+  function overlaps(a, b, pad) { return a[0] < b[2] - pad && a[2] > b[0] + pad && a[1] < b[3] - pad && a[3] > b[1] + pad; }
+  function moveItem(it, f, ox, oy, a, b) {   // scale by f around the top-left (a,b) of the drawing, then place at (ox,oy)
+    function X(x) { return (x - a) * f + ox; } function Y(y) { return (y - b) * f + oy; }
+    if (it.t === 'pen') it.pts = it.pts.map(function (p) { return [X(p[0]), Y(p[1])]; });
+    else if (it.t === 'line' || it.t === 'arrow') { it.x1 = X(it.x1); it.y1 = Y(it.y1); it.x2 = X(it.x2); it.y2 = Y(it.y2); }
+    else if (it.t === 'rect' || it.t === 'box') { it.x = X(it.x); it.y = Y(it.y); it.w *= f; it.h *= f; if (it.size) it.size = Math.max(11, Math.min(40, it.size * f)); }
+    else if (it.t === 'circle') { it.x = X(it.x); it.y = Y(it.y); it.r *= f; }
+    else if (it.t === 'text') { it.x = X(it.x); it.y = Y(it.y); it.size = Math.max(14, Math.min(56, it.size * f)); it.w = Math.max(40, it.w * f); }
+  }
+  /* raw = the AI's answer, region = [x0, y0, x1, y1] on the board where it may draw. Returns a list of safe items or null. */
+  function parseSay(raw) {   // the short text for students that the AI may add: "say":"..."
+    var m = String(raw || '').match(/"say"\s*:\s*"((?:[^"\\]|\\.)*)"/); if (!m) return '';
+    try { return String(JSON.parse('"' + m[1].replace(/[\u0000-\u001f]+/g, ' ') + '"')).replace(/\s+/g, ' ').trim().slice(0, 280); } catch (e) { return ''; }
+  }
+  /* written explanation: keep only text lines and stack them neatly, top to bottom, inside the free area */
+  function stackLines(items, W, region) {
+    var lines = items.filter(function (i) { return i.t === 'text'; });
+    if (!lines.length) return null;
+    var top = region[1] + 24, bottom = region[3] - 14, sc, placed;
+    for (sc = 1; sc >= 0.55; sc -= 0.15) {
+      var y = top; placed = [];
+      for (var i = 0; i < lines.length; i++) {
+        var it = lines[i]; it.x = 40; it.a = 'l'; it.w = W - 80; it.size = Math.max(14, Math.round(Math.min(it.size || 26, 30) * sc)); it.y = y;
+        var b = bbox(it, W); if (b[3] > bottom) break;
+        placed.push(it); y = b[3] + Math.round(16 * sc);
+      }
+      if (placed.length === lines.length) break;
+    }
+    return placed.length ? placed : null;
+  }
+  function parseDrawing(raw, W, H, region, opts) {
+    var list = extractItems(raw); if (!list) return null;
+    if (opts && opts.stack) {
+      var tl = list.map(function (r) { return (r && r.t === 'text') ? cleanItem(r, W, H) : null; }).filter(Boolean).slice(0, 14);
+      tl.forEach(function (o) { o.at = 0; o.d = 0; });
+      var st = stackLines(tl, W, region); if (!st) return null;
+      return st.map(function (it) { return cleanItem(it, W, H); }).filter(Boolean);
+    }
+    var items = list.slice(0, 24).map(function (r) { var o = cleanItem(r, W, H); if (o) { o.at = 0; o.d = 0; if (o.t === 'pen') return null; } return o; }).filter(Boolean);
+    if (!items.length) return null;
+    var boxes = items.filter(function (i) { return i.t === 'box'; }).map(function (i) { return bbox(i, W); }), placed = boxes.slice();
+    items.forEach(function (it) {          // push text out of boxes and away from other text
+      if (it.t !== 'text') return;
+      var b = bbox(it, W), n = 0, hit;
+      while (n < 14) { hit = placed.filter(function (q) { return overlaps(b, q, 3); })[0]; if (!hit) break; it.y = hit[3] + 8; b = bbox(it, W); n++; }
+      placed.push(b);
+    });
+    var texts = items.filter(function (i) { return i.t === 'text'; }).map(function (i) { return bbox(i, W); });
+    function shrink(r, d) { return [r[0] + d, r[1] + d, r[2] - d, r[3] - d]; }
+    function near(r, x, y, d) { return x >= r[0] - d && x <= r[2] + d && y >= r[1] - d && y <= r[3] + d; }
+    items = items.filter(function (it) {   // drop lines and arrows that cut through words or boxes
+      if (it.t !== 'line' && it.t !== 'arrow') return true;
+      if (texts.some(function (r) { return segHitsRect(it.x1, it.y1, it.x2, it.y2, shrink(r, 2)); })) return false;
+      if (boxes.some(function (r) { return !near(r, it.x1, it.y1, 14) && !near(r, it.x2, it.y2, 14) && segHitsRect(it.x1, it.y1, it.x2, it.y2, shrink(r, 6)); })) return false;
+      return true;
+    });
+    if (!items.length) return null;
+    var a = 1e9, b2 = 1e9, c = -1e9, d = -1e9;
+    items.forEach(function (it) { var q = bbox(it, W); a = Math.min(a, q[0]); b2 = Math.min(b2, q[1]); c = Math.max(c, q[2]); d = Math.max(d, q[3]); });
+    var rx = region[0], ry = region[1], rw = region[2] - region[0], rh = region[3] - region[1], M = 24;
+    var bw = Math.max(40, c - a), bh = Math.max(40, d - b2);
+    var f = Math.max(0.5, Math.min(1.5, Math.min((rw - 2 * M) / bw, (rh - 2 * M) / bh)));
+    var ox = rx + (rw - bw * f) / 2, oy = ry + Math.max(M, (rh - bh * f) / 2);
+    items.forEach(function (it) { moveItem(it, f, ox, oy, a, b2); });
+    return items.map(function (it) { return cleanItem(it, W, H); }).filter(Boolean);
+  }
+
+  window.LNEBoard = { COLORS: COLORS, drawItem: drawItem, bbox: bbox, cleanItem: cleanItem, cleanScenes: cleanScenes, parseDrawing: parseDrawing, parseSay: parseSay, wrapLines: wrapLines, layoutText: layoutText, player: player, num: num };
 })();
