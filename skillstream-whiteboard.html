@@ -160,7 +160,7 @@ function fit(){
   const maxW = Math.max(200, (fs ? innerWidth / zf : stage.clientWidth - 16));
   const maxH = Math.max(200, fs ? innerHeight / zf : innerHeight * 0.68 / zf);
   scale = Math.min(maxW / W, maxH / H);
-  dpr = Math.min(1.5, window.devicePixelRatio || 1);
+  dpr = Math.min(2, window.devicePixelRatio || 1);
   const cw = Math.floor(W * scale), ch = Math.floor(H * scale);
   cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
   cv.width = Math.floor(cw * dpr); cv.height = Math.floor(ch * dpr);
@@ -344,8 +344,14 @@ cv.addEventListener('pointermove', e => {
   const p = pos(e);
   if(drag.erase){ eraseAt(p); return; }
   if(tool === 'pen'){
-    if(Math.hypot(p[0] - drag.last[0], p[1] - drag.last[1]) < 2 || preview.pts.length >= MAX_PTS) return;
-    preview.pts.push(p); drag.last = p; redrawSoon();
+    // use every touch sample the phone reports (not only one per frame), so fast writing keeps its exact shape
+    const evs = (e.getCoalescedEvents && e.getCoalescedEvents().length) ? e.getCoalescedEvents() : [e];
+    for(const ev of evs){
+      const q = ev === e ? p : pos(ev);
+      if(Math.hypot(q[0] - drag.last[0], q[1] - drag.last[1]) < 1 || preview.pts.length >= MAX_PTS) continue;
+      preview.pts.push(q); drag.last = q;
+    }
+    redrawSoon();
   } else {
     const s = drag.start, lw = SIZES[sizeIdx][1];
     if(tool === 'line' || tool === 'arrow') preview = { t:tool, x1:s[0], y1:s[1], x2:p[0], y2:p[1], c:color, lw };
