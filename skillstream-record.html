@@ -192,18 +192,39 @@ function baseItems(){
 function fit(){
   const stage = $('stage');
   const maxW = Math.max(200, stage.clientWidth - 16), maxH = Math.max(200, innerHeight * 0.58);
-  scale = Math.min(maxW / W, maxH / H); dpr = Math.min(2, window.devicePixelRatio || 1);
+  scale = Math.min(maxW / W, maxH / H); dpr = Math.min(1.5, window.devicePixelRatio || 1);
   const cw = Math.floor(W * scale), ch = Math.floor(H * scale);
   cv.style.width = cw + 'px'; cv.style.height = ch + 'px'; cv.width = Math.floor(cw * dpr); cv.height = Math.floor(ch * dpr);
   redraw();
 }
+const idMap = new WeakMap(); let idN = 0;
+function idOf(a){ let i = idMap.get(a); if(!i){ i = ++idN; idMap.set(a, i); } return i; }
+let cacheCv = null, cacheKey = '';
 function redraw(){
   ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
-  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
-  if(!cur) return;
-  baseItems().forEach(it => B.drawItem(ctx, it, 1, W));
-  cur.items.forEach(it => B.drawItem(ctx, it, 1, W));
+  if(!cur){ ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); return; }
+  // finished drawings are kept as a picture, so moving the pen only paints the new stroke (much faster on slow phones)
+  const key = [cv.width, cv.height, scale, W, H, idOf(cur.items), cur.insertAt, cur.clear ? 1 : 0, scenes.map(s => idOf(s.items)).join(',')].join('|');
+  if(key !== cacheKey || !cacheCv){
+    cacheCv = cacheCv || document.createElement('canvas');
+    cacheCv.width = cv.width; cacheCv.height = cv.height;
+    const cc = cacheCv.getContext('2d'); cc.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+    cc.fillStyle = '#fff'; cc.fillRect(0, 0, W, H);
+    baseItems().forEach(it => B.drawItem(cc, it, 1, W));
+    cur.items.forEach(it => B.drawItem(cc, it, 1, W));
+    cacheKey = key;
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(cacheCv, 0, 0);
+  ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
   if(preview) B.drawItem(ctx, preview, 1, W);
+}
+let rafId = 0;
+function redrawSoon(){ if(rafId) return; rafId = requestAnimationFrame(() => { rafId = 0; redraw(); }); }
+let eraseTmr = 0, eraseLast = 0;   // while erasing, rebuild the picture at most ~10 times a second
+function redrawErasing(){
+  const wait = 100 - (performance.now() - eraseLast);
+  if(wait <= 0){ eraseLast = performance.now(); redrawSoon(); }
+  else if(!eraseTmr){ eraseTmr = setTimeout(() => { eraseTmr = 0; eraseLast = performance.now(); redrawSoon(); }, wait); }
 }
 let rz = null; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(fit, 150); });
 
@@ -238,7 +259,10 @@ $('redo').onclick = () => { if(!cur || !cur.redoS.length) return; cur.undoS.push
 
 function pos(e){ const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(W, (e.clientX - r.left) / scale)), Math.max(0, Math.min(H, (e.clientY - r.top) / scale))]; }
 function dist2seg(px, py, x1, y1, x2, y2){ const dx = x2 - x1, dy = y2 - y1, l = dx * dx + dy * dy; let t = l ? ((px - x1) * dx + (py - y1) * dy) / l : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy)); }
+const BH = new WeakMap();
+function hitBox(it){ let b = BH.get(it); if(!b){ b = B.bbox(it, W); BH.set(it, b); } return b; }
 function hit(it, x, y, r){
+  const hb = hitBox(it); if(x < hb[0] - r || x > hb[2] + r || y < hb[1] - r || y > hb[3] + r) return false;
   if(it.t === 'pen'){ if(it.pts.length === 1) return Math.hypot(x - it.pts[0][0], y - it.pts[0][1]) <= r; for(let i = 1; i < it.pts.length; i++) if(dist2seg(x, y, it.pts[i-1][0], it.pts[i-1][1], it.pts[i][0], it.pts[i][1]) <= r) return true; return false; }
   if(it.t === 'line' || it.t === 'arrow') return dist2seg(x, y, it.x1, it.y1, it.x2, it.y2) <= r;
   if(it.t === 'circle') return Math.abs(Math.hypot(x - it.x, y - it.y) - it.r) <= r || (it.f && Math.hypot(x - it.x, y - it.y) <= it.r);
@@ -258,19 +282,19 @@ cv.addEventListener('pointermove', e => {
   const p = pos(e);
   if(drag.erase){ eraseAt(p); return; }
   if(tool === 'pen'){
-    if(Math.hypot(p[0] - drag.last[0], p[1] - drag.last[1]) < 1.5 || preview.pts.length >= 1500) return;
-    preview.pts.push(p); drag.last = p; redraw();
+    if(Math.hypot(p[0] - drag.last[0], p[1] - drag.last[1]) < 2 || preview.pts.length >= 1500) return;
+    preview.pts.push(p); drag.last = p; redrawSoon();
   } else {
     const s = drag.start, lw = SIZES[sizeIdx][1];
     if(tool === 'line' || tool === 'arrow') preview = { t:tool, x1:s[0], y1:s[1], x2:p[0], y2:p[1], c:color, lw };
     else if(tool === 'rect') preview = { t:'rect', x:Math.min(s[0], p[0]), y:Math.min(s[1], p[1]), w:Math.abs(p[0] - s[0]), h:Math.abs(p[1] - s[1]), c:color, lw };
     else if(tool === 'circle') preview = { t:'circle', x:s[0], y:s[1], r:Math.hypot(p[0] - s[0], p[1] - s[1]), c:color, lw };
-    redraw();
+    redrawSoon();
   }
 });
 function endDrag(){
   if(!drag) return;
-  if(drag.erase){ drag = null; return; }
+  if(drag.erase){ drag = null; clearTimeout(eraseTmr); eraseTmr = 0; redraw(); return; }
   const pv = preview, st = drag.at; preview = null; drag = null;
   if(!pv){ redraw(); return; }
   const tiny = (pv.t === 'rect' && (pv.w < 6 || pv.h < 6)) || (pv.t === 'circle' && pv.r < 4) || ((pv.t === 'line' || pv.t === 'arrow') && Math.hypot(pv.x2 - pv.x1, pv.y2 - pv.y1) < 6);
@@ -282,7 +306,7 @@ function eraseAt(p){
   for(let i = cur.items.length - 1; i >= 0; i--){
     if(hit(cur.items[i], p[0], p[1], 14)){
       if(!erasedAny){ pushUndo(); erasedAny = true; }
-      cur.items = cur.items.slice(0, i).concat(cur.items.slice(i + 1)); redraw(); return;
+      cur.items = cur.items.slice(0, i).concat(cur.items.slice(i + 1)); redrawErasing(); return;
     }
   }
 }
