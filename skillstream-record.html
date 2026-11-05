@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<script src="js/lne-helpers.js"></script>
 <script src="js/lne-board.js"></script>
 <style>
   :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; --sage:#6B8F71; }
@@ -106,6 +107,9 @@
       </span>
     </div>
     <div id="stage"><canvas id="cv" role="img" aria-label="Lesson board"></canvas></div>
+    <div class="panel hidden" id="aiAskRow" style="padding:8px 12px">
+      <div class="row" style="margin:0"><span class="hint" style="margin:0; flex:1; min-width:120px">AI preview</span><button class="act main" id="aiAccept" type="button">Add to board</button><button class="act del" id="aiDiscard" type="button">Discard</button></div>
+    </div>
 
     <div class="panel" id="ctl">
       <label class="chk"><input type="checkbox" id="cleanScene"> <span>Start this scene on a clean board</span></label>
@@ -132,6 +136,14 @@
         <button class="act" id="shape" type="button">Wide / Tall</button>
       </div>
       <p class="hint" style="margin:0">Undo and the eraser only change what you drew in this scene.</p>
+    </div>
+
+    <div class="panel" id="aiPanel">
+      <h3 style="margin:0 0 6px; font-size:16px">AI on the board</h3>
+      <textarea id="aiTopic" maxlength="300" aria-label="What should the AI draw or write?" placeholder="What should the AI draw or write? e.g. a right triangle with its sides labelled"></textarea>
+      <div class="row"><select id="aiMode" aria-label="AI mode" style="width:auto; flex:1; min-width:130px"><option value="draw">Draw</option><option value="write">Write</option><option value="both">Draw and write</option></select><button class="act main" id="aiGo" type="button">Ask the AI</button></div>
+      <div class="msg" id="aiMsg" role="status"></div>
+      <p class="hint" style="margin:0">Each AI answer uses one of your AI requests for today. While you record, it appears on the board at that moment. Write and Draw-and-write also add text for your students, which you can edit in the scene list.</p>
     </div>
 
     <div class="panel">
@@ -188,7 +200,8 @@ const cv = $('cv'), ctx = cv.getContext('2d');
 
 /* ---------- the scene being made ---------- */
 function newCur(insertAt, clean){
-  return { state:'idle', items:[], undoS:[], redoS:[], clear:!!clean, insertAt:insertAt, acc:0, tick:0, recorder:null, chunks:[], stream:null, mime:'', noVoice:false, voiceDenied:false };
+  if(typeof aiPrev !== 'undefined' && aiPrev){ aiPrev = null; aiPrevSay = ''; const r = document.getElementById('aiAskRow'); if(r) r.classList.add('hidden'); }   // a waiting AI drawing belongs to the old scene
+  return { state:'idle', say:'', items:[], undoS:[], redoS:[], clear:!!clean, insertAt:insertAt, acc:0, tick:0, recorder:null, chunks:[], stream:null, mime:'', noVoice:false, voiceDenied:false };
 }
 function clock(){ return cur.acc + (cur.state === 'rec' ? performance.now() - cur.tick : 0); }
 function usedMs(){ return scenes.reduce((a, s) => a + s.ms, 0); }
@@ -228,7 +241,9 @@ function redraw(){
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(cacheCv, 0, 0);
   ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
   if(preview) B.drawItem(ctx, preview, 1, W);
+  if(aiPrev) aiPrev.forEach(it => B.drawItem(ctx, it, 1, W));
 }
+let aiPrev = null, aiPrevSay = '';   // AI answer waiting for Add / Discard
 let rafId = 0;
 function redrawSoon(){ if(rafId) return; rafId = requestAnimationFrame(() => { rafId = 0; redraw(); }); }
 let eraseTmr = 0, eraseLast = 0;   // while erasing, rebuild the picture at most ~10 times a second
@@ -495,6 +510,7 @@ function stopRecorder(){
 }
 async function finishScene(){
   if(!cur || cur.state === 'idle') return;
+  aiDiscard();
   if(cur.state === 'rec'){ cur.acc += performance.now() - cur.tick; cur.state = 'paused'; }
   const ms = Math.round(cur.acc);
   await stopRecorder(); releaseMic(); keepAwake(false);
@@ -505,7 +521,8 @@ async function finishScene(){
   let blob = null;
   if(cur.chunks.length){ blob = new Blob(cur.chunks, { type:cur.mime.split(';')[0] }); }
   if(blob && blob.size > MAX_AUDIO){ say('msg', T('This scene is too large. Record shorter scenes.'), false); blob = null; cur.items = cur.items; return; }
-  const s = { title:'', say:'', ms, blob, mime:cur.mime ? cur.mime.split(';')[0] : '', clear:cur.clear, items:cur.items };
+  const items = cur.items.map(it => it.at > ms - 50 ? Object.assign({}, it, { at:Math.max(0, ms - 50), d:0 }) : it);   // nothing may start after the scene ends
+  const s = { title:'', say:cur.say || '', ms, blob, mime:cur.mime ? cur.mime.split(';')[0] : '', clear:cur.clear, items };
   const at = cur.insertAt;
   scenes.splice(at, 0, s);
   s.title = T('Scene') + ' ' + (at + 1);
@@ -516,6 +533,76 @@ async function finishScene(){
   renderScenes(); syncUi(); redraw(); syncBtns(); saveDraft();
 }
 $('bRec').onclick = startRec; $('bPause').onclick = pauseRec; $('bFinish').onclick = finishScene;
+
+/* ---------- AI drawing ---------- */
+const LANG_NAMES = { en:'English', ar:'Arabic', fr:'French', es:'Spanish', zh:'Simplified Chinese' };
+const appLang = (window.LNE_I18N && LNE_I18N.lang) || 'en';
+function freeRegion(){      // draw below what is already written, if there is room; otherwise anywhere
+  let maxY = 0; baseItems().concat(cur.items).forEach(it => { maxY = Math.max(maxY, B.bbox(it, W)[3] || 0); });
+  return (maxY > 0 && maxY < H * 0.55) ? [0, Math.ceil(maxY) + 20, W, H] : [0, 0, W, H];
+}
+function aiPrompt(topic, rg, mode){
+  const lang = LANG_NAMES[appLang] || 'English', t = topic.replace(/[\r\n]+/g, ' ');
+  const area = 'The canvas is ' + W + ' wide and ' + H + ' tall (origin top-left, pixels). Use ONLY this area: x from ' + rg[0] + ' to ' + rg[2] + ', y from ' + rg[1] + ' to ' + rg[3] + '.\n';
+  if(mode === 'write'){
+    return 'You are a teacher writing a clear explanation on a whiteboard, line by line.\n' +
+    'Topic: ' + t + '\n' +
+    'Write ALL text in ' + lang + '.\n' +
+    'Reply with ONE JSON object only: no markdown, no code fences, no extra words.\n' +
+    'Format: {"say":"2 or 3 short sentences that students can read under the lesson","items":[{"t":"text","s":"one short line","size":26,"c":"black"}]}\n' +
+    'Rules: 3 to 8 text items, in the order they are written. Each item is ONE short line (at most 60 characters). For maths, put each step of the working on its own line, for example "3/4 + 1/4 = 4/4" then "= 1". Use blue for a heading and red for the final answer, black for the rest. No shapes. Be accurate and simple.\n' +
+    'Example (different topic): {"say":"Plants make food from light.","items":[{"t":"text","s":"Photosynthesis","size":30,"c":"blue"},{"t":"text","s":"Light + water + CO2","size":26,"c":"black"},{"t":"text","s":"= sugar + oxygen","size":26,"c":"red"}]}';
+  }
+  const ex = '{"items":[{"t":"text","x":40,"y":40,"s":"Water cycle","size":34,"c":"blue"},{"t":"box","x":60,"y":300,"w":220,"h":90,"s":"Sea","c":"blue"},{"t":"circle","x":480,"y":120,"r":50,"f":true,"c":"orange"},{"t":"arrow","x1":170,"y1":290,"x2":170,"y2":190,"c":"orange"}]}';
+  return 'You are a teacher drawing ONE clear picture on a whiteboard while explaining.\n' +
+  'Draw: ' + t + '\n' +
+  'Write ALL text in ' + lang + '. Keep every label short.\n' +
+  'Reply with ONE JSON object only: no markdown, no code fences, no extra words.\n' +
+  area + 'Use that whole area, with a 30 unit margin. Draw ONLY inside this area.\n' +
+  'LAYOUT RULES: text needs about size*0.6 units of width per character and size*1.3 per line. Leave at least 30 units between items. Never draw a line or arrow through text, and never put text on other text. Put arrows only in empty space. Use 4 to 14 items.\n' +
+  (mode === 'both' ? 'Format: {"say":"2 or 3 short sentences that explain the picture, for students to read","items":[ ... ]}. ' : 'Format: {"items":[ ... ]}. ') + 'Colours: black, blue, red, green, orange, purple. Item types:\n' +
+  '{"t":"text","x":..,"y":..,"s":"...","size":20-36,"c":"blue","a":"l","w":max width}\n' +
+  '{"t":"line","x1":..,"y1":..,"x2":..,"y2":..,"c":"black"}\n' +
+  '{"t":"arrow","x1":..,"y1":..,"x2":..,"y2":..,"c":"black"}\n' +
+  '{"t":"rect","x":..,"y":..,"w":..,"h":..,"c":"green","f":false}\n' +
+  '{"t":"circle","x":..,"y":..,"r":..,"c":"red","f":false}\n' +
+  '{"t":"box","x":..,"y":..,"w":..,"h":..,"s":"short label","c":"blue"}\n' +
+  'Be accurate and simple. Build shapes such as triangles from lines. Example of the style (different topic): ' + ex;
+}
+function aiShowAsk(on){ $('aiAskRow').classList.toggle('hidden', !on); }
+function aiDiscard(){ if(!aiPrev) return; aiPrev = null; aiPrevSay = ''; aiShowAsk(false); say('aiMsg', '', true); redraw(); }
+$('aiDiscard').onclick = aiDiscard;
+$('aiGo').onclick = async () => {
+  if(!cur) return;
+  const topic = $('aiTopic').value.trim(), mode = $('aiMode').value;
+  if(topic.length < 3){ say('aiMsg', T('Please write what you want drawn or written (at least 3 letters).'), false); return; }
+  aiDiscard(); const go = $('aiGo'); go.disabled = true; say('aiMsg', T('The AI is drawing…'), true);
+  const myCur = cur;
+  try {
+    const rg = freeRegion();
+    const r = await fetch('/api/ask-ai', { method:'POST', headers:await aiHeaders(sb), body:JSON.stringify({ prompt:aiPrompt(topic, rg, mode), maxTokens:3000, feature:'board' }) });
+    let d; try { d = await r.json(); } catch(e){ throw new Error(T('Something went wrong. Please try again.')); }
+    if(d.error) throw new Error(d.error);
+    const items = B.parseDrawing(d.text, W, H, rg, { stack:mode === 'write' }), sayTxt = mode === 'draw' ? '' : B.parseSay(d.text);
+    if(cur !== myCur){ say('aiMsg', '', true); return; }          // the scene was finished while the AI was drawing
+    if(!items){ say('aiMsg', T('The AI could not make this. Try asking in a different way.'), false); return; }
+    aiPrev = items; aiPrevSay = sayTxt; aiShowAsk(true); say('aiMsg', T('Preview on the board. Add it, or discard it.'), true); redraw();
+    $('aiAskRow').scrollIntoView({ block:'nearest' });
+  } catch(e){ say('aiMsg', e.message || T('Something went wrong. Please try again.'), false); }
+  finally { go.disabled = false; }
+};
+$('aiAccept').onclick = () => {
+  if(!cur || !aiPrev) return;
+  const n = aiPrev.length, total = cur.items.length + scenes.reduce((a, s) => a + s.items.length, 0);
+  if(cur.items.length + n > 300 || total + n > 780){ say('aiMsg', T('The lesson has too many drawings. Finish this scene or draw less.'), false); return; }
+  const now = Math.round(clock()), rec = cur.state === 'rec', gap = rec ? Math.min(450, Math.floor(2500 / n)) : 0;
+  const add = aiPrev.map((it, i) => { const o = roundItem(it); o.at = now + i * gap; o.d = rec ? Math.min(400, gap || 400) : 0; return o; });
+  pushUndo(); cur.items = cur.items.concat(add); aiPrev = null; aiShowAsk(false); $('aiTopic').value = '';
+  let note = T('Added to the board.');
+  if(aiPrevSay){ cur.say = ((cur.say ? cur.say + ' ' : '') + aiPrevSay).slice(0, 300); note += ' ' + T('The text for your students was added too.'); }
+  aiPrevSay = '';
+  say('aiMsg', note, true); redraw(); syncBtns();
+};
 
 /* ---------- scenes list ---------- */
 function renderScenes(){
