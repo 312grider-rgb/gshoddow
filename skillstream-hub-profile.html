@@ -27,7 +27,9 @@
   <h1 id="hubTitle">Profile</h1>
   <p id="hubIntro"></p>
 </header>
+<div class="hub-wrap" id="portfolioRoot" style="padding-bottom:0"></div>
 <div class="hub-wrap" id="hubRoot" aria-live="polite"></div>
+<script src="js/lne-portfolio.js"></script>
 <script src="js/nav.js" defer></script>
 <script src="js/hubs.js" defer></script>
 <script>
@@ -41,12 +43,16 @@
     var s = await sb.auth.getSession();
     if(!(s.data && s.data.session)){ location.href = 'skillstream-login.html'; return; }
     var role = cached === 'teacher' ? 'teacher' : 'student';
-    show(role);                              // show something at once, then correct it if the real role differs
+    show(role);
+    var uid = s.data.session.user.id, pf = document.getElementById('portfolioRoot'), pfDone = false;
+    function portfolio(r){ if(r === 'student' && !pfDone){ pfDone = true; try { LNE_PORTFOLIO.mount(pf, sb, uid); } catch(e){} } if(r === 'teacher'){ pf.dataset.off = '1'; pf.textContent = ''; } }
+    if(cached === 'student') portfolio('student');                              // show something at once, then correct it if the real role differs
     try {
       var r = await sb.from('profiles').select('role').eq('id', s.data.session.user.id).maybeSingle();
       var real = r && r.data && r.data.role === 'teacher' ? 'teacher' : 'student';
       window.currentProfile = { role: real }; try { localStorage.setItem('lne_role', real); } catch(e){}
       if(real !== role) show(real);
+      portfolio(real);
     } catch(e){}
     done();
   })();
