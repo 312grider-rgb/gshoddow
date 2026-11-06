@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/lne-helpers.js"></script>
+<script src="js/lne-math.js"></script>
 <script src="js/ai-history.js"></script>
 <style>
   :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; --sage:#6B8F71; }
@@ -121,6 +122,7 @@
       <div class="row">
         <button class="act main" id="explain" type="button">Explain on the board</button>
       </div>
+      <p class="hint" style="margin:0 0 6px">Maths you type, such as 2x + 3 = 11 or 20% of 150, is solved on your phone, exactly, with no AI request.</p>
       <p class="hint" style="margin:0">Each board uses 1 of your AI requests for the day.</p>
       <div class="msg" id="aiMsg" role="status"></div>
       <details id="aiDetails" class="hidden"><summary class="hint">Technical details</summary><pre id="aiRaw" data-no-i18n style="white-space:pre-wrap; font-size:12px; background:#F7F3EA; padding:8px; border-radius:8px; max-height:200px; overflow:auto"></pre></details>
@@ -590,6 +592,17 @@ function showDetails(raw){
 $('explain').onclick = async () => {
   const topic = $('topic').value.trim();
   if(topic.length < 3){ say('aiMsg', T('Please write what you want explained.'), false); return; }
+  if(window.LNE_MATH){      // maths typed in: solve it here, exactly, one step at a time, with no AI request
+    const ms = LNE_MATH.solve(topic, { check:T('Check'), none:T('No solution'), every:T('Every number is a solution'), div0:T('Cannot divide by zero') });
+    if(ms){
+      const n = ms.lines.length, gap = Math.max(40, Math.min(70, Math.floor((H - 100) / n))), raw = JSON.stringify({ title:topic.slice(0, 60), steps:ms.lines.map((l, k) => ({ say:l.s.slice(0, 120), items:[{ t:'text', x:40, y:40 + k * gap, s:l.s.slice(0, 60), size:28, c:l.c, a:'l', w:W - 80 }] })) });
+      const bm = parseBoard(raw);
+      if(bm){
+        $('aiDetails').classList.add('hidden'); ai = bm; aiIdx = 0; say('aiMsg', T('Solved on your phone, exactly. No AI request used.'), true); $('player').classList.remove('hidden');
+        showStep(0, true); renderTranscript(); $('stage').scrollIntoView({ block:'start' }); startPlay(false); return;
+      }
+    }
+  }
   $('explain').disabled = true; say('aiMsg', T('Drawing your board…'), true);
   try {
     const text = await callAI(buildPrompt(topic));
