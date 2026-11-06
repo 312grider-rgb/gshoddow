@@ -1,0 +1,75 @@
+/* ==========================================================================
+   Learning Never Ends - "The Learning Universe" design layer (Stage 1)
+   Loaded on every page by js/i18n.js; selectors are one step more specific than the pages' own rules, so load order does not matter. It only changes looks: no layout
+   rules for page content, no behaviour. Static, no animation, no images:
+   it costs a few hundred bytes of CSS and nothing on slow connections.
+   Palette: Cosmic Midnight, Nebula Indigo, Stellar Gold, Life Emerald, Starlight Ivory.
+   Contrast (checked): ivory on midnight 15.8:1, gold on midnight 7.4:1,
+   dark-gold text on ivory 4.6:1, dark-emerald text on white 4.9:1.
+   Gold and emerald are for fills, borders and icons; use the -text colours for words
+   on light backgrounds.
+   ========================================================================== */
+html:root{
+  --midnight:#101A36;
+  --indigo:#202D50;
+  --gold:#C9A653;
+  --gold-text:#8A6A1F;
+  --emerald:#40B99A;
+  --emerald-text:#1E7F68;
+  --ivory:#F8F5ED;
+  --ink:#101A36;
+  --ink-2:#202D50;
+  --cream:#F8F5ED;
+  --uv-radius:14px;
+  --uv-tap:44px;
+  --uv-star:radial-gradient(1.4px 1.4px at 9% 24%,rgba(255,255,255,.75),transparent),
+            radial-gradient(1px 1px at 21% 74%,rgba(255,255,255,.55),transparent),
+            radial-gradient(1.6px 1.6px at 37% 18%,rgba(228,197,131,.8),transparent),
+            radial-gradient(1px 1px at 52% 62%,rgba(255,255,255,.5),transparent),
+            radial-gradient(1.2px 1.2px at 66% 30%,rgba(255,255,255,.65),transparent),
+            radial-gradient(1px 1px at 78% 80%,rgba(255,255,255,.45),transparent),
+            radial-gradient(1.4px 1.4px at 91% 52%,rgba(228,197,131,.7),transparent);
+}
+
+/* ---- page headers: midnight sky with a few stars and one orbit ---- */
+html header.top{
+  background-image:
+    radial-gradient(circle at calc(100% - 28px) 8px,transparent 92px,rgba(201,166,83,.30) 93px,transparent 95px),
+    radial-gradient(circle at calc(100% - 28px) 8px,transparent 130px,rgba(201,166,83,.14) 131px,transparent 133px),
+    var(--uv-star),
+    linear-gradient(160deg,var(--midnight) 0%,var(--indigo) 100%);
+  background-repeat:no-repeat;
+}
+html[dir="rtl"] header.top{
+  background-image:
+    radial-gradient(circle at 28px 8px,transparent 92px,rgba(201,166,83,.30) 93px,transparent 95px),
+    radial-gradient(circle at 28px 8px,transparent 130px,rgba(201,166,83,.14) 131px,transparent 133px),
+    var(--uv-star),
+    linear-gradient(160deg,var(--midnight) 0%,var(--indigo) 100%);
+}
+
+/* ---- words on light backgrounds must be readable ---- */
+html .section-title{color:var(--gold-text)}
+
+/* ---- progress is emerald ---- */
+html .progress-fill{background:var(--emerald)}
+
+/* ---- visible keyboard / switch-access focus on every page, two-tone so it shows on light and dark ---- */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[tabindex]:focus-visible{
+  outline:3px solid var(--midnight);outline-offset:2px;box-shadow:0 0 0 2px var(--gold);
+}
+
+/* ---- comfortable touch targets for the main buttons ---- */
+.btn-primary,.btn-gold,.tab-btn{min-height:var(--uv-tap)}
+
+/* ---- reusable pieces for the next stages ---- */
+.uv-card{background:#fff;border:1px solid var(--line,#E9E2D2);border-radius:var(--uv-radius);box-shadow:0 2px 10px rgba(16,26,54,.06)}
+.uv-sky{color:var(--ivory);border-radius:var(--uv-radius);background-image:var(--uv-star),linear-gradient(160deg,var(--midnight),var(--indigo));background-repeat:no-repeat}
+.uv-progress{height:8px;border-radius:4px;background:#E9E2D2;overflow:hidden}
+.uv-progress>i{display:block;height:100%;background:var(--emerald);border-radius:4px}
+.uv-chip{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 12px;border-radius:16px;background:rgba(201,166,83,.16);color:var(--gold-text);font-weight:700;font-size:13.5px}
+
+/* ---- calm for people who ask for it ---- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
