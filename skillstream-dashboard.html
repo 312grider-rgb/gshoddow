@@ -12,6 +12,7 @@
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/lne-today.js"></script>
+<script src="js/lne-universe.js"></script>
 <script src="js/lne-helpers.js"></script>
 <script src="js/ai-history.js"></script>
 <script src="js/incentives.js?v=2"></script>
@@ -228,6 +229,7 @@
 </div>
 
 <div class="wrap">
+  <div id="universeCard"></div>
   <div id="todayCard"></div>
   <div class="stats-row" id="statsRow">
     <div class="stat"><div class="val">–</div><div class="lbl">Courses Started</div></div>
@@ -483,6 +485,7 @@ async function loadDashboard(){
 function renderStats(progress, certs){
   const courseIds = new Set(progress.map(p => p.lessons?.course_id).filter(Boolean));
   const lessonsDone = progress.filter(p => p.completed).length;
+  try { LNE_UNIVERSE.render(document.getElementById('universeCard'), { courses: courseIds.size, lessons: lessonsDone, certs: certs.length }); } catch(e){}
 
   const stats = document.getElementById('statsRow');
   stats.innerHTML = `
