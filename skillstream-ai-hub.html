@@ -41,6 +41,9 @@
     flex:1; background:#fff; border:none; padding:15px 8px; border-radius:14px;
     font-size:17px; font-weight:700; color:var(--ink); cursor:pointer; box-shadow:var(--shadow-soft);
   }
+  a.tab-btn{display:block; text-align:center; text-decoration:none; box-sizing:border-box;}
+  .tab-btn{min-width:calc(50% - 8px);}
+  .grp-h{font-size:13px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--ink); opacity:.65; margin:4px 2px 8px;}
   .tab-btn.active{background:var(--ink); color:var(--gold-light); box-shadow:var(--shadow-card);}
 
   .tool-panel{display:none;}
@@ -259,23 +262,33 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
     <h3>🔮 Future Architect</h3>
     <div class="desc" style="margin-bottom:0;">Learn to understand change, spot opportunities, compare possible futures, and plan and test the future you want.</div>
   </a>
+  <div class="grp-h">AI Learning</div>
   <div class="tabs">
     <button class="tab-btn active" id="tabTeacherBtn" onclick="switchTab('teacher')">🧑‍🏫 AI Teacher</button>
     <button class="tab-btn" id="tabAskBtn" onclick="switchTab('ask')">Ask & Explain</button>
-    <button class="tab-btn" id="tabQuizBtn" onclick="switchTab('quiz')">📝 Quiz</button>
-  </div>
-  <div class="tabs">
-    <button class="tab-btn" id="tabLevelBtn" onclick="switchTab('level')">🎯 Test Your Level</button>
     <button class="tab-btn" id="tabSummaryBtn" onclick="switchTab('summary')">Summarize</button>
     <button class="tab-btn" id="tabTranslateBtn" onclick="switchTab('translate')">Translate</button>
+    <button class="tab-btn" id="tabClassroomBtn" onclick="switchTab('classroom')">🏫 AI Classroom</button>
   </div>
+  <div class="grp-h">Test & Improve</div>
+  <div class="tabs">
+    <button class="tab-btn" id="tabQuizBtn" onclick="switchTab('quiz')">📝 Quiz</button>
+    <button class="tab-btn" id="tabLevelBtn" onclick="switchTab('level')">🎯 Test Your Level</button>
+  </div>
+  <div class="grp-h">Plan & Organize</div>
   <div class="tabs">
     <button class="tab-btn" id="tabPlanBtn" onclick="switchTab('plan')">Study Plan</button>
     <button class="tab-btn" id="tabHomeworkBtn" onclick="switchTab('homework')">Homework Helper</button>
-    <button class="tab-btn" id="tabCareerBtn" onclick="switchTab('career')">Career Coach</button>
+    <a class="tab-btn" href="skillstream-engine.html">My Learning</a>
   </div>
+  <div class="grp-h">Build Your Future</div>
   <div class="tabs">
-    <button class="tab-btn" id="tabClassroomBtn" onclick="switchTab('classroom')" style="flex:1;">🏫 AI Classroom</button>
+    <button class="tab-btn" id="tabCareerBtn" onclick="switchTab('career')">Career Coach</button>
+    <a class="tab-btn" href="skillstream-opportunities.html">Opportunities</a>
+  </div>
+  <div class="grp-h">History</div>
+  <div class="tabs">
+    <a class="tab-btn" href="skillstream-ai-history.html">AI History</a>
   </div>
 
   <!-- AI Teacher (ongoing chat) -->
@@ -576,6 +589,7 @@ function switchTab(tab){
   panels.forEach(p => {
     document.getElementById(p + 'Panel').classList.toggle('active', p === tab);
   });
+  document.getElementById(tab + 'Panel').scrollIntoView({behavior:'smooth', block:'nearest'});
   document.getElementById('tabTeacherBtn').classList.toggle('active', tab === 'teacher');
   document.getElementById('tabAskBtn').classList.toggle('active', tab === 'ask');
   document.getElementById('tabSummaryBtn').classList.toggle('active', tab === 'summary');
