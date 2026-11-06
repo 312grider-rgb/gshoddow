@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/lne-helpers.js"></script>
+<script src="js/lne-math.js"></script>
 <script src="js/lne-board.js"></script>
 <style>
   :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; --sage:#6B8F71; }
@@ -157,6 +158,7 @@
       <textarea id="aiTopic" maxlength="300" aria-label="What should the AI draw or write?" placeholder="What should the AI draw or write? e.g. a right triangle with its sides labelled"></textarea>
       <div class="row"><select id="aiMode" aria-label="AI mode" style="width:auto; flex:1; min-width:130px"><option value="draw">Draw</option><option value="write">Write</option><option value="both">Draw and write</option></select><button class="act main" id="aiGo" type="button">Ask the AI</button></div>
       <div class="msg" id="aiMsg" role="status"></div>
+      <p class="hint" style="margin:0 0 6px">Maths you type, such as 2x + 3 = 11 or 20% of 150, is solved on your phone, exactly, with no AI request.</p>
       <p class="hint" style="margin:0">Each AI answer uses one of your AI requests for today. While you record, it appears on the board at that moment. Write and Draw-and-write also add text for your students, which you can edit in the scene list.</p>
     </div>
 
@@ -689,7 +691,16 @@ $('aiGo').onclick = async () => {
   if(!cur) return;
   const topic = $('aiTopic').value.trim(), mode = $('aiMode').value;
   if(topic.length < 3){ say('aiMsg', T('Please write what you want drawn or written (at least 3 letters).'), false); return; }
-  aiDiscard(); const go = $('aiGo'); go.disabled = true; say('aiMsg', T('The AI is drawing…'), true);
+  aiDiscard();
+  if(mode !== 'draw' && window.LNE_MATH){      // maths typed in: solve it here, exactly, with no AI request
+    const ms = LNE_MATH.solve(topic, { check:T('Check'), none:T('No solution'), every:T('Every number is a solution'), div0:T('Cannot divide by zero') });
+    if(ms){
+      const rg0 = freeRegion(), raw = JSON.stringify({ say:ms.say, items:ms.lines.map(l => ({ t:'text', s:l.s.slice(0, 60), size:28, c:l.c })) });
+      const its = B.parseDrawing(raw, W, H, rg0, { stack:true });
+      if(its){ aiPrev = its; aiPrevSay = ms.say; aiShowAsk(true); say('aiMsg', T('Solved on your phone, exactly. No AI request used. Add it, or discard it.'), true); redraw(); $('aiAskRow').scrollIntoView({ block:'nearest' }); return; }
+    }
+  }
+  const go = $('aiGo'); go.disabled = true; say('aiMsg', T('The AI is drawing…'), true);
   const myCur = cur;
   try {
     const rg = freeRegion();
