@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<script src="js/lne-today.js"></script>
 <script src="js/lne-helpers.js"></script>
 <script src="js/ai-history.js"></script>
 <script src="js/incentives.js?v=2"></script>
@@ -227,6 +228,7 @@
 </div>
 
 <div class="wrap">
+  <div id="todayCard"></div>
   <div class="stats-row" id="statsRow">
     <div class="stat"><div class="val">–</div><div class="lbl">Courses Started</div></div>
     <div class="stat"><div class="val">–</div><div class="lbl">Lessons Done</div></div>
@@ -394,6 +396,7 @@ async function initAuth(){
   { const gn = greetName(profile?.full_name); document.getElementById('greeting').textContent = 'Welcome back' + (gn ? ', ' + gn : ''); }
 
   loadDashboard();
+  try{ LNE_TODAY.mount({el:document.getElementById('todayCard'), sb:sb, user:currentUser, role:'student'}); }catch(e){}
   loadStreak();
   loadLiveNow();
   loadTeacherSpaces();
