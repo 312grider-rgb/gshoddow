@@ -34,7 +34,7 @@
     st.textContent =
       '.ln-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;border-top:1px solid #E9E2D2;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around}' +
       '.ln-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:#6B6558;font-size:10.5px;font-weight:600;font-family:inherit;background:none;border:none;padding:4px 8px;border-radius:10px;cursor:pointer;text-decoration:none}' +
-      '.ln-nav-item{flex:1 1 0;min-width:0;padding-left:2px;padding-right:2px}' +
+      '.ln-nav-item{flex:1 1 0;min-width:0;padding-left:1px;padding-right:1px;font-size:10px}' +
       '.ln-nav-item .ln-nav-l{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
       '.ln-nav-item .ln-nav-icon{display:flex;line-height:0}' +
       '.ln-nav-item.active{color:#141F38}' +
@@ -49,6 +49,9 @@
 
   // Five places, the same for everyone: Home · Learn (Teach for teachers) · AI · Community · Profile.
   // Learn, Community and Profile are hub pages that group the existing pages (see js/hubs.js).
+  // Arabic 'Profile' is too wide for a small tab; this short form is used only on the tab bar.
+  function navText(label){ try { if (label === 'Profile' && localStorage.language === 'ar') return 'ملفي'; } catch (e) {} return label; }
+
   var LEARNER_ITEMS = [
     { icon: ICON.home,   label: 'Home',      href: 'skillstream-dashboard.html' },
     { icon: ICON.book,   label: 'Learn',     href: 'skillstream-hub-learn.html' },
@@ -93,7 +96,7 @@
       var on = item.href === current || (grp && grp.indexOf(current) >= 0);
       btn.className = 'ln-nav-item' + (on ? ' active' : '');
       if (on) btn.setAttribute('aria-current', 'page');
-      btn.innerHTML = '<span class="ln-nav-icon">' + item.icon + '</span><span class="ln-nav-l">' + item.label + '</span>';
+      btn.innerHTML = '<span class="ln-nav-icon">' + item.icon + '</span><span class="ln-nav-l">' + navText(item.label) + '</span>';
       nav.appendChild(btn);
     });
     document.body.appendChild(nav);

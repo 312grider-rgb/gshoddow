@@ -15,6 +15,8 @@
   var root = document.documentElement;
   root.setAttribute('lang', lang);
   root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+  // The Learning Universe look (css/universe.css) is added here so every page gets it without editing each page.
+  try { if (!document.getElementById('lneUniverseCss')) { var uv = document.createElement('link'); uv.id = 'lneUniverseCss'; uv.rel = 'stylesheet'; uv.href = 'css/universe.css?v=1'; (document.head || root).appendChild(uv); } } catch (e) {}
   // The page is already in the chosen language: stop the browser's own auto-translate (Chrome) from re-translating it.
   root.setAttribute('translate', 'no');
   if (lang !== 'en') {
