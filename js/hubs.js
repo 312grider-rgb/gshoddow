@@ -86,13 +86,28 @@
             L('chat', 'My AI history', 'Your past AI answers and plans', 'skillstream-ai-history.html')
           ] },
           { title: 'My family', links: [
-            L('user', 'My family', 'Link with a parent or guardian', 'skillstream-family.html')
+            L('user', 'My family', 'Link with a parent or guardian', 'skillstream-family.html'),
+            L('people', 'Parent view', 'Follow the progress of a child you care for', 'skillstream-parent-home.html?as=parent')
           ] },
           { title: 'Account', links: [
             L('settings', 'Settings', 'Language, text size and your account', 'skillstream-settings.html'),
             L('star', 'Plans and pricing', 'See the plans', 'skillstream-pricing.html'),
             L('chat', 'Send feedback', 'Tell us what to improve', 'skillstream-feedback.html'),
             L('teach', 'Become a teacher', 'Apply to teach on the platform', 'skillstream-teach-apply.html', 'student')
+          ] }
+        ]
+      },
+      parent: {
+        title: 'Profile', intro: 'Your account and the learners you follow.',
+        sections: [
+          { title: 'Learners', links: [
+            L('people', 'Learners I follow', 'See a short progress summary', 'skillstream-family.html'),
+            L('user', 'Parent home', 'Your overview', 'skillstream-parent-home.html')
+          ] },
+          { title: 'Account', links: [
+            L('settings', 'Settings', 'Language, text size and your account', 'skillstream-settings.html'),
+            L('chat', 'Send feedback', 'Tell us what to improve', 'skillstream-feedback.html'),
+            L('book', 'Learner view', 'Switch to the learner view', 'skillstream-parent-home.html?as=learner')
           ] }
         ]
       }
@@ -124,7 +139,8 @@
 
   function render(key, role) {
     css();
-    var def = pick(key, role === 'teacher' ? 'teacher' : 'student'); if (!def) return;
+    var parentView = false; try { parentView = role !== 'teacher' && localStorage.getItem('lne_view') === 'parent'; } catch (e) {}
+    var def = pick(key, role === 'teacher' ? 'teacher' : (parentView && HUBS[key] && HUBS[key].parent ? 'parent' : 'student')); if (!def) return;
     var icons = window.LNE_ICONS || {};
     var root = document.getElementById('hubRoot'); if (!root) return;
     root.textContent = '';

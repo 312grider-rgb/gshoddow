@@ -67,6 +67,14 @@
     { icon: ICON.user,   label: 'Profile',   href: 'skillstream-hub-profile.html' }
   ];
 
+  var PARENT_ITEMS = [
+    { icon: ICON.home,   label: 'Home',      href: 'skillstream-parent-home.html' },
+    { icon: ICON.people, label: 'Learners',  href: 'skillstream-family.html' },
+    { icon: ICON.user,   label: 'Profile',   href: 'skillstream-hub-profile.html' }
+  ];
+  // The parent view is a display choice kept on this phone (and in the account); what a parent can see is still decided by the database.
+  function isParentView() { try { return localStorage.getItem('lne_view') === 'parent'; } catch (e) { return false; } }
+
   // Which pages belong under which tab (so the right tab is highlighted on every page)
   var GROUPS = {
     'skillstream-hub-learn.html': ['skillstream-hub-learn.html', 'skillstream-courses.html', 'skillstream-self-paced.html', 'skillstream-academic.html', 'skillstream-classrooms.html',
@@ -93,7 +101,8 @@
       var btn = document.createElement('a');
       btn.href = item.href;
       var grp = item.href && GROUPS[item.href];
-      var on = item.href === current || (grp && grp.indexOf(current) >= 0);
+      var exact = items.some(function (x) { return x.href === current; });
+    var on = item.href === current || (!exact && grp && grp.indexOf(current) >= 0);
       btn.className = 'ln-nav-item' + (on ? ' active' : '');
       if (on) btn.setAttribute('aria-current', 'page');
       btn.innerHTML = '<span class="ln-nav-icon">' + item.icon + '</span><span class="ln-nav-l">' + navText(item.label) + '</span>';
@@ -114,7 +123,7 @@
     // On other pages, use the role this phone saw last time (saved below), so a teacher keeps the teacher tabs everywhere.
     var savedRole = ''; try { savedRole = localStorage.getItem('lne_role') || ''; } catch (e) {}
     function remember(role) { try { if (role) localStorage.setItem('lne_role', role === 'teacher' ? 'teacher' : 'student'); } catch (e) {} }
-    var guessedItems = (/teacher/i.test(fname) || savedRole === 'teacher') ? TEACHER_ITEMS : LEARNER_ITEMS;
+    var guessedItems = (/teacher/i.test(fname) || savedRole === 'teacher') ? TEACHER_ITEMS : (isParentView() ? PARENT_ITEMS : LEARNER_ITEMS);
     render(guessedItems);
 
     // If SSAuth IS present, trust the real role once it resolves, in case
@@ -124,7 +133,7 @@
         var user = window.SSAuth.currentUser && window.SSAuth.currentUser();
         if (!user) return;
         remember(user.role);
-        var correctItems = user.role === 'teacher' ? TEACHER_ITEMS : LEARNER_ITEMS;
+        var correctItems = user.role === 'teacher' ? TEACHER_ITEMS : (isParentView() ? PARENT_ITEMS : LEARNER_ITEMS);
         if (correctItems !== guessedItems) {
           var old = document.querySelector('.ln-bottom-nav');
           if (old) old.remove();
@@ -144,7 +153,7 @@
         var profile = window.currentProfile;
         if (!profile || !profile.role) return;
         remember(profile.role);
-        var correctItems = profile.role === 'teacher' ? TEACHER_ITEMS : LEARNER_ITEMS;
+        var correctItems = profile.role === 'teacher' ? TEACHER_ITEMS : (isParentView() ? PARENT_ITEMS : LEARNER_ITEMS);
         if (correctItems !== guessedItems) {
           var old = document.querySelector('.ln-bottom-nav');
           if (old) old.remove();

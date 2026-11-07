@@ -338,13 +338,13 @@
   function stackLines(items, W, region) {
     var lines = items.filter(function (i) { return i.t === 'text'; });
     if (!lines.length) return null;
-    var top = region[1] + 24, bottom = region[3] - 14, sc, placed;
+    var top = region[1] + 16, bottom = region[3] - 14, sc, placed;
     for (sc = 1; sc >= 0.55; sc -= 0.15) {
       var y = top; placed = [];
       for (var i = 0; i < lines.length; i++) {
-        var it = lines[i]; it.x = 40; it.a = 'l'; it.w = W - 80; it.size = Math.max(14, Math.round(Math.min(it.size || 26, 30) * sc)); it.y = y;
+        var it = lines[i]; it.x = 28; it.a = 'l'; it.w = W - 56; it.size = Math.max(13, Math.round(Math.min(it.size || 20, 22) * sc)); it.y = y;
         var b = bbox(it, W); if (b[3] > bottom) break;
-        placed.push(it); y = b[3] + Math.round(16 * sc);
+        placed.push(it); y = b[3] + Math.round(10 * sc);
       }
       if (placed.length === lines.length) break;
     }
