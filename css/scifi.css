@@ -237,3 +237,10 @@ html[data-comfort="calm"] body::after,html[data-comfort="calm"] header.top::afte
 html[data-comfort="calm"] .lne-enter{display:none}
 html[data-comfort="calm"] *{scroll-behavior:auto!important}
 html #lneComfort{position:static;display:block;margin:0 auto 18px;z-index:1;font:600 12px/1 system-ui,sans-serif;padding:5px 8px;border-radius:999px;border:1px solid rgba(228,197,131,.6);background:#F2EEE2;color:#141F38;max-width:110px;min-height:40px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+
+/* ---- artwork banners (js/lne-world.js fills them; empty and invisible until a picture loads) ---- */
+.lne-art{position:relative;border-radius:16px;overflow:hidden;margin:0 0 14px;border:1px solid rgba(228,197,131,.55);background:#101C62;
+  box-shadow:0 10px 26px rgba(3,6,36,.42),0 0 0 1px rgba(228,197,131,.10)}
+.lne-art:not([data-done]){min-height:0;border:0;box-shadow:none;background:none}
+.lne-art img{width:100%;height:100%;object-fit:cover;display:block}
+.lne-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(12,21,68,0) 55%,rgba(12,21,68,.55) 100%)}
