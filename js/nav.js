@@ -122,7 +122,11 @@
     var fname = currentFile();
     // On other pages, use the role this phone saw last time (saved below), so a teacher keeps the teacher tabs everywhere.
     var savedRole = ''; try { savedRole = localStorage.getItem('lne_role') || ''; } catch (e) {}
-    function remember(role) { try { if (role) localStorage.setItem('lne_role', role === 'teacher' ? 'teacher' : 'student'); } catch (e) {} }
+    function isT(role) { return role === 'teacher' || role === 'both' || (role === 'admin' && savedRole === 'teacher'); }
+    function remember(role) { try {
+      if (role === 'admin') { if (/teacher-dashboard/i.test(fname)) { localStorage.setItem('lne_role', 'teacher'); savedRole = 'teacher'; } else if (/skillstream-dashboard/i.test(fname)) { localStorage.setItem('lne_role', 'student'); savedRole = 'student'; } return; }
+      if (role) localStorage.setItem('lne_role', isT(role) ? 'teacher' : 'student');
+    } catch (e) {} }
     var guessedItems = (/teacher/i.test(fname) || savedRole === 'teacher') ? TEACHER_ITEMS : (isParentView() ? PARENT_ITEMS : LEARNER_ITEMS);
     render(guessedItems);
 
@@ -133,7 +137,7 @@
         var user = window.SSAuth.currentUser && window.SSAuth.currentUser();
         if (!user) return;
         remember(user.role);
-        var correctItems = user.role === 'teacher' ? TEACHER_ITEMS : (isParentView() ? PARENT_ITEMS : LEARNER_ITEMS);
+        var correctItems = isT(user.role) ? TEACHER_ITEMS : (isParentView() ? PARENT_ITEMS : LEARNER_ITEMS);
         if (correctItems !== guessedItems) {
           var old = document.querySelector('.ln-bottom-nav');
           if (old) old.remove();
@@ -153,7 +157,7 @@
         var profile = window.currentProfile;
         if (!profile || !profile.role) return;
         remember(profile.role);
-        var correctItems = profile.role === 'teacher' ? TEACHER_ITEMS : (isParentView() ? PARENT_ITEMS : LEARNER_ITEMS);
+        var correctItems = isT(profile.role) ? TEACHER_ITEMS : (isParentView() ? PARENT_ITEMS : LEARNER_ITEMS);
         if (correctItems !== guessedItems) {
           var old = document.querySelector('.ln-bottom-nav');
           if (old) old.remove();
