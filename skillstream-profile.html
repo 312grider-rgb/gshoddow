@@ -133,7 +133,7 @@
       <label style="margin-top:8px; display:block;">Target (optional)</label>
       <input type="text" id="goalTarget" placeholder="e.g. Build a small project">
       <label style="margin-top:8px; display:block;">Deadline (optional)</label>
-      <input type="date" id="goalDeadline">
+      <input type="date" id="goalDeadline" aria-label="Deadline">
       <button class="btn-primary" style="margin-top:10px;" onclick="saveGoal()">Save Goal</button>
     </div>
   </div>
@@ -177,7 +177,7 @@
 
     <label>Profile Photo</label>
     <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px;">
-      <input type="file" id="avatarFile" accept="image/*" style="flex:1;" onchange="uploadAvatar()">
+      <input type="file" id="avatarFile" aria-label="Choose a profile photo" accept="image/*" style="flex:1;" onchange="uploadAvatar()">
     </div>
     <div id="avatarUploadStatus" style="font-size:14.5px; color:#8a8474; margin-bottom:10px;"></div>
     <input type="hidden" id="avatarUrl">
