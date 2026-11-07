@@ -73,3 +73,90 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+
+/* ---- contrast fixes found by the Stage 5 audit (each rule: the measured text colour on its real background, darkened just enough to reach 4.5:1; scoped to one page so other areas are untouched) ---- */
+html[data-page="index"] a#txt-aiBtn.btn{color:#8A6A1F!important}
+html[data-page="index"] div#featuredCourses.course-scroll div{color:#797466!important}
+html[data-page="index"] div#txt-featKicker.kicker{color:#8A6A1F!important}
+html[data-page="index"] div#txt-liveKicker.kicker{color:#8A6A1F!important}
+html[data-page="index"] div#txt-storyKicker.kicker{color:#8A6A1F!important}
+html[data-page="index"] div.kicker{color:#8A6A1F!important}
+html[data-page="index"] div.loading{color:#746F61!important}
+html[data-page="index"] div.tag{color:#7B6533!important}
+html[data-page="index"] small#txt-eyebrow{color:#8A6A1F!important}
+html[data-page="skillstream-academic"] a.level-card.elementary p{color:#797466!important}
+html[data-page="skillstream-academic"] a.level-card.high p{color:#797466!important}
+html[data-page="skillstream-academic"] a.level-card.kg p{color:#797466!important}
+html[data-page="skillstream-academic"] a.level-card.middle p{color:#797466!important}
+html[data-page="skillstream-academic"] a.level-card.university p{color:#797466!important}
+html[data-page="skillstream-ai-hub"] div#teacherChatLog div{color:#79736B!important}
+html[data-page="skillstream-ai-hub"] div.desc{color:#797466!important}
+html[data-page="skillstream-ai-hub"] div.kicker{color:#8A6A1F!important}
+html[data-page="skillstream-ai-hub"] p.desc{color:#797466!important}
+html[data-page="skillstream-calendar"] div.group-label{color:#756F62!important}
+html[data-page="skillstream-calendar"] div.legend span{color:#756F62!important}
+html[data-page="skillstream-calendar"] div.sub{color:#756F62!important}
+html[data-page="skillstream-challenges"] div.empty{color:#757575!important}
+html[data-page="skillstream-chess"] div.mode-card p{color:#797466!important}
+html[data-page="skillstream-classrooms"] div.group-label{color:#756F62!important}
+html[data-page="skillstream-classrooms"] div.sub{color:#756F62!important}
+html[data-page="skillstream-contact"] div.label{color:#746F61!important}
+html[data-page="skillstream-courses"] div.empty{color:#6F6F6F!important}
+html[data-page="skillstream-dashboard"] div.ai-title{color:#8A6A1F!important}
+html[data-page="skillstream-dashboard"] div.empty{color:#757575!important}
+html[data-page="skillstream-dashboard"] div.foot-copyright{color:#736D63!important}
+html[data-page="skillstream-dashboard"] div.foot-links.foot-links-meta a{color:#726E63!important}
+html[data-page="skillstream-dashboard"] div.journey-milestone{color:#757575!important}
+html[data-page="skillstream-dashboard"] div.lbl{color:#757575!important}
+html[data-page="skillstream-dashboard"] div.na-label{color:#7D6733!important}
+html[data-page="skillstream-discoveries"] div.empty{color:#6F6F6F!important}
+html[data-page="skillstream-focus"] div.t-meta{color:#797466!important}
+html[data-page="skillstream-focus"] span.t-play{color:#8A6A1F!important}
+html[data-page="skillstream-home"] a.view-card p{color:#797466!important}
+html[data-page="skillstream-home"] a.view-card.suggested p{color:#797466!important}
+html[data-page="skillstream-home"] div.spotlight-empty{color:#797466!important}
+html[data-page="skillstream-leaderboard"] div.loading{color:#746E66!important}
+html[data-page="skillstream-library"] div.shelf-card p{color:#797466!important}
+html[data-page="skillstream-ludo"] div.mode-card p{color:#797466!important}
+html[data-page="skillstream-messages"] div.convo-preview{color:#797466!important}
+html[data-page="skillstream-messages"] div.empty{color:#746F61!important}
+html[data-page="skillstream-pricing"] div.muted{color:#6F6F6F!important}
+html[data-page="skillstream-profile"] div#goalView div{color:#757575!important}
+html[data-page="skillstream-profile"] div.lbl{color:#757575!important}
+html[data-page="skillstream-profile"] span.role-badge.student{color:#56725A!important}
+html[data-page="skillstream-recognition"] div.ai-title{color:#8A6A1F!important}
+html[data-page="skillstream-recognition"] div.empty{color:#757575!important}
+html[data-page="skillstream-recognition"] div.foot-copyright{color:#736D63!important}
+html[data-page="skillstream-recognition"] div.foot-links.foot-links-meta a{color:#726E63!important}
+html[data-page="skillstream-recognition"] div.journey-milestone{color:#757575!important}
+html[data-page="skillstream-recognition"] div.lbl{color:#757575!important}
+html[data-page="skillstream-recognition"] div.na-label{color:#7D6733!important}
+html[data-page="skillstream-self-paced"] div.empty{color:#797569!important}
+html[data-page="skillstream-self-paced"] span.icon{color:#746E66!important}
+html[data-page="skillstream-settings"] button#btnNewProfile{color:#8A6A1F!important}
+html[data-page="skillstream-settings"] div#descDarkMode.desc{color:#797466!important}
+html[data-page="skillstream-settings"] div#descEmail.desc{color:#797466!important}
+html[data-page="skillstream-settings"] div#descInApp.desc{color:#797466!important}
+html[data-page="skillstream-settings"] div#descLanguage.desc{color:#797466!important}
+html[data-page="skillstream-settings"] div#descNewProfile.desc{color:#797466!important}
+html[data-page="skillstream-settings"] div#descProfile.desc{color:#797466!important}
+html[data-page="skillstream-settings"] div#langNote.lang-note{color:#746F61!important}
+html[data-page="skillstream-settings"] div.desc{color:#797466!important}
+html[data-page="skillstream-settings"] div.setting-row a{color:#8A6A1F!important}
+html[data-page="skillstream-showcase"] div.empty{color:#797466!important}
+html[data-page="skillstream-teacher-dashboard"] div.empty{color:#797466!important}
+html[data-page="skillstream-teacher-dashboard"] div.lbl{color:#797466!important}
+html[data-page="skillstream-teacher-dashboard"] div.sub{color:#797466!important}
+html[data-page="skillstream-teacher-dashboard"] footer.site-footer div{color:#746F61!important}
+html[data-page="skillstream-teachers-directory"] div.empty{color:#746E66!important}
+
+/* ---- small tap targets found by the audit ---- */
+html #lneLang{min-height:40px}
+html a.back-link,html a.banner-link,html a.link-btn,html a.journey-secondary,html a.home{display:inline-block;padding-top:9px;padding-bottom:9px}
+html[data-page="skillstream-profile"] select#gradeLevel{min-height:40px}
+
+/* ---- two sign-in pages put the text-size control beside the card instead of under it ---- */
+html[data-page="skillstream-forgot-password"] body,html[data-page="skillstream-reset-password"] body{flex-direction:column}
+html[data-page="skillstream-about"] .mission-note,html[data-page="skillstream-academic"] .mission-note{background:#4F7A57!important}
+html[data-page="skillstream-about"] .mission-note .kicker,html[data-page="skillstream-academic"] .mission-note .kicker{color:#F1FAF3!important}
+html .foot-links a,html header.top>a,html footer.site-footer a,html .switch-link a,html .setting-row a{display:inline-block;padding-top:9px;padding-bottom:9px}
