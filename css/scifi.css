@@ -1,246 +1,178 @@
 /* ==========================================================================
-   Learning Never Ends - "Deep Space Station" layer (Sci-fi world, stage 1)
-   Loaded on every page by js/i18n.js after universe.css. Looks only: no layout of page
-   content, no behaviour. Everything is CSS (no images, no fonts, no script), so it costs
-   about 5 KB and nothing on a slow connection. Motion is slow, uses only opacity/transform,
-   and is switched off for people who ask for reduced motion.
-   Palette: void #060B1A, hull #0B1430, plasma cyan #5EE0F0, stellar gold #E4C583, aurora violet #8F7BFF.
-   Cards stay light (ivory glass) so every existing text colour keeps its contrast.
+   Learning Never Ends - "Silver and Cream" (the colours of the robot guide)
+   Pearl-silver and warm cream surfaces, a deep visor-navy header and tab bar, gold like the cap tassel,
+   and one cool cyan glow like the robot's eyes. Quiet and still: no moving background, no neon, no pure white.
+   Loaded on every page by js/i18n.js after universe.css. Looks only; no layout or behaviour.
    ========================================================================== */
 html:root{
-  --void:#060B1A; --hull:#0B1430; --plasma:#5EE0F0; --plasma-text:#0E6E80; --aurora:#8F7BFF; --stellar:#E4C583;
-  --glow-c:0 0 0 1px rgba(94,224,240,.35),0 0 18px rgba(94,224,240,.18);
-  --glow-g:0 0 0 1px rgba(228,197,131,.45),0 0 18px rgba(228,197,131,.16);
+  --silver:#E8ECF3; --cream:#F3EFE6; --paper:#FBF9F4; --edge:#D3D9E4; --visor:#0E4A60; --visor-2:#135A70;
+  --gold:#C9A653; --gold-text:#8A6A1F; --eye:#12A9E0; --ink:#141F38;
 }
-/* ---- the sky: a luminous night of royal blue and violet, with a glowing planet horizon (inspired by the brand artwork) ---- */
-html body{background-color:#0C1544;color-scheme:light}
-html body::before{
-  content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+/* ---- the page: silver light at the top melting into warm cream ---- */
+html body{background-color:#F0EDE4;color-scheme:light}
+html body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
   background:
-    radial-gradient(circle 120vw at 50% 130%,#1A2C78 0 56%,#C9AE72 56.4%,#5E7CC4 57.6%,rgba(70,100,190,.28) 60%,transparent 68%),
-    radial-gradient(ellipse 70% 42% at 88% 4%,rgba(120,100,210,.40),transparent 70%),
-    radial-gradient(ellipse 60% 40% at 6% 34%,rgba(50,100,200,.26),transparent 72%),
-    linear-gradient(180deg,#0C1544 0%,#121B5C 50%,#0C1544 100%);
-}
-html body::after{
-  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background-image:
-    radial-gradient(1.2px 1.2px at 6% 12%,#fff,transparent),radial-gradient(1px 1px at 14% 61%,rgba(255,255,255,.8),transparent),
-    radial-gradient(1.6px 1.6px at 23% 33%,#E4C583,transparent),radial-gradient(1px 1px at 31% 87%,rgba(255,255,255,.7),transparent),
-    radial-gradient(1.3px 1.3px at 42% 9%,rgba(255,255,255,.9),transparent),radial-gradient(1px 1px at 47% 52%,rgba(94,224,240,.9),transparent),
-    radial-gradient(1.5px 1.5px at 58% 74%,#fff,transparent),radial-gradient(1px 1px at 64% 21%,rgba(255,255,255,.8),transparent),
-    radial-gradient(1.2px 1.2px at 73% 44%,#E4C583,transparent),radial-gradient(1px 1px at 81% 91%,rgba(255,255,255,.7),transparent),
-    radial-gradient(1.4px 1.4px at 88% 27%,#fff,transparent),radial-gradient(1px 1px at 94% 66%,rgba(94,224,240,.8),transparent),
-    radial-gradient(1px 1px at 37% 40%,rgba(255,255,255,.6),transparent),radial-gradient(1px 1px at 76% 8%,rgba(255,255,255,.7),transparent);
-  animation:lne-twinkle 14s ease-in-out infinite alternate;
-}
-@keyframes lne-twinkle{from{opacity:.7}to{opacity:.95}}
+    radial-gradient(ellipse 75% 38% at 85% 0%,rgba(18,169,224,.10),transparent 70%),
+    radial-gradient(ellipse 70% 40% at 0% 45%,rgba(160,175,205,.18),transparent 72%),
+    linear-gradient(180deg,#E7EBF3 0%,#F1EEE5 45%,#EDEAE0 100%)}
+html body::after{display:none}
+html body{line-height:1.6}
+html h1,html h2,html h3,html .big{font-family:'Fraunces',Georgia,'Times New Roman',serif;font-weight:600;letter-spacing:.1px}
 
-/* ---- panels: bright glass with a gold edge, like the cards in the artwork ---- */
-html .card,html .panel,html .view-card,html .hub-card,html .mode-card,html .teacher-card,html .convo-card,html .uv-card{
-  border-color:rgba(233,200,119,.75);
-  box-shadow:0 0 0 1px rgba(233,200,119,.25),0 10px 28px rgba(5,10,60,.45),0 0 24px rgba(120,160,255,.28);
-}
-html .view-card,html .hub-card,html a.card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-html .view-card:hover,html .hub-card:hover,html a.card:hover{transform:translateY(-2px);border-color:#E4C583;box-shadow:0 0 0 1px rgba(228,197,131,.6),0 0 28px rgba(228,197,131,.4),0 14px 34px rgba(5,10,60,.5)}
-html .view-card.suggested{border-color:#E4C583;box-shadow:0 0 0 1px rgba(228,197,131,.6),0 0 26px rgba(228,197,131,.35)}
-
-/* ---- header: a bright bridge display, blue to violet, ringed in gold light ---- */
+/* ---- header: a deep visor-navy band with a fine gold rule ---- */
 html header.top{position:relative;overflow:hidden;
   background-image:
-    radial-gradient(circle at calc(100% - 28px) 8px,transparent 92px,rgba(228,197,131,.55) 93px,transparent 96px),
-    radial-gradient(circle at calc(100% - 28px) 8px,transparent 130px,rgba(228,197,131,.28) 131px,transparent 134px),
+    radial-gradient(circle at calc(100% - 28px) 8px,transparent 92px,rgba(201,166,83,.45) 93px,transparent 95px),
+    radial-gradient(circle at calc(100% - 28px) 8px,transparent 130px,rgba(201,166,83,.20) 131px,transparent 133px),
     var(--uv-star),
-    linear-gradient(150deg,#16257A 0%,#2B2A8C 55%,#40308E 100%);
-  border-bottom:1px solid rgba(228,197,131,.7);box-shadow:0 1px 0 rgba(228,197,131,.25),0 6px 22px rgba(60,80,170,.3)}
-html header.top::after{
-  content:"";position:absolute;inset-inline-end:-70px;top:-70px;width:210px;height:210px;border-radius:50%;pointer-events:none;
-  border:1px solid rgba(228,197,131,.5);box-shadow:inset 0 0 40px rgba(150,180,255,.25),0 0 34px rgba(180,150,255,.35);
-  background:conic-gradient(from 0deg,rgba(228,197,131,0),rgba(228,197,131,.30),rgba(120,170,255,0) 55%,rgba(190,160,255,.28),rgba(228,197,131,0));
-  animation:lne-spin 48s linear infinite;
-}
+    linear-gradient(155deg,var(--visor) 0%,var(--visor-2) 100%);
+  border-bottom:1px solid rgba(201,166,83,.85);box-shadow:0 6px 18px rgba(15,24,48,.18)}
+html header.top::after{display:none}
+html header.top .eyebrow{letter-spacing:2.4px;color:#E4C583}
+
+/* ---- panels: soft paper with a silver edge and a gentle shadow ---- */
+html .card,html .panel,html .view-card,html .hub-card,html .mode-card,html .teacher-card,html .convo-card{
+  background-color:var(--paper);border:1px solid var(--edge);border-radius:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 6px 18px rgba(15,24,48,.08)}
+html .view-card,html .hub-card,html a.card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+html .view-card:hover,html .hub-card:hover,html a.card:hover{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,166,83,.55),0 12px 26px rgba(15,24,48,.14)}
+html .view-card.suggested{border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,166,83,.55),0 8px 22px rgba(15,24,48,.12)}
+html input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),html select,html textarea{background-color:#FFFEFB}
+/* dark accent cards (Learning Universe, Daily inspiration) use the visor navy */
+html .uv-sky{background-image:var(--uv-star),linear-gradient(160deg,var(--visor),var(--visor-2));border:1px solid rgba(201,166,83,.45);box-shadow:0 8px 22px rgba(15,24,48,.22)}
+html .lt-card{background:linear-gradient(135deg,var(--visor),var(--visor-2));border:1px solid rgba(201,166,83,.45);box-shadow:0 8px 22px rgba(15,24,48,.22)}
+
+/* ---- bottom navigation: visor navy, gold when open ---- */
+html .ln-bottom-nav{background:rgba(14,74,96,.97);border-top:1px solid rgba(201,166,83,.8);box-shadow:0 -6px 18px rgba(14,60,80,.22)}
+@media (min-width:900px){html .ln-bottom-nav{border:1px solid rgba(201,166,83,.7);border-bottom:0}}
+html .ln-nav-item{color:#C9D2E8}
+html .ln-nav-item+.ln-nav-item{box-shadow:inset 1px 0 0 rgba(201,166,83,.18)}
+html .ln-nav-item.active{color:#E4C583}
+html .ln-nav-item.active svg{filter:drop-shadow(0 0 4px rgba(228,197,131,.55))}
+
+/* ---- focus: the robot's eye cyan ---- */
+html :focus-visible{outline:3px solid var(--eye);outline-offset:2px}
+
+/* ---- small widgets at the bottom of the page ---- */
+html #lneSize button,html #lneLang select{background-color:#EEF1F6}
+html #lneSize,html #lneLang{box-shadow:0 1px 6px rgba(15,24,48,.15)}
+html #lneComfort{position:static;display:block;margin:0 auto 18px;z-index:1;font:600 12px/1 system-ui,sans-serif;padding:5px 8px;border-radius:999px;border:1px solid var(--edge);background:#EEF1F6;color:#141F38;max-width:110px;min-height:40px;box-shadow:0 1px 6px rgba(15,24,48,.15)}
+
+/* ---- comfort modes ---- */
+#lneTint{display:none;position:fixed;inset:0;z-index:2147482000;pointer-events:none;background:#F2C48A;opacity:.45;mix-blend-mode:multiply}
+html[data-comfort="night"] #lneTint{display:block}
+html[data-comfort="calm"] .lne-enter{display:none}
+html.lne-warping body>*{transition:opacity .2s ease;opacity:0}
+
+/* ---- welcome and sign-in screens wear the picture, softly dimmed so the cards stay easy to read ---- */
+html[data-page="skillstream-login"] body::before,html[data-page="skillstream-signup"] body::before{background:
+    linear-gradient(180deg,rgba(10,52,68,.35) 0%,rgba(10,52,68,.70) 62%,rgba(10,52,68,.85) 100%),url(art-welcome.webp) center top/cover no-repeat}
+
+/* ---- entering moment ---- */
+.lne-enter{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:none;
+  background:radial-gradient(ellipse at center,#135A70 0%,#0E4A60 75%);animation:lne-enter-out 1.4s ease forwards}
+.lne-enter-ring{width:76px;height:76px;border-radius:50%;border:2px solid rgba(18,169,224,.55);border-top-color:#E4C583;animation:lne-spin 1.2s linear infinite}
 @keyframes lne-spin{to{transform:rotate(360deg)}}
-html header.top .eyebrow{letter-spacing:2.4px;color:#E4C583;text-shadow:0 0 12px rgba(228,197,131,.55)}
-html header.top h1{text-shadow:0 0 22px rgba(160,190,255,.5)}
+.lne-enter-t{color:#E4C583;font:700 13px/1 Inter,system-ui,sans-serif;letter-spacing:3px;text-transform:uppercase}
+@keyframes lne-enter-out{0%,55%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.lne-enter{display:none}html.lne-warping body>*{transition:none}}
 
-/* ---- bottom navigation: deep glass dock with gold light; the open page glows ---- */
-html .ln-bottom-nav{background:rgba(8,14,70,.94);border-top:1px solid rgba(228,197,131,.75);box-shadow:0 -6px 28px rgba(228,197,131,.18)}
-@media (min-width:900px){html .ln-bottom-nav{border:1px solid rgba(228,197,131,.7);border-bottom:0}}
-html .ln-nav-item{color:#C3CEFF}
-html .ln-nav-item+.ln-nav-item{box-shadow:inset 1px 0 0 rgba(228,197,131,.18)}
-html .ln-nav-item.active{color:#E4C583;text-shadow:0 0 12px rgba(228,197,131,.7)}
-html .ln-nav-item.active svg{filter:drop-shadow(0 0 5px rgba(228,197,131,.8))}
+/* ---- Daily mission card on the "Welcome back" pages ---- */
+.lne-mission{display:flex;gap:14px;align-items:center;text-decoration:none;color:#141F38;margin:0 0 14px;padding:16px;border-radius:16px;
+  background:linear-gradient(135deg,#FBF9F4,#EEF1F6);border:1px solid rgba(201,166,83,.75);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 6px 18px rgba(15,24,48,.10)}
+.lne-mission .lm-ic{font-size:34px;line-height:1;flex:none}
+.lne-mission .lm-tx{min-width:0;flex:1}
+.lne-mission h3{margin:0 0 4px;font-size:18px;color:#141F38!important}
+.lne-mission p{margin:0;font-size:13.5px;line-height:1.5;color:#5C5648!important}
+.lne-mission .lm-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:baseline;margin-top:8px;font-size:13px;color:#5C5648}
+.lne-mission .lm-meta b{font-family:'Fraunces',Georgia,serif;font-size:18px;color:#141F38}
+.lne-mission .lm-go{margin-inline-start:auto;font-weight:700;color:#7A5C16}
 
-/* ---- buttons and focus: energy rather than flat colour ---- */
-html .btn:not(.alt):not(.del),html button.primary,html .primary-btn{box-shadow:0 0 0 1px rgba(94,224,240,.4),0 4px 16px rgba(94,224,240,.22)}
-html :focus-visible{outline:3px solid var(--plasma);outline-offset:2px;box-shadow:0 0 0 5px #0B1430}
+/* ==== Soft Cosmic: still, quiet and comfortable. No horizon glow, no drifting or twinkling, no spinning ring, no scan beam. ==== */
+html body::before{background:
+    radial-gradient(ellipse 70% 42% at 88% 4%,var(--t-ga),transparent 70%),
+    radial-gradient(ellipse 60% 40% at 6% 38%,var(--t-gb),transparent 72%),
+    linear-gradient(180deg,var(--t-0) 0%,var(--t-1) 55%,var(--t-0) 100%)}
+html body::after{animation:none;opacity:.55}
+html header.top::after{animation:none;opacity:.6}
+html .lne-beam{display:none}
+html .view-card,html .hub-card,html .card,html .panel{box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 8px 22px rgba(10,8,40,.36),0 0 0 1px rgba(228,197,131,.16)}
+/* welcome and sign-in screens wear the picture, softly dimmed so the cards stay easy to read */
+html[data-page="skillstream-login"] body::before,html[data-page="skillstream-signup"] body::before{background:
+    linear-gradient(180deg,rgba(31,28,80,.40) 0%,rgba(31,28,80,.72) 62%,rgba(31,28,80,.86) 100%),url(art-welcome.webp) center top/cover no-repeat}
+html[data-page="skillstream-profile"] button.btn.outline{color:#A8402A!important}
 
-/* ---- small widgets (text size, language) sit on the dark sky ---- */
-html #lneSize,html #lneLang{box-shadow:0 0 0 1px rgba(94,224,240,.4),0 4px 16px rgba(0,0,0,.4)}
+/* ---- artwork banners (js/lne-world.js fills them; empty and invisible until a picture loads) ---- */
+.lne-art{position:relative;border-radius:16px;overflow:hidden;margin:0 0 14px;border:1px solid rgba(201,166,83,.7);background:#135A70;
+  box-shadow:0 8px 20px rgba(14,60,80,.20)}
+.lne-art:not([data-done]){min-height:0;border:0;box-shadow:none;background:none}
+.lne-art img{width:100%;height:100%;object-fit:cover;display:block}
+.lne-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(10,52,68,0) 55%,rgba(10,52,68,.45) 100%)}
 
-@media (prefers-reduced-motion:reduce){
-  html body::after,html header.top::after{animation:none!important}
-  html .view-card,html .hub-card,html a.card{transition:none}
-}
-/* ---- text that sits directly on the dark sky (generated from the contrast check, page by page) ---- */
-html[data-page="index"] div#txt-liveKicker.kicker{color:#E4C583!important}
-html[data-page="index"] h2#txt-liveTitle{color:#E6ECFF!important}
-html[data-page="index"] div.loading{color:#E6ECFF!important}
-html[data-page="skillstream-about"] p.lead{color:#E6ECFF!important}
-html[data-page="skillstream-about"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-academic"] div.section-title{color:#E4C583!important}
-html[data-page="skillstream-ai-hub"] div.grp-h{color:#E6ECFF!important}
-html[data-page="skillstream-ai-hub"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-calendar"] div.page h1{color:#E6ECFF!important}
-html[data-page="skillstream-calendar"] div.sub{color:#E6ECFF!important}
-html[data-page="skillstream-calendar"] div.legend span{color:#E6ECFF!important}
-html[data-page="skillstream-calendar"] div#monthLabel.label{color:#E6ECFF!important}
-html[data-page="skillstream-calendar"] div.group-label{color:#E6ECFF!important}
-html[data-page="skillstream-challenges"] footer.site-footer a{color:#8FE3F0!important}
-html[data-page="skillstream-chess"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-classrooms"] div#listView h1{color:#E6ECFF!important}
-html[data-page="skillstream-classrooms"] div.sub{color:#E6ECFF!important}
-html[data-page="skillstream-classrooms"] div.sub a{color:#8FE3F0!important}
-html[data-page="skillstream-classrooms"] div.group-label{color:#E6ECFF!important}
-html[data-page="skillstream-community"] div.row h2{color:#E6ECFF!important}
-html[data-page="skillstream-community"] div.empty{color:#E6ECFF!important}
-html[data-page="skillstream-contact"] span.icon{color:#E6ECFF!important}
-html[data-page="skillstream-contact"] div.label{color:#E6ECFF!important}
-html[data-page="skillstream-contact"] div.value a{color:#8FE3F0!important}
-html[data-page="skillstream-contact"] div.value{color:#E6ECFF!important}
-html[data-page="skillstream-contact"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-courses"] div.empty{color:#E6ECFF!important}
-html[data-page="skillstream-courses"] div.display{color:#E6ECFF!important}
-html[data-page="skillstream-dashboard"] div.section-title{color:#E4C583!important}
-html[data-page="skillstream-dashboard"] div.foot-links a{color:#8FE3F0!important}
-html[data-page="skillstream-dashboard"] div.foot-links.foot-links-meta a{color:#8FE3F0!important}
-html[data-page="skillstream-dashboard"] div.foot-copyright{color:#E6ECFF!important}
-html[data-page="skillstream-discoveries"] div.empty{color:#E6ECFF!important}
-html[data-page="skillstream-faq"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-focus"] div.section-title{color:#E4C583!important}
-html[data-page="skillstream-focus"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-future-architect"] span#saveState.save.mono{color:#E6ECFF!important}
-html[data-page="skillstream-future-architect"] h2.hero-h{color:#E6ECFF!important}
-html[data-page="skillstream-future-architect"] p.lede{color:#E6ECFF!important}
-html[data-page="skillstream-future-architect"] div.field label{color:#E6ECFF!important}
-html[data-page="skillstream-future-architect"] p.note{color:#E6ECFF!important}
-html[data-page="skillstream-future-architect"] h2.sec{color:#E6ECFF!important}
-html[data-page="skillstream-future-architect"] p.loop.mono{color:#E6ECFF!important}
-html[data-page="skillstream-future-architect"] p.q{color:#E6ECFF!important}
-html[data-page="skillstream-future-architect"] p.foot{color:#E6ECFF!important}
-html[data-page="skillstream-home"] div.section-title-home{color:#E4C583!important}
-html[data-page="skillstream-hub-community"] div.hub-h{color:#E6ECFF!important}
-html[data-page="skillstream-hub-learn"] div.hub-h{color:#E6ECFF!important}
-html[data-page="skillstream-hub-profile"] div.hub-h{color:#E6ECFF!important}
-html[data-page="skillstream-leaderboard"] div.loading{color:#E6ECFF!important}
-html[data-page="skillstream-leaderboard"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-library"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-ludo"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-messages"] div.sec-title{color:#E4C583!important}
-html[data-page="skillstream-messages"] div#privTitle.sec-title{color:#E4C583!important}
-html[data-page="skillstream-messages"] div.empty{color:#E6ECFF!important}
-html[data-page="skillstream-opportunities"] label.chk span{color:#E6ECFF!important}
-html[data-page="skillstream-opportunities"] div.empty{color:#E6ECFF!important}
-html[data-page="skillstream-pricing"] div.muted{color:#E6ECFF!important}
-html[data-page="skillstream-privacy"] div.wrap h2{color:#E6ECFF!important}
-html[data-page="skillstream-privacy"] div.wrap p{color:#E6ECFF!important}
-html[data-page="skillstream-privacy"] div.wrap li{color:#E6ECFF!important}
-html[data-page="skillstream-privacy"] div.wrap a{color:#8FE3F0!important}
-html[data-page="skillstream-privacy"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-profile"] div#goalTitle.section-title{color:#E4C583!important}
-html[data-page="skillstream-profile"] div.section-title{color:#E4C583!important}
-html[data-page="skillstream-recognition"] div.section-title{color:#E4C583!important}
-html[data-page="skillstream-recognition"] div.foot-links a{color:#8FE3F0!important}
-html[data-page="skillstream-recognition"] div.foot-links.foot-links-meta a{color:#8FE3F0!important}
-html[data-page="skillstream-recognition"] div.foot-copyright{color:#E6ECFF!important}
-html[data-page="skillstream-self-paced"] span.icon{color:#E6ECFF!important}
-html[data-page="skillstream-settings"] div#titleAppearance.section-title{color:#E4C583!important}
-html[data-page="skillstream-settings"] div.section-title{color:#E4C583!important}
-html[data-page="skillstream-settings"] div#titleLanguage.section-title{color:#E4C583!important}
-html[data-page="skillstream-settings"] div#langNote.lang-note{color:#E6ECFF!important}
-html[data-page="skillstream-settings"] div#titleNotifications.section-title{color:#E4C583!important}
-html[data-page="skillstream-settings"] div#titleAccount.section-title{color:#E4C583!important}
-html[data-page="skillstream-settings"] a#backLink.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-showcase"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-teacher-dashboard"] div.section-title{color:#E4C583!important}
-html[data-page="skillstream-teacher-dashboard"] div.foot-links a{color:#8FE3F0!important}
-html[data-page="skillstream-teacher-dashboard"] footer.site-footer div{color:#E6ECFF!important}
-html[data-page="skillstream-teachers-directory"] div.empty{color:#E6ECFF!important}
-html[data-page="skillstream-teachers-directory"] a.back-link{color:#8FE3F0!important}
-html[data-page="skillstream-terms"] div.wrap h2{color:#E6ECFF!important}
-html[data-page="skillstream-terms"] div.wrap p{color:#E6ECFF!important}
-html[data-page="skillstream-terms"] div.wrap li{color:#E6ECFF!important}
-html[data-page="skillstream-terms"] div.wrap a{color:#8FE3F0!important}
-html[data-page="skillstream-terms"] a.back-link{color:#8FE3F0!important}
+
+/* chess: the join row must not push the page sideways */
 html[data-page="skillstream-chess"] .join-row input{min-width:0;width:100%}
 
-/* ---- the living world (js/lne-world.js) ---- */
-.lne-beam{position:fixed;left:0;right:0;top:0;height:120px;z-index:0;pointer-events:none;opacity:.5;
-  background:linear-gradient(180deg,transparent,rgba(94,224,240,.07) 55%,rgba(94,224,240,.16) 92%,transparent);
-  transform:translateY(-130px);animation:lne-scan 11s linear infinite}
-@keyframes lne-scan{0%{transform:translateY(-130px)}100%{transform:translateY(110vh)}}
-.lne-enter{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:none;
-  background:radial-gradient(ellipse at center,#0B1430 0%,#060B1A 70%);animation:lne-enter-out 1.5s ease forwards}
-.lne-enter-ring{width:84px;height:84px;border-radius:50%;border:2px solid rgba(94,224,240,.6);border-top-color:#E4C583;box-shadow:0 0 30px rgba(94,224,240,.4);animation:lne-spin 1.1s linear infinite}
-.lne-enter-t{color:#E4C583;font:700 13px/1 Inter,system-ui,sans-serif;letter-spacing:3px;text-transform:uppercase;text-shadow:0 0 14px rgba(228,197,131,.6)}
-@keyframes lne-enter-out{0%,55%{opacity:1}100%{opacity:0}}
-html.lne-warping body>*:not(#lneWorld){transition:opacity .22s ease,transform .22s ease;opacity:0;transform:scale(1.05)}
-@media (prefers-reduced-motion:reduce){.lne-beam,.lne-enter{display:none}}
-html[data-page="skillstream-future-architect"] .qcard>span.mono.dim{color:#C3CEFF!important}
-
-/* ---- eye comfort for long sessions: warm paper instead of pure white, softer glow, calmer motion ---- */
-html .card,html .panel,html .view-card,html .hub-card,html .mode-card,html .teacher-card,html .convo-card{background-color:#F9F6EE}
-html input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html select,html textarea{background-color:#FAF8F1}
-html .btn.alt,html button.alt{background-color:#F9F6EE}
-html #lneSize button,html #lneLang select{background-color:#F2EEE2}
-html .lne-beam{display:none}
-html .view-card,html .hub-card,html .card,html .panel{box-shadow:0 0 0 1px rgba(228,197,131,.22),0 8px 22px rgba(4,8,40,.40)}
-/* eye comfort: muted text on warm paper, a little darker */
+/* ---- text a touch darker where the paper tones need it (generated from the contrast check) ---- */
+html[data-page="index"] small#txt-eyebrow{color:#7A5C16!important}
+html[data-page="index"] div#txt-liveKicker.kicker{color:#7A5C16!important}
+html[data-page="index"] div.loading{color:#5C5648!important}
+html[data-page="skillstream-academic"] div.section-title{color:#7A5C16!important}
 html[data-page="skillstream-ai-hub"] div.desc{color:#5C5648!important}
 html[data-page="skillstream-ai-hub"] p.desc{color:#5C5648!important}
 html[data-page="skillstream-ai-hub"] div#teacherChatLog div{color:#5C5648!important}
+html[data-page="skillstream-calendar"] div.sub{color:#5C5648!important}
+html[data-page="skillstream-calendar"] div.legend span{color:#5C5648!important}
+html[data-page="skillstream-calendar"] div.group-label{color:#5C5648!important}
 html[data-page="skillstream-chess"] div.mode-card p{color:#5C5648!important}
+html[data-page="skillstream-classrooms"] div.sub{color:#5C5648!important}
+html[data-page="skillstream-classrooms"] div.group-label{color:#5C5648!important}
+html[data-page="skillstream-contact"] div.label{color:#5C5648!important}
+html[data-page="skillstream-courses"] div.empty{color:#5C5648!important}
+html[data-page="skillstream-dashboard"] div.section-title{color:#7A5C16!important}
+html[data-page="skillstream-dashboard"] div.foot-links.foot-links-meta a{color:#5C5648!important}
+html[data-page="skillstream-dashboard"] div.foot-copyright{color:#5C5648!important}
+html[data-page="skillstream-discoveries"] div.empty{color:#5C5648!important}
+html[data-page="skillstream-focus"] div.section-title{color:#7A5C16!important}
 html[data-page="skillstream-forgot-password"] div.sub{color:#5C5648!important}
 html[data-page="skillstream-forgot-password"] div.card label{color:#5C5648!important}
+html[data-page="skillstream-home"] div.section-title-home{color:#7A5C16!important}
 html[data-page="skillstream-home"] a.view-card.suggested p{color:#5C5648!important}
 html[data-page="skillstream-home"] a.view-card p{color:#5C5648!important}
+html[data-page="skillstream-leaderboard"] div.loading{color:#5C5648!important}
 html[data-page="skillstream-ludo"] div.mode-card p{color:#5C5648!important}
+html[data-page="skillstream-messages"] div.sec-title{color:#7A5C16!important}
+html[data-page="skillstream-messages"] div#privTitle.sec-title{color:#7A5C16!important}
+html[data-page="skillstream-messages"] div.empty{color:#5C5648!important}
+html[data-page="skillstream-pricing"] div.muted{color:#5C5648!important}
+html[data-page="skillstream-profile"] div#goalTitle.section-title{color:#7A5C16!important}
 html[data-page="skillstream-profile"] div#goalView div{color:#5C5648!important}
+html[data-page="skillstream-profile"] div.section-title{color:#7A5C16!important}
+html[data-page="skillstream-puzzle"] p.hint.foot{color:#5C5648!important}
+html[data-page="skillstream-recognition"] div.section-title{color:#7A5C16!important}
+html[data-page="skillstream-recognition"] div.foot-links.foot-links-meta a{color:#5C5648!important}
+html[data-page="skillstream-recognition"] div.foot-copyright{color:#5C5648!important}
 html[data-page="skillstream-reset-password"] div.card label{color:#5C5648!important}
+html[data-page="skillstream-self-paced"] span.icon{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#titleAppearance.section-title{color:#7A5C16!important}
 html[data-page="skillstream-settings"] div#descDarkMode.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] div.section-title{color:#7A5C16!important}
 html[data-page="skillstream-settings"] div.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#titleLanguage.section-title{color:#7A5C16!important}
 html[data-page="skillstream-settings"] div#descLanguage.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#langNote.lang-note{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#titleNotifications.section-title{color:#7A5C16!important}
 html[data-page="skillstream-settings"] div#descInApp.desc{color:#5C5648!important}
 html[data-page="skillstream-settings"] div#descEmail.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#titleAccount.section-title{color:#7A5C16!important}
 html[data-page="skillstream-settings"] div#descProfile.desc{color:#5C5648!important}
 html[data-page="skillstream-settings"] div#descNewProfile.desc{color:#5C5648!important}
 html[data-page="skillstream-settings"] button#btnLogout.btn-danger{color:#A8402A!important}
+html[data-page="skillstream-teacher-dashboard"] div.section-title{color:#7A5C16!important}
+html[data-page="skillstream-teacher-dashboard"] footer.site-footer div{color:#5C5648!important}
+html[data-page="skillstream-teachers-directory"] div.empty{color:#5C5648!important}
 
-/* ==== refinement: restraint, type and depth (ink navy, ivory paper, one soft gold) ==== */
-html h1,html h2,html h3,html .big{font-family:'Fraunces',Georgia,'Times New Roman',serif;font-weight:600;letter-spacing:.1px}
-html body{line-height:1.6}
-html header.top{background-image:
-    radial-gradient(circle at calc(100% - 28px) 8px,transparent 92px,rgba(228,197,131,.5) 93px,transparent 95px),
-    radial-gradient(circle at calc(100% - 28px) 8px,transparent 130px,rgba(228,197,131,.24) 131px,transparent 133px),
-    var(--uv-star),
-    linear-gradient(155deg,#101C62 0%,#1B2576 60%,#27267F 100%)}
-html .card,html .panel,html .view-card,html .hub-card,html .mode-card,html .teacher-card,html .convo-card{
-  border:1px solid rgba(228,197,131,.55);border-radius:16px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),inset 0 -1px 0 rgba(160,130,70,.08),0 10px 26px rgba(3,6,36,.42),0 0 0 1px rgba(228,197,131,.10)}
-html .view-card:hover,html .hub-card:hover,html a.card:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 22px rgba(228,197,131,.28),0 14px 30px rgba(3,6,36,.5)}
-html .view-card.mission{background-image:linear-gradient(135deg,#FFFDF6,#F6EDD3)}
-
-/* ---- comfort modes ---- */
-#lneTint{display:none;position:fixed;inset:0;z-index:2147482000;pointer-events:none;background:#F2C48A;opacity:.5;mix-blend-mode:multiply}
-html[data-comfort="night"] #lneTint{display:block}
-html[data-comfort="calm"] body::after,html[data-comfort="calm"] header.top::after,html[data-comfort="calm"] .lne-beam{animation:none!important}
-html[data-comfort="calm"] .lne-enter{display:none}
-html[data-comfort="calm"] *{scroll-behavior:auto!important}
-html #lneComfort{position:static;display:block;margin:0 auto 18px;z-index:1;font:600 12px/1 system-ui,sans-serif;padding:5px 8px;border-radius:999px;border:1px solid rgba(228,197,131,.6);background:#F2EEE2;color:#141F38;max-width:110px;min-height:40px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-
-/* ---- artwork banners (js/lne-world.js fills them; empty and invisible until a picture loads) ---- */
-.lne-art{position:relative;border-radius:16px;overflow:hidden;margin:0 0 14px;border:1px solid rgba(228,197,131,.55);background:#101C62;
-  box-shadow:0 10px 26px rgba(3,6,36,.42),0 0 0 1px rgba(228,197,131,.10)}
-.lne-art:not([data-done]){min-height:0;border:0;box-shadow:none;background:none}
-.lne-art img{width:100%;height:100%;object-fit:cover;display:block}
-.lne-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(12,21,68,0) 55%,rgba(12,21,68,.55) 100%)}
+/* the same visor teal on the other dark cards and the AI Teacher button and panel */
+html .inspiration-card,html #aiTeacherFab{background:linear-gradient(135deg,var(--visor),var(--visor-2))!important}
+html #aiTeacherPanel{background:var(--visor)!important}
