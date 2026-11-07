@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Daily mission — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:#2B2B2B; padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:14px; max-width:620px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; overflow-wrap:anywhere; min-width:0;}
+  .card h2{margin:0 0 6px; font-size:18px;}
+  .hint{font-size:13px; color:var(--muted); line-height:1.55; margin:6px 0;}
+  .stats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
+  .stat{background:#F7F3EA; border-radius:12px; padding:10px 6px; text-align:center;}
+  .stat b{display:block; font-family:'Fraunces',serif; font-size:22px; color:var(--ink);} .stat span{font-size:11.5px; color:var(--muted);}
+  .rank{font-weight:700; color:#8A6A1F; font-size:14px; margin-top:8px;}
+  .bar{background:#E9E2D2; border-radius:6px; height:10px; overflow:hidden; margin-top:6px;} .bar i{display:block; height:100%; background:var(--sage); width:0;}
+  .steps{display:flex; gap:8px; margin:10px 0 2px;}
+  .dot{flex:1; height:8px; border-radius:6px; background:#E9E2D2;} .dot.on{background:#C9A653;} .dot.cur{background:var(--ink);}
+  .q{font-size:20px; font-weight:700; color:var(--ink); line-height:1.5; margin:10px 0; direction:ltr; text-align:center; overflow-wrap:anywhere;}
+  .seq{display:flex; gap:6px; justify-content:center; flex-wrap:wrap; direction:ltr; margin:12px 0;}
+  .seq span{min-width:44px; padding:10px 8px; background:#F7F3EA; border-radius:10px; font-family:'Fraunces',serif; font-size:20px; font-weight:700; color:var(--ink); text-align:center;}
+  .seq span.ask{background:#fff; border:2px dashed var(--gold); color:#8A6A1F;}
+  input[type=text],input[type=number]{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:20px; text-align:center; direction:ltr; margin-top:6px;}
+  .btn{border:0; border-radius:10px; padding:12px 16px; font-weight:700; font-size:15px; cursor:pointer; font-family:inherit; min-height:46px; background:var(--ink); color:#fff; margin:10px 8px 0 0;}
+  .btn.alt{background:#fff; color:var(--ink); border:1.5px solid var(--ink);}
+  .btn:disabled{opacity:.5;}
+  .tiles{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; direction:ltr; margin:10px 0;}
+  .tile{min-width:46px; min-height:48px; border-radius:10px; border:1.5px solid var(--ink); background:#fff; font-size:22px; font-weight:700; color:var(--ink); cursor:pointer; font-family:inherit; text-transform:uppercase;}
+  .tile:disabled{opacity:.25;}
+  .slots .tile{background:#F7F3EA; border-style:dashed;}
+  .msg{font-size:14px; min-height:20px; margin-top:8px; font-weight:600;} .msg.err{color:var(--danger);} .msg.ok{color:#2F6B42;}
+  .foot{color:#C5D0EE;}
+  .hidden{display:none;}
+  .big{font-family:'Fraunces',serif; font-size:30px; color:var(--ink); text-align:center; margin:6px 0;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Daily mission</h1>
+  <p>Three short puzzles, a new set every day. Build your streak and rise through the ranks.</p>
+</header>
+<div class="wrap">
+  <div class="card">
+    <div class="stats">
+      <div class="stat"><b id="sStreak">0</b><span>Day streak</span></div>
+      <div class="stat"><b id="sXp">0</b><span>Points</span></div>
+      <div class="stat"><b id="sBest">0</b><span>Best day</span></div>
+    </div>
+    <div class="rank" id="rank"></div>
+    <div class="bar"><i id="rankBar"></i></div>
+    <div class="hint" id="rankNext"></div>
+  </div>
+  <div class="card" id="play">
+    <div class="steps" id="steps"></div>
+    <h2 id="pTitle"></h2>
+    <div id="pBody"></div>
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+  </div>
+  <div class="card hidden" id="done">
+    <h2>Mission complete</h2>
+    <div class="big" id="dayScore"></div>
+    <p class="hint" id="doneNote">Come back tomorrow for a new mission. Your streak grows every day you finish.</p>
+    <button class="btn" id="share" type="button">Share my result</button>
+    <div class="msg" id="shareMsg" role="status"></div>
+  </div>
+  <p class="hint foot">Puzzles are the same for everyone each day. Your points and streak are kept on this phone.</p>
+</div>
+<script src="js/nav.js" defer></script>
+<script>
+const $ = id => document.getElementById(id);
+const lang = (function(){ try { return localStorage.getItem('language') || 'en'; } catch(e){ return 'en'; } })();
+const KEY = 'lne_puzzle';
+function load(){ try { const v = JSON.parse(localStorage.getItem(KEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch(e){ return {}; } }
+function save(s){ try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
+function dayNum(d){ return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); }
+const today = dayNum(new Date());
+function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(today * 7919 + 13);
+const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
+
+/* ---- today's three puzzles, the same for everyone ---- */
+const WORDS_EN = ['planet','rocket','galaxy','comet','orbit','signal','energy','future','puzzle','memory','gravity','nebula','science','number','island','castle','bridge','forest','silver','golden','window','school','teacher','student','library','compass','journey','harvest','lantern','thunder'];
+const WORDS_AR = ['مدرسة','معلم','كتاب','قلم','مجرة','كوكب','صاروخ','طاقة','سفينة','نجمة','مكتبة','سماء','جبل','نهر','حديقة','ذاكرة','حاسوب','رقمي','مستقبل','صحراء'];
+function seqPuzzle(){
+  const t = ri(0, 4); let a = ri(2, 9), d = ri(2, 7), s = [], rule = '';
+  if(t === 0){ for(let i = 0; i < 6; i++) s.push(a + d * i); rule = 'Each number grows by the same amount.'; }
+  else if(t === 1){ d = ri(2, 3); a = ri(1, 4); for(let i = 0; i < 6; i++) s.push(a * Math.pow(d, i)); rule = 'Each number is multiplied by the same number.'; }
+  else if(t === 2){ a = ri(1, 5); for(let i = 0; i < 6; i++) s.push((a + i) * (a + i)); rule = 'Look at square numbers.'; }
+  else if(t === 3){ let x = ri(1, 4), y = ri(2, 6); s = [x, y]; for(let i = 2; i < 6; i++) s.push(s[i - 1] + s[i - 2]); rule = 'Add the two numbers before it.'; }
+  else { for(let i = 0; i < 6; i++) s.push(a + i * d + (i % 2 ? 0 : 0)); const e = ri(1, 3); s = []; let v = a; for(let i = 0; i < 6; i++){ s.push(v); v += (i % 2 ? d : e); } rule = 'The step changes: it goes up by two different amounts in turn.'; }
+  return { kind:'seq', shown:s.slice(0, 5), answer:s[5], hint:rule };
+}
+function mathPuzzle(){
+  const a = ri(3, 12), b = ri(3, 12), c = ri(2, 9), d = ri(2, 20), v = ri(0, 2);
+  if(v === 0) return { kind:'math', q:'(' + a + ' + ' + b + ') × ' + c + ' − ' + d, answer:(a + b) * c - d, hint:'Do the brackets first, then multiply, then subtract.' };
+  if(v === 1) return { kind:'math', q:a + ' × ' + c + ' + ' + b + ' × ' + c, answer:a * c + b * c, hint:'Work out each multiplication first.' };
+  return { kind:'math', q:(a * c) + ' ÷ ' + c + ' + ' + b + ' × ' + 2, answer:a + b * 2, hint:'Divide and multiply first, then add.' };
+}
+function wordPuzzle(){
+  const list = lang === 'ar' ? WORDS_AR : WORDS_EN, w = list[ri(0, list.length - 1)], letters = Array.from(w);
+  let sh = letters.slice(), n = 0;
+  do { sh = letters.slice().sort(() => R() - .5); n++; } while(sh.join('') === w && n < 20);
+  return { kind:'word', word:w, letters:sh, hint:'The first letter is ' + letters[0] };
+}
+const P = [seqPuzzle(), mathPuzzle(), wordPuzzle()];
+const TITLES = ['What comes next?', 'Quick calculation', 'Unscramble the word'];
+
+/* ---- ranks ---- */
+const RANKS = [['Cadet', 0], ['Pilot', 60], ['Navigator', 180], ['Engineer', 400], ['Commander', 800], ['Admiral', 1500]];
+function rankOf(xp){ let i = 0; RANKS.forEach((r, k) => { if(xp >= r[1]) i = k; }); return i; }
+
+let S = load(); S.xp = S.xp || 0; S.streak = S.streak || 0; S.best = S.best || 0;
+if(S.day !== today){ S.day = today; S.res = []; S.cur = 0; save(S); }
+let tries = 0, hinted = false;
+
+function paintStats(){
+  $('sStreak').textContent = S.streak; $('sXp').textContent = S.xp; $('sBest').textContent = S.best;
+  const k = rankOf(S.xp), nx = RANKS[k + 1];
+  $('rank').textContent = RANKS[k][0];
+  const lo = RANKS[k][1], hi = nx ? nx[1] : lo + 1;
+  $('rankBar').style.width = nx ? Math.min(100, Math.round((S.xp - lo) / (hi - lo) * 100)) + '%' : '100%';
+  const rn = $('rankNext'); rn.textContent = '';
+  if(nx){ [['Next rank', 0], [': ', 1], [nx[0], 0], [' · ', 1], [String(hi - S.xp), 2], [' ', 1], ['points to go', 0]].forEach(x => { const sp = document.createElement('span'); sp.textContent = x[0]; if(x[1] === 2) sp.setAttribute('data-no-i18n', ''); rn.appendChild(sp); }); }
+}
+function paintSteps(){
+  const st = $('steps'); st.textContent = '';
+  for(let i = 0; i < 3; i++){ const d = document.createElement('div'); d.className = 'dot' + (i < S.res.length ? ' on' : (i === S.res.length ? ' cur' : '')); st.appendChild(d); }
+}
+function say(t, ok){ const m = $('msg'); m.className = 'msg ' + (ok ? 'ok' : 'err'); m.textContent = t; }
+
+function finishStep(points){
+  S.res.push(points); S.xp += points; save(S); paintStats(); paintSteps();
+  if(S.res.length >= 3) return finishDay();
+  setTimeout(show, 900);
+}
+function finishDay(){
+  const total = S.res.reduce((a, b) => a + b, 0), prev = S.last;
+  S.streak = (prev === today - 1) ? S.streak + 1 : (prev === today ? S.streak : 1);
+  S.last = today; if(total > S.best) S.best = total;
+  const bonus = Math.min(10, S.streak * 2); S.xp += bonus; S.total = total + bonus; save(S); paintStats();
+  $('play').classList.add('hidden'); $('done').classList.remove('hidden');
+  $('dayScore').textContent = '★ ' + S.total + ' / 40';
+}
+function award(){ const base = tries === 0 ? 10 : tries === 1 ? 6 : 3; return Math.max(1, base - (hinted ? 2 : 0)); }
+
+function show(){
+  tries = 0; hinted = false; $('msg').textContent = '';
+  const i = S.res.length, p = P[i], body = $('pBody'); body.textContent = '';
+  $('pTitle').textContent = TITLES[i];
+  const row = document.createElement('div'), hintBtn = document.createElement('button');
+  hintBtn.className = 'btn alt'; hintBtn.type = 'button'; hintBtn.textContent = 'Hint (−2 points)';
+  hintBtn.onclick = () => { hinted = true; say(p.hint, true); hintBtn.disabled = true; };
+  function wrong(){ tries++; if(tries >= 3){ say(p.kind === 'word' ? p.word : String(p.answer), false); finishStepSoon(0); } else say(tries === 1 ? 'Not yet. Try again.' : 'Close. One more try.', false); }
+  function finishStepSoon(pts){ body.querySelectorAll('button,input').forEach(e => e.disabled = true); setTimeout(() => finishStep(pts), 1400); }
+  function right(){ const pts = award(); say('Correct! +' + pts, true); finishStepSoon(pts); }
+  if(p.kind === 'seq' || p.kind === 'math'){
+    if(p.kind === 'seq'){
+      const q = document.createElement('div'); q.className = 'seq';
+      p.shown.forEach(n => { const s = document.createElement('span'); s.textContent = n; q.appendChild(s); });
+      const a = document.createElement('span'); a.className = 'ask'; a.textContent = '?'; q.appendChild(a); body.appendChild(q);
+    } else { const q = document.createElement('div'); q.className = 'q'; q.textContent = p.q + ' = ?'; body.appendChild(q); }
+    const inp = document.createElement('input'); inp.type = 'number'; inp.inputMode = 'numeric'; inp.setAttribute('aria-label', 'Your answer'); body.appendChild(inp);
+    const go = document.createElement('button'); go.className = 'btn'; go.type = 'button'; go.textContent = 'Check';
+    go.onclick = () => { if(inp.value === ''){ say('Type your answer.', false); return; } if(Number(inp.value) === p.answer) right(); else wrong(); };
+    inp.onkeydown = e => { if(e.key === 'Enter') go.onclick(); };
+    body.appendChild(go); body.appendChild(hintBtn);
+  } else {
+    const slots = document.createElement('div'), pool = document.createElement('div'); slots.className = 'tiles slots'; pool.className = 'tiles';
+    const chosen = [], btns = [];
+    if(lang === 'ar'){ slots.dir = 'rtl'; pool.dir = 'rtl'; }
+    function redraw(){ slots.textContent = ''; p.letters.forEach((_, k) => { const t = document.createElement('button'); t.className = 'tile'; t.type = 'button'; t.textContent = chosen[k] != null ? p.letters[chosen[k]] : '·'; t.setAttribute('aria-label', 'Letter'); t.onclick = () => { if(chosen[k] != null){ btns[chosen[k]].disabled = false; chosen.splice(k, 1); redraw(); } }; slots.appendChild(t); }); }
+    p.letters.forEach((ch, k) => { const t = document.createElement('button'); t.className = 'tile'; t.type = 'button'; t.textContent = ch; t.onclick = () => { if(chosen.length < p.letters.length){ chosen.push(k); t.disabled = true; redraw(); } }; btns.push(t); pool.appendChild(t); });
+    redraw(); body.appendChild(slots); body.appendChild(pool);
+    const go = document.createElement('button'); go.className = 'btn'; go.type = 'button'; go.textContent = 'Check';
+    go.onclick = () => { if(chosen.length < p.letters.length){ say('Use all the letters.', false); return; } if(chosen.map(k => p.letters[k]).join('') === p.word) right(); else { wrong(); chosen.length = 0; btns.forEach(b => b.disabled = false); redraw(); } };
+    const clr = document.createElement('button'); clr.className = 'btn alt'; clr.type = 'button'; clr.textContent = 'Clear';
+    clr.onclick = () => { chosen.length = 0; btns.forEach(b => b.disabled = false); redraw(); };
+    body.appendChild(go); body.appendChild(clr); body.appendChild(hintBtn);
+  }
+}
+$('share').onclick = async () => {
+  const txt = 'Learning Never Ends — Daily mission ' + (today - 20000) + ': ' + S.res.map(r => r >= 10 ? '★★★' : r >= 6 ? '★★' : r > 0 ? '★' : '·').join(' ') + ' · ' + S.streak + ' day streak';
+  try { if(navigator.share){ await navigator.share({ text:txt }); return; } } catch(e){ return; }
+  try { await navigator.clipboard.writeText(txt); $('shareMsg').className = 'msg ok'; $('shareMsg').textContent = 'Copied.'; } catch(e){ $('shareMsg').className = 'msg ok'; $('shareMsg').textContent = txt; }
+};
+paintStats(); paintSteps();
+if(S.res.length >= 3){ $('play').classList.add('hidden'); $('done').classList.remove('hidden'); $('dayScore').textContent = '★ ' + (S.total || S.res.reduce((a, b) => a + b, 0)) + ' / 40'; }
+else show();
+</script>
+</body>
+</html>
