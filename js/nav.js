@@ -82,7 +82,7 @@
       'skillstream-school.html', 'skillstream-teachers-directory.html', 'skillstream-focus.html', 'skillstream-live-session.html', 'skillstream-live-video.html', 'skillstream-session-detail.html'],
     'skillstream-ai-hub.html': ['skillstream-ai-hub.html', 'skillstream-future-architect.html'],
     'skillstream-hub-community.html': ['skillstream-hub-community.html', 'skillstream-messages.html', 'skillstream-community.html', 'skillstream-shared.html', 'skillstream-whiteboard.html',
-      'skillstream-showcase.html', 'skillstream-games.html', 'skillstream-leaderboard.html', 'skillstream-challenges.html', 'skillstream-recognition.html', 'skillstream-chess.html', 'skillstream-ludo.html'],
+      'skillstream-showcase.html', 'skillstream-puzzle.html', 'skillstream-games.html', 'skillstream-leaderboard.html', 'skillstream-challenges.html', 'skillstream-recognition.html', 'skillstream-chess.html', 'skillstream-ludo.html'],
     'skillstream-hub-profile.html': ['skillstream-hub-profile.html', 'skillstream-profile.html', 'skillstream-passport.html', 'skillstream-vault.html', 'skillstream-family.html',
       'skillstream-discoveries.html', 'skillstream-opportunities.html', 'skillstream-ai-history.html', 'skillstream-settings.html', 'skillstream-pricing.html', 'skillstream-feedback.html', 'skillstream-teach-apply.html']
   };

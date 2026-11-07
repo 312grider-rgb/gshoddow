@@ -63,6 +63,7 @@
           ] },
           { title: 'Show and play', links: [
             L('image', 'Showcase', 'See and share what people made', 'skillstream-showcase.html'),
+            L('star', 'Daily mission', 'Three new puzzles every day', 'skillstream-puzzle.html'),
             L('games', 'Games', 'Learn while you play', 'skillstream-games.html'),
             L('trophy', 'Leaderboard', 'See how you are doing', 'skillstream-leaderboard.html'),
             L('star', 'Learning challenges', 'Small challenges to grow your skills', 'skillstream-challenges.html'),
