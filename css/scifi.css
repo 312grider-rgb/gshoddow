@@ -13,15 +13,14 @@ html:root{
   --glow-g:0 0 0 1px rgba(228,197,131,.45),0 0 18px rgba(228,197,131,.16);
 }
 /* ---- the sky: a luminous night of royal blue and violet, with a glowing planet horizon (inspired by the brand artwork) ---- */
-html body{background-color:#0A1450;color-scheme:light}
+html body{background-color:#0C1544;color-scheme:light}
 html body::before{
   content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
   background:
-    radial-gradient(circle 120vw at 50% 128%,#1D3FD6 0 56%,#E9C877 56.4%,#7FA8FF 57.6%,rgba(80,120,255,.35) 60%,transparent 68%),
-    radial-gradient(ellipse 70% 42% at 88% 4%,rgba(150,120,255,.62),transparent 70%),
-    radial-gradient(ellipse 60% 40% at 6% 34%,rgba(50,130,255,.42),transparent 72%),
-    radial-gradient(ellipse 80% 40% at 50% 62%,rgba(90,70,230,.30),transparent 75%),
-    linear-gradient(180deg,#0B1660 0%,#141E86 48%,#0A1450 100%);
+    radial-gradient(circle 120vw at 50% 130%,#1A2C78 0 56%,#C9AE72 56.4%,#5E7CC4 57.6%,rgba(70,100,190,.28) 60%,transparent 68%),
+    radial-gradient(ellipse 70% 42% at 88% 4%,rgba(120,100,210,.40),transparent 70%),
+    radial-gradient(ellipse 60% 40% at 6% 34%,rgba(50,100,200,.26),transparent 72%),
+    linear-gradient(180deg,#0C1544 0%,#121B5C 50%,#0C1544 100%);
 }
 html body::after{
   content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
@@ -33,9 +32,9 @@ html body::after{
     radial-gradient(1.2px 1.2px at 73% 44%,#E4C583,transparent),radial-gradient(1px 1px at 81% 91%,rgba(255,255,255,.7),transparent),
     radial-gradient(1.4px 1.4px at 88% 27%,#fff,transparent),radial-gradient(1px 1px at 94% 66%,rgba(94,224,240,.8),transparent),
     radial-gradient(1px 1px at 37% 40%,rgba(255,255,255,.6),transparent),radial-gradient(1px 1px at 76% 8%,rgba(255,255,255,.7),transparent);
-  animation:lne-twinkle 7s ease-in-out infinite alternate;
+  animation:lne-twinkle 14s ease-in-out infinite alternate;
 }
-@keyframes lne-twinkle{from{opacity:.55}to{opacity:1}}
+@keyframes lne-twinkle{from{opacity:.7}to{opacity:.95}}
 
 /* ---- panels: bright glass with a gold edge, like the cards in the artwork ---- */
 html .card,html .panel,html .view-card,html .hub-card,html .mode-card,html .teacher-card,html .convo-card,html .uv-card{
@@ -43,34 +42,34 @@ html .card,html .panel,html .view-card,html .hub-card,html .mode-card,html .teac
   box-shadow:0 0 0 1px rgba(233,200,119,.25),0 10px 28px rgba(5,10,60,.45),0 0 24px rgba(120,160,255,.28);
 }
 html .view-card,html .hub-card,html a.card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-html .view-card:hover,html .hub-card:hover,html a.card:hover{transform:translateY(-2px);border-color:#F3D98F;box-shadow:0 0 0 1px rgba(243,217,143,.6),0 0 28px rgba(243,217,143,.4),0 14px 34px rgba(5,10,60,.5)}
-html .view-card.suggested{border-color:#F3D98F;box-shadow:0 0 0 1px rgba(243,217,143,.6),0 0 26px rgba(243,217,143,.35)}
+html .view-card:hover,html .hub-card:hover,html a.card:hover{transform:translateY(-2px);border-color:#E4C583;box-shadow:0 0 0 1px rgba(228,197,131,.6),0 0 28px rgba(228,197,131,.4),0 14px 34px rgba(5,10,60,.5)}
+html .view-card.suggested{border-color:#E4C583;box-shadow:0 0 0 1px rgba(228,197,131,.6),0 0 26px rgba(228,197,131,.35)}
 
 /* ---- header: a bright bridge display, blue to violet, ringed in gold light ---- */
 html header.top{position:relative;overflow:hidden;
   background-image:
-    radial-gradient(circle at calc(100% - 28px) 8px,transparent 92px,rgba(243,217,143,.55) 93px,transparent 96px),
-    radial-gradient(circle at calc(100% - 28px) 8px,transparent 130px,rgba(243,217,143,.28) 131px,transparent 134px),
+    radial-gradient(circle at calc(100% - 28px) 8px,transparent 92px,rgba(228,197,131,.55) 93px,transparent 96px),
+    radial-gradient(circle at calc(100% - 28px) 8px,transparent 130px,rgba(228,197,131,.28) 131px,transparent 134px),
     var(--uv-star),
-    linear-gradient(150deg,#1A2A9A 0%,#3A2CB0 55%,#5B34C8 100%);
-  border-bottom:1px solid rgba(243,217,143,.7);box-shadow:0 1px 0 rgba(243,217,143,.3),0 8px 30px rgba(110,140,255,.35)}
+    linear-gradient(150deg,#16257A 0%,#2B2A8C 55%,#40308E 100%);
+  border-bottom:1px solid rgba(228,197,131,.7);box-shadow:0 1px 0 rgba(228,197,131,.25),0 6px 22px rgba(60,80,170,.3)}
 html header.top::after{
   content:"";position:absolute;inset-inline-end:-70px;top:-70px;width:210px;height:210px;border-radius:50%;pointer-events:none;
-  border:1px solid rgba(243,217,143,.5);box-shadow:inset 0 0 40px rgba(150,180,255,.25),0 0 34px rgba(180,150,255,.35);
-  background:conic-gradient(from 0deg,rgba(243,217,143,0),rgba(243,217,143,.30),rgba(120,170,255,0) 55%,rgba(190,160,255,.28),rgba(243,217,143,0));
+  border:1px solid rgba(228,197,131,.5);box-shadow:inset 0 0 40px rgba(150,180,255,.25),0 0 34px rgba(180,150,255,.35);
+  background:conic-gradient(from 0deg,rgba(228,197,131,0),rgba(228,197,131,.30),rgba(120,170,255,0) 55%,rgba(190,160,255,.28),rgba(228,197,131,0));
   animation:lne-spin 48s linear infinite;
 }
 @keyframes lne-spin{to{transform:rotate(360deg)}}
-html header.top .eyebrow{letter-spacing:2.4px;color:#F3D98F;text-shadow:0 0 12px rgba(243,217,143,.55)}
+html header.top .eyebrow{letter-spacing:2.4px;color:#E4C583;text-shadow:0 0 12px rgba(228,197,131,.55)}
 html header.top h1{text-shadow:0 0 22px rgba(160,190,255,.5)}
 
 /* ---- bottom navigation: deep glass dock with gold light; the open page glows ---- */
-html .ln-bottom-nav{background:rgba(8,14,70,.94);border-top:1px solid rgba(243,217,143,.75);box-shadow:0 -6px 28px rgba(243,217,143,.18)}
-@media (min-width:900px){html .ln-bottom-nav{border:1px solid rgba(243,217,143,.7);border-bottom:0}}
+html .ln-bottom-nav{background:rgba(8,14,70,.94);border-top:1px solid rgba(228,197,131,.75);box-shadow:0 -6px 28px rgba(228,197,131,.18)}
+@media (min-width:900px){html .ln-bottom-nav{border:1px solid rgba(228,197,131,.7);border-bottom:0}}
 html .ln-nav-item{color:#C3CEFF}
-html .ln-nav-item+.ln-nav-item{box-shadow:inset 1px 0 0 rgba(243,217,143,.18)}
-html .ln-nav-item.active{color:#F3D98F;text-shadow:0 0 12px rgba(243,217,143,.7)}
-html .ln-nav-item.active svg{filter:drop-shadow(0 0 5px rgba(243,217,143,.8))}
+html .ln-nav-item+.ln-nav-item{box-shadow:inset 1px 0 0 rgba(228,197,131,.18)}
+html .ln-nav-item.active{color:#E4C583;text-shadow:0 0 12px rgba(228,197,131,.7)}
+html .ln-nav-item.active svg{filter:drop-shadow(0 0 5px rgba(228,197,131,.8))}
 
 /* ---- buttons and focus: energy rather than flat colour ---- */
 html .btn:not(.alt):not(.del),html button.primary,html .primary-btn{box-shadow:0 0 0 1px rgba(94,224,240,.4),0 4px 16px rgba(94,224,240,.22)}
@@ -188,3 +187,31 @@ html[data-page="skillstream-chess"] .join-row input{min-width:0;width:100%}
 html.lne-warping body>*:not(#lneWorld){transition:opacity .22s ease,transform .22s ease;opacity:0;transform:scale(1.05)}
 @media (prefers-reduced-motion:reduce){.lne-beam,.lne-enter{display:none}}
 html[data-page="skillstream-future-architect"] .qcard>span.mono.dim{color:#C3CEFF!important}
+
+/* ---- eye comfort for long sessions: warm paper instead of pure white, softer glow, calmer motion ---- */
+html .card,html .panel,html .view-card,html .hub-card,html .mode-card,html .teacher-card,html .convo-card{background-color:#F9F6EE}
+html input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html select,html textarea{background-color:#FAF8F1}
+html .btn.alt,html button.alt{background-color:#F9F6EE}
+html #lneSize button,html #lneLang select{background-color:#F2EEE2}
+html .lne-beam{display:none}
+html .view-card,html .hub-card,html .card,html .panel{box-shadow:0 0 0 1px rgba(228,197,131,.22),0 8px 22px rgba(4,8,40,.40)}
+/* eye comfort: muted text on warm paper, a little darker */
+html[data-page="skillstream-ai-hub"] div.desc{color:#5C5648!important}
+html[data-page="skillstream-ai-hub"] p.desc{color:#5C5648!important}
+html[data-page="skillstream-ai-hub"] div#teacherChatLog div{color:#5C5648!important}
+html[data-page="skillstream-chess"] div.mode-card p{color:#5C5648!important}
+html[data-page="skillstream-forgot-password"] div.sub{color:#5C5648!important}
+html[data-page="skillstream-forgot-password"] div.card label{color:#5C5648!important}
+html[data-page="skillstream-home"] a.view-card.suggested p{color:#5C5648!important}
+html[data-page="skillstream-home"] a.view-card p{color:#5C5648!important}
+html[data-page="skillstream-ludo"] div.mode-card p{color:#5C5648!important}
+html[data-page="skillstream-profile"] div#goalView div{color:#5C5648!important}
+html[data-page="skillstream-reset-password"] div.card label{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#descDarkMode.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] div.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#descLanguage.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#descInApp.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#descEmail.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#descProfile.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] div#descNewProfile.desc{color:#5C5648!important}
+html[data-page="skillstream-settings"] button#btnLogout.btn-danger{color:#A8402A!important}
