@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Parent home — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --sage:#6B8F71; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:#2B2B2B; padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:22px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:14px; max-width:760px; margin:0 auto;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; overflow-wrap:anywhere; min-width:0;}
+  .card h2{margin:0 0 8px; font-size:18px;}
+  .hint{font-size:13px; color:var(--muted); line-height:1.55;}
+  .code{font-family:monospace; font-size:28px; letter-spacing:4px; font-weight:700; color:var(--ink); background:#F7F3EA; border-radius:12px; padding:12px; text-align:center; margin:10px 0; direction:ltr; user-select:all;}
+  input[type=text]{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:18px; letter-spacing:3px; text-transform:uppercase; direction:ltr; margin-top:8px;}
+  .btn{border:0; border-radius:10px; padding:12px 14px; font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; min-height:44px; background:var(--ink); color:#fff; margin-top:10px; margin-inline-end:8px;}
+  .btn.alt{background:#fff; color:var(--ink); border:1.5px solid var(--ink);} .btn.del{background:#fff; color:var(--danger); border:1.5px solid var(--danger);}
+  .btn:disabled{opacity:.5;}
+  .person{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; padding:10px 0; border-top:1px solid var(--line);}
+  .person:first-of-type{border-top:0;}
+  .person b{font-size:15px; color:var(--ink);}
+  .msg{font-size:13.5px; margin-top:10px; min-height:18px;} .msg.err{color:var(--danger);} .msg.ok{color:#3E6B48;}
+  .prog{background:#F7F3EA; border-radius:12px; padding:12px; margin:8px 0 12px; width:100%;}
+  .prog h3{margin:10px 0 4px; font-size:14px;} .prog h3:first-child{margin-top:0;}
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:6px 0;}
+  .num{background:#fff; border-radius:10px; padding:8px 4px; text-align:center;} .num b{display:block; font-family:'Fraunces',serif; font-size:20px; color:var(--ink);} .num span{font-size:11px; color:var(--muted);}
+  .bar{background:#E9E2D2; border-radius:6px; height:10px; overflow:hidden; margin-top:4px;} .bar i{display:block; height:100%; background:var(--sage);}
+  .goal{margin:8px 0; font-size:14px;}
+  .hidden{display:none;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  .kid{border-top:1px solid var(--line); padding:12px 0;} .kid:first-of-type{border-top:0;} .kid h3{margin:0 0 6px; font-size:16px;}
+  .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .pill{background:#F7F3EA; border-radius:999px; padding:4px 10px; font-size:12.5px; color:var(--ink);}
+  .pill.warn{background:#FBE9E5; color:var(--danger);}
+  a.btn{display:inline-flex; align-items:center; text-decoration:none;}
+</style></head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Parent home</h1>
+  <p>A calm, short summary of the learners you follow. No chats, no private notes.</p>
+</header>
+<div class="wrap">
+  <div id="loading" class="card">Loading…</div>
+  <div id="err" class="card hidden"><p class="hint">Could not load this page. Please try again.</p></div>
+  <div id="main" class="hidden">
+    <div class="card">
+      <h2>Learners I follow</h2>
+      <div id="kids"></div>
+      <div id="empty" class="hidden">
+        <p class="hint">You are not following anyone yet. Ask your child to open My family and make a code, then type it here.</p>
+      </div>
+      <a class="btn" href="skillstream-family.html" id="followBtn">Follow a learner</a>
+    </div>
+    <div class="card">
+      <h2>What you can see</h2>
+      <p class="hint">Goals, review topics, the last active day, attendance and overdue class work. You cannot see AI chats, private notes or messages. A learner can stop sharing at any time.</p>
+    </div>
+    <div class="card">
+      <h2>Your view</h2>
+      <p class="hint">You are using the parent view. You can switch to the learner view at any time.</p>
+      <button class="btn alt" id="toLearner" type="button">Use the learner view</button>
+    </div>
+  </div>
+</div>
+<script>try{var _a=new URLSearchParams(location.search).get("as");if(_a==="parent")localStorage.setItem("lne_view","parent");if(_a==="learner")localStorage.removeItem("lne_view");}catch(e){}</script>
+<script src="js/nav.js" defer></script>
+<script>
+const sb = window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co', 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+const $ = id => document.getElementById(id);
+const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+const appLang = (window.LNE_I18N && LNE_I18N.lang) || 'en';
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(c));
+  return n;
+}
+function fmtDate(d){ try { return new Date(String(d).slice(0, 10) + 'T00:00:00').toLocaleDateString(appLang === 'zh' ? 'zh-CN' : appLang, { month:'short', day:'numeric', year:'numeric' }); } catch(e){ return String(d); } }
+function num(label, v){ return el('div', { class:'num' }, [ el('b', { text:String(v), 'data-no-i18n':'' }), el('span', { text:T(label) }) ]); }
+
+function renderProgress(p){
+  const box = el('div', { class:'prog' });
+  box.appendChild(el('h3', { text:T('Last active day') }));
+  box.appendChild(el('div', { text:p.last_active_day ? fmtDate(p.last_active_day) : T('Nothing yet'), 'data-no-i18n':'' }));
+  box.appendChild(el('h3', { text:T('Goals') }));
+  const goals = p.goals_active || [];
+  if(!goals.length) box.appendChild(el('div', { class:'hint', text:T('No active goals.') }));
+  goals.forEach(g => {
+    const pct = g.total ? Math.round(g.done / g.total * 100) : 0;
+    box.appendChild(el('div', { class:'goal' }, [
+      el('div', { text:g.subject, 'data-no-i18n':'' }),
+      el('div', { class:'hint', text:g.done + ' / ' + g.total + (g.deadline ? ' · ' + T('Deadline') + ' ' + fmtDate(g.deadline) : ''), 'data-no-i18n':'' }),
+      el('div', { class:'bar' }, [ el('i', { style:'width:' + pct + '%' }) ])
+    ]));
+  });
+  box.appendChild(el('div', { class:'hint', text:T('Goals completed') + ': ' + p.goals_completed, 'data-no-i18n':'' }));
+  const tp = p.topics || {};
+  box.appendChild(el('h3', { text:T('Review topics') }));
+  const g1 = el('div', { class:'grid' });
+  [['New', tp.new], ['Learning', tp.learning], ['Practising', tp.practising], ['Confident', tp.confident], ['Mastered', tp.mastered]].forEach(x => g1.appendChild(num(x[0], x[1] || 0)));
+  box.appendChild(g1);
+  box.appendChild(el('div', { class:'hint', text:T('Review answers in the last 7 days') + ': ' + p.reviews_last_7_days, 'data-no-i18n':'' }));
+  const at = p.attendance_30_days || {};
+  box.appendChild(el('h3', { text:T('Attendance, last 30 days') }));
+  const g2 = el('div', { class:'grid' });
+  [['Present', at.present], ['Late', at.late], ['Absent', at.absent]].forEach(x => g2.appendChild(num(x[0], x[1] || 0)));
+  box.appendChild(g2);
+  box.appendChild(el('h3', { text:T('Overdue class work') }));
+  box.appendChild(el('div', { text:String(p.overdue_work), 'data-no-i18n':'' }));
+  return box;
+}
+
+async function setView(kind){
+  try { await sb.auth.updateUser({ data:{ account_type: kind } }); } catch(e){}
+  try { if(kind === 'parent') localStorage.setItem('lne_view', 'parent'); else localStorage.removeItem('lne_view'); } catch(e){}
+}
+$('toLearner').onclick = async () => { await setView('learner'); window.location.href = 'skillstream-dashboard.html'; };
+async function load(){
+  const r = await sb.rpc('family_my_links');
+  if(r.error || !r.data) throw (r.error || new Error('no data'));
+  const kids = r.data.children || [], box = $('kids'); box.textContent = '';
+  $('empty').classList.toggle('hidden', kids.length > 0);
+  await Promise.all(kids.map(async k => {
+    const x = await sb.rpc('family_child_progress', { p_child:k.child_id });
+    const p = x.data || null, slot = el('div', { class:'hidden' }), card = el('div', { class:'kid' });
+    card.appendChild(el('h3', { text:k.name, 'data-no-i18n':'' }));
+    if(p){
+      const pills = el('div', { class:'row' });
+      pills.appendChild(el('span', { class:'pill', text:T('Last active day') + ': ' + (p.last_active_day ? fmtDate(p.last_active_day) : T('Nothing yet')), 'data-no-i18n':'' }));
+      pills.appendChild(el('span', { class:'pill', text:T('Goals') + ': ' + (p.goals_active || []).length, 'data-no-i18n':'' }));
+      pills.appendChild(el('span', { class:'pill' + (p.overdue_work > 0 ? ' warn' : ''), text:T('Overdue class work') + ': ' + p.overdue_work, 'data-no-i18n':'' }));
+      card.appendChild(pills);
+      const more = el('button', { class:'btn alt', type:'button', text:T('See progress') });
+      more.onclick = () => { if(slot.classList.contains('hidden')){ slot.textContent = ''; slot.appendChild(renderProgress(p)); slot.classList.remove('hidden'); } else slot.classList.add('hidden'); };
+      card.appendChild(more); card.appendChild(slot);
+    } else card.appendChild(el('p', { class:'hint', text:T('Something went wrong. Please try again.') }));
+    box.appendChild(card);
+  }));
+}
+(async function(){
+  const s = await sb.auth.getSession();
+  if(!(s.data && s.data.session)){ window.location.href = 'skillstream-login.html'; return; }
+  const q = new URLSearchParams(location.search).get('as');
+  if(q === 'parent') await setView('parent');
+  if(q === 'learner'){ await setView('learner'); window.location.href = 'skillstream-dashboard.html'; return; }
+  let teacher = false;
+  try { const pr = await sb.from('profiles').select('role').eq('id', s.data.session.user.id).maybeSingle(); teacher = !!(pr.data && pr.data.role === 'teacher'); } catch(e){}
+  if(teacher){ window.location.href = 'skillstream-teacher-dashboard.html'; return; }
+  await load();
+  $('loading').classList.add('hidden'); $('main').classList.remove('hidden');
+})().catch(e => { try { console.error('LNE error', e); } catch(x){} $('loading').classList.add('hidden'); $('err').classList.remove('hidden'); });
+</script>
+</body>
+</html>

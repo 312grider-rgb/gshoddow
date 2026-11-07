@@ -164,6 +164,11 @@ async function init(){
   const { data: profile } = await sb.from('profiles').select('full_name, role').eq('id', session.user.id).maybeSingle();
   window._homeName = profile?.full_name ? profile.full_name.split(' ')[0] : '';
   window._homeRole = profile?.role || 'student';
+  try {
+    const md = session.user.user_metadata || {};
+    if(md.account_type === 'parent' && window._homeRole !== 'teacher' && window._homeRole !== 'admin'){ localStorage.setItem('lne_view', 'parent'); window.location.replace('skillstream-parent-home.html'); return; }
+    if(window._homeRole === 'teacher') localStorage.removeItem('lne_view');
+  } catch(e){}
 
   document.getElementById('viewsLoading').style.display = 'none';
   applyHomeLanguage(localStorage.getItem('language') || 'en');
@@ -232,23 +237,23 @@ function applyHomeLanguage(lang){
 
   const role = window._homeRole || 'student';
   document.getElementById('viewCards').innerHTML = `
-    <a class="view-card ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html">
+    ${role === 'teacher' ? '' : `<a class="view-card ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html">
       ${role === 'student' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.studentTitle}. ${t.studentDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
       <div class="icon">🎓</div>
       <h2>${t.studentTitle}</h2>
       <p>${t.studentDesc}</p>
       <div class="go">${t.studentGo}</div>
-    </a>
+    </a>`}
 
-    <a class="view-card ${role === 'teacher' ? 'suggested' : ''}" href="skillstream-teacher-dashboard.html">
+    ${role === 'student' ? '' : `<a class="view-card ${role === 'teacher' ? 'suggested' : ''}" href="skillstream-teacher-dashboard.html">
       ${role === 'teacher' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.teacherTitle}. ${t.teacherDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
       <div class="icon">🧑‍🏫</div>
       <h2>${t.teacherTitle}</h2>
       <p>${t.teacherDesc}</p>
       <div class="go">${t.teacherGo}</div>
-    </a>
+    </a>`}
 
     <a class="view-card" href="skillstream-ai-hub.html">
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.aiTitle}. ${t.aiDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>

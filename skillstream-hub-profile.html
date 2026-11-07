@@ -45,7 +45,7 @@
     var role = cached === 'teacher' ? 'teacher' : 'student';
     show(role);
     var uid = s.data.session.user.id, pf = document.getElementById('portfolioRoot'), pfDone = false;
-    function portfolio(r){ if(r === 'student' && !pfDone){ pfDone = true; try { LNE_PORTFOLIO.mount(pf, sb, uid); } catch(e){} } if(r === 'teacher'){ pf.dataset.off = '1'; pf.textContent = ''; } }
+    function portfolio(r){ try { if(localStorage.getItem('lne_view') === 'parent'){ pf.dataset.off = '1'; pf.textContent = ''; return; } } catch(e){} if(r === 'student' && !pfDone){ pfDone = true; try { LNE_PORTFOLIO.mount(pf, sb, uid); } catch(e){} } if(r === 'teacher'){ pf.dataset.off = '1'; pf.textContent = ''; } }
     if(cached === 'student') portfolio('student');                              // show something at once, then correct it if the real role differs
     try {
       var r = await sb.from('profiles').select('role').eq('id', s.data.session.user.id).maybeSingle();

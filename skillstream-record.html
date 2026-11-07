@@ -203,7 +203,7 @@ function el(tag, props, kids){
 }
 function say(id, text, ok){ const m = $(id); m.className = 'msg ' + (ok ? 'ok' : 'err'); m.textContent = text; }
 const B = window.LNEBoard, COLORS = B.COLORS, COLOR_NAMES = Object.keys(COLORS);
-const MAX_MS = 20 * 60 * 1000, MIN_SCENE_MS = 2000, MAX_SCENES = 12, MAX_AUDIO = 4 * 1024 * 1024, SCENE_MAX_MS = 12 * 60 * 1000, VOICE_BPS = 32000, MAX_JSON = 380000;
+const MAX_MS = 20 * 60 * 1000, MIN_SCENE_MS = 2000, MAX_SCENES = 12, MAX_AUDIO = 4 * 1024 * 1024, SCENE_MAX_MS = 7 * 60 * 1000, VOICE_BPS = 64000, MAX_JSON = 380000;
 const SIZES = [['S', 3, 22], ['M', 6, 32], ['L', 10, 46]];
 const TOOLS = [['pen','Pen'],['eraser','Eraser'],['line','Line'],['arrow','Arrow'],['rect','Box'],['circle','Circle'],['text','Text']];
 
@@ -407,14 +407,14 @@ function tickUi(){
   $('timer').textContent = fmt(clock());
   const left = MAX_MS - usedMs() - clock();
   $('leftTxt').textContent = left < 120000 ? (fmt(Math.max(0, left)) + ' ' + T('left')) : '';
-  if(cur.state === 'rec' && clock() >= SCENE_MAX_MS){ say('msg', T('This scene reached 12 minutes, so it was finished. Start a new scene to continue.'), false); finishScene(); return; }
+  if(cur.state === 'rec' && clock() >= SCENE_MAX_MS){ say('msg', T('This scene reached 7 minutes, so it was finished. Start a new scene to continue.'), false); finishScene(); return; }
   if(cur.state === 'rec' && left <= 0){ say('msg', T('You reached 20 minutes. This is the end of the lesson.'), false); finishScene(); }
 }
 setInterval(tickUi, 250);
 
 /* ---------- voice quality: gentle filters, live level, 5-second test ---------- */
 // no echo filter (nobody plays sound back here, and it makes voices thin); light noise filter; automatic level so quiet voices are lifted
-const MIC_OPTS = { channelCount:1, echoCancellation:false, noiseSuppression:true, autoGainControl:true };
+const MIC_OPTS = { channelCount:1, sampleRate:{ ideal:48000 }, sampleSize:{ ideal:16 }, echoCancellation:false, noiseSuppression:true, autoGainControl:true };
 let mAc = null, mRaf = 0, mPeak = 0;
 function setMeter(v){
   const m = $('meter'); $('meterFill').style.width = Math.round(Math.min(1, v) * 100) + '%';
@@ -695,7 +695,7 @@ $('aiGo').onclick = async () => {
   if(mode !== 'draw' && window.LNE_MATH){      // maths typed in: solve it here, exactly, with no AI request
     const ms = LNE_MATH.solve(topic, { check:T('Check'), none:T('No solution'), every:T('Every number is a solution'), div0:T('Cannot divide by zero') });
     if(ms){
-      const rg0 = freeRegion(), raw = JSON.stringify({ say:ms.say, items:ms.lines.map(l => ({ t:'text', s:l.s.slice(0, 60), size:28, c:l.c })) });
+      const rg0 = freeRegion(), raw = JSON.stringify({ say:ms.say, items:ms.lines.map(l => ({ t:'text', s:l.s.slice(0, 60), size:20, c:l.c })) });
       const its = B.parseDrawing(raw, W, H, rg0, { stack:true });
       if(its){ aiPrev = its; aiPrevSay = ms.say; aiShowAsk(true); say('aiMsg', T('Solved on your phone, exactly. No AI request used. Add it, or discard it.'), true); redraw(); $('aiAskRow').scrollIntoView({ block:'nearest' }); return; }
     }

@@ -595,7 +595,7 @@ $('explain').onclick = async () => {
   if(window.LNE_MATH){      // maths typed in: solve it here, exactly, one step at a time, with no AI request
     const ms = LNE_MATH.solve(topic, { check:T('Check'), none:T('No solution'), every:T('Every number is a solution'), div0:T('Cannot divide by zero') });
     if(ms){
-      const n = ms.lines.length, gap = Math.max(40, Math.min(70, Math.floor((H - 100) / n))), raw = JSON.stringify({ title:topic.slice(0, 60), steps:ms.lines.map((l, k) => ({ say:l.s.slice(0, 120), items:[{ t:'text', x:40, y:40 + k * gap, s:l.s.slice(0, 60), size:28, c:l.c, a:'l', w:W - 80 }] })) });
+      const n = ms.lines.length, gap = Math.max(30, Math.min(44, Math.floor((H - 60) / n))), raw = JSON.stringify({ title:topic.slice(0, 60), steps:ms.lines.map((l, k) => ({ say:l.s.slice(0, 120), items:[{ t:'text', x:28, y:28 + k * gap, s:l.s.slice(0, 60), size:20, c:l.c, a:'l', w:W - 56 }] })) });
       const bm = parseBoard(raw);
       if(bm){
         $('aiDetails').classList.add('hidden'); ai = bm; aiIdx = 0; say('aiMsg', T('Solved on your phone, exactly. No AI request used.'), true); $('player').classList.remove('hidden');
