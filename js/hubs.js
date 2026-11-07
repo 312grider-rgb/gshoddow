@@ -145,6 +145,7 @@
     var icons = window.LNE_ICONS || {};
     var root = document.getElementById('hubRoot'); if (!root) return;
     root.textContent = '';
+    var art = ({ learn: 'city', community: 'earth', profile: 'tree' })[key]; if (art) { var ab = document.createElement('div'); ab.className = 'lne-art'; ab.setAttribute('data-art', art); ab.setAttribute('data-h', '150'); root.appendChild(ab); }
     var h1 = document.getElementById('hubTitle'); if (h1) h1.textContent = def.title;
     var p = document.getElementById('hubIntro'); if (p) p.textContent = def.intro;
     var tt = def.title + ' — Learning Never Ends'; document.title = tt;

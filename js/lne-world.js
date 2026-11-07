@@ -34,6 +34,25 @@
     } catch (e) {}
   }
   function ready0(fn) { if (d.body) fn(); else d.addEventListener('DOMContentLoaded', fn); }
+
+  /* ---- artwork banners: <div class="lne-art" data-art="hero" data-h="160"></div> becomes a small compressed picture.
+     Skipped entirely on Data Saver. Pictures are decoration only (empty alt text). ---- */
+  function fillArt() {
+    try {
+      var nodes = d.querySelectorAll('.lne-art[data-art]:not([data-done])');
+      for (var i = 0; i < nodes.length; i++) {
+        var el = nodes[i]; el.setAttribute('data-done', '1');
+        if (save) { el.style.display = 'none'; continue; }
+        var img = new Image(); img.alt = ''; img.decoding = 'async'; img.loading = 'lazy';
+        img.style.objectPosition = el.getAttribute('data-pos') || '50% 40%';
+        el.style.height = (parseInt(el.getAttribute('data-h'), 10) || 150) + 'px';
+        (function (box) { img.onerror = function () { box.style.display = 'none'; }; })(el);
+        img.src = 'css/art-' + el.getAttribute('data-art') + '.webp?v=1';
+        el.appendChild(img);
+      }
+    } catch (e) {}
+  }
+  ready0(function () { fillArt(); try { var t = 0; new MutationObserver(function () { if (t) return; t = setTimeout(function () { t = 0; fillArt(); }, 60); }).observe(d.body, { childList: true, subtree: true }); } catch (e) {} });
   ready0(function () { var n = 0, t = setInterval(function () { buildComfort(); if (d.getElementById('lneComfort') || ++n > 12) clearInterval(t); }, 250); });
   if (reduce || save || root.getAttribute('data-comfort') === 'calm') return;
 
