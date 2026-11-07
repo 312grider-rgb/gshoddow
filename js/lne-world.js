@@ -13,7 +13,29 @@
   try { weak = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2); } catch (e) {}
   var d = document, root = d.documentElement;
   window.LNE_WORLD = { on: false };
-  if (reduce || save) return;
+
+  /* ---- comfort: Auto (warm at night) / Day / Night / Calm (no motion). Kept on this phone. ---- */
+  function comfortMode() { try { return localStorage.getItem('lne_comfort') || 'auto'; } catch (e) { return 'auto'; } }
+  function effective(m) { if (m !== 'auto') return m; var h = new Date().getHours(); return (h >= 20 || h < 6) ? 'night' : 'day'; }
+  function applyComfort() { root.setAttribute('data-comfort', effective(comfortMode())); }
+  applyComfort();
+  function buildComfort() {
+    try {
+      if (!d.getElementById('lneTint')) { var tint = d.createElement('div'); tint.id = 'lneTint'; tint.setAttribute('aria-hidden', 'true'); d.body.appendChild(tint); }
+      if (d.getElementById('lneComfort')) return;
+      var sel = d.createElement('select'); sel.id = 'lneComfort'; sel.setAttribute('aria-label', 'Comfort'); sel.title = 'Comfort';
+      [['auto', 'Auto'], ['day', 'Day'], ['night', 'Night'], ['calm', 'Calm']].forEach(function (o) { var op = d.createElement('option'); op.value = o[0]; op.textContent = o[1]; sel.appendChild(op); });
+      sel.value = comfortMode();
+      sel.onchange = function () { var was = root.getAttribute('data-comfort'); try { localStorage.setItem('lne_comfort', sel.value); } catch (e) {} applyComfort(); if ((was === 'calm') !== (root.getAttribute('data-comfort') === 'calm')) location.reload(); };
+      var lang = d.getElementById('lneLang'), size = d.getElementById('lneSize');
+      if (lang && lang.parentNode) lang.parentNode.insertBefore(sel, lang.nextSibling);
+      else if (size && size.parentNode) size.parentNode.insertBefore(sel, size.nextSibling);
+      else return;
+    } catch (e) {}
+  }
+  function ready0(fn) { if (d.body) fn(); else d.addEventListener('DOMContentLoaded', fn); }
+  ready0(function () { var n = 0, t = setInterval(function () { buildComfort(); if (d.getElementById('lneComfort') || ++n > 12) clearInterval(t); }, 250); });
+  if (reduce || save || root.getAttribute('data-comfort') === 'calm') return;
 
   function ready(fn) { if (d.body) fn(); else d.addEventListener('DOMContentLoaded', fn); }
   ready(function () {
