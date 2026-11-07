@@ -49,7 +49,7 @@
     if(cached === 'student') portfolio('student');                              // show something at once, then correct it if the real role differs
     try {
       var r = await sb.from('profiles').select('role').eq('id', s.data.session.user.id).maybeSingle();
-      var real = r && r.data && r.data.role === 'teacher' ? 'teacher' : 'student';
+      var rr = r && r.data && r.data.role; var real = (rr === 'teacher' || rr === 'both' || (rr === 'admin' && cached === 'teacher')) ? 'teacher' : 'student';
       window.currentProfile = { role: real }; try { localStorage.setItem('lne_role', real); } catch(e){}
       if(real !== role) show(real);
       portfolio(real);

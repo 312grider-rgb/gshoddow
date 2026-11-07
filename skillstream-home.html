@@ -237,7 +237,7 @@ function applyHomeLanguage(lang){
 
   const role = window._homeRole || 'student';
   document.getElementById('viewCards').innerHTML = `
-    ${role === 'teacher' ? '' : `<a class="view-card ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html">
+    ${role === 'teacher' ? '' : `<a class="view-card ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html" onclick="try{localStorage.setItem('lne_role','student')}catch(e){}">
       ${role === 'student' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.studentTitle}. ${t.studentDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
       <div class="icon">🎓</div>
@@ -246,7 +246,7 @@ function applyHomeLanguage(lang){
       <div class="go">${t.studentGo}</div>
     </a>`}
 
-    ${role === 'student' ? '' : `<a class="view-card ${role === 'teacher' ? 'suggested' : ''}" href="skillstream-teacher-dashboard.html">
+    ${role === 'student' ? '' : `<a class="view-card ${role === 'teacher' ? 'suggested' : ''}" href="skillstream-teacher-dashboard.html" onclick="try{localStorage.setItem('lne_role','teacher')}catch(e){}">
       ${role === 'teacher' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.teacherTitle}. ${t.teacherDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
       <div class="icon">🧑‍🏫</div>
