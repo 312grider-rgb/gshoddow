@@ -1,0 +1,15 @@
+{
+  "name": "Learning Never Ends — Paradise Of The Eternal Learners",
+  "short_name": "Learning Never Ends",
+  "description": "Learn, teach and grow with AI, lessons, games and community.",
+  "start_url": "skillstream-home.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FBF9F4",
+  "theme_color": "#0E4A60",
+  "icons": [
+    { "src": "css/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "css/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "css/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
