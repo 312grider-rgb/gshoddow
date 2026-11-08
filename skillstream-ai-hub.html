@@ -584,7 +584,7 @@ async function initAuth(){
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   currentProfile = profile;
   window.currentProfile = profile; // exposed for js/nav.js role-aware bottom nav
-  try { const r = String((profile && profile.role) || '').toLowerCase(); if(r === 'teacher' || r === 'admin' || r === 'both') document.getElementById('teacherAiCard').style.display = 'block'; } catch(e){}
+  try { const r = String((profile && profile.role) || '').toLowerCase(); let seen = ''; try { seen = localStorage.getItem('lne_role') || ''; } catch(e){} if(r === 'teacher' || r === 'both' || (r === 'admin' && seen === 'teacher')) document.getElementById('teacherAiCard').style.display = 'block'; } catch(e){}
 
   sb.auth.onAuthStateChange((event, session)=>{
     if(!session){ window.location.href = 'skillstream-login.html'; }
