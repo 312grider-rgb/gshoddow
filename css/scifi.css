@@ -181,3 +181,14 @@ html #aiTeacherPanel{background:var(--visor)!important}
 /* ---- logo on the entering screen and the sign-in page ---- */
 .lne-enter img{width:min(86vw,420px)!important;max-width:86vw!important;height:auto!important;border-radius:18px;box-shadow:0 0 40px rgba(92,200,255,.45)}
 .lne-logo-hero{display:block;width:min(100%,420px);height:auto;margin:6px auto 16px;border-radius:18px;box-shadow:0 0 36px rgba(92,200,255,.4)}
+
+/* ---- AI guide tip and level ring on the Daily mission ---- */
+.lne-guide{display:flex;gap:12px;align-items:center;text-decoration:none;margin:0 0 12px;padding:10px 12px;border-radius:16px;background:#EFF1FF;border:1px solid #C9CDF7}
+.lne-guide img{width:44px;height:44px;border-radius:50%;flex:none;border:2px solid #5CC8FF;box-shadow:0 0 12px rgba(92,200,255,.65);object-fit:cover}
+.lne-guide .lg-tx{min-width:0;flex:1}
+.lne-guide b{display:block;font-size:13px;color:#232869!important}
+.lne-guide span{display:block;font-size:13px;line-height:1.45;color:#4A4F86!important}
+.lne-mission .lm-ring{width:58px;height:58px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:conic-gradient(#C9A653 var(--p,0%),#E3E0FA 0)}
+.lne-mission .lm-ring i{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font:800 18px/1 'Fraunces',Georgia,serif;font-style:normal;color:#232869}
+.lne-mission .lm-rank{margin-top:6px;font-size:13px;font-weight:700;color:#7A5C16}
+.lne-mission .lm-rank b{font-size:13px;color:#7A5C16;font-family:inherit}
