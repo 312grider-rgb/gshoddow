@@ -5,7 +5,7 @@
    Loaded on every page by js/i18n.js after universe.css. Looks only; no layout or behaviour.
    ========================================================================== */
 html:root{
-  --silver:#E8ECF3; --cream:#F3EFE6; --paper:#FBF9F4; --edge:#D3D9E4; --visor:#0E4A60; --visor-2:#135A70;
+  --silver:#E8ECF3; --cream:#F3EFE6; --paper:#FBF9F4; --edge:#D3D9E4; --visor:#2B3399; --visor-2:#4A47C6;
   --gold:#C9A653; --gold-text:#8A6A1F; --eye:#12A9E0; --ink:#141F38;
 }
 /* ---- the page: silver light at the top melting into warm cream ---- */
@@ -44,7 +44,7 @@ html .uv-sky{background-image:var(--uv-star),linear-gradient(160deg,var(--visor)
 html .lt-card{background:linear-gradient(135deg,var(--visor),var(--visor-2));border:1px solid rgba(201,166,83,.45);box-shadow:0 8px 22px rgba(15,24,48,.22)}
 
 /* ---- bottom navigation: visor navy, gold when open ---- */
-html .ln-bottom-nav{background:rgba(14,74,96,.97);border-top:1px solid rgba(201,166,83,.8);box-shadow:0 -6px 18px rgba(14,60,80,.22)}
+html .ln-bottom-nav{background:rgba(43,51,153,.97);border-top:1px solid rgba(201,166,83,.8);box-shadow:0 -6px 18px rgba(14,60,80,.22)}
 @media (min-width:900px){html .ln-bottom-nav{border:1px solid rgba(201,166,83,.7);border-bottom:0}}
 html .ln-nav-item{color:#C9D2E8}
 html .ln-nav-item+.ln-nav-item{box-shadow:inset 1px 0 0 rgba(201,166,83,.18)}
@@ -105,11 +105,11 @@ html[data-page="skillstream-login"] body::before,html[data-page="skillstream-sig
 html[data-page="skillstream-profile"] button.btn.outline{color:#A8402A!important}
 
 /* ---- artwork banners (js/lne-world.js fills them; empty and invisible until a picture loads) ---- */
-.lne-art{position:relative;border-radius:16px;overflow:hidden;margin:0 0 14px;border:1px solid rgba(201,166,83,.7);background:#135A70;
+.lne-art{position:relative;border-radius:16px;overflow:hidden;margin:0 0 14px;border:1px solid rgba(201,166,83,.7);background:#4A47C6;
   box-shadow:0 8px 20px rgba(14,60,80,.20)}
 .lne-art:not([data-done]){min-height:0;border:0;box-shadow:none;background:none}
 .lne-art img{width:100%;height:100%;object-fit:cover;display:block}
-.lne-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(10,52,68,0) 55%,rgba(10,52,68,.45) 100%)}
+.lne-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(26,31,110,0) 55%,rgba(26,31,110,.45) 100%)}
 
 
 /* chess: the join row must not push the page sideways */
