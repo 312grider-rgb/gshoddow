@@ -92,7 +92,7 @@
       if (!sessionStorage.getItem('lne_entered')) {
         sessionStorage.setItem('lne_entered', '1');
         var ov = d.createElement('div'); ov.className = 'lne-enter'; ov.setAttribute('aria-hidden', 'true');
-        ov.innerHTML = '<div class="lne-enter-ring"></div><div class="lne-enter-t">Entering the Universe</div>';
+        ov.innerHTML = (save ? '' : '<img src="css/logo-full.webp?v=1" alt="" width="420" height="280">') + '<div class="lne-enter-ring"></div><div class="lne-enter-t">Entering the Universe</div>';
         d.body.appendChild(ov); setTimeout(function () { try { ov.remove(); } catch (e) { ov.style.display = 'none'; } }, 1500);
       }
     } catch (e) {}
