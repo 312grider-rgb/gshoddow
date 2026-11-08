@@ -44,11 +44,26 @@
         var dt = new Date(), day = Math.floor(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()) / 86400000), st = {};
         try { st = JSON.parse(localStorage.getItem('lne_puzzle') || '{}') || {}; } catch (e) {}
         var done = st.day === day && (st.res || []).length >= 3, streak = (st.last === day || st.last === day - 1) ? (st.streak || 0) : 0;
+        var xp = Math.max(0, parseInt(st.xp, 10) || 0), RK = [['Cadet', 0], ['Pilot', 60], ['Navigator', 180], ['Engineer', 400], ['Commander', 800], ['Admiral', 1500]], ri = 0;
+        RK.forEach(function (r, k) { if (xp >= r[1]) ri = k; });
+        var nx = RK[ri + 1], pc = nx ? Math.min(100, Math.round((xp - RK[ri][1]) / (nx[1] - RK[ri][1]) * 100)) : 100;
+        /* the AI guide: one short, kind tip that follows how the day is going */
+        var g = d.createElement('a'); g.className = 'lne-guide'; g.href = 'skillstream-ai-hub.html';
+        if (!save) { var gi = new Image(); gi.alt = ''; gi.width = 44; gi.height = 44; gi.src = 'css/logo-mark.png?v=2'; g.appendChild(gi); }
+        var gt = d.createElement('div'); gt.className = 'lg-tx';
+        var gb = d.createElement('b'); gb.textContent = 'Your AI guide'; gt.appendChild(gb);
+        var gs = d.createElement('span'); gs.textContent = done ? 'Mission complete. Great work, see you tomorrow.' : (streak > 0 ? 'Your streak is alive. Today\'s mission keeps it going.' : 'Three puzzles are waiting. A few minutes keeps your learning sharp.'); gt.appendChild(gs);
+        g.appendChild(gt); el.appendChild(g);
         var a = d.createElement('a'); a.className = 'lne-mission'; a.href = 'skillstream-puzzle.html';
-        var ic = d.createElement('div'); ic.className = 'lm-ic'; ic.textContent = '🪐'; a.appendChild(ic);
+        var ic = d.createElement('div'); ic.className = 'lm-ring'; ic.style.setProperty('--p', pc + '%'); ic.setAttribute('aria-hidden', 'true');
+        var ii = d.createElement('i'); ii.textContent = String(ri + 1); ii.setAttribute('data-no-i18n', ''); ic.appendChild(ii); a.appendChild(ic);
         var box = d.createElement('div'); box.className = 'lm-tx';
         var h = d.createElement('h3'); h.textContent = 'Daily mission'; box.appendChild(h);
         var p = d.createElement('p'); p.textContent = 'Three new puzzles, a few minutes. Keep your streak alive.'; box.appendChild(p);
+        var rk = d.createElement('div'); rk.className = 'lm-rank';
+        var rn = d.createElement('span'); rn.textContent = RK[ri][0]; rk.appendChild(rn);
+        if (nx) { var dot = d.createElement('span'); dot.textContent = ' · '; dot.setAttribute('data-no-i18n', ''); rk.appendChild(dot); var pb = d.createElement('b'); pb.textContent = String(nx[1] - xp); pb.setAttribute('data-no-i18n', ''); rk.appendChild(pb); var pt = d.createElement('span'); pt.textContent = ' points to go'; rk.appendChild(pt); }
+        box.appendChild(rk);
         var m = d.createElement('div'); m.className = 'lm-meta';
         var b = d.createElement('b'); b.textContent = String(streak); b.setAttribute('data-no-i18n', ''); m.appendChild(b);
         var sp = d.createElement('span'); sp.textContent = 'Day streak'; m.appendChild(sp);
