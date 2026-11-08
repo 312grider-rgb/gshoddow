@@ -263,6 +263,11 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
     <h3>🔮 Future Architect</h3>
     <div class="desc" style="margin-bottom:0;">Learn to understand change, spot opportunities, compare possible futures, and plan and test the future you want.</div>
   </a>
+  <a class="card" id="teacherAiCard" href="skillstream-teacher-ai.html" style="display:none; text-decoration:none; color:inherit; border:2px solid var(--gold-light);">
+    <div class="kicker">For teachers</div>
+    <h3>🧑‍🏫 Teacher AI</h3>
+    <div class="desc" style="margin-bottom:0;">Lesson plans, quizzes, a lesson that writes, draws and speaks on the board, and advice about your students.</div>
+  </a>
   <div class="grp-h">AI Learning</div>
   <div class="tabs">
     <button class="tab-btn active" id="tabTeacherBtn" onclick="switchTab('teacher')">🧑‍🏫 AI Teacher</button>
@@ -579,6 +584,7 @@ async function initAuth(){
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   currentProfile = profile;
   window.currentProfile = profile; // exposed for js/nav.js role-aware bottom nav
+  try { const r = String((profile && profile.role) || '').toLowerCase(); if(r === 'teacher' || r === 'admin' || r === 'both') document.getElementById('teacherAiCard').style.display = 'block'; } catch(e){}
 
   sb.auth.onAuthStateChange((event, session)=>{
     if(!session){ window.location.href = 'skillstream-login.html'; }
