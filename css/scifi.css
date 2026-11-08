@@ -29,6 +29,7 @@ html header.top{position:relative;overflow:hidden;
   border-bottom:1px solid rgba(201,166,83,.85);box-shadow:0 6px 18px rgba(15,24,48,.18)}
 html header.top::after{display:none}
 html header.top .eyebrow{letter-spacing:2.4px;color:#E4C583}
+html header.top .eyebrow::before{content:"";display:inline-block;width:30px;height:23px;margin-inline-end:9px;vertical-align:-6px;background:url(logo-mark.png) center/contain no-repeat}
 
 /* ---- panels: soft paper with a silver edge and a gentle shadow ---- */
 html .card,html .panel,html .view-card,html .hub-card,html .mode-card,html .teacher-card,html .convo-card{
