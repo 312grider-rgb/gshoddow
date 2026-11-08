@@ -29,7 +29,7 @@ html header.top{position:relative;overflow:hidden;
   border-bottom:1px solid rgba(201,166,83,.85);box-shadow:0 6px 18px rgba(15,24,48,.18)}
 html header.top::after{display:none}
 html header.top .eyebrow{letter-spacing:2.4px;color:#E4C583}
-html header.top .eyebrow::before{content:"";display:inline-block;width:30px;height:23px;margin-inline-end:9px;vertical-align:-6px;background:url(logo-mark.png) center/contain no-repeat}
+html header.top .eyebrow::before{content:"";display:inline-block;width:26px;height:26px;border-radius:7px;margin-inline-end:9px;vertical-align:-8px;background:url(logo-mark.png) center/contain no-repeat}
 
 /* ---- panels: soft paper with a silver edge and a gentle shadow ---- */
 html .card,html .panel,html .view-card,html .hub-card,html .mode-card,html .teacher-card,html .convo-card{
@@ -67,11 +67,11 @@ html.lne-warping body>*{transition:opacity .2s ease;opacity:0}
 
 /* ---- welcome and sign-in screens wear the picture, softly dimmed so the cards stay easy to read ---- */
 html[data-page="skillstream-login"] body::before,html[data-page="skillstream-signup"] body::before{background:
-    linear-gradient(180deg,rgba(10,52,68,.35) 0%,rgba(10,52,68,.70) 62%,rgba(10,52,68,.85) 100%),url(art-welcome.webp) center top/cover no-repeat}
+    linear-gradient(180deg,#2F3CB5 0%,#1A1F7E 58%,#101456 100%)}
 
 /* ---- entering moment ---- */
 .lne-enter{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:none;
-  background:radial-gradient(ellipse at center,#135A70 0%,#0E4A60 75%);animation:lne-enter-out 1.4s ease forwards}
+  background:radial-gradient(ellipse at 50% 38%,#4A55D6 0%,#1A1F7E 72%);animation:lne-enter-out 1.4s ease forwards}
 .lne-enter-ring{width:76px;height:76px;border-radius:50%;border:2px solid rgba(18,169,224,.55);border-top-color:#E4C583;animation:lne-spin 1.2s linear infinite}
 @keyframes lne-spin{to{transform:rotate(360deg)}}
 .lne-enter-t{color:#E4C583;font:700 13px/1 Inter,system-ui,sans-serif;letter-spacing:3px;text-transform:uppercase}
@@ -101,7 +101,7 @@ html .lne-beam{display:none}
 html .view-card,html .hub-card,html .card,html .panel{box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 8px 22px rgba(10,8,40,.36),0 0 0 1px rgba(228,197,131,.16)}
 /* welcome and sign-in screens wear the picture, softly dimmed so the cards stay easy to read */
 html[data-page="skillstream-login"] body::before,html[data-page="skillstream-signup"] body::before{background:
-    linear-gradient(180deg,rgba(31,28,80,.40) 0%,rgba(31,28,80,.72) 62%,rgba(31,28,80,.86) 100%),url(art-welcome.webp) center top/cover no-repeat}
+    linear-gradient(180deg,#2F3CB5 0%,#1A1F7E 58%,#101456 100%)}
 html[data-page="skillstream-profile"] button.btn.outline{color:#A8402A!important}
 
 /* ---- artwork banners (js/lne-world.js fills them; empty and invisible until a picture loads) ---- */
@@ -177,3 +177,7 @@ html[data-page="skillstream-teachers-directory"] div.empty{color:#5C5648!importa
 /* the same visor teal on the other dark cards and the AI Teacher button and panel */
 html .inspiration-card,html #aiTeacherFab{background:linear-gradient(135deg,var(--visor),var(--visor-2))!important}
 html #aiTeacherPanel{background:var(--visor)!important}
+
+/* ---- logo on the entering screen and the sign-in page ---- */
+.lne-enter img{width:min(86vw,420px)!important;max-width:86vw!important;height:auto!important;border-radius:18px;box-shadow:0 0 40px rgba(92,200,255,.45)}
+.lne-logo-hero{display:block;width:min(100%,420px);height:auto;margin:6px auto 16px;border-radius:18px;box-shadow:0 0 36px rgba(92,200,255,.4)}
