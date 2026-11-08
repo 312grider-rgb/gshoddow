@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher AI — Paradise Of The Eternal Learners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<script src="js/lne-helpers.js"></script>
+<script src="js/lne-board.js"></script>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; --danger:#A33A2B; --muted:#6B6558; --sage:#6B8F71; }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:#2B2B2B; padding-bottom:96px;}
+  h1,h2,h3{font-family:'Fraunces',serif; color:var(--ink);}
+  header.top{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%); color:var(--cream); padding:20px 18px;}
+  header.top .eyebrow{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top h1{margin:0; font-size:24px; color:var(--cream);}
+  header.top p{margin:8px 0 0; font-size:14px; color:rgba(251,247,239,.82); line-height:1.5;}
+  .wrap{padding:12px; max-width:900px; margin:0 auto;}
+  .panel{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; min-width:0; overflow-wrap:anywhere;}
+  .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:8px 0;}
+  .act{min-width:44px; min-height:44px; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:6px 12px; font:inherit; font-size:14px; font-weight:600; color:var(--ink); cursor:pointer;}
+  .act.main{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .act.del{color:var(--danger); border-color:var(--danger);}
+  .act:disabled{opacity:.45;}
+  .tabs{display:flex; gap:6px; overflow-x:auto; padding:2px 0 8px; margin-bottom:4px;}
+  .tabs .act{white-space:nowrap; flex:none;}
+  .tabs .act[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink);}
+  label.lbl{display:block; font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin:10px 0 4px;}
+  input[type=text],input[type=number],textarea,select{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:12px; font:inherit; font-size:16px; background:#fff; color:#2B2B2B;}
+  textarea{min-height:64px; resize:vertical;}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  @media (max-width:420px){ .two{grid-template-columns:1fr;} }
+  .hint{font-size:13px; color:var(--muted); line-height:1.55;}
+  .msg{font-size:13.5px; margin-top:8px; min-height:18px;} .msg.err{color:var(--danger);} .msg.ok{color:#3E6B48;}
+  .hidden{display:none !important;}
+  .out h3{margin:16px 0 6px; font-size:17px;}
+  .out h3:first-child{margin-top:0;}
+  .out ul,.out ol{margin:4px 0 8px; padding-inline-start:22px; line-height:1.55;}
+  .step{border-inline-start:3px solid var(--gold); padding:4px 10px; margin:8px 0; background:#FBF4E2; border-radius:0 8px 8px 0;}
+  .step b{color:var(--ink);}
+  .q{border-top:1px solid var(--line); padding:10px 0;}
+  .q:first-child{border-top:0;}
+  .ans{color:#2E6B3F; font-weight:700;}
+  .key .ans-only{display:inline;} .nokey .ans-only{display:none;}
+  .pill{background:#FBF4E2; border-radius:999px; padding:3px 10px; font-size:12.5px; font-weight:700; color:#8A6A1F;}
+  table{border-collapse:collapse; width:100%; font-size:13.5px;}
+  th,td{border-bottom:1px solid var(--line); padding:8px 6px; text-align:start; vertical-align:top;}
+  th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted);}
+  .tbl{overflow-x:auto;}
+  .flag{display:inline-block; background:#FBE9E5; color:var(--danger); border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; margin:1px 2px 1px 0;}
+  .good{display:inline-block; background:#E6F2E8; color:#2E6B3F; border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; margin:1px 2px 1px 0;}
+  canvas{display:block; background:#fff; border-radius:8px; box-shadow:0 1px 6px rgba(0,0,0,.12); touch-action:none;}
+  #stage{display:flex; justify-content:center; background:#EFEAE0; border:1px solid var(--line); border-radius:14px; padding:8px; margin:8px 0; overflow:hidden;}
+  #sayLine{min-height:44px; font-size:15px; line-height:1.5; margin:6px 0;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  @media print{ body[data-pr="plan"] #qOutBox,body[data-pr="quiz"] #pOutBox{display:none !important;} body{background:#fff; padding:0;} header.top,.tabs,.noprint,.ln-bottom-nav,nav{display:none !important;} .panel{border:0; padding:0;} .panel.printable{display:block !important;} .panel:not(.printable){display:none !important;} .key .ans-only{display:inline;} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Teacher AI</h1>
+  <p>Plan a lesson, make a quiz, build a lesson that writes, draws and speaks on the board, and understand your students.</p>
+</header>
+<div class="wrap">
+
+  <div class="panel hidden" id="pBlock">
+    <p class="hint" style="margin:0" id="blockMsg">Only teachers can use Teacher AI.</p>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="tabs" role="group" aria-label="Teacher AI tools" id="tabs">
+      <button class="act" type="button" data-tab="plan" aria-pressed="true">Lesson plan</button>
+      <button class="act" type="button" data-tab="quiz" aria-pressed="false">Quiz &amp; worksheet</button>
+      <button class="act" type="button" data-tab="board" aria-pressed="false">Lesson on the board</button>
+      <button class="act" type="button" data-tab="students" aria-pressed="false">My students</button>
+    </div>
+
+    <!-- 1. LESSON PLAN -->
+    <div id="t-plan">
+      <div class="panel">
+        <label class="lbl" for="pTopic">Topic</label>
+        <input type="text" id="pTopic" maxlength="150" placeholder="e.g. Adding fractions with different denominators">
+        <div class="two">
+          <div><label class="lbl" for="pLevel">Learners</label>
+            <select id="pLevel"><option>Primary school</option><option>Middle school</option><option selected>Secondary school</option><option>University</option><option>Adults</option></select></div>
+          <div><label class="lbl" for="pMin">Minutes</label>
+            <input type="number" id="pMin" min="10" max="120" value="45" inputmode="numeric"></div>
+        </div>
+        <div class="two">
+          <div><label class="lbl" for="pLang">Write it in</label><select class="langSel" id="pLang"></select></div>
+          <div><label class="lbl" for="pNote">Anything special? (optional)</label><input type="text" id="pNote" maxlength="200" placeholder="e.g. mixed ability, no projector"></div>
+        </div>
+        <div class="row"><button class="act main" type="button" id="pGo">Make the lesson plan</button></div>
+        <div class="msg" id="pMsg" role="status"></div>
+        <p class="hint" style="margin:0">Each plan uses one of your AI requests for today.</p>
+      </div>
+      <div class="panel hidden printable" id="pOutBox">
+        <div class="out" id="pOut" data-no-i18n></div>
+        <div class="row noprint">
+          <button class="act" type="button" id="pCopy">Copy</button>
+          <button class="act" type="button" id="pPrint">Print</button>
+          <button class="act main" type="button" id="pToBoard">Make this lesson on the board</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. QUIZ -->
+    <div id="t-quiz" class="hidden">
+      <div class="panel">
+        <label class="lbl" for="qTopic">Topic</label>
+        <input type="text" id="qTopic" maxlength="150" placeholder="e.g. The water cycle">
+        <div class="two">
+          <div><label class="lbl" for="qLevel">Learners</label>
+            <select id="qLevel"><option>Primary school</option><option>Middle school</option><option selected>Secondary school</option><option>University</option><option>Adults</option></select></div>
+          <div><label class="lbl" for="qDiff">Difficulty</label>
+            <select id="qDiff"><option>Easy</option><option selected>Medium</option><option>Hard</option><option>Mixed (easy to hard)</option></select></div>
+        </div>
+        <div class="two">
+          <div><label class="lbl" for="qCount">How many questions</label>
+            <input type="number" id="qCount" min="3" max="15" value="8" inputmode="numeric"></div>
+          <div><label class="lbl" for="qType">Type</label>
+            <select id="qType"><option value="mcq">Multiple choice</option><option value="mixed">Multiple choice + short answer</option><option value="short">Short answer</option></select></div>
+        </div>
+        <label class="lbl" for="qLang">Write it in</label><select class="langSel" id="qLang"></select>
+        <div class="row"><button class="act main" type="button" id="qGo">Make the quiz</button></div>
+        <div class="msg" id="qMsg" role="status"></div>
+        <p class="hint" style="margin:0">Each quiz uses one of your AI requests for today. Always read the questions and the answer key before you use them.</p>
+      </div>
+      <div class="panel hidden printable" id="qOutBox">
+        <div class="row noprint"><label class="chk" style="display:flex;gap:8px;align-items:center;min-height:44px"><input type="checkbox" id="qKey" style="width:22px;height:22px"> Show the answer key</label></div>
+        <div class="out nokey" id="qOut" data-no-i18n></div>
+        <div class="row noprint">
+          <button class="act" type="button" id="qCopy">Copy worksheet</button>
+          <button class="act" type="button" id="qCopyKey">Copy with answers</button>
+          <button class="act" type="button" id="qPrint">Print</button>
+        </div>
+        <div class="row noprint" id="qAddRow">
+          <select id="qClass" aria-label="Class" style="flex:1; min-width:150px"></select>
+          <button class="act main" type="button" id="qAdd">Add to this class as a quiz</button>
+        </div>
+        <div class="msg" id="qAddMsg" role="status"></div>
+        <p class="hint noprint" style="margin:0">Only the multiple-choice questions can be added as a class quiz. Students then answer it in their class and it is marked automatically.</p>
+      </div>
+    </div>
+
+    <!-- 3. LESSON ON THE BOARD -->
+    <div id="t-board" class="hidden">
+      <div class="panel">
+        <label class="lbl" for="bTopic">What is the lesson about?</label>
+        <input type="text" id="bTopic" maxlength="150" placeholder="e.g. How the heart pumps blood">
+        <div class="two">
+          <div><label class="lbl" for="bLevel">Learners</label>
+            <select id="bLevel"><option>Primary school</option><option>Middle school</option><option selected>Secondary school</option><option>University</option><option>Adults</option></select></div>
+          <div><label class="lbl" for="bMin">Length</label>
+            <select id="bMin"><option value="3">About 3 minutes</option><option value="5" selected>About 5 minutes</option><option value="7">About 7 minutes</option></select></div>
+        </div>
+        <div class="two">
+          <div><label class="lbl" for="bLang">The teacher speaks and writes in</label><select class="langSel" id="bLang"></select></div>
+          <div><label class="lbl" for="bShape">Board</label><select id="bShape"><option value="tall">Tall (phones)</option><option value="wide">Wide</option></select></div>
+        </div>
+        <label class="lbl" for="bNote">Your notes for the AI (optional)</label>
+        <textarea id="bNote" maxlength="400" placeholder="e.g. Start with a real-life example. Include one diagram. Finish with a question."></textarea>
+        <div class="row"><button class="act main" type="button" id="bGo">Build the lesson</button></div>
+        <div class="msg" id="bMsg" role="status"></div>
+        <p class="hint" style="margin:0">The AI teacher writes on the board, draws and speaks. One lesson uses one AI request. The speaking uses the voice installed on this phone, so it costs nothing and sends nothing.</p>
+      </div>
+
+      <div class="panel hidden" id="bOutBox">
+        <h3 style="margin:0 0 4px" id="bTitle" data-no-i18n></h3>
+        <div id="stage"><canvas id="bCv" aria-label="The lesson board"></canvas></div>
+        <div id="sayLine" data-no-i18n></div>
+        <div class="row">
+          <button class="act" type="button" id="bPrev" aria-label="Previous scene">‹</button>
+          <button class="act main" type="button" id="bPlay">Play with voice</button>
+          <button class="act" type="button" id="bNext" aria-label="Next scene">›</button>
+          <label class="hint" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="bMute" style="width:20px;height:20px"> Silent</label>
+          <span class="pill" id="bInfo" data-no-i18n></span>
+        </div>
+        <div class="msg" id="bPlayMsg" role="status"></div>
+        <h3 style="font-size:16px;margin:14px 0 6px">Use it with your class</h3>
+        <label class="lbl" for="bClass">Class</label>
+        <select id="bClass"></select>
+        <div class="row"><button class="act main" type="button" id="bSend">Open in the recorder</button></div>
+        <div class="msg" id="bSendMsg" role="status"></div>
+        <p class="hint" style="margin:0">The recorder opens with these scenes as your unfinished lesson. You can listen to it, redo any scene with your own voice, and then post it to the class. The AI voice is for your preview only.</p>
+      </div>
+    </div>
+
+    <!-- 4. MY STUDENTS -->
+    <div id="t-students" class="hidden">
+      <div class="panel">
+        <label class="lbl" for="sClass">Class</label>
+        <select id="sClass"></select>
+        <div class="row"><button class="act main" type="button" id="sLoad">Show my students</button></div>
+        <div class="msg" id="sMsg" role="status"></div>
+        <p class="hint" style="margin:0">This reads the work in your class: assignments, grades and quizzes. Nothing is sent to the AI until you press the advice button.</p>
+      </div>
+      <div class="panel hidden" id="sBox">
+        <h3 style="margin:0 0 6px" id="sTitle" data-no-i18n></h3>
+        <div class="tbl"><table id="sTbl" data-no-i18n><thead><tr><th>Student</th><th>Work handed in</th><th>Average grade</th><th>Quizzes</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+        <label class="lbl" for="sAsk">Your question (optional)</label>
+        <input type="text" id="sAsk" maxlength="200" placeholder="e.g. How can I help the quiet students? (do not type names)">
+        <div class="row"><button class="act main" type="button" id="sAdvise">Get advice from the AI</button></div>
+        <div class="msg" id="sAdvMsg" role="status"></div>
+        <p class="hint" style="margin:0"><b>Privacy:</b> the AI only gets numbers for "Student 1, Student 2…". It never gets names, messages or anything students wrote. Names are put back on your phone. The advice is a starting point: you know your students best.</p>
+      </div>
+      <div class="panel hidden" id="sAdvBox"><div class="out" id="sAdv" data-no-i18n></div></div>
+    </div>
+  </div>
+</div>
+<script src="js/nav.js" defer></script>
+<script>
+const sb = window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co', 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+const $ = id => document.getElementById(id);
+const B = window.LNEBoard;
+function el(tag, props, kids){
+  const n = document.createElement(tag);
+  Object.keys(props || {}).forEach(k => { if(k === 'text') n.textContent = props[k]; else if(k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(c => n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
+  return n;
+}
+function say(id, text, ok){ const m = $(id); m.className = 'msg ' + (ok ? 'ok' : 'err'); m.textContent = text; }
+const LANGS = [['en','English','en-US'],['ar','Arabic','ar-SA'],['fr','French','fr-FR'],['es','Spanish','es-ES'],['zh','Simplified Chinese','zh-CN']];
+const LANG_NAME = {}, LANG_TAG = {}; LANGS.forEach(l => { LANG_NAME[l[0]] = l[1]; LANG_TAG[l[0]] = l[2]; });
+const appLang = (window.LNE_I18N && LNE_I18N.lang) || 'en';
+document.querySelectorAll('.langSel').forEach(s => { LANGS.forEach(l => s.appendChild(el('option', { value:l[0], text:l[1], 'data-no-i18n':'' }))); s.value = LANG_NAME[appLang] ? appLang : 'en'; });
+const clean = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n || 200);
+
+let me = null, classes = [], profile = null;
+window.lnAuthReady = (async () => {
+  const s = await sb.auth.getSession();
+  if(!(s.data && s.data.session)){ window.location.href = 'skillstream-login.html'; return; }
+  me = s.data.session.user;
+  const p = await sb.from('profiles').select('role').eq('id', me.id).maybeSingle();
+  profile = p.data || { role:'student' }; window.currentProfile = profile;
+  const role = String(profile.role || '').toLowerCase();
+  if(role !== 'teacher' && role !== 'admin' && role !== 'both'){
+    $('pBlock').classList.remove('hidden'); return;
+  }
+  const r = await sb.from('classrooms').select('id,name,subject').eq('teacher_id', me.id).order('name');
+  classes = r.data || [];
+  ['qClass','bClass','sClass'].forEach(id => {
+    const sel = $(id);
+    if(!classes.length){ sel.appendChild(el('option', { value:'', text:'No class yet', 'data-no-i18n':'' })); }
+    classes.forEach(c => sel.appendChild(el('option', { value:c.id, text:c.name, 'data-no-i18n':'' })));
+  });
+  $('app').classList.remove('hidden');
+  const want = new URLSearchParams(location.search).get('tab');
+  if(want && $('t-' + want)) showTab(want);
+})();
+
+function showTab(t){
+  document.querySelectorAll('#tabs .act').forEach(b => b.setAttribute('aria-pressed', b.getAttribute('data-tab') === t ? 'true' : 'false'));
+  ['plan','quiz','board','students'].forEach(x => $('t-' + x).classList.toggle('hidden', x !== t));
+  if(t !== 'board') stopSpeech();
+}
+$('tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if(b) showTab(b.getAttribute('data-tab')); });
+
+/* ---------- AI call + safe reading of the answer ---------- */
+async function askAI(prompt, maxTokens, feature){
+  const r = await fetch('/api/ask-ai', { method:'POST', headers:await aiHeaders(sb), body:JSON.stringify({ prompt, maxTokens, feature:feature || 'teacher' }) });
+  let d; try { d = await r.json(); } catch(e){ throw new Error('Something went wrong. Please try again.'); }
+  if(d.error) throw new Error(d.error);
+  return d.text || '';
+}
+function tidyJson(t){ return String(t).replace(/[\u0000-\u001f]+/g, ' ').replace(/,\s*([}\]])/g, '$1'); }
+function balancedEnd(str, a){
+  let depth = 0, inStr = false, esc = false;
+  for(let i = a; i < str.length; i++){
+    const ch = str[i];
+    if(inStr){ if(esc) esc = false; else if(ch === '\\') esc = true; else if(ch === '"') inStr = false; continue; }
+    if(ch === '"') inStr = true;
+    else if(ch === '{' || ch === '['){ depth++; }
+    else if(ch === '}' || ch === ']'){ depth--; if(depth === 0) return i + 1; }
+  }
+  return -1;
+}
+function readJson(raw){
+  const s = String(raw || '').replace(/```[a-z]*/gi, ' ');
+  let from = 0;
+  for(let n = 0; n < 6; n++){
+    const a = s.indexOf('{', from); if(a < 0) break;
+    const e = balancedEnd(s, a);
+    if(e > 0){ try { const o = JSON.parse(tidyJson(s.slice(a, e))); if(o && typeof o === 'object') return o; } catch(x){} }
+    from = a + 1;
+  }
+  return null;
+}
+const arr = (v, n, len) => (Array.isArray(v) ? v : []).slice(0, n || 20).map(x => clean(typeof x === 'object' && x ? (x.text || x.q || JSON.stringify(x)) : x, len || 300)).filter(Boolean);
+async function copyText(txt, msgId){
+  try { await navigator.clipboard.writeText(txt); say(msgId, 'Copied.', true); }
+  catch(e){ say(msgId, 'Could not copy. Select the text and copy it.', false); }
+}
+function lis(list, tag){ const l = el(tag || 'ul'); list.forEach(x => l.appendChild(el('li', { text:x }))); return l; }
+
+/* ---------- 1. lesson plan ---------- */
+let planText = '', planTopic = '';
+$('pGo').onclick = async () => {
+  const topic = clean($('pTopic').value, 150);
+  if(topic.length < 3){ say('pMsg', 'Please write the topic (at least 3 letters).', false); return; }
+  const mins = Math.max(10, Math.min(120, parseInt($('pMin').value, 10) || 45)), lang = LANG_NAME[$('pLang').value];
+  const prompt = 'You are an experienced teacher and curriculum coach. Make a practical lesson plan.\n' +
+    'Topic: ' + topic + '\nLearners: ' + $('pLevel').value + '\nLesson length: ' + mins + ' minutes\n' +
+    ($('pNote').value.trim() ? 'Teacher note: ' + clean($('pNote').value, 200) + '\n' : '') +
+    'Write ALL text in ' + lang + '. Be accurate, concrete and realistic for a classroom with little equipment.\n' +
+    'Reply with ONE JSON object only (no markdown, no code fences) in this format:\n' +
+    '{"title":"...","objectives":["by the end, students can ..."],"materials":["..."],"steps":[{"name":"Warm-up","minutes":5,"teacher":"what the teacher does and says","students":"what students do"}],"check":["a question that checks understanding"],"support":"how to help students who struggle","stretch":"how to challenge fast learners","homework":"short task"}\n' +
+    'Rules: 3 objectives; 4 to 7 steps whose minutes add up to ' + mins + '; 3 to 5 check questions with the answer in brackets.';
+  const go = $('pGo'); go.disabled = true; say('pMsg', 'The AI is planning…', true);
+  try {
+    const o = readJson(await askAI(prompt, 3500, 'teacher_plan'));
+    if(!o || !Array.isArray(o.steps) || !o.steps.length) throw new Error('The AI could not make this plan. Try again or change the topic.');
+    renderPlan(o, topic); say('pMsg', '', true);
+  } catch(e){ say('pMsg', e.message || 'Something went wrong. Please try again.', false); }
+  finally { go.disabled = false; }
+};
+function renderPlan(o, topic){
+  planTopic = topic;
+  const out = $('pOut'); out.textContent = '';
+  const lines = [];
+  const title = clean(o.title, 120) || topic; lines.push(title);
+  out.appendChild(el('h3', { text:title }));
+  const sec = (h, list) => { if(!list.length) return; out.appendChild(el('h3', { text:h })); out.appendChild(lis(list)); lines.push('', h.toUpperCase()); list.forEach(x => lines.push('- ' + x)); };
+  sec('Objectives', arr(o.objectives, 6, 200));
+  sec('Materials', arr(o.materials, 10, 120));
+  out.appendChild(el('h3', { text:'Steps' })); lines.push('', 'STEPS');
+  (o.steps || []).slice(0, 10).forEach((s, i) => {
+    s = s || {}; const nm = clean(s.name, 80) || ('Step ' + (i + 1)), mn = Math.max(0, Math.min(120, parseInt(s.minutes, 10) || 0));
+    const kids = [el('b', { text:nm + (mn ? ' (' + mn + ' min)' : '') })];
+    const t = clean(s.teacher, 400), st = clean(s.students, 400);
+    if(t) kids.push(el('div', { text:'Teacher: ' + t })); if(st) kids.push(el('div', { text:'Students: ' + st }));
+    out.appendChild(el('div', { class:'step' }, kids));
+    lines.push((i + 1) + '. ' + nm + (mn ? ' (' + mn + ' min)' : '')); if(t) lines.push('   Teacher: ' + t); if(st) lines.push('   Students: ' + st);
+  });
+  sec('Check understanding', arr(o.check, 8, 250));
+  [['Support', o.support], ['Stretch', o.stretch], ['Homework', o.homework]].forEach(p => {
+    const t = clean(p[1], 400); if(!t) return; out.appendChild(el('h3', { text:p[0] })); out.appendChild(el('p', { text:t, style:'margin:0' })); lines.push('', p[0].toUpperCase(), t);
+  });
+  planText = lines.join('\n');
+  $('pOutBox').classList.remove('hidden'); $('pOutBox').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+$('pCopy').onclick = () => copyText(planText, 'pMsg');
+$('pPrint').onclick = () => { document.body.setAttribute('data-pr', 'plan'); window.print(); };
+$('pToBoard').onclick = () => { $('bTopic').value = planTopic; $('bLevel').value = $('pLevel').value; $('bLang').value = $('pLang').value; showTab('board'); window.scrollTo({ top:0, behavior:'smooth' }); };
+
+/* ---------- 2. quiz ---------- */
+let quiz = null;
+$('qGo').onclick = async () => {
+  const topic = clean($('qTopic').value, 150);
+  if(topic.length < 3){ say('qMsg', 'Please write the topic (at least 3 letters).', false); return; }
+  const n = Math.max(3, Math.min(15, parseInt($('qCount').value, 10) || 8)), type = $('qType').value, lang = LANG_NAME[$('qLang').value];
+  const kind = type === 'mcq' ? 'ALL ' + n + ' questions are multiple choice' : type === 'short' ? 'ALL ' + n + ' questions are short-answer' : 'about two thirds multiple choice and the rest short-answer, ' + n + ' in total';
+  const prompt = 'You are an experienced teacher writing an assessment.\nTopic: ' + topic + '\nLearners: ' + $('qLevel').value + '\nDifficulty: ' + $('qDiff').value + '\n' +
+    'Write ALL text in ' + lang + '. Questions must be accurate, unambiguous and have exactly one correct answer.\n' + kind + '.\n' +
+    'Reply with ONE JSON object only (no markdown, no code fences) in this format:\n' +
+    '{"title":"...","mcq":[{"q":"question","choices":["A","B","C","D"],"correctIndex":0,"why":"one short reason"}],"short":[{"q":"question","answer":"model answer"}]}\n' +
+    'Rules: each multiple-choice question has exactly 4 choices, only one correct, correctIndex is 0 to 3, vary the position of the correct answer. Use an empty list for a type you were not asked for.';
+  const go = $('qGo'); go.disabled = true; say('qMsg', 'The AI is writing the quiz…', true);
+  try {
+    const o = readJson(await askAI(prompt, 4500, 'teacher_quiz'));
+    const mcq = (o && Array.isArray(o.mcq) ? o.mcq : []).slice(0, 15).map(x => {
+      const ch = arr(x && x.choices, 4, 120), ci = parseInt(x && x.correctIndex, 10), q = clean(x && x.q, 300);
+      return (q && ch.length === 4 && ci >= 0 && ci <= 3) ? { q, choices:ch, correctIndex:ci, why:clean(x.why, 200) } : null;
+    }).filter(Boolean);
+    const short = (o && Array.isArray(o.short) ? o.short : []).slice(0, 15).map(x => { const q = clean(x && x.q, 300), a = clean(x && x.answer, 300); return q ? { q, answer:a } : null; }).filter(Boolean);
+    if(!mcq.length && !short.length) throw new Error('The AI could not make this quiz. Try again or change the topic.');
+    quiz = { title:clean(o.title, 100) || topic, mcq, short };
+    renderQuiz(); say('qMsg', '', true);
+  } catch(e){ say('qMsg', e.message || 'Something went wrong. Please try again.', false); }
+  finally { go.disabled = false; }
+};
+function renderQuiz(){
+  const out = $('qOut'); out.textContent = '';
+  out.appendChild(el('h3', { text:quiz.title }));
+  out.appendChild(el('p', { class:'hint', text:'Name: ______________________    Date: ______________' }));
+  let n = 0; const L = 'ABCD';
+  quiz.mcq.forEach(q => {
+    n++; const box = el('div', { class:'q' }, [el('b', { text:n + '. ' + q.q })]);
+    q.choices.forEach((c, i) => box.appendChild(el('div', { text:L[i] + ') ' + c, style:'margin-inline-start:12px' })));
+    box.appendChild(el('div', { class:'ans ans-only', text:'Answer: ' + L[q.correctIndex] + (q.why ? ' — ' + q.why : '') }));
+    out.appendChild(box);
+  });
+  quiz.short.forEach(q => {
+    n++; const box = el('div', { class:'q' }, [el('b', { text:n + '. ' + q.q }), el('div', { text:'_______________________________________', style:'color:#bbb;margin-top:6px' })]);
+    box.appendChild(el('div', { class:'ans ans-only', text:'Answer: ' + q.answer }));
+    out.appendChild(box);
+  });
+  $('qKey').checked = false; out.className = 'out nokey';
+  $('qAddRow').classList.toggle('hidden', !quiz.mcq.length || !classes.length);
+  $('qOutBox').classList.remove('hidden'); $('qOutBox').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+$('qKey').onchange = () => { $('qOut').className = 'out ' + ($('qKey').checked ? 'key' : 'nokey'); };
+function quizText(withKey){
+  const L = 'ABCD', lines = [quiz.title, '', 'Name: ____________   Date: __________', '']; let n = 0;
+  quiz.mcq.forEach(q => { n++; lines.push(n + '. ' + q.q); q.choices.forEach((c, i) => lines.push('   ' + L[i] + ') ' + c)); if(withKey) lines.push('   Answer: ' + L[q.correctIndex] + (q.why ? ' — ' + q.why : '')); lines.push(''); });
+  quiz.short.forEach(q => { n++; lines.push(n + '. ' + q.q); if(withKey) lines.push('   Answer: ' + q.answer); else lines.push('   ______________________________'); lines.push(''); });
+  return lines.join('\n');
+}
+$('qCopy').onclick = () => quiz && copyText(quizText(false), 'qAddMsg');
+$('qCopyKey').onclick = () => quiz && copyText(quizText(true), 'qAddMsg');
+$('qPrint').onclick = () => { document.body.setAttribute('data-pr', 'quiz'); $('qOut').className = 'out ' + ($('qKey').checked ? 'key' : 'nokey'); window.print(); };
+$('qAdd').onclick = async () => {
+  const cid = $('qClass').value;
+  if(!quiz || !quiz.mcq.length || !cid){ say('qAddMsg', 'Choose a class first.', false); return; }
+  if(!confirm('Add ' + quiz.mcq.length + ' multiple-choice questions to this class as a quiz? Students will see it right away.')) return;
+  const b = $('qAdd'); b.disabled = true;
+  const r = await sb.from('quizzes').insert({ classroom_id:cid, title:quiz.title.slice(0, 100), questions:quiz.mcq.map(q => ({ q:q.q, choices:q.choices, correctIndex:q.correctIndex, points:1 })) });
+  b.disabled = false;
+  if(r.error) say('qAddMsg', r.error.message || 'Could not add the quiz.', false);
+  else say('qAddMsg', 'Added. Your students can take it in the class now.', true);
+};
+
+/* ---------- 3. lesson on the board ---------- */
+let lesson = null, bW = 600, bH = 800, player = null, speaking = false, voices = [];
+function loadVoices(){ try { voices = speechSynthesis.getVoices() || []; } catch(e){ voices = []; } }
+try { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; } catch(e){}
+function stopSpeech(){ try { speechSynthesis.cancel(); } catch(e){} }
+function speakScene(i){
+  stopSpeech();
+  if(!lesson || $('bMute').checked) return;
+  const s = lesson.scenes[i]; if(!s || !s.say) return;
+  try {
+    const u = new SpeechSynthesisUtterance(s.say), tag = LANG_TAG[lesson.lang] || 'en-US';
+    u.lang = tag; u.rate = 0.95;
+    const v = voices.find(x => x.lang && x.lang.toLowerCase().replace('_', '-') === tag.toLowerCase()) || voices.find(x => x.lang && x.lang.toLowerCase().startsWith(lesson.lang));
+    if(v) u.voice = v; else if(voices.length) say('bPlayMsg', 'This phone has no ' + LANG_NAME[lesson.lang] + ' voice installed. The lesson still plays in writing. You can add a voice in your phone settings (text-to-speech).', false);
+    speechSynthesis.speak(u);
+  } catch(e){}
+}
+function sceneMs(sayTxt, lang){
+  const units = lang === 'zh' ? clean(sayTxt, 400).length / 3.6 : clean(sayTxt, 400).split(' ').filter(Boolean).length / 2.2;
+  return Math.round(Math.max(5000, Math.min(45000, units * 1000 + 2200)));
+}
+function buildScenes(o, W, H){
+  const out = [];
+  (Array.isArray(o.scenes) ? o.scenes : []).slice(0, 8).forEach((sc, i) => {
+    sc = sc || {};
+    const sayTxt = clean(sc.say, 290), write = arr(sc.write, 5, 60), drawRaw = sc.draw && Array.isArray(sc.draw.items) ? sc.draw.items : (Array.isArray(sc.draw) ? sc.draw : []);
+    const hasDraw = drawRaw.length >= 2, ms = sceneMs(sayTxt || write.join(' '), o.lang);
+    const topH = hasDraw ? Math.round(H * 0.4) : H;
+    const textItems = write.map((s, k) => ({ t:'text', s, size:k === 0 ? 24 : 21, c:k === 0 ? 'blue' : 'black' }));
+    let items = [];
+    const tl = textItems.length ? B.parseDrawing(JSON.stringify({ items:textItems }), W, H, [0, 0, W, topH], { stack:true }) : null;
+    if(tl){ const n = tl.length; tl.forEach((it, k) => { it.at = Math.round(500 + k * (ms * 0.45 / Math.max(1, n))); it.d = 700; }); items = items.concat(tl); }
+    if(hasDraw){
+      const dr = B.parseDrawing(JSON.stringify({ items:drawRaw }), W, H, [0, Math.round(H * 0.42), W, H], {});
+      if(dr){ const m = dr.length; dr.forEach((it, k) => { it.at = Math.round(ms * 0.5 + k * (ms * 0.4 / Math.max(1, m))); it.d = 600; }); items = items.concat(dr); }
+    }
+    if(!items.length && !sayTxt) return;
+    out.push({ title:clean(sc.title, 55) || ('Part ' + (out.length + 1)), say:sayTxt, ms, audio:null, clear:true, items });
+  });
+  return B.cleanScenes(out, W, H);
+}
+$('bGo').onclick = async () => {
+  const topic = clean($('bTopic').value, 150);
+  if(topic.length < 3){ say('bMsg', 'Please write what the lesson is about (at least 3 letters).', false); return; }
+  const lang = $('bLang').value, mins = parseInt($('bMin').value, 10) || 5, n = mins <= 3 ? 3 : mins <= 5 ? 5 : 7;
+  const tall = $('bShape').value === 'tall'; bW = tall ? 600 : 1000; bH = tall ? 800 : 600;
+  const dw = bW, dh = Math.round(bH * 0.55);
+  const prompt = 'You are a warm, clear teacher giving a short lesson on a whiteboard. You write on the board, draw, and speak.\n' +
+    'Lesson: ' + topic + '\nLearners: ' + $('bLevel').value + '\n' + ($('bNote').value.trim() ? 'Teacher notes: ' + clean($('bNote').value, 400) + '\n' : '') +
+    'Make exactly ' + n + ' scenes, about ' + mins + ' minutes in total. Write ALL text, and what the teacher says, in ' + LANG_NAME[lang] + '.\n' +
+    'Each scene: "title" (max 5 words), "say" (what the teacher says aloud in a natural spoken voice, 2 to 4 short sentences, at most 280 characters), "write" (1 to 5 short lines written on the board, each at most 50 characters; the first line is the heading; for maths put each step on its own line), and optionally "draw" (a simple diagram).\n' +
+    'Structure: hook or question, explain step by step, one worked example, a quick check question, summary.\n' +
+    'Draw rules: include a diagram in 1 or 2 scenes only where a picture truly helps. Canvas is ' + dw + ' wide and ' + dh + ' tall. 4 to 10 items using ONLY these: ' +
+    '{"t":"text","x":..,"y":..,"s":"label","size":20,"c":"blue"} {"t":"box","x":..,"y":..,"w":..,"h":..,"s":"label","c":"green"} {"t":"arrow","x1":..,"y1":..,"x2":..,"y2":..,"c":"black"} {"t":"line","x1":..,"y1":..,"x2":..,"y2":..,"c":"black"} {"t":"circle","x":..,"y":..,"r":..,"c":"orange","f":false} {"t":"rect","x":..,"y":..,"w":..,"h":..,"c":"red","f":false}. ' +
+    'Colours: black, blue, red, green, orange, purple. Keep 30 units between items, never put an arrow through text.\n' +
+    'Reply with ONE JSON object only (no markdown, no code fences): {"title":"lesson title","scenes":[{"title":"...","say":"...","write":["..."],"draw":{"items":[...]}}]}. Use "draw":null when there is no diagram. Be accurate.';
+  const go = $('bGo'); go.disabled = true; say('bMsg', 'The AI teacher is preparing the lesson…', true);
+  try {
+    const o = readJson(await askAI(prompt, 7000, 'teacher_board'));
+    if(!o || !Array.isArray(o.scenes)) throw new Error('The AI could not build this lesson. Try again or change the topic.');
+    o.lang = lang;
+    const scenes = buildScenes(o, bW, bH);
+    if(scenes.length < 2) throw new Error('The AI could not build this lesson. Try again or change the topic.');
+    lesson = { title:clean(o.title, 80) || topic, lang, scenes };
+    showLesson(); say('bMsg', '', true);
+  } catch(e){ say('bMsg', e.message || 'Something went wrong. Please try again.', false); }
+  finally { go.disabled = false; }
+};
+function fitStage(){
+  if(!player) return;
+  player.size(Math.max(200, $('stage').clientWidth - 18), Math.max(220, innerHeight * 0.55));
+}
+function showLesson(){
+  stopSpeech(); if(player){ player.destroy(); player = null; }
+  $('bOutBox').classList.remove('hidden'); $('bTitle').textContent = lesson.title;
+  const tot = lesson.scenes.reduce((a, s) => a + s.ms, 0);
+  $('bInfo').textContent = lesson.scenes.length + ' scenes · ' + Math.floor(tot / 60000) + ':' + String(Math.floor(tot / 1000) % 60).padStart(2, '0');
+  player = B.player({
+    canvas:$('bCv'), w:bW, h:bH, scenes:lesson.scenes,
+    onScene:i => { $('sayLine').textContent = lesson.scenes[i] ? lesson.scenes[i].say : ''; if(player && player.isPlaying()) speakScene(i); },
+    onState:p => { $('bPlay').textContent = p ? 'Pause' : 'Play with voice'; if(!p) stopSpeech(); },
+    onEnd:() => stopSpeech()
+  });
+  fitStage(); $('sayLine').textContent = lesson.scenes[0].say; say('bPlayMsg', '', true);
+  $('bOutBox').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+$('bPlay').onclick = () => { if(!player) return; if(player.isPlaying()) player.pause(); else { player.play(); speakScene(player.scene()); } };
+$('bPrev').onclick = () => { if(!player) return; const was = player.isPlaying(); player.goScene(Math.max(0, player.scene() - 1)); if(was) speakScene(player.scene()); };
+$('bNext').onclick = () => { if(!player) return; const was = player.isPlaying(); player.goScene(Math.min(lesson.scenes.length - 1, player.scene() + 1)); if(was) speakScene(player.scene()); };
+$('bMute').onchange = () => { if($('bMute').checked) stopSpeech(); else if(player && player.isPlaying()) speakScene(player.scene()); };
+addEventListener('resize', () => { if(player) fitStage(); });
+addEventListener('pagehide', stopSpeech);
+
+const DBN = 'lne_rec_draft_v1';
+function idb(){ return new Promise((res, rej) => { try { const r = indexedDB.open(DBN, 1); r.onupgradeneeded = () => r.result.createObjectStore('d'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch(e){ rej(e); } }); }
+async function idbGet(k){ const db = await idb(); return await new Promise((res, rej) => { const r = db.transaction('d').objectStore('d').get(k); r.onsuccess = () => res(r.result || null); r.onerror = () => rej(r.error); }); }
+async function idbPut(k, v){ const db = await idb(); return await new Promise((res, rej) => { const tx = db.transaction('d', 'readwrite'); tx.objectStore('d').put(v, k); tx.oncomplete = () => res(true); tx.onerror = () => rej(tx.error); }); }
+$('bSend').onclick = async () => {
+  const cid = $('bClass').value;
+  if(!lesson || !cid){ say('bSendMsg', 'You need a class to record for. Create a class first.', false); return; }
+  try {
+    const old = await idbGet('class:' + cid);
+    if(old && Array.isArray(old.scenes) && old.scenes.length && !confirm('This class already has an unfinished lesson in the recorder. Replace it with this one?')) return;
+    await idbPut('class:' + cid, {
+      meta:{ classId:cid, title:lesson.title.slice(0, 80), note:'' }, W:bW, H:bH, saved:Date.now(), pics:{},
+      scenes:lesson.scenes.map(s => ({ title:s.title, say:s.say, ms:s.ms, blob:null, mime:'', clear:true, items:s.items }))
+    });
+    window.location.href = 'skillstream-record.html?class=' + encodeURIComponent(cid);
+  } catch(e){ say('bSendMsg', 'Could not save the lesson on this phone. Please try again.', false); }
+};
+
+/* ---------- 4. my students ---------- */
+let roster = null;
+const pct = (g, p) => { g = Number(g); p = Number(p); return (isFinite(g) && isFinite(p) && p > 0) ? Math.max(0, Math.min(100, Math.round(g / p * 100))) : null; };
+const avg = a => a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : null;
+$('sLoad').onclick = async () => {
+  const cid = $('sClass').value; if(!cid){ say('sMsg', 'Create a class first.', false); return; }
+  const b = $('sLoad'); b.disabled = true; say('sMsg', 'Reading your class…', true); $('sAdvBox').classList.add('hidden');
+  try {
+    const cls = classes.find(c => c.id === cid) || {};
+    const m = await sb.from('classroom_members').select('student_id').eq('classroom_id', cid);
+    if(m.error) throw m.error;
+    const sids = (m.data || []).map(x => x.student_id);
+    if(!sids.length){ say('sMsg', 'No students have joined this class yet.', false); $('sBox').classList.add('hidden'); return; }
+    const a = await sb.from('assignments').select('id,title,due_date,points').eq('classroom_id', cid); if(a.error) throw a.error;
+    const asg = a.data || [], aids = asg.map(x => x.id);
+    let subs = []; if(aids.length){ const s = await sb.from('submissions').select('assignment_id,user_id,grade,submitted_at').in('assignment_id', aids); if(s.error) throw s.error; subs = s.data || []; }
+    const q = await sb.from('quizzes').select('id,questions').eq('classroom_id', cid); if(q.error) throw q.error;
+    const quizzes = q.data || [], qids = quizzes.map(x => x.id);
+    let qres = []; if(qids.length){ const r = await sb.from('quiz_results').select('quiz_id,user_id,score').in('quiz_id', qids); if(r.error) throw r.error; qres = r.data || []; }
+    const nm = await sb.from('public_profiles').select('id,name,full_name').in('id', sids);
+    const names = {}; (nm.data || []).forEach(p => { names[p.id] = p.name || p.full_name || null; });
+    const ptsOf = {}; asg.forEach(x => ptsOf[x.id] = x.points); const quizTot = {}; quizzes.forEach(x => { quizTot[x.id] = (x.questions || []).reduce((s, y) => s + (Number(y.points) || 1), 0); });
+    const now = Date.now(), pastDue = asg.filter(x => x.due_date && new Date(x.due_date).getTime() < now);
+    const rows = sids.map((id, i) => {
+      const my = subs.filter(s => s.user_id === id), mySet = new Set(my.map(s => s.assignment_id));
+      const grades = my.map(s => pct(s.grade, ptsOf[s.assignment_id])).filter(v => v !== null);
+      const myQ = qres.filter(r => r.user_id === id), qp = myQ.map(r => pct(r.score, quizTot[r.quiz_id])).filter(v => v !== null);
+      const missed = pastDue.filter(x => !mySet.has(x.id)).length;
+      const late = my.filter(s => { const a1 = asg.find(x => x.id === s.assignment_id); return a1 && a1.due_date && s.submitted_at && new Date(s.submitted_at).getTime() > new Date(a1.due_date).getTime() + 86400000; }).length;
+      return { id, label:'Student ' + (i + 1), name:names[id] || ('Student ' + (i + 1)), handed:my.length, total:asg.length, grade:avg(grades), quizzes:myQ.length, quizTotal:quizzes.length, quizAvg:avg(qp), missed, late };
+    });
+    roster = { classId:cid, subject:clean(cls.subject, 60), rows, asgN:asg.length, quizN:quizzes.length };
+    renderRoster(cls.name || 'Class'); say('sMsg', '', true);
+  } catch(e){ say('sMsg', (e && e.message) || 'Could not read the class.', false); }
+  finally { b.disabled = false; }
+};
+function flagsOf(r){
+  const f = [], g = [];
+  if(r.missed >= 2) f.push('Missed ' + r.missed + ' deadlines'); else if(r.missed === 1) f.push('Missed 1 deadline');
+  if(r.late >= 2) f.push('Often late');
+  if(r.grade !== null && r.grade < 50) f.push('Low grades');
+  if(r.quizAvg !== null && r.quizAvg < 50) f.push('Struggling in quizzes');
+  if(r.quizTotal && r.quizzes === 0) f.push('No quizzes taken');
+  if(r.total && r.handed === 0) f.push('Nothing handed in');
+  if(r.grade !== null && r.grade >= 85 && !f.length) g.push('Doing very well');
+  return { f, g };
+}
+function renderRoster(className){
+  $('sTitle').textContent = className + ' · ' + roster.rows.length + ' students';
+  const tb = $('sTbl').querySelector('tbody'); tb.textContent = '';
+  roster.rows.slice().sort((a, b) => flagsOf(b).f.length - flagsOf(a).f.length).forEach(r => {
+    const fl = flagsOf(r), tr = el('tr');
+    tr.appendChild(el('td', { text:r.name }));
+    tr.appendChild(el('td', { text:r.total ? r.handed + ' / ' + r.total : '–' }));
+    tr.appendChild(el('td', { text:r.grade === null ? '–' : r.grade + '%' }));
+    tr.appendChild(el('td', { text:r.quizTotal ? r.quizzes + ' / ' + r.quizTotal + (r.quizAvg !== null ? ' · ' + r.quizAvg + '%' : '') : '–' }));
+    const nt = el('td'); fl.f.forEach(x => nt.appendChild(el('span', { class:'flag', text:x }))); fl.g.forEach(x => nt.appendChild(el('span', { class:'good', text:x }))); if(!fl.f.length && !fl.g.length) nt.textContent = '–';
+    tr.appendChild(nt); tb.appendChild(tr);
+  });
+  $('sBox').classList.remove('hidden');
+}
+$('sAdvise').onclick = async () => {
+  if(!roster) return;
+  const stats = roster.rows.map(r => ({ id:r.label, handed_in:r.handed + '/' + r.total, avg_grade_pct:r.grade, quizzes_taken:r.quizzes + '/' + r.quizTotal, quiz_avg_pct:r.quizAvg, missed_deadlines:r.missed, late_submissions:r.late }));
+  const q = clean($('sAsk').value, 200);
+  const prompt = 'You are an experienced teacher-coach advising a teacher about their class. You only have the numbers below, so do not invent facts, and say "not enough data" where needed. Be kind, practical and specific. Never guess why a student struggles; suggest what the teacher can try or ask.\n' +
+    'Subject: ' + (roster.subject || 'not given') + '\nClass size: ' + stats.length + '\nAssignments so far: ' + roster.asgN + '\nQuizzes so far: ' + roster.quizN + '\n' +
+    'Students (anonymous): ' + JSON.stringify(stats) + '\n' + (q ? 'Teacher question: ' + q + '\n' : '') +
+    'Write in English. Reply with ONE JSON object only (no markdown, no code fences):\n' +
+    '{"overview":"3 sentences on how the class is doing","strengths":["..."],"concerns":["..."],"students":[{"id":"Student 3","advice":"one or two sentences of what to try"}],"actions":["the 3 most useful things to do this week"],"answer":"answer to the teacher question, if any"}\n' +
+    'Rules: give advice for at most 6 students who need attention most and 2 who are doing very well (to challenge them); use the exact ids; 3 actions.';
+  const b = $('sAdvise'); b.disabled = true; say('sAdvMsg', 'The AI is reading the numbers…', true);
+  try {
+    const o = readJson(await askAI(prompt, 3500, 'teacher_students'));
+    if(!o || !o.overview) throw new Error('The AI could not give advice. Please try again.');
+    renderAdvice(o); say('sAdvMsg', '', true);
+  } catch(e){ say('sAdvMsg', e.message || 'Something went wrong. Please try again.', false); }
+  finally { b.disabled = false; }
+};
+function renderAdvice(o){
+  const out = $('sAdv'); out.textContent = '';
+  const nameOf = {}; roster.rows.forEach(r => nameOf[r.label] = r.name);
+  out.appendChild(el('h3', { text:'How the class is doing' })); out.appendChild(el('p', { text:clean(o.overview, 700), style:'margin:0' }));
+  const sec = (h, list) => { if(list.length){ out.appendChild(el('h3', { text:h })); out.appendChild(lis(list)); } };
+  sec('Strengths', arr(o.strengths, 5, 250)); sec('Concerns', arr(o.concerns, 5, 250));
+  const st = (Array.isArray(o.students) ? o.students : []).slice(0, 8).map(x => ({ n:nameOf[clean(x && x.id, 20)], t:clean(x && x.advice, 400) })).filter(x => x.n && x.t);
+  if(st.length){ out.appendChild(el('h3', { text:'Student by student' })); st.forEach(x => out.appendChild(el('div', { class:'step' }, [el('b', { text:x.n }), el('div', { text:x.t })]))); }
+  if(clean(o.answer, 700)){ out.appendChild(el('h3', { text:'Your question' })); out.appendChild(el('p', { text:clean(o.answer, 700), style:'margin:0' })); }
+  sec('Do this week', arr(o.actions, 5, 250));
+  out.appendChild(el('p', { class:'hint', text:'This advice comes from grades and hand-in numbers only. It cannot see what a student is going through. Talk to the student before you decide anything.' }));
+  $('sAdvBox').classList.remove('hidden'); $('sAdvBox').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+</script>
+</body>
+</html>
