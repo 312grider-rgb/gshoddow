@@ -37,6 +37,7 @@
           { title: 'Your teaching', links: [
             L('book', 'Courses', 'Create and manage your courses', 'skillstream-courses.html'),
             L('chat', 'Classrooms', 'Your classes and students', 'skillstream-classrooms.html'),
+            L('ai', 'Teacher AI', 'Plan lessons, make quizzes and understand your students', 'skillstream-teacher-ai.html'),
             L('teach', 'Record a lesson', 'Talk and write on a board for your class', 'skillstream-record.html'),
             L('book', 'Lessons', 'The recorded lessons in your classes', 'skillstream-lessons.html')
           ] },
