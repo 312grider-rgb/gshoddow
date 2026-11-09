@@ -175,7 +175,7 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
     <div class="class-header">
       <div class="name" id="dName"></div>
       <div class="meta" id="dMeta"></div>
-      <div class="code-box hidden" id="dCodeBox">Class code: <span id="dCode"></span></div>
+      <div class="code-box hidden" id="dCodeBox">Class code: <span id="dCode"></span> <button class="btn btn-ghost" type="button" id="shareClassBtn" style="margin-inline-start:10px">Share link</button></div>
       <div class="online-strip hidden" id="dOnline"></div>
     </div>
     <div class="tabs">
@@ -402,6 +402,14 @@ async function submitCreate() {
     err.style.display = 'block';
   }
 }
+
+async function shareClassLink() {
+  const c = currentClassroom; if (!c) return;
+  const url = location.origin + location.pathname.replace(/[^\/]*$/, '') + 'skillstream-classrooms.html?join=' + encodeURIComponent(c.code);
+  try { if (navigator.share) { await navigator.share({ title: c.name, text: 'Join my class "' + c.name + '" on Learning Never Ends', url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(url); showToast('✅ Link copied'); } catch (e) { prompt('Copy this link:', url); }
+}
+document.addEventListener('click', e => { if (e.target && e.target.id === 'shareClassBtn') shareClassLink(); });
 
 async function submitJoin() {
   const code = document.getElementById('jCode').value.trim();
@@ -878,6 +886,8 @@ async function gradePrompt(assignmentId, studentEmail, maxPoints) {
 
 (async () => {
   try {
+    const jq = new URLSearchParams(window.location.search).get('join');
+    if (jq && /^[A-Za-z0-9]{4,12}$/.test(jq)) { try { localStorage.setItem('lne_after_login', 'skillstream-classrooms.html?join=' + jq); } catch (e) {} }
     me = await SSAuth.requireAuth();
     if (!me) return;
     if (me.role !== 'teacher' && me.role !== 'admin') {
@@ -892,6 +902,14 @@ async function gradePrompt(assignmentId, studentEmail, maxPoints) {
     }
     await renderList();
     const qp = new URLSearchParams(window.location.search), openId = qp.get('open');
+    const joinCode = qp.get('join');
+    if (joinCode && /^[A-Za-z0-9]{4,12}$/.test(joinCode)) {
+      try { localStorage.removeItem('lne_after_login'); } catch (e) {}
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+      const r = await SSClass.join(joinCode);
+      if (r.ok && r.classroom && r.classroom.id) { await renderList(); await openClass(r.classroom.id); showToast('✅ Joined ' + (r.classroom.name || 'class')); }
+      else showToast(r.error || 'Could not join this class');
+    }
     if (openId) { try { await openClass(openId); if (qp.get('tab')) switchTab(qp.get('tab')); } catch (e) { console.warn(e); } }
   } catch (e) {
     console.error('Page bootstrap error:', e);
