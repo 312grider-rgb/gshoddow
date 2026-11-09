@@ -209,7 +209,7 @@
   // Never let the browser zoom the page when a field is focused or while typing.
   function lockZoom() {
     var m = document.querySelector('meta[name=viewport]');
-    if (m) { if (!/maximum-scale/.test(m.content)) m.content += ',maximum-scale=1'; return true; }
+    if (m) { if (!/maximum-scale/.test(m.content)) m.content += ',maximum-scale=1,user-scalable=no'; return true; }
     return false;
   }
   if (!lockZoom()) { var mo = new MutationObserver(function () { if (lockZoom()) mo.disconnect(); }); mo.observe(document.documentElement, { childList: true, subtree: true }); document.addEventListener('DOMContentLoaded', function () { lockZoom(); mo.disconnect(); }); }

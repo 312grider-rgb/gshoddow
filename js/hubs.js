@@ -14,7 +14,6 @@
           { title: 'My learning', links: [
             L('ai', 'My Learning', 'Your goals and a path of steps to tick off', 'skillstream-engine.html'),
             L('book', 'My courses', 'The courses you are taking', 'skillstream-courses.html'),
-            L('book', 'Self-paced learning', 'Learn at your own speed', 'skillstream-self-paced.html'),
             L('library', 'Academic studies', 'School and university subjects', 'skillstream-academic.html')
           ] },
           { title: 'Lessons and materials', links: [
