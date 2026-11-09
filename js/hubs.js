@@ -139,6 +139,7 @@
     return h[role] || h.all || h.student || null;
   }
 
+  var C3D = { user:'sap', home:'sap', teach:'sap', star:'amb', trophy:'amb', compass:'eme', book:'eme', library:'ame', ai:'ame', chat:'oce', calendar:'oce', image:'rose', games:'rose', settings:'sla', more:'sla' };
   function render(key, role) {
     css();
     var parentView = false; try { parentView = role !== 'teacher' && localStorage.getItem('lne_view') === 'parent'; } catch (e) {}
@@ -156,7 +157,7 @@
       var grid = document.createElement('div'); grid.className = 'hub-grid';
       links.forEach(function (l) {
         var a = document.createElement('a'); a.className = 'hub-card'; a.href = l.href;
-        var ic = document.createElement('span'); ic.className = 'hub-ic'; ic.setAttribute('aria-hidden', 'true'); ic.innerHTML = icons[l.icon] || '';   // our own fixed icon markup, never user data
+        var ic = document.createElement('span'); ic.className = 'hub-ic'; ic.setAttribute('data-c', C3D[l.icon] || 'sap'); ic.setAttribute('aria-hidden', 'true'); ic.innerHTML = icons[l.icon] || '';   // our own fixed icon markup, never user data
         var b = document.createElement('b'); b.textContent = l.label;
         var d = document.createElement('span'); d.className = 'hub-d'; d.textContent = l.desc;
         a.appendChild(ic); a.appendChild(b); a.appendChild(d); grid.appendChild(a);

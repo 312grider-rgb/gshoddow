@@ -44,6 +44,8 @@
     document.head.appendChild(st);
   }
 
+  var C3D = { user:'sap', home:'sap', teach:'sap', star:'amb', trophy:'amb', compass:'eme', book:'eme', library:'ame', ai:'ame', chat:'oce', calendar:'oce', image:'rose', games:'rose', settings:'sla', more:'sla' };
+  function colorOf(svg) { for (var k in ICON) if (ICON[k] === svg) return C3D[k] || 'sap'; return 'sap'; }
   window.LNE_ICONS = ICON;   // the hub pages reuse these icons
   ICON.people = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8"/><path d="M18 14.7c2 .6 3.3 2.3 3.6 5.3"/></svg>';
 
@@ -105,7 +107,7 @@
     var on = item.href === current || (!exact && grp && grp.indexOf(current) >= 0);
       btn.className = 'ln-nav-item' + (on ? ' active' : '');
       if (on) btn.setAttribute('aria-current', 'page');
-      btn.innerHTML = '<span class="ln-nav-icon">' + item.icon + '</span><span class="ln-nav-l">' + navText(item.label) + '</span>';
+      btn.innerHTML = '<span class="ln-nav-icon" data-c="' + colorOf(item.icon) + '">' + item.icon + '</span><span class="ln-nav-l">' + navText(item.label) + '</span>';
       nav.appendChild(btn);
     });
     document.body.appendChild(nav);
