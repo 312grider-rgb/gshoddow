@@ -9,6 +9,7 @@
     { label: 'Classes',     href: 'skillstream-classrooms.html' }
   ];
   function build() {
+    return; /* tab strip removed: the Learn hub cards are the one path */
     if (document.getElementById('ln-learntabs')) return;
     var cur = window.location.pathname.split('/').pop() || '';
     if (!document.getElementById('ln-learntabs-css')) {
