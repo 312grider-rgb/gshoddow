@@ -265,36 +265,36 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
   </a>
   <a class="card" id="teacherAiCard" href="skillstream-teacher-ai.html" style="display:none; text-decoration:none; color:inherit; border:2px solid var(--gold-light);">
     <div class="kicker">For teachers</div>
-    <h3>🧑‍🏫 Teacher AI</h3>
+    <h3><span data-ic="teach"></span>Teacher AI</h3>
     <div class="desc" style="margin-bottom:0;">Lesson plans, quizzes, a lesson that writes, draws and speaks on the board, and advice about your students.</div>
   </a>
   <div class="grp-h">AI Learning</div>
   <div class="tabs">
-    <button class="tab-btn active" id="tabTeacherBtn" onclick="switchTab('teacher')">🧑‍🏫 AI Teacher</button>
-    <button class="tab-btn" id="tabAskBtn" onclick="switchTab('ask')">Ask & Explain</button>
-    <button class="tab-btn" id="tabSummaryBtn" onclick="switchTab('summary')">Summarize</button>
-    <button class="tab-btn" id="tabTranslateBtn" onclick="switchTab('translate')">Translate</button>
-    <button class="tab-btn" id="tabClassroomBtn" onclick="switchTab('classroom')">🏫 AI Classroom</button>
+    <button class="tab-btn active" id="tabTeacherBtn" data-ic="teach" onclick="switchTab('teacher')">AI Teacher</button>
+    <button class="tab-btn" id="tabAskBtn" data-ic="ask" onclick="switchTab('ask')">Ask & Explain</button>
+    <button class="tab-btn" id="tabSummaryBtn" data-ic="sum" onclick="switchTab('summary')">Summarize</button>
+    <button class="tab-btn" id="tabTranslateBtn" data-ic="tr" onclick="switchTab('translate')">Translate</button>
+    <button class="tab-btn" id="tabClassroomBtn" data-ic="room" onclick="switchTab('classroom')">AI Classroom</button>
   </div>
   <div class="grp-h">Test & Improve</div>
   <div class="tabs">
-    <button class="tab-btn" id="tabQuizBtn" onclick="switchTab('quiz')">📝 Quiz</button>
-    <button class="tab-btn" id="tabLevelBtn" onclick="switchTab('level')">🎯 Test Your Level</button>
+    <button class="tab-btn" id="tabQuizBtn" data-ic="quiz" onclick="switchTab('quiz')">Quiz</button>
+    <button class="tab-btn" id="tabLevelBtn" data-ic="lvl" onclick="switchTab('level')">Test Your Level</button>
   </div>
   <div class="grp-h">Plan & Organize</div>
   <div class="tabs">
-    <button class="tab-btn" id="tabPlanBtn" onclick="switchTab('plan')">Study Plan</button>
-    <button class="tab-btn" id="tabHomeworkBtn" onclick="switchTab('homework')">Homework Helper</button>
-    <a class="tab-btn" href="skillstream-engine.html">My Learning</a>
+    <button class="tab-btn" id="tabPlanBtn" data-ic="plan" onclick="switchTab('plan')">Study Plan</button>
+    <button class="tab-btn" id="tabHomeworkBtn" data-ic="hw" onclick="switchTab('homework')">Homework Helper</button>
+    <a class="tab-btn" data-ic="learn" href="skillstream-engine.html">My Learning</a>
   </div>
   <div class="grp-h">Build Your Future</div>
   <div class="tabs">
-    <button class="tab-btn" id="tabCareerBtn" onclick="switchTab('career')">Career Coach</button>
-    <a class="tab-btn" href="skillstream-opportunities.html">Opportunities</a>
+    <button class="tab-btn" id="tabCareerBtn" data-ic="car" onclick="switchTab('career')">Career Coach</button>
+    <a class="tab-btn" data-ic="opp" href="skillstream-opportunities.html">Opportunities</a>
   </div>
   <div class="grp-h">History</div>
   <div class="tabs">
-    <a class="tab-btn" href="skillstream-ai-history.html">AI History</a>
+    <a class="tab-btn" data-ic="hist" href="skillstream-ai-history.html">AI History</a>
   </div>
 
   <!-- AI Teacher (ongoing chat) -->
