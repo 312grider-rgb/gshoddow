@@ -192,3 +192,21 @@ html #aiTeacherPanel{background:var(--visor)!important}
 .lne-mission .lm-ring i{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font:800 18px/1 'Fraunces',Georgia,serif;font-style:normal;color:#232869}
 .lne-mission .lm-rank{margin-top:6px;font-size:13px;font-weight:700;color:#7A5C16}
 .lne-mission .lm-rank b{font-size:13px;color:#7A5C16;font-family:inherit}
+
+/* ---- 3D icon tiles (glossy, drawn by code, no downloads) ---- */
+[data-c="sap"]{--a:#4F5CF0;--b:#2B3399;--g:rgba(43,51,153,.6)}
+[data-c="amb"]{--a:#F2C75C;--b:#C98A12;--g:rgba(201,138,18,.6)}
+[data-c="eme"]{--a:#2FD3B0;--b:#0E8C86;--g:rgba(14,140,134,.6)}
+[data-c="ame"]{--a:#9A6BFF;--b:#5A32C4;--g:rgba(90,50,196,.6)}
+[data-c="rose"]{--a:#FF7AA8;--b:#C93A78;--g:rgba(201,58,120,.6)}
+[data-c="oce"]{--a:#4CC3FF;--b:#1B74D6;--g:rgba(27,116,214,.6)}
+[data-c="sla"]{--a:#8EA2C8;--b:#4B5F8F;--g:rgba(75,95,143,.6)}
+html .hub-card .hub-ic,html .ln-nav-icon[data-c]{position:relative;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(150deg,var(--a),var(--b));
+  box-shadow:0 10px 16px -5px var(--g),0 2px 0 rgba(255,255,255,.55) inset,0 -5px 8px rgba(0,0,0,.28) inset}
+html .hub-card .hub-ic::before,html .ln-nav-icon[data-c]::before{content:"";position:absolute;left:9%;right:9%;top:6%;height:44%;border-radius:40% 40% 60% 60%/60% 60% 40% 40%;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0))}
+html .hub-card .hub-ic{width:54px;height:54px;border-radius:17px;margin-bottom:10px}
+html .hub-card .hub-ic svg{position:relative;width:28px;height:28px;stroke:#fff;filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
+html .ln-nav-icon[data-c]{width:34px;height:34px;border-radius:11px;box-shadow:0 6px 10px -4px var(--g),0 1px 0 rgba(255,255,255,.55) inset,0 -3px 5px rgba(0,0,0,.28) inset}
+html .ln-nav-icon[data-c] svg{position:relative;width:20px;height:20px;stroke:#fff;filter:drop-shadow(0 2px 1px rgba(0,0,0,.35))}
+html .ln-nav-item.active .ln-nav-icon[data-c]{box-shadow:0 0 0 2px #E4C583,0 0 14px 2px rgba(228,197,131,.55),0 1px 0 rgba(255,255,255,.55) inset,0 -3px 5px rgba(0,0,0,.28) inset}
+html .ln-nav-item.active svg{filter:drop-shadow(0 2px 1px rgba(0,0,0,.35))}

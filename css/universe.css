@@ -161,4 +161,4 @@ html[data-page="skillstream-about"] .mission-note,html[data-page="skillstream-ac
 html[data-page="skillstream-about"] .mission-note .kicker,html[data-page="skillstream-academic"] .mission-note .kicker{color:#F1FAF3!important}
 html .foot-links a,html header.top>a,html footer.site-footer a,html .switch-link a,html .setting-row a{display:inline-block;padding-top:9px;padding-bottom:9px}
 /* ---- no zoom when a field is focused on phones (iOS/Android zoom below 16px) ---- */
-html input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),html select,html textarea{font-size:max(16px,1em)}
+html input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),html select,html textarea,html [contenteditable=true]{font-size:max(16px,1em)!important}
