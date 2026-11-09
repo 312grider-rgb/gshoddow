@@ -220,3 +220,12 @@ html .tabs .act[data-ic]{flex:1 1 0;min-width:84px}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html .tabs:has(.tab-btn[data-ic]){flex-wrap:wrap}
 html .tab-btn[data-ic]{flex:1 1 calc(50% - 8px);min-width:calc(50% - 8px)}
+
+html[dir="rtl"] header.top{background-image:
+    radial-gradient(circle at 28px 8px,transparent 92px,rgba(201,166,83,.45) 93px,transparent 95px),
+    radial-gradient(circle at 28px 8px,transparent 130px,rgba(201,166,83,.20) 131px,transparent 133px),
+    var(--uv-star),
+    linear-gradient(155deg,var(--visor) 0%,var(--visor-2) 100%)}
+html .view-card .ai-ic,html .quick-link .ai-ic{width:46px;height:46px;border-radius:15px;margin:0 0 10px}
+html .view-card .ai-ic svg,html .quick-link .ai-ic svg{width:26px;height:26px}
+html .quick-link .ai-ic{margin:0;flex:none}
