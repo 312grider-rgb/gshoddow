@@ -144,6 +144,7 @@
    hist:['sla','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
    learn:['eme','<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M5 17a3 3 0 013-3h11"/>'],
    board:['ame','<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 12l3-3 3 2 4-4M8 20h8"/>'],
+   fa:['ame','<path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M19 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>'],
    stud:['oce','<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M17 14c2.5.5 4 2.5 4 6"/>']
   };
   function run(){
@@ -157,4 +158,5 @@
     }
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
+  var tm=0; try{ new MutationObserver(function(){ clearTimeout(tm); tm=setTimeout(run,60); }).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
 })();
