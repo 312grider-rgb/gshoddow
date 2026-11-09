@@ -126,3 +126,35 @@
     addEventListener('pageshow', function (e) { if (e.persisted) root.classList.remove('lne-warping'); });
   });
 })();
+
+/* ---- glossy 3D tiles for AI tools: any element with data-ic="name" gets one ---- */
+(function(){
+  var P={
+   teach:['ame','<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/>'],
+   ask:['oce','<path d="M4 5h16v11H9l-5 4z"/><path d="M10 9.5a2 2 0 114 0c0 1.5-2 1.5-2 3M12 14.5v.01"/>'],
+   sum:['eme','<path d="M5 6h14M5 11h14M5 16h9"/>'],
+   tr:['oce','<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'],
+   room:['sap','<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>'],
+   quiz:['amb','<path d="M5 12l4 4 10-10"/>'],
+   lvl:['rose','<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/>'],
+   plan:['eme','<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'],
+   hw:['amb','<path d="M4 20l1-4L16 5l3 3L8 19z"/>'],
+   car:['sap','<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'],
+   opp:['amb','<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'],
+   hist:['sla','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
+   learn:['eme','<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M5 17a3 3 0 013-3h11"/>'],
+   board:['ame','<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 12l3-3 3 2 4-4M8 20h8"/>'],
+   stud:['oce','<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M17 14c2.5.5 4 2.5 4 6"/>']
+  };
+  function run(){
+    var els=document.querySelectorAll('[data-ic]:not([data-ic-done])');
+    for(var i=0;i<els.length;i++){
+      var e=els[i],p=P[e.getAttribute('data-ic')]; e.setAttribute('data-ic-done','1'); if(!p) continue;
+      var s=document.createElement('span'); s.className='ai-ic'; s.setAttribute('data-c',p[0]); s.setAttribute('aria-hidden','true');
+      s.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+p[1]+'</svg>';
+      if(e.childNodes.length===0&&e.tagName==='SPAN'){ e.className='ai-ic'; e.setAttribute('data-c',p[0]); e.innerHTML=s.innerHTML; e.style.marginInlineEnd='8px'; }
+      else e.insertBefore(s,e.firstChild);
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
+})();
