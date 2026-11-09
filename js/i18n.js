@@ -206,6 +206,13 @@
    Stored only in this browser (localStorage 'lne_textsize').
    --------------------------------------------------------------------------- */
 (function () {
+  // Never let the browser zoom the page when a field is focused or while typing.
+  function lockZoom() {
+    var m = document.querySelector('meta[name=viewport]');
+    if (m) { if (!/maximum-scale/.test(m.content)) m.content += ',maximum-scale=1'; return true; }
+    return false;
+  }
+  if (!lockZoom()) { var mo = new MutationObserver(function () { if (lockZoom()) mo.disconnect(); }); mo.observe(document.documentElement, { childList: true, subtree: true }); document.addEventListener('DOMContentLoaded', function () { lockZoom(); mo.disconnect(); }); }
   var STEPS = [
     { k: 'n',   z: 1,    label: 'Normal text' },
     { k: 'l',   z: 1.15, label: 'Large text' },
@@ -213,10 +220,13 @@
     { k: 'max', z: 1.45, label: 'Maximum text' }
   ];
   function get() {
-    var k = 'l';
-    try { k = localStorage.getItem('lne_textsize') || 'l'; } catch (e) {}
+    var k = 'max';
+    try {
+      if (localStorage.getItem('lne_textsize_v') !== '2') { localStorage.removeItem('lne_textsize'); localStorage.setItem('lne_textsize_v', '2'); }
+      k = localStorage.getItem('lne_textsize') || 'max';
+    } catch (e) {}
     for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return STEPS[i];
-    return STEPS[1];
+    return STEPS[3];
   }
   function apply(step) { document.documentElement.style.zoom = step.z === 1 ? '' : String(step.z); }
   apply(get()); // before the page paints
