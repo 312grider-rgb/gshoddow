@@ -178,6 +178,10 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
       <div class="meta" id="dMeta"></div>
       <div class="code-box hidden" id="dCodeBox">Class code: <span id="dCode"></span> <button class="btn btn-ghost" type="button" id="shareClassBtn" style="margin-inline-start:10px">Share link</button></div>
       <div class="online-strip hidden" id="dOnline"></div>
+      <div id="dLive" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn btn-primary" id="liveBtn" href="#" target="_blank" rel="noopener"><span aria-hidden="true">🎥</span> <span id="liveLbl">Join live class</span></a>
+        <button class="btn btn-ghost hidden" type="button" id="liveTell">Tell students</button>
+      </div>
     </div>
     <div class="tabs">
       <div class="tab active" data-tab="stream" onclick="switchTab('stream')">Stream</div>
@@ -454,6 +458,9 @@ async function renderDetail() {
   document.getElementById('dCodeBox').classList.toggle('hidden', !teaching);
   document.getElementById('tabAttBtn').classList.toggle('hidden', !teaching);
   document.getElementById('dCode').textContent = c.code;
+  document.getElementById('liveBtn').href = 'https://meet.jit.si/LNE-' + String(c.id).replace(/-/g, '');
+  document.getElementById('liveLbl').textContent = teaching ? 'Start live class' : 'Join live class';
+  document.getElementById('liveTell').classList.toggle('hidden', !teaching);
 
   // Stream tab
   document.getElementById('announceActionRow').innerHTML = teaching
@@ -829,6 +836,14 @@ async function sendChat() {
   currentClassroom = await SSClass.get(currentClassId);
   renderChat();
 }
+
+async function tellLive() {
+  const result = await SSClass.addAnnouncement(currentClassId, { title: 'Live class is starting now', body: 'Your teacher is starting a live class. Tap Join live class at the top of this class to join.' });
+  if (!result.ok) { showToast(result.error, true); return; }
+  await renderDetail();
+  showToast('✅ Students have been told');
+}
+document.addEventListener('click', e => { if (e.target && e.target.id === 'liveTell') tellLive(); });
 
 async function submitAnnouncement() {
   const title = document.getElementById('aTitle').value.trim();
