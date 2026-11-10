@@ -22,8 +22,10 @@
             L('book', 'My work', 'Assignments and quizzes from your classes', 'skillstream-mywork.html'),
             L('calendar', 'Calendar', 'Schedules, deadlines and classes', 'skillstream-calendar.html')
           ] },
-          { title: 'Classes and school', links: [
-            L('chat', 'Classrooms', 'Join a class with a code from your teacher', 'skillstream-classrooms.html'),
+          { title: 'Classes', links: [
+            L('chat', 'Classrooms', 'Join a class with a code from your teacher', 'skillstream-classrooms.html')
+          ] },
+          { title: 'More', more: true, links: [
             L('home', 'My school', 'Your school and its activities', 'skillstream-school.html'),
             L('teach', 'Our teachers', 'Meet the teachers', 'skillstream-teachers-directory.html'),
             L('compass', 'Focus mode', 'Study without distractions', 'skillstream-focus.html')
@@ -40,7 +42,7 @@
             L('teach', 'Record a lesson', 'Talk and write on a board for your class', 'skillstream-record.html'),
             L('book', 'Lessons', 'The recorded lessons in your classes', 'skillstream-lessons.html')
           ] },
-          { title: 'Resources', links: [
+          { title: 'More', more: true, links: [
             L('library', 'Library', 'Books, PDFs and videos', 'skillstream-library.html'),
             L('calendar', 'Calendar', 'Schedules, deadlines and classes', 'skillstream-calendar.html'),
             L('home', 'My school', 'Your school and its activities', 'skillstream-school.html'),
@@ -57,15 +59,15 @@
             L('chat', 'Private messages', 'Chat with teachers, classmates and your classes', 'skillstream-messages.html'),
             L('chat', 'Study groups', 'Learn together in groups', 'skillstream-community.html')
           ] },
-          { title: 'Work together', links: [
-            L('book', 'Shared work', 'A private space for work shared with a teacher', 'skillstream-shared.html'),
-            L('chat', 'Whiteboard', 'Draw and explain ideas', 'skillstream-whiteboard.html')
-          ] },
           { title: 'Show and play', links: [
-            L('image', 'Showcase', 'See and share what people made', 'skillstream-showcase.html'),
             L('star', 'Daily mission', 'Three new puzzles every day', 'skillstream-puzzle.html'),
             L('games', 'Games', 'Learn while you play', 'skillstream-games.html'),
             L('trophy', 'Leaderboard', 'See how you are doing', 'skillstream-leaderboard.html'),
+            L('image', 'Showcase', 'See and share what people made', 'skillstream-showcase.html')
+          ] },
+          { title: 'More', more: true, links: [
+            L('book', 'Shared work', 'A private space for work shared with a teacher', 'skillstream-shared.html'),
+            L('chat', 'Whiteboard', 'Draw and explain ideas', 'skillstream-whiteboard.html'),
             L('star', 'Learning challenges', 'Small challenges to grow your skills', 'skillstream-challenges.html'),
             L('star', 'Feedback and recognition', 'Kind words and recognition from teachers', 'skillstream-recognition.html')
           ] }
@@ -80,18 +82,16 @@
             L('user', 'Profile', 'Your name, photo and details', 'skillstream-profile.html'),
             L('star', 'My Passport', 'What you really did, with a link you can share', 'skillstream-passport.html')
           ] },
-          { title: 'My growth', links: [
+          { title: 'Account', links: [
+            L('settings', 'Settings', 'Language, text size and your account', 'skillstream-settings.html'),
+            L('user', 'My family', 'Link with a parent or guardian', 'skillstream-family.html')
+          ] },
+          { title: 'More', more: true, links: [
             L('compass', 'Discoveries and records', 'Things you found and records you set', 'skillstream-discoveries.html'),
             L('library', 'My Vault', 'Private notes only you can read', 'skillstream-vault.html'),
             L('library', 'Opportunities', 'Opportunities to explore and save', 'skillstream-opportunities.html'),
-            L('chat', 'My AI history', 'Your past AI answers and plans', 'skillstream-ai-history.html')
-          ] },
-          { title: 'My family', links: [
-            L('user', 'My family', 'Link with a parent or guardian', 'skillstream-family.html'),
-            L('people', 'Parent view', 'Follow the progress of a child you care for', 'skillstream-parent-home.html?as=parent')
-          ] },
-          { title: 'Account', links: [
-            L('settings', 'Settings', 'Language, text size and your account', 'skillstream-settings.html'),
+            L('chat', 'My AI history', 'Your past AI answers and plans', 'skillstream-ai-history.html'),
+            L('people', 'Parent view', 'Follow the progress of a child you care for', 'skillstream-parent-home.html?as=parent'),
             L('star', 'Plans and pricing', 'See the plans', 'skillstream-pricing.html'),
             L('chat', 'Send feedback', 'Tell us what to improve', 'skillstream-feedback.html'),
             L('teach', 'Become a teacher', 'Apply to teach on the platform', 'skillstream-teach-apply.html', 'student')
@@ -129,6 +129,7 @@
       '.hub-card b{font-size:14.5px;line-height:1.25;overflow-wrap:break-word}' +
       '.hub-card span.hub-d{font-size:12.5px;line-height:1.4;color:#6B6558;overflow-wrap:break-word}' +
       '.hub-card:focus-visible{outline:3px solid #C9A24E;outline-offset:2px}' +
+      '.hub-more{margin-top:20px}.hub-more summary{cursor:pointer;list-style:none;text-align:center;padding:14px;border-radius:14px;border:1.5px dashed #C9A24E;color:#8A6A1F;font-weight:700;font-size:15px}.hub-more summary::-webkit-details-marker{display:none}.hub-more[open] summary{margin-bottom:12px}' +
       '@media (min-width:700px){.hub-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}';
     document.head.appendChild(st);
   }
@@ -152,7 +153,14 @@
     def.sections.forEach(function (sec) {
       var links = sec.links.filter(function (l) { return !l.only || l.only === (role === 'teacher' ? 'teacher' : 'student'); });
       if (!links.length) return;
-      var h = document.createElement('div'); h.className = 'hub-h'; h.textContent = sec.title; root.appendChild(h);
+      var host = root;
+      if (sec.more) {
+        var dt = document.createElement('details'); dt.className = 'hub-more';
+        var sm = document.createElement('summary'); sm.textContent = sec.title; dt.appendChild(sm);
+        root.appendChild(dt); host = dt;
+      } else {
+        var h = document.createElement('div'); h.className = 'hub-h'; h.textContent = sec.title; root.appendChild(h);
+      }
       var grid = document.createElement('div'); grid.className = 'hub-grid';
       links.forEach(function (l) {
         var a = document.createElement('a'); a.className = 'hub-card'; a.href = l.href;
@@ -161,7 +169,7 @@
         var d = document.createElement('span'); d.className = 'hub-d'; d.textContent = l.desc;
         a.appendChild(ic); a.appendChild(b); a.appendChild(d); grid.appendChild(a);
       });
-      root.appendChild(grid);
+      host.appendChild(grid);
     });
   }
 
