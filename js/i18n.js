@@ -56,11 +56,12 @@
         var names = [];
         var src = k.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{(\d+)\}/g, function (_, n) { names.push(+n); return '\u0001'; });
         src = src.replace(/[{}]/g, '\\$&').replace(/\u0001/g, '(.+?)');
-        patterns.push({ re: new RegExp('^' + src + '$', 's'), names: names, out: D[k], len: k.length });
+        patterns.push({ re: new RegExp('^' + src + '$', 's'), names: names, out: D[k], len: k.length, lit: k.replace(/\{\d+\}/g, '').length });
       } else if (/[:：]$/.test(k) && k.length > 3) prefixes.push(k);
     });
     patterns.sort(function (a, b) { return b.len - a.len; });
     prefixes.sort(function (a, b) { return b.length - a.length; });
+    patterns.sort(function (a, b) { return b.lit - a.lit; });   // most specific pattern first
 
     function norm(s) { return s.replace(/\s+/g, ' ').trim(); }
     function tr(core, depth) {
