@@ -60,7 +60,8 @@
   </div>
   <div id="game" class="hidden">
     <div class="score"><div><b id="s1">0</b><span id="n1">You</span></div><div><b id="s0">0</b><span>Draws</span></div><div><b id="s2">0</b><span id="n2">Computer</span></div></div>
-    <div id="codeBox" class="hidden" style="text-align:center;margin-bottom:10px"><div>Share this code with your friend:</div><div id="codeShow" data-no-i18n style="font:800 34px Inter,sans-serif;letter-spacing:6px;color:var(--ink);direction:ltr"></div><button class="opt" id="shareBtn" type="button" style="margin-top:8px;text-align:center">Share link</button></div>
+    <div id="codeBox" class="hidden" style="text-align:center;margin-bottom:10px"><div>Share this code with your friend:</div><div id="codeShow" data-no-i18n style="font:800 34px Inter,sans-serif;letter-spacing:6px;color:var(--ink);direction:ltr"></div><button class="opt" id="waBtn" type="button" style="margin-top:8px;text-align:center;background:#1FA855;border-color:#1FA855;color:#fff">Invite on WhatsApp</button>
+    <button class="opt" id="shareBtn" type="button" style="margin-top:8px;text-align:center">Share link</button></div>
     <div id="msg" aria-live="polite"></div>
     <div id="board"></div>
     <div class="row"><button class="opt" id="again" type="button">New game</button><button class="opt" id="back" type="button">Change mode</button></div>
@@ -159,6 +160,10 @@
   $('mCpu').onclick=function(){$('lvBox').classList.remove('hidden');$('onBox').classList.add('hidden')};
   $('mFriend').onclick=function(){start('friend',0)};
   $('mOnline').onclick=function(){$('onBox').classList.remove('hidden');$('lvBox').classList.add('hidden');loadSb().catch(function(){})};
+  function invite(){var url=location.origin+location.pathname+'?join='+game.code;
+    var t=(window.LNE_I18N&&LNE_I18N.t)?LNE_I18N.t("Let's play X-O on Learning Never Ends! Join my game:"):"Let's play X-O on Learning Never Ends! Join my game:";
+    window.open('https://wa.me/?text='+encodeURIComponent(t+'\n'+url),'_blank','noopener')}
+  $('waBtn').onclick=function(){if(game)invite()};
   $('oCreate').onclick=onlineCreate;$('oJoin').onclick=function(){onlineJoin($('oCode').value)};$('shareBtn').onclick=shareLink;
   Array.prototype.forEach.call(document.querySelectorAll('[data-lv]'),function(el){el.onclick=function(){start('cpu',+el.getAttribute('data-lv'))}});
   $('again').onclick=newGame;
