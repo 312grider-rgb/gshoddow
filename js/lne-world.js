@@ -145,15 +145,25 @@
    learn:['eme','<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M5 17a3 3 0 013-3h11"/>'],
    board:['ame','<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 12l3-3 3 2 4-4M8 20h8"/>'],
    fa:['ame','<path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M19 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>'],
+   sci:['eme','<circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/>'],
+   math:['sap','<path d="M12 4v10M7 9h10M7 19h10"/>'],
+   tech:['oce','<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>'],
+   biz:['amb','<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V5a1 1 0 011-1h4a1 1 0 011 1v3M3 13h18"/>'],
+   econ:['amb','<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
+   ent:['rose','<path d="M12 3c4 2 6 6 5 11l-5 4-5-4c-1-5 1-9 5-11z"/><circle cx="12" cy="10" r="1.6"/><path d="M8 18l-2 3M16 18l2 3"/>'],
+   psy:['ame','<path d="M9 4a4 4 0 00-4 4c-2 1-2 5 0 6 0 3 2 5 5 5h2V4z"/><path d="M13 4a4 4 0 014 4c2 1 2 5 0 6 0 3-2 5-5 5"/>'],
+   phil:['sla','<path d="M9 18h6M10 21h4M12 3a6 6 0 00-3 11c1 1 1 2 1 4h4c0-2 0-3 1-4a6 6 0 00-3-11z"/>'],
+   arts:['rose','<path d="M12 3a9 9 0 100 18c1 0 2-1 2-2 0-2 1-2 3-2a4 4 0 004-4c0-5-4-10-9-10z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="7" r="1"/><circle cx="16" cy="10" r="1"/>'],
+   life:['sap','<path d="M12 21s-8-5-8-11a4.5 4.5 0 018-3 4.5 4.5 0 018 3c0 6-8 11-8 11z"/>'],
    stud:['oce','<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M17 14c2.5.5 4 2.5 4 6"/>']
   };
   function run(){
     var els=document.querySelectorAll('[data-ic]:not([data-ic-done])');
     for(var i=0;i<els.length;i++){
       var e=els[i],p=P[e.getAttribute('data-ic')]; e.setAttribute('data-ic-done','1'); if(!p) continue;
-      var s=document.createElement('span'); s.className='ai-ic'; s.setAttribute('data-c',p[0]); s.setAttribute('aria-hidden','true');
+      var cc=e.getAttribute('data-cc')||p[0]; var s=document.createElement('span'); s.className='ai-ic'; s.setAttribute('data-c',cc); s.setAttribute('aria-hidden','true');
       s.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+p[1]+'</svg>';
-      if(e.childNodes.length===0&&e.tagName==='SPAN'){ e.className='ai-ic'; e.setAttribute('data-c',p[0]); e.innerHTML=s.innerHTML; e.style.marginInlineEnd='8px'; }
+      if(e.childNodes.length===0&&e.tagName==='SPAN'){ e.className='ai-ic'; e.setAttribute('data-c',cc); e.innerHTML=s.innerHTML; e.style.marginInlineEnd='8px'; }
       else e.insertBefore(s,e.firstChild);
     }
   }
