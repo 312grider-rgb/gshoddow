@@ -86,6 +86,28 @@
   .followup-chip:active{transform:scale(0.98);}
   .followup-chip .fq-icon{margin-right:6px;}
 
+  .styles-h{font-size:13px;color:#6B6558;font-weight:700;margin:2px 0 6px}
+  .styles{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .stl{border:1.5px solid var(--line,#E9E2D2);background:#fff;color:var(--ink,#141F38);border-radius:999px;padding:8px 14px;font:600 14px Inter,sans-serif;cursor:pointer}
+  .stl.active{background:var(--ink,#141F38);color:#fff;border-color:var(--ink,#141F38)}
+  .followups{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 10px}
+  .followups button{border:1.5px solid #C9A24E;background:#FFF9EC;color:#8A6A1F;border-radius:999px;padding:7px 12px;font:700 13px Inter,sans-serif;cursor:pointer}
+  #voiceMode{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:22px 18px 28px;background:radial-gradient(circle at 50% 30%,#3a3fb8,#1B2166 70%);color:#fff;text-align:center}
+  #voiceMode .vtop{width:100%;display:flex;justify-content:space-between;align-items:center}
+  #voiceMode .vbtn{border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:999px;padding:10px 16px;font:700 14px Inter,sans-serif;cursor:pointer;min-height:44px}
+  #voiceMode .vmid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;padding:12px 0}
+  #vBot{width:120px;height:120px;border-radius:38px;box-shadow:0 0 0 6px rgba(76,195,255,.25),0 20px 40px rgba(0,0,0,.35);animation:vfloat 3.2s ease-in-out infinite}
+  #voiceMode.listening #vBot{box-shadow:0 0 0 10px rgba(76,195,255,.55),0 0 50px rgba(76,195,255,.7)}
+  #voiceMode.speaking #vBot{animation:vtalk .5s ease-in-out infinite alternate}
+  #voiceMode.thinking #vBot{animation:vthink 1.2s linear infinite}
+  @keyframes vfloat{50%{transform:translateY(-8px)}}
+  @keyframes vtalk{to{transform:scale(1.06)}}
+  @keyframes vthink{50%{opacity:.7}}
+  #vState{font-size:20px;font-weight:800;margin:14px 0 6px}
+  #vText{font-size:15.5px;line-height:1.6;max-width:460px;max-height:26vh;overflow:auto;color:rgba(255,255,255,.9)}
+  #vMic{width:96px;height:96px;border-radius:50%;border:0;font-size:38px;color:#fff;cursor:pointer;background:linear-gradient(150deg,#4CC3FF,#1B74D6);box-shadow:0 0 0 8px rgba(76,195,255,.25),0 14px 28px rgba(0,0,0,.4)}
+  #voiceMode.listening #vMic{background:linear-gradient(150deg,#FF7AA8,#C93A78);box-shadow:0 0 0 12px rgba(255,122,168,.35)}
+  .vbar{display:flex;gap:10px;margin-top:16px}
   .chat-bubble{
     padding:13px 16px; border-radius:14px; font-size:18.5px; line-height:1.6; margin-bottom:8px; max-width:88%;
   }
@@ -297,6 +319,16 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
       <div class="kicker">🧑‍🏫 AI Teacher</div>
       <h3>Your personal AI teacher</h3>
       <p class="desc">A running conversation, not just one-off answers — ask a question, follow up, dig deeper. The AI Teacher remembers what you've asked earlier in this session.</p>
+
+      <div class="styles-h">Teaching style:</div>
+      <div class="styles" id="teachStyles">
+        <button type="button" class="stl active" data-m="explain">Explain</button>
+        <button type="button" class="stl" data-m="socratic">Socratic</button>
+        <button type="button" class="stl" data-m="practical">Practical</button>
+        <button type="button" class="stl" data-m="visual">Visual</button>
+        <button type="button" class="stl" data-m="exam">Exam coach</button>
+      </div>
+      <button type="button" class="submit-btn" id="openVoice" style="display:none;margin:0 0 14px;">🎙️ Live voice</button>
 
       <div id="teacherChatLog" style="margin-bottom:14px;"></div>
 
@@ -750,6 +782,16 @@ async function callClaude(prompt, maxTokens){
 
 /* ---------- AI TEACHER (ongoing chat) ---------- */
 let teacherHistory = [];
+let teacherMode = 'explain';
+const MODE_TXT = {
+  explain: 'Teaching approach: explain concepts clearly, step by step, in simple words.',
+  socratic: 'Teaching approach: Socratic. Do not just give the answer. Ask one or two thoughtful guiding questions that help the student reach the idea themselves, and give small hints.',
+  practical: 'Teaching approach: practical. Use real-world examples and everyday applications.',
+  visual: 'Teaching approach: visual. Use simple diagrams made of text (lines, arrows, tables) or vivid word pictures to explain.',
+  exam: 'Teaching approach: exam coach. Give a short practice question or exercise, wait for the student, then correct them and explain.'
+};
+const FOLLOWUPS = ['Explain more','Give an example','Simplify this','Test my knowledge'];
+const FOLLOW_MSG = {'Explain more':'Please explain this in more detail.','Give an example':'Please give me an example.','Simplify this':'Please explain this in a simpler way.','Test my knowledge':'Please test my knowledge with a short question about this.'};
 
 function renderTeacherChat(){
   const log = document.getElementById('teacherChatLog');
@@ -758,7 +800,21 @@ function renderTeacherChat(){
     return;
   }
   log.innerHTML = teacherHistory.map(m => `<div class="chat-bubble ${m.role}">${m.role === 'ai' ? renderMarkdown(m.text) : escapeHtml(m.text)}</div>`).join('');
+  const last = teacherHistory[teacherHistory.length - 1];
+  if(last && last.role === 'ai' && last.text !== 'Thinking…' && !/^Error:/.test(last.text)){
+    log.insertAdjacentHTML('beforeend', '<div class="followups">' + FOLLOWUPS.map(f => `<button type="button" data-f="${f}">${f}</button>`).join('') + '</div>');
+  }
 }
+document.getElementById('teacherChatLog').addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-f]'); if(!b) return;
+  document.getElementById('teacherInput').value = (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(FOLLOW_MSG[b.getAttribute('data-f')]) : FOLLOW_MSG[b.getAttribute('data-f')];
+  askTeacher();
+});
+document.getElementById('teachStyles').addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-m]'); if(!b) return;
+  teacherMode = b.getAttribute('data-m');
+  Array.prototype.forEach.call(document.querySelectorAll('#teachStyles .stl'), x => x.classList.toggle('active', x === b));
+});
 renderTeacherChat();
 
 /* ---------- AI TEACHER'S MEMORY OF THE STUDENT ----------
@@ -795,17 +851,81 @@ async function askTeacher(){
 
   const conversation = teacherHistory.slice(0, -1).map(m => (m.role === 'user' ? 'Student: ' : 'AI Teacher: ') + m.text).join('\n');
   const memoryContext = await getLearningProfilesContext();
-  const prompt = `You are a friendly, patient AI teacher having an ongoing conversation with a student. ${memoryContext} Use this to pitch your explanations at the right level for them when relevant — simpler for a Beginner, more advanced for Advanced — without explicitly stating "since you're a Beginner" unless it naturally fits. Continue the conversation naturally, referencing earlier messages when relevant. Keep responses conversational and under 150 words unless more detail is truly needed.\n\nConversation so far:\n${conversation}\n\nAI Teacher:`;
+  const prompt = `You are a friendly, patient AI teacher having an ongoing conversation with a student. ${memoryContext} Use this to pitch your explanations at the right level for them when relevant — simpler for a Beginner, more advanced for Advanced — without explicitly stating "since you're a Beginner" unless it naturally fits. ${MODE_TXT[teacherMode]} Continue the conversation naturally, referencing earlier messages when relevant. Keep responses conversational and under 150 words unless more detail is truly needed.\n\nConversation so far:\n${conversation}\n\nAI Teacher:`;
 
   try{
     const text = await callClaude(prompt, 500);
     teacherHistory[teacherHistory.length - 1] = { role:'ai', text: text };
     LNE_HIST.log(sb, 'teacher', message, text);
+    renderTeacherChat();
+    return text;
   } catch(err){
     teacherHistory[teacherHistory.length - 1] = { role:'ai', text: 'Error: ' + err.message };
   }
   renderTeacherChat();
+  return null;
 }
+
+
+/* ---------- LIVE VOICE MODE (shares teacherHistory with the text chat) ---------- */
+document.addEventListener('DOMContentLoaded', function(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  if(!SR) return;
+  const T = s => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(s) : s;
+  const LANGS = { en:'en-US', ar:'ar-SA', fr:'fr-FR', es:'es-ES', zh:'zh-CN' };
+  const lang = () => LANGS[(window.LNE_I18N && LNE_I18N.lang) || 'en'] || 'en-US';
+  const $ = id => document.getElementById(id);
+  let rec = null, state = 'idle', muted = false, token = 0;
+  $('openVoice').style.display = 'block';
+  function set(st, text){
+    state = st; $('voiceMode').className = st;
+    $('vState').textContent = ({idle:'Tap the microphone and speak', listening:'Listening…', thinking:'Thinking…', speaking:'Speaking… tap to interrupt'})[st] || '';
+    if(text != null) $('vText').textContent = text;
+    $('vMic').textContent = st === 'listening' ? '⏹' : '🎤';
+  }
+  function stopSpeech(){ token++; try{ speechSynthesis.cancel(); }catch(e){} }
+  function stopRec(){ try{ if(rec) rec.stop(); }catch(e){} rec = null; }
+  function clean(t){ return String(t||'').replace(/[*_#`>|-]+/g,' ').replace(/\s+/g,' ').trim(); }
+  function speak(text){
+    const my = ++token;
+    if(!canSpeak || muted){ set('idle'); return; }
+    const parts = clean(text).slice(0, 2500).split(/(?<=[.!?؟。！？])\s+/);
+    let i = 0;
+    set('speaking');
+    (function next(){
+      if(my !== token) return;
+      if(i >= parts.length){ set('idle'); return; }
+      const u = new SpeechSynthesisUtterance(parts[i++]); u.lang = lang(); u.rate = 0.95;
+      u.onend = next; u.onerror = () => { if(my === token) set('idle'); };
+      speechSynthesis.speak(u);
+    })();
+  }
+  async function handle(said){
+    set('thinking', said);
+    $('teacherInput').value = said;
+    const ans = await askTeacher();
+    if(state !== 'thinking') return;                 // user ended or interrupted meanwhile
+    if(ans){ $('vText').textContent = ans; speak(ans); }
+    else { set('idle', T('Something went wrong. Please try again.')); }
+  }
+  function listen(){
+    stopSpeech(); stopRec();
+    const r = new SR(); r.lang = lang(); r.interimResults = false; r.maxAlternatives = 1; r.continuous = false;
+    rec = r; let got = '';
+    r.onresult = e => { got = ''; for(let k = 0; k < e.results.length; k++) got += e.results[k][0].transcript; got = got.trim(); };
+    r.onerror = e => { if(rec === r){ rec = null; set('idle', (e && e.error === 'not-allowed') ? T('Microphone is blocked. Allow it in your browser settings.') : T('Could not hear you. Please try again.')); } };
+    r.onend = () => { if(rec !== r) return; rec = null; if(state !== 'listening') return; if(got) handle(got); else set('idle', T('Could not hear you. Please try again.')); };
+    try{ r.start(); set('listening'); }catch(e){ set('idle'); }
+  }
+  $('openVoice').onclick = () => { $('voiceMode').style.display = 'flex'; set('idle'); };
+  function close(){ stopSpeech(); stopRec(); state = 'idle'; $('voiceMode').style.display = 'none'; renderTeacherChat(); }
+  $('vEnd').onclick = close; $('vText2').onclick = close;
+  $('vMic').onclick = () => { if(state === 'listening'){ stopRec(); set('idle'); } else listen(); };
+  $('vBot').onclick = () => { if(state === 'speaking'){ stopSpeech(); set('idle'); } };
+  $('vMute').onclick = () => { muted = !muted; $('vMute').textContent = T(muted ? 'Unmute voice' : 'Mute voice'); if(muted && state === 'speaking'){ stopSpeech(); set('idle'); } };
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && $('voiceMode').style.display === 'flex') close(); });
+});
 
 /* ---------- TEST YOUR LEVEL ---------- */
 let levelSubjectCache = '';
@@ -1680,5 +1800,17 @@ window.lnAuthReady = initAuth(); // exposed for js/nav.js role-aware bottom nav
   setInterval(updateLiveClock, 1000);
 </script>
 <script src="js/nav.js" defer></script>
+<div id="voiceMode" role="dialog" aria-modal="true" aria-label="Live voice">
+  <div class="vtop"><button class="vbtn" type="button" id="vText2">Text chat</button><button class="vbtn" type="button" id="vEnd">End</button></div>
+  <div class="vmid">
+    <img id="vBot" src="css/icon-192.png" alt="" width="120" height="120">
+    <div id="vState">Tap the microphone and speak</div>
+    <div id="vText">Hello! I'm your AI Teacher. What would you like to learn today?</div>
+  </div>
+  <div>
+    <button id="vMic" type="button" aria-label="Microphone">🎤</button>
+    <div class="vbar"><button class="vbtn" type="button" id="vMute">Mute voice</button></div>
+  </div>
+</div>
 </body>
 </html>
