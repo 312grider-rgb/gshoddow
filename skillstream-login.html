@@ -204,7 +204,7 @@ async function handleSubmit(){
       let applyNext = false;
       try { applyNext = localStorage.getItem('lne_apply_teacher') === '1'; if(applyNext) localStorage.removeItem('lne_apply_teacher'); } catch(e){}
       let backTo = '';
-      try { const b = localStorage.getItem('lne_after_login'); if(b){ localStorage.removeItem('lne_after_login'); if(/^skillstream-lessons\.html\?l=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(b) || /^skillstream-classrooms\.html\?join=[A-Za-z0-9]{4,12}$/.test(b)) backTo = b; } } catch(e){}
+      try { const b = localStorage.getItem('lne_after_login'); if(b){ localStorage.removeItem('lne_after_login'); if(/^skillstream-lessons\.html\?l=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(b) || /^skillstream-classrooms\.html\?join=[A-Za-z0-9]{4,12}$/.test(b) || /^skillstream-xo\.html\?join=[A-Z0-9]{5}$/.test(b)) backTo = b; } } catch(e){}
       window.location.href = backTo || (applyNext ? 'skillstream-teach-apply.html' : 'skillstream-home.html');
 
     } else {

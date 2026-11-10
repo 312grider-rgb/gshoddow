@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X-O — Paradise Of The Eternal Learners</title>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; --x:#2B3399; --o:#B07C14; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--cream);color:#2B2B2B;padding-bottom:90px}
+  header.top{background:linear-gradient(160deg,var(--ink),var(--ink-2));color:var(--cream);padding:22px 18px 24px}
+  header.top .eyebrow{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;font-weight:700}
+  header.top h1{margin:0;font-size:24px;color:var(--cream)}
+  header.top p{margin:8px 0 0;font-size:14px;color:rgba(251,247,239,.85);line-height:1.5}
+  header.top a{color:var(--gold);font-size:13px;text-decoration:none;display:inline-block;margin-top:10px}
+  .wrap{max-width:420px;margin:0 auto;padding:18px}
+  h2{font-size:17px;color:var(--ink);margin:18px 0 10px}
+  .opt{display:block;width:100%;text-align:start;margin:0 0 10px;padding:16px;border-radius:14px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font:700 16px Inter,sans-serif;cursor:pointer}
+  .opt:active{transform:scale(.98)}
+  .lv{display:flex;gap:8px}.lv .opt{margin:0;text-align:center;padding:14px 6px}
+  .score{display:flex;gap:8px;margin-bottom:14px}
+  .score div{flex:1;text-align:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 4px;font-size:12px;color:#6B6558}
+  .score b{display:block;font-size:22px;color:var(--ink)}
+  #msg{text-align:center;font-weight:700;font-size:17px;color:var(--ink);min-height:28px;margin:6px 0 12px}
+  #board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;direction:ltr}
+  .cell{aspect-ratio:1;border-radius:16px;border:2px solid var(--line);background:#fff;font:800 52px/1 Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 4px 10px rgba(20,31,56,.08)}
+  .cell.x{color:var(--x)}.cell.o{color:var(--o)}
+  .cell.win{background:#FFF4D6;border-color:var(--gold)}
+  .cell:disabled{cursor:default}
+  .row{display:flex;gap:8px;margin-top:16px}.row .opt{margin:0;text-align:center}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>X-O</h1>
+  <p>Think ahead and line up three in a row.</p>
+  <a href="skillstream-games.html">&larr; Games</a>
+</header>
+<div class="wrap">
+  <div id="menu">
+    <h2>Choose how to play</h2>
+    <button class="opt" id="mCpu" type="button">Play with the computer</button>
+    <button class="opt" id="mFriend" type="button">Play with a friend</button>
+    <button class="opt" id="mOnline" type="button">Play online with a friend</button>
+    <div id="onBox" class="hidden">
+      <button class="opt" id="oCreate" type="button">Create a game</button>
+      <h2>Join with a code</h2>
+      <input id="oCode" maxlength="5" autocomplete="off" autocapitalize="characters" placeholder="ABCDE" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--line);font:700 20px Inter,sans-serif;text-align:center;letter-spacing:4px;text-transform:uppercase;direction:ltr" data-no-i18n>
+      <button class="opt" id="oJoin" type="button" style="margin-top:10px;text-align:center">Join</button>
+      <div id="oErr" style="color:#B3261E;font-weight:600;margin-top:8px"></div>
+    </div>
+    <div id="lvBox" class="hidden">
+      <h2>Choose the level</h2>
+      <div class="lv"><button class="opt" data-lv="0" type="button">Easy</button><button class="opt" data-lv="1" type="button">Medium</button><button class="opt" data-lv="2" type="button">Hard</button></div>
+    </div>
+  </div>
+  <div id="game" class="hidden">
+    <div class="score"><div><b id="s1">0</b><span id="n1">You</span></div><div><b id="s0">0</b><span>Draws</span></div><div><b id="s2">0</b><span id="n2">Computer</span></div></div>
+    <div id="codeBox" class="hidden" style="text-align:center;margin-bottom:10px"><div>Share this code with your friend:</div><div id="codeShow" data-no-i18n style="font:800 34px Inter,sans-serif;letter-spacing:6px;color:var(--ink);direction:ltr"></div><button class="opt" id="shareBtn" type="button" style="margin-top:8px;text-align:center">Share link</button></div>
+    <div id="msg" aria-live="polite"></div>
+    <div id="board"></div>
+    <div class="row"><button class="opt" id="again" type="button">New game</button><button class="opt" id="back" type="button">Change mode</button></div>
+  </div>
+</div>
+<script>
+(function(){
+  var LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  var SB_URL='https://vauudtedojtcveiqajlr.supabase.co',SB_KEY='sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
+  var $=function(i){return document.getElementById(i)};
+  var mode='cpu',lv=1,b,turn,over,score,starter=0,lock=false;
+  var sb=null,game=null,me='X',chan=null,poll=null,lastStatus='';
+  function load(){try{return JSON.parse(localStorage.getItem('lne_xo_score')||'')||null}catch(e){return null}}
+  function save(){try{localStorage.setItem('lne_xo_score',JSON.stringify(score))}catch(e){}}
+  function winner(s){for(var i=0;i<8;i++){var l=LINES[i];if(s[l[0]]&&s[l[0]]===s[l[1]]&&s[l[0]]===s[l[2]])return{p:s[l[0]],l:l}}return null}
+  function full(s){return s.every(Boolean)}
+  function empties(s){var r=[];for(var i=0;i<9;i++)if(!s[i])r.push(i);return r}
+  function minimax(s,p){var w=winner(s);if(w)return w.p==='O'?10:-10;if(full(s))return 0;
+    var best=p==='O'?-99:99;empties(s).forEach(function(i){s[i]=p;var v=minimax(s,p==='O'?'X':'O');s[i]=null;best=p==='O'?Math.max(best,v):Math.min(best,v)});return best}
+  function pick(){var e=empties(b),k;
+    if(lv===0)return e[Math.floor(Math.random()*e.length)];
+    function finish(p){for(var j=0;j<e.length;j++){b[e[j]]=p;var w=winner(b);b[e[j]]=null;if(w)return e[j]}return -1}
+    if(lv===1){k=finish('O');if(k<0)k=finish('X');if(k>=0&&Math.random()<.85)return k;return e[Math.floor(Math.random()*e.length)]}
+    var best=-99,moves=[];e.forEach(function(m){b[m]='O';var v=minimax(b,'X');b[m]=null;if(v>best){best=v;moves=[m]}else if(v===best)moves.push(m)});
+    return moves[Math.floor(Math.random()*moves.length)]}
+  function canTap(i){if(over||b[i]||lock)return false;if(mode==='cpu')return turn==='X';if(mode==='online')return game&&game.status==='active'&&turn===me;return true}
+  function draw(win){var bd=$('board');bd.innerHTML='';
+    for(var i=0;i<9;i++){(function(i){var c=document.createElement('button');c.type='button';c.className='cell'+(b[i]?' '+b[i].toLowerCase():'')+(win&&win.l.indexOf(i)>=0?' win':'');
+      c.textContent=b[i]||'';c.setAttribute('data-no-i18n','');c.setAttribute('aria-label',(b[i]||'')+' '+(i+1));c.disabled=!canTap(i);
+      c.addEventListener('click',function(){play(i)});bd.appendChild(c)})(i)}}
+  function say(t){$('msg').textContent=t}
+  function status(){
+    if(mode==='cpu')say(turn==='X'?'You are X. Your turn.':'Computer is thinking…');
+    else say(turn==='X'?'Player X, your turn.':'Player O, your turn.')}
+  function upd(){$('s0').textContent=score[0];$('s1').textContent=score[1];$('s2').textContent=score[2]}
+  function end(w){over=true;var k;
+    if(w){k=w.p==='X'?1:2;score[k]++;
+      say(mode==='cpu'?(w.p==='X'?'You win!':'The computer wins.'):(w.p==='X'?'Player X wins!':'Player O wins!'))}
+    else{score[0]++;say('It is a draw.')}
+    if(mode!=='online')save();upd();draw(w)}
+  function play(i){if(!canTap(i))return;
+    if(mode==='online'){onlineMove(i);return}
+    b[i]=turn;var w=winner(b);
+    if(w||full(b)){end(w);return}
+    turn=turn==='X'?'O':'X';status();draw();
+    if(mode==='cpu'&&turn==='O'){lock=true;draw();setTimeout(function(){lock=false;if(over)return;var m=pick();b[m]='O';var w2=winner(b);
+      if(w2||full(b)){end(w2);return}turn='X';status();draw()},450)}}
+  function newGame(){
+    if(mode==='online'){onlineRematch();return}
+    b=[null,null,null,null,null,null,null,null,null];over=false;lock=false;
+    if(mode==='cpu')turn='X';else{starter=1-starter;turn=starter?'O':'X'}
+    status();draw();upd()}
+  function show(){$('menu').classList.add('hidden');$('game').classList.remove('hidden')}
+  function start(m,level){stopOnline();mode=m;lv=level;score=(m==='cpu'&&load())||[0,0,0];
+    $('n1').textContent=m==='cpu'?'You':'Player X';$('n2').textContent=m==='cpu'?'Computer':'Player O';
+    $('codeBox').classList.add('hidden');show();starter=1;newGame()}
+
+  /* ---------------- online ---------------- */
+  function loadSb(){return new Promise(function(res,rej){
+    if(sb)return res(sb);
+    function go(){try{sb=window.supabase.createClient(SB_URL,SB_KEY);res(sb)}catch(e){rej(e)}}
+    if(window.supabase)return go();
+    var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js';s.onload=go;s.onerror=function(){rej(new Error('net'))};document.head.appendChild(s)})}
+  function oerr(t){$('oErr').textContent=t||''}
+  function needLogin(code){try{if(code)localStorage.setItem('lne_after_login','skillstream-xo.html?join='+code)}catch(e){}location.href='skillstream-login.html'}
+  async function ensure(code){var c=await loadSb();var s=await c.auth.getSession();if(!(s.data&&s.data.session)){needLogin(code);return null}return s.data.session.user}
+  function stopOnline(){try{if(chan&&sb)sb.removeChannel(chan)}catch(e){}chan=null;if(poll){clearInterval(poll);poll=null}game=null;lastStatus=''}
+  function fromRow(r){
+    var was=game;game=r;b=r.board.split('').map(function(ch){return ch==='.'?null:ch});turn=r.turn;over=r.status==='finished';
+    var w=over&&r.winner&&r.winner!=='D'?winner(b):null;
+    if(r.status==='waiting'){say('Waiting for your friend to join…');$('codeBox').classList.remove('hidden')}
+    else{$('codeBox').classList.add('hidden');
+      if(lastStatus==='waiting'&&r.status==='active')say('Your friend joined. Game on!');
+      else if(over){
+        if(lastStatus!=='finished'){ if(r.winner==='D')score[0]++;else if(r.winner===me)score[1]++;else score[2]++; upd() }
+        say(r.winner==='D'?'It is a draw.':(r.winner===me?'You win!':'Your friend wins.'))}
+      else say(turn===me?'Your turn.':'Your friend is playing…')}
+    lastStatus=r.status;draw(w)}
+  async function refetch(){try{var r=await sb.from('xo_games').select('*').eq('id',game.id).single();if(r.data&&(r.data.board!==game.board||r.data.status!==game.status||r.data.turn!==game.turn))fromRow(r.data)}catch(e){}}
+  function watch(){
+    try{chan=sb.channel('xo_'+game.id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'xo_games',filter:'id=eq.'+game.id},function(p){fromRow(p.new)}).subscribe()}catch(e){}
+    poll=setInterval(refetch,4000)}
+  function enter(r,mine){stopOnline();mode='online';me=mine;score=[0,0,0];lastStatus=r.status==='waiting'?'waiting':r.status==='active'?'active':'finished';
+    $('n1').textContent='You';$('n2').textContent='Friend';$('codeShow').textContent=r.code;show();game=r;fromRow(r);lastStatus=r.status;
+    if(r.status==='finished')lastStatus='finished';watch()}
+  async function onlineCreate(){oerr('');try{var u=await ensure();if(!u)return;var r=await sb.rpc('xo_create');if(r.error)return oerr(r.error.message);enter(r.data,'X')}catch(e){oerr('Could not connect. Check your internet.')}}
+  async function onlineJoin(code){oerr('');code=(code||'').trim().toUpperCase();if(!/^[A-Z0-9]{5}$/.test(code))return oerr('Enter the code');
+    try{var u=await ensure(code);if(!u)return;var r=await sb.rpc('xo_join',{p_code:code});if(r.error)return oerr(r.error.message);
+      enter(r.data,r.data.x_player===u.id?'X':'O')}catch(e){oerr('Could not connect. Check your internet.')}}
+  async function onlineMove(i){lock=true;draw();try{var r=await sb.rpc('xo_move',{p_id:game.id,p_cell:i});if(r.error)say(r.error.message);else fromRow(r.data)}catch(e){say('Could not connect. Check your internet.')}lock=false;draw(game&&game.winner&&game.winner!=='D'?winner(b):null)}
+  async function onlineRematch(){if(!game||game.status!=='finished')return;try{var r=await sb.rpc('xo_rematch',{p_id:game.id});if(!r.error){lastStatus='active';fromRow(r.data)}}catch(e){}}
+  async function shareLink(){var url=location.origin+location.pathname+'?join='+game.code;
+    try{if(navigator.share){await navigator.share({title:'X-O',text:'Play X-O with me on Learning Never Ends',url:url});return}}catch(e){if(e&&e.name==='AbortError')return}
+    try{await navigator.clipboard.writeText(url)}catch(e){prompt('Copy this link:',url)}}
+
+  $('mCpu').onclick=function(){$('lvBox').classList.remove('hidden');$('onBox').classList.add('hidden')};
+  $('mFriend').onclick=function(){start('friend',0)};
+  $('mOnline').onclick=function(){$('onBox').classList.remove('hidden');$('lvBox').classList.add('hidden');loadSb().catch(function(){})};
+  $('oCreate').onclick=onlineCreate;$('oJoin').onclick=function(){onlineJoin($('oCode').value)};$('shareBtn').onclick=shareLink;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-lv]'),function(el){el.onclick=function(){start('cpu',+el.getAttribute('data-lv'))}});
+  $('again').onclick=newGame;
+  $('back').onclick=function(){stopOnline();$('game').classList.add('hidden');$('menu').classList.remove('hidden');$('lvBox').classList.add('hidden');$('onBox').classList.add('hidden')};
+  var jq=new URLSearchParams(location.search).get('join');
+  if(jq&&/^[A-Za-z0-9]{5}$/.test(jq)){try{localStorage.removeItem('lne_after_login')}catch(e){}try{history.replaceState(null,'',location.pathname)}catch(e){}onlineJoin(jq.toUpperCase())}
+})();
+</script>
+<script src="js/nav.js" defer></script>
+</body>
+</html>
