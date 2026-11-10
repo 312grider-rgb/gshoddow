@@ -44,6 +44,7 @@
   a.tab-btn{display:block; text-align:center; text-decoration:none; box-sizing:border-box;}
   .tab-btn{min-width:calc(50% - 8px);}
   .grp-h{font-size:13px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--ink); opacity:.65; margin:4px 2px 8px;}
+  .ai-more{margin:6px 0 14px}.ai-more summary{cursor:pointer;list-style:none;text-align:center;padding:12px;border-radius:14px;border:1.5px dashed var(--gold,#C9A24E);color:#8A6A1F;font-weight:700}.ai-more summary::-webkit-details-marker{display:none}.ai-more[open] summary{margin-bottom:10px}
   .tab-btn.active{background:var(--ink); color:var(--gold-light); box-shadow:var(--shadow-card);}
 
   .tool-panel{display:none;}
@@ -268,34 +269,27 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
     <h3><span data-ic="teach"></span>Teacher AI</h3>
     <div class="desc" style="margin-bottom:0;">Lesson plans, quizzes, a lesson that writes, draws and speaks on the board, and advice about your students.</div>
   </a>
-  <div class="grp-h">AI Learning</div>
+  <div class="grp-h">What do you need help with?</div>
   <div class="tabs">
+    <button class="tab-btn" id="tabLevelBtn" data-ic="lvl" onclick="switchTab('level')">Test Your Level</button>
     <button class="tab-btn active" id="tabTeacherBtn" data-ic="teach" onclick="switchTab('teacher')">AI Teacher</button>
+    <button class="tab-btn" id="tabHomeworkBtn" data-ic="hw" onclick="switchTab('homework')">Homework Helper</button>
     <button class="tab-btn" id="tabAskBtn" data-ic="ask" onclick="switchTab('ask')">Ask & Explain</button>
     <button class="tab-btn" id="tabSummaryBtn" data-ic="sum" onclick="switchTab('summary')">Summarize</button>
-    <button class="tab-btn" id="tabTranslateBtn" data-ic="tr" onclick="switchTab('translate')">Translate</button>
-    <button class="tab-btn" id="tabClassroomBtn" data-ic="room" onclick="switchTab('classroom')">AI Classroom</button>
-  </div>
-  <div class="grp-h">Test & Improve</div>
-  <div class="tabs">
     <button class="tab-btn" id="tabQuizBtn" data-ic="quiz" onclick="switchTab('quiz')">Quiz</button>
-    <button class="tab-btn" id="tabLevelBtn" data-ic="lvl" onclick="switchTab('level')">Test Your Level</button>
   </div>
-  <div class="grp-h">Plan & Organize</div>
-  <div class="tabs">
-    <button class="tab-btn" id="tabPlanBtn" data-ic="plan" onclick="switchTab('plan')">Study Plan</button>
-    <button class="tab-btn" id="tabHomeworkBtn" data-ic="hw" onclick="switchTab('homework')">Homework Helper</button>
-    <a class="tab-btn" data-ic="learn" href="skillstream-engine.html">My Learning</a>
-  </div>
-  <div class="grp-h">Build Your Future</div>
-  <div class="tabs">
-    <button class="tab-btn" id="tabCareerBtn" data-ic="car" onclick="switchTab('career')">Career Coach</button>
-    <a class="tab-btn" data-ic="opp" href="skillstream-opportunities.html">Opportunities</a>
-  </div>
-  <div class="grp-h">History</div>
-  <div class="tabs">
-    <a class="tab-btn" data-ic="hist" href="skillstream-ai-history.html">AI History</a>
-  </div>
+  <details class="ai-more">
+    <summary>More</summary>
+    <div class="tabs">
+      <button class="tab-btn" id="tabPlanBtn" data-ic="plan" onclick="switchTab('plan')">Study Plan</button>
+      <button class="tab-btn" id="tabTranslateBtn" data-ic="tr" onclick="switchTab('translate')">Translate</button>
+      <button class="tab-btn" id="tabClassroomBtn" data-ic="room" onclick="switchTab('classroom')">AI Classroom</button>
+      <button class="tab-btn" id="tabCareerBtn" data-ic="car" onclick="switchTab('career')">Career Coach</button>
+      <a class="tab-btn" data-ic="opp" href="skillstream-opportunities.html">Opportunities</a>
+      <a class="tab-btn" data-ic="learn" href="skillstream-engine.html">My Learning</a>
+      <a class="tab-btn" data-ic="hist" href="skillstream-ai-history.html">AI History</a>
+    </div>
+  </details>
 
   <!-- AI Teacher (ongoing chat) -->
   <div class="tool-panel active" id="teacherPanel">
@@ -592,6 +586,7 @@ async function initAuth(){
 }
 
 function switchTab(tab){
+  var mb=document.querySelector('.ai-more'); if(mb && ['translate','plan','career','classroom'].indexOf(tab)>=0) mb.open=true;
   const panels = ['teacher', 'ask', 'summary', 'quiz', 'translate', 'level', 'plan', 'homework', 'career', 'classroom'];
   panels.forEach(p => {
     document.getElementById(p + 'Panel').classList.toggle('active', p === tab);
