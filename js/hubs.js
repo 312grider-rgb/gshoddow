@@ -12,6 +12,7 @@
         title: 'Learn', intro: 'Everything for your studies, in one place.',
         sections: [
           { title: 'My learning', links: [
+            L('compass', 'Discover', 'Explore worlds of knowledge and start learning', 'skillstream-discover.html'),
             L('ai', 'My Learning', 'Your goals and a path of steps to tick off', 'skillstream-engine.html'),
             L('book', 'My courses', 'The courses you are taking', 'skillstream-courses.html'),
             L('library', 'Academic studies', 'School and university subjects', 'skillstream-academic.html')
