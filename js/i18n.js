@@ -187,6 +187,18 @@
     try {
       var url = typeof input === 'string' ? input : (input && input.url) || '';
       if (/(^|\/)api\/ask-ai(\?|$)/.test(url)) {
+        // Make the AI answer in the language the app is set to (not for JSON/teacher-tool prompts).
+        try {
+          var NAMES = { ar: 'Arabic', fr: 'French', es: 'Spanish', zh: 'Simplified Chinese' };
+          var ln = NAMES[localStorage.getItem('language') || 'en'];
+          if (ln && init && typeof init.body === 'string' && !/teacher/i.test(location.pathname)) {
+            var bd = JSON.parse(init.body);
+            if (bd && typeof bd.prompt === 'string' && !/json/i.test(bd.prompt) && !/^teacher_/.test(bd.feature || '') && bd.prompt.indexOf('[LNE-LANG]') < 0) {
+              bd.prompt += '\n\n[LNE-LANG] Write all explanations, instructions, feedback and questions in ' + ln + '. Keep any exact words, labels, markers or formats the task requires unchanged (for example a level word the answer must start with). Keep any text that is being practised, quoted or translated in the language the task needs (for example, practice sentences of a language the student is learning).';
+              init = Object.assign({}, init, { body: JSON.stringify(bd) });
+            }
+          }
+        } catch (e) {}
         var t = accessToken();
         if (t) {
           init = init || {};
