@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discover — Paradise Of The Eternal Learners</title>
+<style>
+  .hidden{display:none}
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--cream);color:#2B2B2B;padding-bottom:90px}
+  header.top{background:linear-gradient(160deg,var(--ink),var(--ink-2));color:var(--cream);padding:22px 18px 24px}
+  header.top .eyebrow{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;font-weight:700}
+  header.top h1{margin:0;font-size:24px;color:var(--cream)}
+  header.top p{margin:8px 0 0;font-size:14px;color:rgba(251,247,239,.85);line-height:1.5}
+  .wrap{max-width:560px;margin:0 auto;padding:18px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .world{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:16px 10px;border-radius:18px;border:1.5px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;font:inherit;min-width:0;box-shadow:0 6px 14px -8px rgba(20,31,56,.25)}
+  .world:active{transform:scale(.97)}
+  .world b{font-size:15px;line-height:1.25;overflow-wrap:anywhere}
+  .world .wd{font-size:12px;line-height:1.35;color:#5E584B;font-weight:400}
+  .world .ai-ic{width:54px;height:54px;border-radius:17px;margin:0}
+  .world .ai-ic svg{width:28px;height:28px}
+  #shade{position:fixed;inset:0;background:rgba(10,14,30,.55);display:none;z-index:50}
+  #sheet{position:fixed;left:0;right:0;bottom:0;background:var(--cream);border-radius:22px 22px 0 0;padding:22px 18px 28px;z-index:51;display:none;max-width:560px;margin:0 auto;box-shadow:0 -10px 30px rgba(0,0,0,.3)}
+  #sheet h2{margin:0 0 6px;font-size:20px;color:var(--ink)}
+  #sheet p{margin:0 0 16px;color:#5E584B;font-size:14px;line-height:1.5}
+  #sheet .small{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#8A6A1F;font-weight:700;margin-bottom:6px}
+  .go{display:flex;align-items:center;gap:10px;width:100%;padding:14px;margin:0 0 10px;border-radius:14px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font:700 16px Inter,sans-serif;text-decoration:none;text-align:start;cursor:pointer}
+  .go .ai-ic{margin:0}
+  .dots{display:flex;gap:4px;justify-content:center;margin-top:2px}
+  .dots i{width:9px;height:9px;border-radius:50%;background:#E4DCC8}
+  .dots i.on{background:var(--gold);box-shadow:0 0 6px rgba(201,162,78,.7)}
+  .world.known{border-color:var(--gold)}
+  .lvl{font-size:12px;font-weight:700;color:#8A6A1F}
+  #mapline{margin:0 0 14px;font-size:14px;font-weight:700;color:var(--ink)}
+  .close{display:block;width:100%;padding:12px;border:0;background:none;color:#5E584B;font:600 15px Inter,sans-serif;cursor:pointer}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Discover</h1>
+  <p>Pick a world of knowledge and start exploring.</p>
+</header>
+<div class="wrap">
+  <div id="mapline" class="hidden"></div>
+  <div class="grid" id="worlds">
+    <button class="world" type="button" data-subject="Science" data-name="Science"><span data-ic="sci" data-cc="eme"></span><b>Science</b><span class="wd">How the world works, from atoms to galaxies.</span></button>
+    <button class="world" type="button" data-subject="Math" data-name="Mathematics"><span data-ic="math" data-cc="sap"></span><b>Mathematics</b><span class="wd">Numbers, patterns and problem solving.</span></button>
+    <button class="world" type="button" data-subject="Computer Science" data-name="Technology"><span data-ic="tech" data-cc="oce"></span><b>Technology</b><span class="wd">How computers and modern tools work.</span></button>
+    <button class="world" type="button" data-subject="Computer Science" data-name="Artificial Intelligence"><span data-ic="fa" data-cc="ame"></span><b>Artificial Intelligence</b><span class="wd">How machines learn, and how to use AI well.</span></button>
+    <button class="world" type="button" data-subject="Business" data-name="Business"><span data-ic="biz" data-cc="amb"></span><b>Business</b><span class="wd">How organisations are run and how they grow.</span></button>
+    <button class="world" type="button" data-subject="Business" data-name="Economics"><span data-ic="econ" data-cc="amb"></span><b>Economics</b><span class="wd">Money, markets and the choices people make.</span></button>
+    <button class="world" type="button" data-subject="Business" data-name="Entrepreneurship"><span data-ic="ent" data-cc="rose"></span><b>Entrepreneurship</b><span class="wd">Turn an idea into something real.</span></button>
+    <button class="world" type="button" data-subject="Psychology" data-name="Psychology"><span data-ic="psy" data-cc="ame"></span><b>Psychology</b><span class="wd">How people think, feel and behave.</span></button>
+    <button class="world" type="button" data-subject="Philosophy" data-name="Philosophy"><span data-ic="phil" data-cc="sla"></span><b>Philosophy</b><span class="wd">Big questions and clear thinking.</span></button>
+    <button class="world" type="button" data-subject="Foreign Languages" data-name="Languages"><span data-ic="tr" data-cc="oce"></span><b>Languages</b><span class="wd">Learn to speak, read and write a new language.</span></button>
+    <button class="world" type="button" data-subject="Art & Design" data-name="Arts"><span data-ic="arts" data-cc="rose"></span><b>Arts</b><span class="wd">Drawing, design, music and creative expression.</span></button>
+    <button class="world" type="button" data-subject="General knowledge" data-name="General knowledge"><span data-ic="learn" data-cc="eme"></span><b>General knowledge</b><span class="wd">Interesting facts about the world and history.</span></button>
+    <button class="world" type="button" data-subject="Practical life skills" data-name="Practical life skills"><span data-ic="life" data-cc="sap"></span><b>Practical life skills</b><span class="wd">Skills for everyday life, study and work.</span></button>
+  </div>
+</div>
+<div id="shade"></div>
+<div id="sheet" role="dialog" aria-modal="true">
+  <div class="small">Start here</div>
+  <h2 id="shName"></h2>
+  <p id="shDesc"></p>
+  <a class="go" id="goAsk" href="#"><span data-ic="teach"></span><span>Ask the AI Teacher</span></a>
+  <a class="go" id="goLevel" href="#"><span data-ic="lvl"></span><span>Test my level</span></a>
+  <a class="go" id="goHw" href="#"><span data-ic="hw"></span><span>Get homework help</span></a>
+  <button class="close" id="shClose" type="button">Close</button>
+</div>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var cur=null;
+  function open(btn){cur=btn;var nm=btn.getAttribute('data-name'),sb=btn.getAttribute('data-subject');
+    $('shName').textContent=btn.querySelector('b').textContent;$('shDesc').textContent=btn.querySelector('.wd').textContent;
+    var e=encodeURIComponent;
+    $('goAsk').href='skillstream-ai-hub.html?tab=teacher&q='+e('Teach me about '+nm);
+    $('goLevel').href='skillstream-ai-hub.html?tab=level&subject='+e(sb);
+    $('goHw').href='skillstream-ai-hub.html?tab=homework&subject='+e(sb);
+    $('shade').style.display='block';$('sheet').style.display='block'}
+  function close(){$('shade').style.display='none';$('sheet').style.display='none'}
+  Array.prototype.forEach.call(document.querySelectorAll('.world'),function(b){b.addEventListener('click',function(){open(b)})});
+  $('shade').onclick=close;$('shClose').onclick=close;
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
+
+  /* ---- My map: show the level you reached in each world (read-only, your own data) ---- */
+  (async function(){
+    try{
+      var c=await new Promise(function(res,rej){
+        function go(){try{res(window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co','sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE'))}catch(e){rej(e)}}
+        if(window.supabase)return go();
+        var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js';s.onload=go;s.onerror=function(){rej(new Error('net'))};document.head.appendChild(s)});
+      var ses=await c.auth.getSession(); if(!(ses.data&&ses.data.session))return;
+      var r=await c.from('ai_learning_profile').select('subject,level');
+      var rows=(r&&r.data)||[]; if(!rows.length)return;
+      var by={};rows.forEach(function(x){by[String(x.subject||'').toLowerCase()]=x.level});
+      var n=0,seen={};
+      Array.prototype.forEach.call(document.querySelectorAll('.world'),function(b){
+        var lv=by[(b.getAttribute('data-subject')||'').toLowerCase()]; if(!lv)return;
+        var k=({Beginner:1,Intermediate:2,Advanced:3})[lv]||1;
+        b.classList.add('known');
+        var d=document.createElement('div');d.className='dots';for(var i=1;i<=3;i++){var e=document.createElement('i');if(i<=k)e.className='on';d.appendChild(e)}
+        var t=document.createElement('div');t.className='lvl';t.textContent=lv;
+        b.appendChild(d);b.appendChild(t);
+        var key=b.getAttribute('data-subject').toLowerCase(); if(!seen[key]){seen[key]=1}
+        n++;
+      });
+      if(n){var m=document.getElementById('mapline');m.textContent='Your map: '+n+' of 13 worlds explored';m.classList.remove('hidden')}
+    }catch(e){}
+  })();
+})();
+</script>
+<script src="js/nav.js" defer></script>
+</body>
+</html>

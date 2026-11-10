@@ -710,6 +710,25 @@ function getSubjectValue(hiddenId, otherId){
 renderHubSubjectGrid('levelSubjectGrid', 'levelSubject', 'levelSubjectOther');
 renderHubSubjectGrid('hwSubjectGrid', 'hwSubject', 'hwSubjectOther');
 
+// Deep links from the Discover page: ?tab=teacher|level|homework&subject=...&q=...
+function applyDeepLink(){
+  try{
+    var p=new URLSearchParams(location.search),t=p.get('tab'),s=p.get('subject'),q=p.get('q');
+    var ok=['teacher','ask','summary','translate','quiz','level','homework','plan','career','classroom'];
+    if(t&&ok.indexOf(t)>=0&&typeof switchTab==='function')switchTab(t);
+    function pickSubj(grid,hid,oid){
+      if(!s)return;
+      var known=HUB_SUBJECTS.some(function(x){return x.value===s&&x.value!=='Other'});
+      if(known){selectHubSubject(grid,hid,oid,s)}
+      else{selectHubSubject(grid,hid,oid,'Other');document.getElementById(oid).value=s}
+    }
+    if(t==='level')pickSubj('levelSubjectGrid','levelSubject','levelSubjectOther');
+    if(t==='homework')pickSubj('hwSubjectGrid','hwSubject','hwSubjectOther');
+    if(q&&(t==='teacher'||!t)){var i=document.getElementById('teacherInput');if(i)i.value=q.slice(0,200)}
+  }catch(e){ console.warn('deeplink',e) }
+}
+applyDeepLink(); window.addEventListener('load',function(){ setTimeout(applyDeepLink,400); });
+
 /* ---------- Calls our own /api/ask-ai serverless function instead of
    Anthropic directly — the API key stays server-side in Vercel's
    environment variables, never exposed in the browser. ---------- */
