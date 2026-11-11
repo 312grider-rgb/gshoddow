@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World — Paradise Of The Eternal Learners</title>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; --up:#1E7F5C; --down:#9A6B14; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--cream);color:#2B2B2B;padding-bottom:90px}
+  header.top{background:linear-gradient(160deg,var(--ink),var(--ink-2));color:var(--cream);padding:22px 18px 24px}
+  header.top .eyebrow{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;font-weight:700}
+  header.top h1{margin:0;font-size:24px;color:var(--cream)}
+  header.top p{margin:8px 0 0;font-size:14px;color:rgba(251,247,239,.85);line-height:1.5}
+  .wrap{max-width:560px;margin:0 auto;padding:18px}
+  label{display:block;font-size:13px;font-weight:700;color:#6B6558;margin:0 0 6px}
+  select{width:100%;padding:13px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font:600 16px Inter,sans-serif;color:var(--ink);margin-bottom:12px}
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:14px;margin:0 0 12px;box-shadow:0 6px 14px -10px rgba(20,31,56,.3)}
+  .ctop{display:flex;gap:12px;align-items:center}
+  .ctop .ai-ic{width:46px;height:46px;border-radius:15px;margin:0}
+  .ctop .ai-ic svg{width:25px;height:25px}
+  .nm{font-size:15px;font-weight:800;color:var(--ink);line-height:1.25}
+  .ds{font-size:12.5px;color:#6B6558;line-height:1.4;margin-top:2px}
+  .val{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
+  .val b{font-size:28px;color:var(--ink);letter-spacing:-.5px}
+  .val span{font-size:13px;color:#6B6558}
+  .trend{font-size:13px;font-weight:700}
+  .trend.up{color:var(--up)}.trend.down{color:var(--down)}.trend.flat{color:#6B6558}
+  svg.sp{width:100%;height:34px;margin:6px 0 2px}
+  .src{font-size:12px;color:#6B6558;margin-top:6px;line-height:1.5}
+  .src a{color:#8A6A1F}
+  .cmp{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:14px;color:var(--ink)}
+  .learn{display:inline-block;margin-top:10px;padding:9px 14px;border-radius:999px;border:1.5px solid var(--gold);background:#FFF9EC;color:#8A6A1F;font:700 13px Inter,sans-serif;text-decoration:none}
+  .btn{display:block;width:100%;padding:15px;border-radius:14px;border:0;background:var(--ink);color:#fff;font:700 16px Inter,sans-serif;cursor:pointer;margin:6px 0 12px}
+  #stat{text-align:center;color:#6B6558;padding:18px 0}
+  #stat button{margin-top:10px;padding:10px 18px;border-radius:12px;border:1.5px solid var(--ink);background:#fff;font:700 15px Inter,sans-serif;color:var(--ink);cursor:pointer}
+  #ai{white-space:pre-wrap;line-height:1.7;font-size:15.5px;color:#2B2B2B}
+  .note{font-size:12.5px;color:#6B6558;line-height:1.5;margin:4px 0 14px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>World</h1>
+  <p>See how the world is progressing, and what you can learn from it.</p>
+</header>
+<div class="wrap">
+  <label for="cA">Country</label>
+  <select id="cA" data-no-i18n></select>
+  <label for="cB">Compare with</label>
+  <select id="cB" data-no-i18n></select>
+  <div id="stat"></div>
+  <div id="cards"></div>
+  <div id="foot" class="hidden">
+    <div class="note" id="note"></div>
+    <button class="btn" id="analyst" type="button">Explain this picture with AI</button>
+    <div class="card hidden" id="aiCard">
+      <div class="nm">AI analysis</div>
+      <div id="ai"></div>
+      <div class="note" style="margin-top:10px">AI can make mistakes. The numbers come from the source, and the analysis is only a careful reading of them. Check important facts at the source.</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var T=function(s){return (window.LNE_I18N&&LNE_I18N.t)?LNE_I18N.t(s):s};
+  var LANG=(window.LNE_I18N&&LNE_I18N.lang)||'en';
+  var CODES='AF AL DZ AD AO AG AR AM AU AT AZ BS BH BD BB BY BE BZ BJ BT BO BA BW BR BN BG BF BI CV KH CM CA CF TD CL CN CO KM CG CD CR CI HR CU CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FJ FI FR GA GM GE DE GH GR GD GT GN GW GY HT HN HU IS IN ID IR IQ IE IL IT JM JP JO KZ KE KI KW KG LA LV LB LS LR LY LI LT LU MG MW MY MV ML MT MH MR MU MX FM MD MC MN ME MA MZ MM NA NR NP NL NZ NI NE NG KP MK NO OM PK PW PS PA PG PY PE PH PL PT QA RO RU RW KN LC VC WS SM ST SA SN RS SC SL SG SK SI SB SO ZA KR SS ES LK SD SR SE CH SY TJ TZ TH TL TG TO TT TN TR TM TV UG UA AE GB US UY UZ VU VE VN YE ZM ZW'.split(' ');
+  var dn=null;try{dn=new Intl.DisplayNames([LANG],{type:'region'})}catch(e){}
+  function cname(c){try{return (dn&&dn.of(c))||c}catch(e){return c}}
+  var META={
+    income:{ic:'econ',cc:'amb',name:'Income per person',desc:'Average yearly income of each person, in US dollars.',w:'Economics'},
+    life:{ic:'life',cc:'rose',name:'Life expectancy',desc:'How many years a newborn can expect to live.',w:'Science'},
+    internet:{ic:'tech',cc:'oce',name:'People using the internet',desc:'Share of people who use the internet.',w:'Technology'},
+    school:{ic:'learn',cc:'eme',name:'Secondary school enrolment',desc:'Students in secondary school compared with the school-age group.',w:'General knowledge'},
+    renewable:{ic:'sci',cc:'eme',name:'Renewable energy share',desc:'Share of energy that comes from renewable sources.',w:'Science'},
+    research:{ic:'sci',cc:'ame',name:'Research spending',desc:'Money spent on research and development, as a share of national income.',w:'Science'}
+  };
+  var ORDER=['income','life','internet','school','renewable','research'];
+  var cache={};
+  function fmt(i){
+    if(i.value==null)return null;
+    if(i.unit==='usd')return '$'+Math.round(i.value).toLocaleString(LANG==='ar'?'en':LANG);
+    if(i.unit==='years')return String(Math.round(i.value*10)/10);
+    return (Math.round(i.value*10)/10)+'%';
+  }
+  function trend(i){
+    var s=i.series||[];if(s.length<2)return null;
+    var last=s[s.length-1],ref=null;
+    for(var k=s.length-2;k>=0;k--){if(last[0]-s[k][0]>=5){ref=s[k];break}}
+    if(!ref)ref=s[0];
+    if(last[0]-ref[0]<2)return null;
+    var ch=(last[1]-ref[1])/Math.max(Math.abs(ref[1]),0.0001);
+    var cls=Math.abs(ch)<0.02?'flat':(ch>0?'up':'down');
+    return {cls:cls,year:ref[0],txt:cls==='flat'?'About the same since '+ref[0]:(cls==='up'?'Up since ':'Down since ')+ref[0]};
+  }
+  function spark(s){
+    if(!s||s.length<2)return null;
+    var xs=s.map(function(p){return p[0]}),ys=s.map(function(p){return p[1]});
+    var x0=Math.min.apply(0,xs),x1=Math.max.apply(0,xs),y0=Math.min.apply(0,ys),y1=Math.max.apply(0,ys);
+    var pts=s.map(function(p){var x=(p[0]-x0)/Math.max(x1-x0,1)*100,y=30-((p[1]-y0)/Math.max(y1-y0,1e-9))*26-2;return x.toFixed(1)+','+y.toFixed(1)}).join(' ');
+    return '<svg class="sp" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#C9A24E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" points="'+pts+'"/></svg>';
+  }
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  async function load(code){
+    if(cache[code])return cache[code];
+    var r=await fetch('/api/world?c='+encodeURIComponent(code));
+    if(!r.ok)throw new Error('http '+r.status);
+    var j=await r.json();cache[code]=j;return j;
+  }
+  function byKey(d){var m={};(d.indicators||[]).forEach(function(i){m[i.key]=i});return m}
+  var A=null,B=null;
+  function render(){
+    var cards=$('cards');cards.innerHTML='';
+    var a=byKey(A),b=B?byKey(B):null;
+    ORDER.forEach(function(k){
+      var m=META[k],i=a[k]||{},v=fmt(i),t=trend(i),sp=spark(i.series);
+      var c=document.createElement('div');c.className='card';
+      var h='<div class="ctop"><span data-ic="'+m.ic+'" data-cc="'+m.cc+'"></span><div><div class="nm">'+esc(m.name)+'</div><div class="ds">'+esc(m.desc)+'</div></div></div>';
+      if(v==null){h+='<div class="val"><span>No recent data for this country</span></div>'}
+      else{
+        h+='<div class="val"><b data-no-i18n>'+esc(v)+'</b>'+(i.unit==='years'?'<span>years</span>':'')+'<span>Latest data: '+i.year+'</span></div>';
+        if(t)h+='<div class="trend '+t.cls+'">'+esc(t.txt)+'</div>';else h+='<div class="trend flat">Not enough data to show a trend</div>';
+        if(sp)h+=sp;
+      }
+      if(b){var j=b[k]||{},w=fmt(j);h+='<div class="cmp"><span data-no-i18n>'+esc(cname(B.country.code))+'</span>: '+(w==null?'<span>No recent data for this country</span>':'<b data-no-i18n>'+esc(w)+'</b> <span>'+(j.unit==='years'?'<span>years</span> ':'')+'Latest data: '+j.year+'</span>')+'</div>'}
+      h+='<div class="src">Source: World Bank, World Development Indicators · <a href="https://data.worldbank.org/indicator/'+esc(i.code||'')+'" target="_blank" rel="noopener" data-no-i18n>'+esc(i.code||'')+'</a></div>';
+      h+='<a class="learn" href="skillstream-discover.html?w='+encodeURIComponent(m.w)+'">Learn about this</a>';
+      c.innerHTML=h;cards.appendChild(c);
+    });
+    $('note').textContent=A.note||'';
+    $('foot').classList.remove('hidden');
+  }
+  function status(kind){
+    var s=$('stat');
+    if(kind==='load'){s.textContent=T('Loading…');return}
+    if(kind==='err'){s.innerHTML='<div>The data could not be loaded. Check your internet and try again.</div><button type="button" id="retry">Try again</button>';$('retry').onclick=go;return}
+    s.textContent='';
+  }
+  async function go(){
+    var ca=$('cA').value,cb=$('cB').value;
+    try{localStorage.setItem('lne_world_c',ca)}catch(e){}
+    status('load');$('cards').innerHTML='';$('foot').classList.add('hidden');$('aiCard').classList.add('hidden');
+    try{A=await load(ca);B=cb?await load(cb).catch(function(){return null}):null;status();render()}
+    catch(e){status('err')}
+  }
+  function fill(){
+    var names=CODES.map(function(c){return {c:c,n:cname(c)}}).sort(function(x,y){return x.n.localeCompare(y.n,LANG)});
+    var opt=names.map(function(x){return '<option value="'+x.c+'">'+esc(x.n)+'</option>'}).join('');
+    $('cA').innerHTML=opt;
+    $('cB').innerHTML='<option value="" data-no-i18n>—</option>'+opt;
+    var saved='';try{saved=localStorage.getItem('lne_world_c')||''}catch(e){}
+    $('cA').value=CODES.indexOf(saved)>=0?saved:'SD';
+  }
+  $('cA').onchange=go;$('cB').onchange=go;
+  $('analyst').onclick=async function(){
+    if(!A)return;var btn=$('analyst');btn.disabled=true;
+    $('aiCard').classList.remove('hidden');$('ai').textContent=T('Thinking…');
+    function lines(d){return ORDER.map(function(k){var i=byKey(d)[k]||{};return META[k].name+': '+(fmt(i)==null?'no recent data':fmt(i)+(i.unit==='years'?' years':'')+' ('+i.year+')')}).join('\n')}
+    var p='You are a careful world-development analyst writing for a student. Use ONLY the figures below (World Bank, World Development Indicators, with the year of each figure). Write three short labelled sections: Facts, Analysis, Uncertain. Facts: restate the key numbers with their years. Analysis: explain what they may suggest and possible causes, in cautious words. Uncertain: what these numbers cannot tell us, any data gaps, and ONE possible future scenario clearly marked as a guess, not a fact. Never invent numbers or events. Maximum 220 words.\n\nCountry: '+cname(A.country.code)+' ('+A.country.code+')\n'+lines(A)+(B?'\n\nFor comparison, '+cname(B.country.code)+':\n'+lines(B):'');
+    try{
+      var r=await fetch('/api/ask-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,maxTokens:700,feature:'world_analyst'})});
+      var j=await r.json();
+      $('ai').textContent=(r.ok&&j.text)?j.text:(j.error||'Something went wrong. Please try again.');
+    }catch(e){$('ai').textContent=T('Something went wrong. Please try again.')}
+    btn.disabled=false;
+  };
+  fill();go();
+})();
+</script>
+<script src="js/nav.js" defer></script>
+</body>
+</html>

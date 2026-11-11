@@ -46,6 +46,7 @@
   <p>Pick a world of knowledge and start exploring.</p>
 </header>
 <div class="wrap">
+  <a href="skillstream-world.html" class="world" style="text-decoration:none;margin-bottom:12px;flex-direction:row;text-align:start;gap:12px;padding:14px"><span data-ic="learn" data-cc="oce"></span><span style="flex:1;min-width:0"><b style="display:block">World</b><span class="wd">See how countries are progressing, with real data.</span></span></a>
   <div id="mapline" class="hidden"></div>
   <div class="grid" id="worlds">
     <button class="world" type="button" data-subject="Science" data-name="Science"><span data-ic="sci" data-cc="eme"></span><b>Science</b><span class="wd">How the world works, from atoms to galaxies.</span></button>
@@ -85,7 +86,8 @@
     $('goHw').href='skillstream-ai-hub.html?tab=homework&subject='+e(sb);
     $('shade').style.display='block';$('sheet').style.display='block'}
   function close(){$('shade').style.display='none';$('sheet').style.display='none'}
-  Array.prototype.forEach.call(document.querySelectorAll('.world'),function(b){b.addEventListener('click',function(){open(b)})});
+  Array.prototype.forEach.call(document.querySelectorAll('button.world'),function(b){b.addEventListener('click',function(){open(b)})});
+  try{var w=new URLSearchParams(location.search).get('w');if(w){var all=document.querySelectorAll('button.world');for(var i=0;i<all.length;i++){if(all[i].getAttribute('data-name').toLowerCase()===w.toLowerCase()||all[i].getAttribute('data-subject').toLowerCase()===w.toLowerCase()){open(all[i]);break}}}}catch(e){}
   $('shade').onclick=close;$('shClose').onclick=close;
   document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
 
