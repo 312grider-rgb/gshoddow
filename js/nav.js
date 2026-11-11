@@ -80,7 +80,7 @@
   // Which pages belong under which tab (so the right tab is highlighted on every page)
   var GROUPS = {
     'skillstream-hub-learn.html': ['skillstream-hub-learn.html', 'skillstream-courses.html', 'skillstream-self-paced.html', 'skillstream-academic.html', 'skillstream-classrooms.html',
-      'skillstream-discover.html', 'skillstream-engine.html', 'skillstream-lessons.html', 'skillstream-record.html', 'skillstream-teacher-ai.html', 'skillstream-mywork.html', 'skillstream-library.html', 'skillstream-calendar.html',
+      'skillstream-discover.html', 'skillstream-world.html', 'skillstream-engine.html', 'skillstream-lessons.html', 'skillstream-record.html', 'skillstream-teacher-ai.html', 'skillstream-mywork.html', 'skillstream-library.html', 'skillstream-calendar.html',
       'skillstream-school.html', 'skillstream-teachers-directory.html', 'skillstream-focus.html', 'skillstream-live-session.html', 'skillstream-live-video.html', 'skillstream-session-detail.html'],
     'skillstream-ai-hub.html': ['skillstream-ai-hub.html', 'skillstream-future-architect.html'],
     'skillstream-hub-community.html': ['skillstream-hub-community.html', 'skillstream-messages.html', 'skillstream-community.html', 'skillstream-shared.html', 'skillstream-whiteboard.html',
