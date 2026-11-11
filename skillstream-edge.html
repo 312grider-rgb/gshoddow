@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Edge — Paradise Of The Eternal Learners</title>
+<style>
+  :root{ --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --cream:#FBF7EF; --line:#E9E2D2; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--cream);color:#2B2B2B;padding-bottom:90px}
+  header.top{background:linear-gradient(160deg,var(--ink),var(--ink-2));color:var(--cream);padding:22px 18px 24px}
+  header.top .eyebrow{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;font-weight:700}
+  header.top h1{margin:0;font-size:24px;color:var(--cream)}
+  header.top p{margin:8px 0 0;font-size:14px;color:rgba(251,247,239,.85);line-height:1.5}
+  .wrap{max-width:560px;margin:0 auto;padding:16px 18px}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;padding:10px 15px;border-radius:999px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font:700 14px Inter,sans-serif;cursor:pointer}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:14px;margin:0 0 12px;box-shadow:0 6px 14px -10px rgba(20,31,56,.3)}
+  .ctop{display:flex;gap:12px;align-items:flex-start}
+  .ctop .ai-ic{width:44px;height:44px;border-radius:14px;margin:0;flex:0 0 auto}
+  .ctop .ai-ic svg{width:24px;height:24px}
+  .ct{font-size:16px;font-weight:800;color:var(--ink);line-height:1.3}
+  .st{display:inline-block;margin-top:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:800}
+  .st.proven{background:#E3F4EC;color:#14694A}.st.early{background:#FFF3D6;color:#8A6A1F}.st.spec{background:#F3E4F2;color:#7A2E78}
+  .row{font-size:14.5px;line-height:1.55;margin-top:9px}
+  .row b{color:var(--ink)}
+  .src{font-size:12.5px;color:#6B6558;margin-top:10px;line-height:1.5}
+  .src a{color:#8A6A1F}
+  .ask{display:inline-block;margin-top:10px;padding:9px 14px;border-radius:999px;border:1.5px solid var(--gold);background:#FFF9EC;color:#8A6A1F;font:700 13px Inter,sans-serif;text-decoration:none}
+  .key{font-size:12.5px;color:#6B6558;line-height:1.6;margin:0 0 14px}
+  .key b{color:var(--ink)}
+  .foot{font-size:12.5px;color:#6B6558;line-height:1.55;margin:16px 0}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>The Edge</h1>
+  <p>What is happening at the frontier right now, and why it changes direction.</p>
+</header>
+<div class="wrap">
+  <div class="chips" id="chips"></div>
+  <div class="key"><div>Proven: already in real use.</div><div>Early: working in labs, trials or first products.</div><div>Speculative: a claim, a plan or a bet.</div></div>
+  <div id="list"></div>
+  <div class="foot">These cards are short summaries written from the sources linked on each card, on the date shown. Fast-moving fields change quickly, so check the source for the latest. A World link: <a href="skillstream-world.html" style="color:#8A6A1F">World progress by country</a>.</div>
+</div>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var T=function(s){return (window.LNE_I18N&&LNE_I18N.t)?LNE_I18N.t(s):s};
+  var IND={
+    ai:{n:'AI',ic:'fa',cc:'ame'},
+    health:{n:'Health',ic:'life',cc:'rose'},
+    energy:{n:'Energy',ic:'sci',cc:'amb'},
+    space:{n:'Space',ic:'sci',cc:'sap'},
+    computing:{n:'Computing',ic:'tech',cc:'oce'},
+    finance:{n:'Finance & economy',ic:'econ',cc:'amb'},
+    transport:{n:'Transport',ic:'car',cc:'eme'}
+  };
+  var D=[
+   {i:'ai',t:'AI that can attack and defend computer systems',s:'early',w:'The UK AI Security Institute tested frontier models on a 32-step simulated cyber attack. In May 2026 it reported that Anthropic\'s Claude Mythos Preview was the first to complete the whole range (3 of 10 runs), and OpenAI\'s GPT-5.5 completed it in 2 of 10 runs about three weeks later.',h:'Who: AI labs and government safety institutes.',y:'The institute estimates that this ability doubles about every four months. The test had no active defenders, so it does not prove success against well-protected real systems. It makes AI security a priority for every company.',d:'May 2026',sr:'State of AI: May 2026 (Air Street Press)',u:'https://press.airstreet.com/p/state-of-ai-may-2026',q:'Explain how AI can be used in cybersecurity, for attack and for defence'},
+   {i:'ai',t:'Cheap open-weights AI from China',s:'proven',w:'Within 12 days, Z.ai (GLM-5.1), MiniMax (M2.7), Moonshot (Kimi K2.6) and DeepSeek (V4) released coding models that anyone can download. Each costs less than a third of a leading US model to run.',h:'Who: Z.ai, MiniMax, Moonshot AI, DeepSeek.',y:'Powerful AI is becoming cheaper and available outside a few big companies. A US government evaluation put DeepSeek V4 about eight months behind the US frontier, while DeepSeek claims near equality, so the gap is disputed.',d:'May 2026',sr:'State of AI: May 2026 (Air Street Press)',u:'https://press.airstreet.com/p/state-of-ai-may-2026',q:'What does open-weights AI mean and why does it matter?'},
+   {i:'ai',t:'AI agents: impressive in demos, mixed in the real world',s:'early',w:'AI agents that act for you (shop, negotiate, browse). In tests, a top agent scored only 33% on 153 real website tasks, and every frontier model lost money on average when managing a sports-betting bankroll for a season. Yet one company reports its buying agents work 3 times faster.',h:'Who: Anthropic, OpenAI, Ramp, research groups.',y:'Agents are improving fast but are not yet reliable alone. Expect them to help with narrow tasks first, with a person checking the result.',d:'May 2026',sr:'State of AI: May 2026 (Air Street Press)',u:'https://press.airstreet.com/p/state-of-ai-may-2026',q:'What are AI agents and where do they fail?'},
+   {i:'ai',t:'Robots that learn new tasks from AI models',s:'early',w:'Physical Intelligence\'s π0.7 model matched or beat specialist robot policies on tasks such as making espresso and folding laundry, and combined skills it had not been trained on for multi-step kitchen jobs.',h:'Who: Physical Intelligence, Skild AI, Sereact.',y:'Instead of programming a robot for each job, one AI model could control many robots. Money is flowing in: Sereact raised $110M, and Skild AI bought a robotics business from Zebra Technologies.',d:'May 2026',sr:'State of AI: May 2026 (Air Street Press)',u:'https://press.airstreet.com/p/state-of-ai-may-2026',q:'How do AI models control robots?'},
+   {i:'ai',t:'The money behind AI',s:'proven',w:'OpenAI reportedly closed a $122B funding round at an $852B valuation. Anthropic received $40B from Google and $5B from Amazon. At least 11 US states have proposed limits on data centres.',h:'Who: OpenAI, Anthropic, Google, Amazon, Microsoft.',y:'AI needs huge amounts of computing and electricity. Power, land and local politics are becoming limits as important as the algorithms.',d:'May 2026',sr:'State of AI: May 2026 (Air Street Press)',u:'https://press.airstreet.com/p/state-of-ai-may-2026',q:'Why does AI need so much electricity and money?'},
+   {i:'health',t:'Gene editing is now an approved treatment',s:'proven',w:'Casgevy, the first CRISPR gene therapy, was approved by the US FDA for severe sickle cell disease. In July 2026 the approval was widened to children as young as 2 (before: 12 and older).',h:'Who: Vertex Pharmaceuticals and CRISPR Therapeutics.',y:'Editing a patient\'s own cells can treat a genetic disease at its cause. Cost and access are the big open questions, especially in countries with fewer hospitals.',d:'July 2026',sr:'BioPharm International',u:'https://www.biopharminternational.com/view/fda-expands-casgevy-label-to-children-as-young-as-2-broadening-access-to-first-crispr-gene-therapy-for-sickle-cell-disease',q:'How does CRISPR gene editing work and what diseases could it treat?'},
+   {i:'health',t:'AI-designed medicines heading to human trials',s:'early',w:'Companies such as Isomorphic Labs use AI protein models (from the AlphaFold family) to design drug candidates, with partnerships with big drug makers such as Eli Lilly and Novartis.',h:'Who: Isomorphic Labs, Profluent (a $2.25B partnership with Lilly was reported), big pharma.',y:'AI can suggest drug designs in seconds, but only human trials show whether a drug is safe and works. No one yet knows how many AI-designed drugs will pass the final trial stage.',d:'2026',sr:'Intuition Labs overview',u:'https://intuitionlabs.ai/articles/isomorphic-labs-alphafold-ai-drug-discovery-trials',q:'How is AI used to discover new medicines?'},
+   {i:'energy',t:'Fusion: lots of money and claims, no power plant yet',s:'spec',w:'Companies such as Helion, Pacific Fusion and Inertia reported progress or raised money in early 2026 (Inertia reportedly $450M). In the US government labs, simulations suggest inertial fusion plants could tolerate some imperfections. About 30 US fusion companies exist, and several claim grid power as early as the 2030s.',h:'Who: Helion, Pacific Fusion, Inertia, Focused Energy, US national labs.',y:'Fusion could give large amounts of clean energy, but company claims are not yet confirmed by published data, and grid-connected power is a forecast, not a fact.',d:'Feb–Aug 2026',sr:'American Nuclear Society',u:'https://www.ans.org/news/2026-02-20/article-7700/fusion-energy-progress-partnerships-and-the-path-to-deployment/',q:'How does nuclear fusion work and why is it so hard?'},
+   {i:'energy',t:'Sodium-ion batteries: a lithium alternative',s:'early',w:'The battery maker CATL announced it would start mass-producing sodium-ion batteries in 2026. Sodium is far more common than lithium.',h:'Who: CATL (China).',y:'Cheaper, easier-to-source batteries could lower the price of electric cars and energy storage. Their driving range is still lower than the best lithium batteries.',d:'May 2026',sr:'CarNewsChina',u:'https://carnewschina.com/2026/05/30/catl-to-mass-produce-sodium-ion-batteries-in-2026-targets-600-km-range/',q:'How do batteries work and what is a sodium-ion battery?'},
+   {i:'energy',t:'Solid-state batteries: promised for 2027',s:'spec',w:'Toyota has said it aims to start mass production of solid-state batteries in 2027, aiming for a range of about 1,000 km.',h:'Who: Toyota and other car makers.',y:'These batteries promise more range and faster charging. Industry reports suggest that sodium-ion is arriving first, and solid-state is still a bet on 2027.',d:'2026',sr:'Shanghai Metals Market',u:'https://news.metal.com/newscontent/103633667-Toyotas-Solid-State-Battery-Layout:-Mass-Production-in-2027-to-Achieve-a-1000-km-Driving-Range-Revolution',q:'What is a solid-state battery?'},
+   {i:'space',t:'Humans returned to the Moon\'s neighbourhood',s:'proven',w:'NASA\'s Artemis II sent four astronauts on a 10-day trip around the Moon and splashed down in the Pacific on 10 April 2026. It was the first crewed mission beyond low Earth orbit since Apollo 17 in 1972.',h:'Who: NASA, with international partners.',y:'It tests the systems for a future Moon landing and a long-term base. Artemis III, the landing mission, comes next.',d:'April 2026',sr:'NPR',u:'https://www.npr.org/2026/04/10/nx-s1-5781327/nasa-artemis-ii-return-earth-splashdown-moon',q:'What is the Artemis programme and why go back to the Moon?'},
+   {i:'space',t:'The race to the Moon\'s south pole',s:'early',w:'China\'s Chang\'e 7 (orbiter, lander, rover and hopper) was planned for mid-to-late 2026 to search for water ice at the Moon\'s south pole. Blue Origin\'s Blue Moon Mark 1 lander and SpaceX\'s Starship are also aiming at the Moon.',h:'Who: CNSA (China), NASA, Blue Origin, SpaceX.',y:'Water ice could provide drinking water, oxygen and rocket fuel, which makes the south pole the most valuable place on the Moon. Launch dates often slip, so check the latest news.',d:'planned 2026',sr:'Space.com',u:'https://space.com/space-exploration/moon-landings-asteroid-missions-and-new-telescopes-here-are-the-top-spaceflight-moments-to-look-forward-to-in-2026',q:'Why is water ice on the Moon so important?'},
+   {i:'space',t:'Private space stations and reusable rockets',s:'early',w:'Planned for 2026: Vast\'s Haven-1, the first privately built space station; Rocket Lab\'s Neutron reusable rocket; and Sierra Space\'s Dream Chaser spaceplane. SpaceX aims for Starship to reach orbit and transfer fuel in space.',h:'Who: Vast, Rocket Lab, Sierra Space, SpaceX.',y:'Cheaper launches and private stations could open space to many more researchers and companies. These were planned dates, and delays are common.',d:'planned 2026',sr:'Space.com',u:'https://space.com/space-exploration/moon-landings-asteroid-missions-and-new-telescopes-here-are-the-top-spaceflight-moments-to-look-forward-to-in-2026',q:'How do reusable rockets lower the cost of space travel?'},
+   {i:'computing',t:'Quantum computers are fixing their own errors',s:'early',w:'Companies such as Quantinuum and Atom Computing have announced progress in quantum error correction, the key step to building quantum computers that give reliable answers.',h:'Who: Quantinuum, Atom Computing and other quantum companies.',y:'Today\'s quantum computers make many errors. If error correction scales up, they could help with chemistry and materials. Useful large machines do not exist yet, and most figures come from company announcements.',d:'2026',sr:'HPCwire (Atom Computing report)',u:'https://www.hpcwire.com/off-the-wire/atom-computing-reports-neutral-atom-quantum-error-correction-milestone-using-toric-code/',q:'What is a quantum computer and what is quantum error correction?'},
+   {i:'finance',t:'The world economy: steady growth, with a long list of risks',s:'spec',w:'In October 2026 the IMF forecast global growth of 3.1% for 2026 and 3.4% for 2027, with inflation of 4.7% in 2026 easing to 4.1% in 2027. It names the risks: more conflict, renewed trade tensions, weak government finances, and a possible "reassessment" of expectations about AI.',h:'Who: the International Monetary Fund (IMF).',y:'Part of today\'s growth comes from heavy investment in AI. If those hopes shrink, growth could suffer. The IMF also says governments must rebuild their financial room to act in the next crisis. These are forecasts, and the IMF revises them often.',d:'October 2026',sr:'IMF World Economic Outlook, October 2026',u:'https://www.imf.org/en/publications/weo/issues/2026/10/13/world-economic-outlook-october-2026',q:'What is the IMF World Economic Outlook and what do its forecasts mean?'},
+   {i:'finance',t:'Mobile money: money on the phone passes $2 trillion a year',s:'proven',w:'In 2025 more than $2 trillion moved through mobile money wallets worldwide. The industry took about 20 years to reach $1 trillion and about 4 more years to double it. There are 2.3 billion registered accounts, but only about 593 million (about 1 in 4) were used in the last 30 days. Sub-Saharan Africa has 1.2 billion registered accounts, and about 40% of its adults have one.',h:'Who: mobile operators and fintech companies; figures from the GSMA industry report.',y:'A phone can act as a bank account for people far from a bank branch. The next challenge is making people use it for saving, loans and payments, not only sending money. Most accounts are inactive in a given month.',d:'March 2026 (data for 2025)',sr:'ITWeb, reporting the GSMA 2026 report',u:'https://www.itweb.co.za/article/mobile-money-industry-surpasses-2tn-threshold/Kjlyr7wBwy5vk6am',q:'How does mobile money work and how does it help people without bank accounts?'},
+   {i:'finance',t:'Stablecoins: digital dollars get their first national law',s:'early',w:'Stablecoins are digital tokens designed to hold a steady value, such as one US dollar. The US GENIUS Act, signed on 18 July 2025, requires issuers to be licensed, hold reserves of cash or short-term US government bonds equal to every token, publish monthly reserve reports, and not pay interest to holders. It is due to take effect by 18 January 2027, and unlicensed stablecoins may no longer be offered by 18 July 2028.',h:'Who: US lawmakers and regulators, stablecoin issuers, banks.',y:'Clear rules could make stablecoins a normal way to send money across borders and could spread the use of the US dollar. They are not guaranteed or insured by the government. Rules are still being finalised, and other regions, such as the EU, have their own.',d:'September 2026',sr:'US Congressional Research Service',u:'https://www.everycrsreport.com/files/2026-09-17_R49351_6e7716a54599addf12a9c6f115b6b4f20ff39c1f.html',q:'What is a stablecoin and how is it different from bitcoin?'},
+   {i:'finance',t:'Tokenization: shares, bonds and funds as digital tokens',s:'early',w:'Big asset managers, including BlackRock, have launched tokenized funds, where ownership of a real asset such as a government bond fund is recorded as a token on a blockchain. Estimates of the market size differ widely between sources, from roughly $20 billion to over $40 billion.',h:'Who: BlackRock and other asset managers, banks, blockchain companies.',y:'Tokens could make trading faster, cheaper and open all day. The market is still tiny compared with the whole financial system, and the figures come from crypto industry trackers that define "tokenized" in different ways.',d:'2026',sr:'Crypto Briefing',u:'https://cryptobriefing.com/tokenized-asset-market-tops-43-billion/',q:'What does it mean to tokenize an asset?'},
+   {i:'transport',t:'Robotaxis are becoming a real business',s:'proven',w:'Waymo reported about 500,000 paid rides a week across ten US cities in early 2026, and it began paid rides in Denver, San Diego and Tampa. Its goal for 2026 is one million rides a week.',h:'Who: Waymo (Alphabet).',y:'Driverless cars are moving from tests to a daily service in a few cities. Weather, rules and public trust still decide where they spread.',d:'2026',sr:'InsideEVs',u:'https://insideevs.com/news/791245/waymo-rides-per-week-2026-doubled/',q:'How do self-driving cars work?'}
+  ];
+  var cur='all';
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  var SL={proven:'Proven',early:'Early',spec:'Speculative'};
+  function chips(){
+    var h='<button type="button" class="chip on" data-k="all">All</button>';
+    Object.keys(IND).forEach(function(k){h+='<button type="button" class="chip" data-k="'+k+'">'+IND[k].n+'</button>'});
+    $('chips').innerHTML=h;
+    Array.prototype.forEach.call($('chips').children,function(b){b.onclick=function(){
+      cur=b.getAttribute('data-k');Array.prototype.forEach.call($('chips').children,function(x){x.classList.toggle('on',x===b)});draw()}});
+  }
+  function draw(){
+    var h='';
+    D.forEach(function(c){
+      if(cur!=='all'&&c.i!==cur)return;
+      var m=IND[c.i];
+      h+='<div class="card"><div class="ctop"><span data-ic="'+m.ic+'" data-cc="'+m.cc+'"></span><div><div class="ct" data-no-i18n>'+esc(c.t)+'</div><span class="st '+c.s+'">'+SL[c.s]+'</span></div></div>'
+        +'<div class="row" data-no-i18n><b>What:</b> '+esc(c.w)+'</div>'
+        +'<div class="row" data-no-i18n>'+esc(c.h)+'</div>'
+        +'<div class="row" data-no-i18n><b>Why it matters:</b> '+esc(c.y)+'</div>'
+        +'<div class="src" data-no-i18n>Source: <a href="'+esc(c.u)+'" target="_blank" rel="noopener">'+esc(c.sr)+'</a> · '+esc(c.d)+'</div>'
+        +'<a class="ask" href="skillstream-ai-hub.html?tab=teacher&q='+encodeURIComponent(c.q)+'">Ask the AI Teacher</a></div>';
+    });
+    $('list').innerHTML=h;
+  }
+  chips();draw();
+})();
+</script>
+<script src="js/nav.js" defer></script>
+</body>
+</html>
