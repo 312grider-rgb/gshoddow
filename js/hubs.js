@@ -17,6 +17,8 @@
             L('star', 'The Edge', 'What is new at the frontier of science and technology', 'skillstream-edge.html'),
             L('trophy', 'Scholarships', 'Official scholarship programmes and how to prepare', 'skillstream-scholarships.html'),
             L('people', 'Jobs', 'Real job links and jobs posted by schools and employers', 'skillstream-jobs.html'),
+            L('book', 'Careers', 'Careers and what each subject leads to', 'skillstream-careers.html'),
+            L('teach', 'Careers', 'What you can become by learning a subject', 'skillstream-careers.html'),
             L('ai', 'My Learning', 'Your goals and a path of steps to tick off', 'skillstream-engine.html'),
             L('book', 'My courses', 'The courses you are taking', 'skillstream-courses.html'),
             L('library', 'Academic studies', 'School and university subjects', 'skillstream-academic.html')
