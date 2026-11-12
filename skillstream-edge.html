@@ -82,6 +82,7 @@
    {i:'finance',t:'Tokenization: shares, bonds and funds as digital tokens',s:'early',w:'Big asset managers, including BlackRock, have launched tokenized funds, where ownership of a real asset such as a government bond fund is recorded as a token on a blockchain. Estimates of the market size differ widely between sources, from roughly $20 billion to over $40 billion.',h:'Who: BlackRock and other asset managers, banks, blockchain companies.',y:'Tokens could make trading faster, cheaper and open all day. The market is still tiny compared with the whole financial system, and the figures come from crypto industry trackers that define "tokenized" in different ways.',d:'2026',sr:'Crypto Briefing',u:'https://cryptobriefing.com/tokenized-asset-market-tops-43-billion/',q:'What does it mean to tokenize an asset?'},
    {i:'transport',t:'Robotaxis are becoming a real business',s:'proven',w:'Waymo reported about 500,000 paid rides a week across ten US cities in early 2026, and it began paid rides in Denver, San Diego and Tampa. Its goal for 2026 is one million rides a week.',h:'Who: Waymo (Alphabet).',y:'Driverless cars are moving from tests to a daily service in a few cities. Weather, rules and public trust still decide where they spread.',d:'2026',sr:'InsideEVs',u:'https://insideevs.com/news/791245/waymo-rides-per-week-2026-doubled/',q:'How do self-driving cars work?'}
   ];
+  var AUTO=[];
   var cur='all';
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   var SL={proven:'Proven',early:'Early',spec:'Speculative'};
@@ -94,19 +95,31 @@
   }
   function draw(){
     var h='';
-    D.forEach(function(c){
+    AUTO.concat(D).forEach(function(c){
       if(cur!=='all'&&c.i!==cur)return;
       var m=IND[c.i];
+      if(!m)return;
       h+='<div class="card"><div class="ctop"><span data-ic="'+m.ic+'" data-cc="'+m.cc+'"></span><div><div class="ct" data-no-i18n>'+esc(c.t)+'</div><span class="st '+c.s+'">'+SL[c.s]+'</span></div></div>'
         +'<div class="row" data-no-i18n><b>What:</b> '+esc(c.w)+'</div>'
         +'<div class="row" data-no-i18n>'+esc(c.h)+'</div>'
         +'<div class="row" data-no-i18n><b>Why it matters:</b> '+esc(c.y)+'</div>'
+        +(c.auto?'<div class="src" data-no-i18n><b>Latest news, AI summary. Check the source.</b></div>':'')
         +'<div class="src" data-no-i18n>Source: <a href="'+esc(c.u)+'" target="_blank" rel="noopener">'+esc(c.sr)+'</a> · '+esc(c.d)+'</div>'
         +'<a class="ask" href="skillstream-ai-hub.html?tab=teacher&q='+encodeURIComponent(c.q)+'">Ask the AI Teacher</a></div>';
     });
     $('list').innerHTML=h;
   }
-  chips();draw();
+  chips();
+  try{var qi=new URLSearchParams(location.search).get('i');if(qi&&IND[qi]){cur=qi;Array.prototype.forEach.call($('chips').children,function(x){x.classList.toggle('on',x.getAttribute('data-k')===qi)})}}catch(e){}
+  draw();
+  try{
+    fetch('https://vauudtedojtcveiqajlr.supabase.co/rest/v1/edge_items?select=industry,title,what_text,why_text,status,source_name,source_url,as_of&hidden=eq.false&order=created_at.desc&limit=24',{headers:{apikey:'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE'}})
+    .then(function(r){return r.ok?r.json():[]}).then(function(rows){
+      if(!Array.isArray(rows))return;
+      AUTO=rows.filter(function(x){return /^https:\/\//.test(x.source_url)}).map(function(x){return {auto:1,i:x.industry,t:x.title,s:x.status==='spec'?'spec':'early',w:x.what_text,h:'',y:x.why_text,d:x.as_of||'',sr:x.source_name,u:x.source_url,q:x.title}});
+      draw();
+    }).catch(function(){});
+  }catch(e){}
 })();
 </script>
 <script src="js/nav.js" defer></script>

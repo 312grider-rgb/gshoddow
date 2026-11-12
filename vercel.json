@@ -63,5 +63,23 @@
       "destination": "/",
       "permanent": true
     }
-  ]
+  ],
+  "crons": [
+    {
+      "path": "/api/edge-refresh",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/jobs-refresh",
+      "schedule": "30 5 * * *"
+    }
+  ],
+  "functions": {
+    "api/edge-refresh.js": {
+      "maxDuration": 60
+    },
+    "api/jobs-refresh.js": {
+      "maxDuration": 60
+    }
+  }
 }
