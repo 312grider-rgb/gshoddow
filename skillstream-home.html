@@ -279,7 +279,7 @@ function applyHomeLanguage(lang){
     ${catHtml()}
     ${role === 'admin' ? `
     <a class="view-card" href="skillstream-admin-home.html">
-      <div class="icon" data-ic="plan" data-cc="sla"></div>
+      <div class="icon" data-ic="gear" data-cc="sla"></div>
       <h2>Admin workspace</h2>
       <p>All admin tools in one place.</p>
       <div class="go">Open →</div>
@@ -293,7 +293,7 @@ const CATS=[
  {ic:'sci',cc:'oce',t:'Discover',d:'Explore knowledge, records and the world',l:[['Discover','skillstream-discover.html'],['Discoveries and records','skillstream-discoveries.html'],['The Edge','skillstream-edge.html'],['World','skillstream-world.html']]},
  {ic:'fa',cc:'ame',t:'Future',d:'Understand change and design your future',l:[['Future Architect','skillstream-future-architect.html'],['Careers','skillstream-careers.html']]},
  {ic:'opp',cc:'amb',t:'Opportunities',d:'Jobs, scholarships and more',l:[['Jobs','skillstream-jobs.html'],['Scholarships','skillstream-scholarships.html'],['Opportunities','skillstream-opportunities.html']]},
- {ic:'room',cc:'rose',t:'Community',d:'Learn together with other people',l:[['Study groups','skillstream-community.html'],['Private messages','skillstream-messages.html'],['Showcase','skillstream-showcase.html'],['Leaderboard','skillstream-leaderboard.html'],['Our teachers','skillstream-teachers-directory.html']]}
+ {ic:'stud',cc:'rose',t:'Community',d:'Learn together with other people',l:[['Study groups','skillstream-community.html'],['Private messages','skillstream-messages.html'],['Showcase','skillstream-showcase.html'],['Leaderboard','skillstream-leaderboard.html'],['Our teachers','skillstream-teachers-directory.html']]}
 ];
 function catHtml(){
   return CATS.map(function(c){
