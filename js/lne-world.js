@@ -130,6 +130,21 @@
 /* ---- glossy 3D tiles for AI tools: any element with data-ic="name" gets one ---- */
 (function(){
   var P={
+   game:['sap','<rect x="3" y="8" width="18" height="10" rx="5"/><path d="M8 11v4M6 13h4M15.5 12.5v.01M18 14.5v.01"/>'],
+   chess:['sla','<circle cx="12" cy="7" r="3"/><path d="M9.5 20h5M10 20c0-3 .5-5-1.5-7h7c-2 2-1.5 4-1.5 7"/>'],
+   dice:['rose','<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 8.5v.01M15.5 8.5v.01M12 12v.01M8.5 15.5v.01M15.5 15.5v.01"/>'],
+   xo:['eme','<path d="M4 4l7 7M11 4l-7 7"/><circle cx="16.5" cy="16.5" r="4"/>'],
+   mail:['oce','<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'],
+   chat:['oce','<path d="M4 5h16v11H9l-5 4z"/>'],
+   book:['eme','<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M5 17a3 3 0 013-3h11"/>'],
+   clip:['sla','<path d="M8 12.5l6-6a3 3 0 014.2 4.2l-7.5 7.5a5 5 0 01-7-7l6.3-6.3"/>'],
+   star:['amb','<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'],
+   trophy:['amb','<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v1a4 4 0 004 4M16 6h4v1a4 4 0 01-4 4M12 13v4M8 20h8"/>'],
+   bank:['sla','<path d="M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18"/>'],
+   img:['rose','<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 18l5-5 4 4 3-3 4 4"/>'],
+   gear:['sla','<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>'],
+   swap:['oce','<path d="M4 8h14l-3-3M20 16H6l3 3"/>'],
+   user:['oce','<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/>'],
    teach:['ame','<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/>'],
    ask:['oce','<path d="M4 5h16v11H9l-5 4z"/><path d="M10 9.5a2 2 0 114 0c0 1.5-2 1.5-2 3M12 14.5v.01"/>'],
    sum:['eme','<path d="M5 6h14M5 11h14M5 16h9"/>'],
