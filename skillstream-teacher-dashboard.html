@@ -60,7 +60,7 @@
 
   .wrap{padding:18px;}
 
-  .stats-row{display:flex; gap:10px; margin-bottom:24px;}
+  .stats-row{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:24px;}
   .stat{flex:1; min-width:0; overflow-wrap:anywhere; background:#fff; border-radius:14px; padding:14px 10px; text-align:center; box-shadow:var(--shadow-soft);}
   .stat .val{font-family:'Inter',sans-serif; font-size:26px; font-weight:700; color:var(--ink); letter-spacing:-0.5px;}
   .stat .lbl{font-size:15.5px; color:#8a8474; margin-top:4px;}
@@ -182,43 +182,43 @@
     <div class="section-title">Quick Links</div>
     <div class="quick-links">
       <a class="quick-link" href="skillstream-courses.html">
-        <span class="icon">📚</span>
+        <span class="icon" data-ic="book" data-cc="eme"></span>
         <div><div class="label">Manage Courses & Lessons</div><div class="sub">Create, edit, publish</div></div>
       </a>
       <a class="quick-link" href="skillstream-shared.html">
-        <span class="icon">📎</span>
+        <span class="icon" data-ic="clip" data-cc="sla"></span>
         <div><div class="label">Shared With Students</div><div class="sub">Documents, songs, videos & PDFs</div></div>
       </a>
       <a class="quick-link" href="skillstream-messages.html">
-        <span class="icon">💬</span>
+        <span class="icon" data-ic="chat" data-cc="oce"></span>
         <div><div class="label">Messages</div><div class="sub">Chat with students & teachers</div></div>
       </a>
       <a class="quick-link" href="skillstream-recognition.html">
-        <span class="icon">🌟</span>
+        <span class="icon" data-ic="star" data-cc="amb"></span>
         <div><div class="label">Student Feedback & Recognition</div><div class="sub">Encourage genuine improvement</div></div>
       </a>
       <a class="quick-link" href="skillstream-library.html">
-        <span class="icon">📖</span>
+        <span class="icon" data-ic="book" data-cc="sap"></span>
         <div><div class="label">Library</div><div class="sub">Browse or upload books</div></div>
       </a>
       <a class="quick-link" href="skillstream-showcase.html">
-        <span class="icon">🖼️</span>
+        <span class="icon" data-ic="img" data-cc="rose"></span>
         <div><div class="label">Project Showcase</div><div class="sub">See and pin student work</div></div>
       </a>
       <a class="quick-link" href="skillstream-profile.html">
-        <span class="icon">👤</span>
+        <span class="icon" data-ic="user" data-cc="oce"></span>
         <div><div class="label">Edit Profile</div><div class="sub">Name, bio, avatar</div></div>
       </a>
       <a class="quick-link" href="skillstream-teachers-directory.html">
-        <span class="icon">🧑‍🏫</span>
+        <span class="icon" data-ic="teach" data-cc="ame"></span>
         <div><div class="label">Teacher Directory</div><div class="sub">See how you appear publicly</div></div>
       </a>
       <a class="quick-link" href="skillstream-settings.html">
-        <span class="icon">⚙️</span>
+        <span class="icon" data-ic="gear" data-cc="sla"></span>
         <div><div class="label">Settings</div><div class="sub">Appearance, language, notifications</div></div>
       </a>
       <a class="quick-link" href="skillstream-home.html">
-        <span class="icon">🔀</span>
+        <span class="icon" data-ic="swap" data-cc="oce"></span>
         <div><div class="label">Switch View</div><div class="sub">Browse as a learner too</div></div>
       </a>
     </div>

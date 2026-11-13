@@ -39,6 +39,17 @@
   .view-card h2{margin:0 0 6px; font-size:19px; color:var(--ink);}
   .view-card p{margin:0; font-size:13.5px; color:#8a8474; line-height:1.5;}
   .view-card .go{margin-top:14px; font-size:13px; font-weight:700; color:var(--gold);}
+  details.cat{background:#fff;border-radius:20px;margin-bottom:12px;box-shadow:var(--shadow-card)}
+  details.cat summary{list-style:none;display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer}
+  details.cat summary::-webkit-details-marker{display:none}
+  details.cat .icon{flex:0 0 auto;margin:0}
+  .cat-tx{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .cat-tx b{font-size:18px;color:var(--ink)}
+  .cat-tx span{font-size:13.5px;color:#8a8474;line-height:1.4}
+  details.cat[open] summary{padding-bottom:8px}
+  .cat-links{display:flex;flex-wrap:wrap;gap:8px;padding:4px 16px 16px}
+  .cat-links a{padding:10px 14px;border-radius:999px;border:1.5px solid var(--line);background:#FBF7EF;color:var(--ink);font-weight:700;font-size:14px;text-decoration:none}
+  .cat-plans{display:block;text-align:center;padding:12px;font-size:14px;font-weight:700;color:var(--gold);text-decoration:none}
   .view-card.suggested{border:2px solid var(--gold-light);}
   .suggested-tag{
     display:inline-block; background:var(--gold-light); color:var(--ink); font-size:10.5px; font-weight:700;
@@ -242,7 +253,7 @@ function applyHomeLanguage(lang){
     ${role === 'teacher' ? '' : `<a class="view-card ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html" onclick="try{localStorage.setItem('lne_role','student')}catch(e){}">
       ${role === 'student' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.studentTitle}. ${t.studentDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
-      <div class="icon">🎓</div>
+      <div class="icon" data-ic="stud" data-cc="amb"></div>
       <h2>${t.studentTitle}</h2>
       <p>${t.studentDesc}</p>
       <div class="go">${t.studentGo}</div>
@@ -251,7 +262,7 @@ function applyHomeLanguage(lang){
     ${role === 'student' ? '' : `<a class="view-card ${role === 'teacher' ? 'suggested' : ''}" href="skillstream-teacher-dashboard.html" onclick="try{localStorage.setItem('lne_role','teacher')}catch(e){}">
       ${role === 'teacher' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.teacherTitle}. ${t.teacherDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
-      <div class="icon">🧑‍🏫</div>
+      <div class="icon" data-ic="teach" data-cc="ame"></div>
       <h2>${t.teacherTitle}</h2>
       <p>${t.teacherDesc}</p>
       <div class="go">${t.teacherGo}</div>
@@ -259,146 +270,36 @@ function applyHomeLanguage(lang){
 
     <a class="view-card" href="skillstream-ai-hub.html">
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.aiTitle}. ${t.aiDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
-      <div class="icon">🤖</div>
+      <div class="icon" data-ic="ask" data-cc="oce"></div>
       <h2>${t.aiTitle}</h2>
       <p>${t.aiDesc}</p>
       <div class="go">${t.aiGo}</div>
     </a>
 
-    <a class="view-card" href="skillstream-future-architect.html">
-      <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.faTitle}. ${t.faDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
-      <div class="icon" data-ic="fa"></div>
-      <h2>${t.faTitle}</h2>
-      <p>${t.faDesc}</p>
-      <div class="go">${t.faGo}</div>
-    </a>
-
-    <a class="view-card" href="skillstream-discover.html">
-      <div class="icon" data-ic="learn" data-cc="eme"></div>
-      <h2>Discover</h2>
-      <p>Explore worlds of knowledge and start learning</p>
-      <div class="go">Explore →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-world.html">
-      <div class="icon" data-ic="learn" data-cc="oce"></div>
-      <h2>World</h2>
-      <p>See how countries are progressing, with real data.</p>
-      <div class="go">Explore →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-edge.html">
-      <div class="icon" data-ic="fa" data-cc="ame"></div>
-      <h2>The Edge</h2>
-      <p>What is new at the frontier of science and technology</p>
-      <div class="go">Explore →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-scholarships.html">
-      <div class="icon" data-ic="opp" data-cc="amb"></div>
-      <h2>Scholarships</h2>
-      <p>Well-known scholarship programmes, with the official link for each.</p>
-      <div class="go">Explore →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-careers.html">
-      <div class="icon" data-ic="car" data-cc="sap"></div>
-      <h2>Careers</h2>
-      <p>What you can become by learning a subject, and how the future of work may change.</p>
-      <div class="go">Explore →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-careers.html">
-      <div class="icon" data-ic="car" data-cc="rose"></div>
-      <h2>Careers</h2>
-      <p>What each subject can lead to, and which jobs are growing in the future.</p>
-      <div class="go">Explore →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-jobs.html">
-      <div class="icon" data-ic="car" data-cc="eme"></div>
-      <h2>Jobs</h2>
-      <p>Real job links from trusted public sources, and jobs posted by schools and employers.</p>
-      <div class="go">Explore →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-discoveries.html">
-      <div class="icon">🏛️</div>
-      <h2>Discoveries and records</h2>
-      <p>The history of inventions, discoveries and achievements that changed the world.</p>
-      <div class="go">Explore →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-engine.html">
-      <div class="icon">🚀</div>
-      <h2>My Learning</h2>
-      <p>Get unstuck in one tap, set goals with a clear path, and make explanations fit you.</p>
-      <div class="go">Open →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-games.html">
-      <div class="icon">🎮</div>
-      <h2>Games</h2>
-      <p>Chess, Ludo and learning challenges.</p>
-      <div class="go">Play →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-pricing.html">
-      <div class="icon">⭐</div>
-      <h2>Plans and pricing</h2>
-      <p>See your plan, your AI usage and upgrade to Premium.</p>
-      <div class="go">See plans →</div>
-    </a>
+    ${catHtml()}
     ${role === 'admin' ? `
-    <a class="view-card" href="skillstream-admin.html">
-      <div class="icon">🛠️</div>
-      <h2>Admin</h2>
-      <p>Manage courses and users.</p>
-      <div class="go">Open Admin →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-admin-assistant.html">
-      <div class="icon">🧭</div>
-      <h2>Admin Assistant</h2>
-      <p>Ask the AI adviser about usage, health and what to improve next. Read-only.</p>
-      <div class="go">Open Assistant →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-admin-orders.html">
-      <div class="icon">💳</div>
-      <h2>Payments</h2>
-      <p>Review and approve subscription payments.</p>
-      <div class="go">Open Payments →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-admin-teachers.html">
-      <div class="icon">🎓</div>
-      <h2>Teacher applications</h2>
-      <p>Review and approve people who want to teach.</p>
-      <div class="go">Open →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-admin-jobs.html">
-      <div class="icon">💼</div>
-      <h2>Jobs (admin)</h2>
-      <p>Approve posted jobs and run the daily feed.</p>
-      <div class="go">Open →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-admin-edge.html">
-      <div class="icon">📰</div>
-      <h2>The Edge (admin)</h2>
-      <p>Run the daily update and hide automatic cards.</p>
-      <div class="go">Open →</div>
-    </a>
-
-    <a class="view-card" href="skillstream-admin-discoveries.html">
-      <div class="icon">📚</div>
-      <h2>Discoveries (admin)</h2>
-      <p>Add, edit and publish entries of the Discoveries hub.</p>
+    <a class="view-card" href="skillstream-admin-home.html">
+      <div class="icon" data-ic="plan" data-cc="sla"></div>
+      <h2>Admin workspace</h2>
+      <p>All admin tools in one place.</p>
       <div class="go">Open →</div>
     </a>` : ''}
   `;
+}
+
+
+const CATS=[
+ {ic:'learn',cc:'eme',t:'Learn',d:'Courses, lessons, games and your learning path',l:[['My Learning','skillstream-engine.html'],['Courses','skillstream-courses.html'],['Lessons','skillstream-lessons.html'],['Library','skillstream-library.html'],['Games','skillstream-games.html'],['Classrooms','skillstream-classrooms.html']]},
+ {ic:'sci',cc:'oce',t:'Discover',d:'Explore knowledge, records and the world',l:[['Discover','skillstream-discover.html'],['Discoveries and records','skillstream-discoveries.html'],['The Edge','skillstream-edge.html'],['World','skillstream-world.html']]},
+ {ic:'fa',cc:'ame',t:'Future',d:'Understand change and design your future',l:[['Future Architect','skillstream-future-architect.html'],['Careers','skillstream-careers.html']]},
+ {ic:'opp',cc:'amb',t:'Opportunities',d:'Jobs, scholarships and more',l:[['Jobs','skillstream-jobs.html'],['Scholarships','skillstream-scholarships.html'],['Opportunities','skillstream-opportunities.html']]},
+ {ic:'room',cc:'rose',t:'Community',d:'Learn together with other people',l:[['Study groups','skillstream-community.html'],['Private messages','skillstream-messages.html'],['Showcase','skillstream-showcase.html'],['Leaderboard','skillstream-leaderboard.html'],['Our teachers','skillstream-teachers-directory.html']]}
+];
+function catHtml(){
+  return CATS.map(function(c){
+    return '<details class="cat"><summary><span class="icon" data-ic="'+c.ic+'" data-cc="'+c.cc+'"></span><span class="cat-tx"><b>'+c.t+'</b><span>'+c.d+'</span></span></summary><div class="cat-links">'
+      +c.l.map(function(x){return '<a href="'+x[1]+'">'+x[0]+'</a>'}).join('')+'</div></details>';
+  }).join('')+'<a class="cat-plans" href="skillstream-pricing.html">Plans and pricing</a>';
 }
 
 function changeHomeLanguage(){

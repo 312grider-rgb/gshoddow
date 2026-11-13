@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin workspace</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:#FBF7EF;color:#2B2B2B;padding:18px;max-width:640px;margin:0 auto}
+  h1{font-size:22px;color:#141F38;margin:6px 0}
+  h2{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#8A6A1F;margin:20px 0 8px}
+  a.t{display:block;background:#fff;border:1.5px solid #E9E2D2;border-radius:14px;padding:14px;margin:0 0 8px;text-decoration:none;color:#141F38;font-weight:800;font-size:15px}
+  a.t span{display:block;font-weight:500;font-size:13px;color:#6B6558;margin-top:2px}
+  a.back{color:#8A6A1F}
+</style>
+</head>
+<body>
+<a class="back" href="skillstream-home.html">← Home</a>
+<h1>Admin workspace</h1>
+<div id="locked" style="display:none">This page is for admins only.</div>
+<div id="box" style="display:none">
+  <h2>People and money</h2>
+  <a class="t" href="skillstream-admin.html">Admin<span>Courses and users</span></a>
+  <a class="t" href="skillstream-admin-teachers.html">Teacher applications<span>Review people who want to teach</span></a>
+  <a class="t" href="skillstream-admin-schools.html">Schools<span>Manage schools</span></a>
+  <a class="t" href="skillstream-admin-orders.html">Payments<span>Orders and payments</span></a>
+  <a class="t" href="skillstream-admin-analytics.html">Analytics<span>How the app is used</span></a>
+  <h2>Content</h2>
+  <a class="t" href="skillstream-admin-discoveries.html">Discoveries<span>Add, edit and publish entries</span></a>
+  <a class="t" href="skillstream-admin-opportunities.html">Opportunities<span>Manage opportunity entries</span></a>
+  <a class="t" href="skillstream-admin-jobs.html">Jobs<span>Approve posted jobs and run the feed</span></a>
+  <a class="t" href="skillstream-admin-edge.html">The Edge<span>Run the daily update and hide cards</span></a>
+  <h2>Tools</h2>
+  <a class="t" href="skillstream-admin-assistant.html">Admin Assistant<span>Ask the assistant for help</span></a>
+</div>
+<script>
+const sb=window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co','sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){location.href='skillstream-login.html';return}
+  const {data:p}=await sb.from('profiles').select('role').eq('id',session.user.id).maybeSingle();
+  if(p&&p.role==='admin')document.getElementById('box').style.display='block';else document.getElementById('locked').style.display='block';
+})();
+</script>
+</body>
+</html>
