@@ -60,6 +60,11 @@
 
   .wrap{padding:18px;}
 
+  .fold{background:#fff; border-radius:14px; box-shadow:var(--shadow-soft); margin:0 0 14px; overflow:hidden;}
+  .fold summary{padding:14px 16px; font-weight:700; font-size:16px; cursor:pointer; color:var(--ink); list-style:none; min-height:48px; display:flex; align-items:center;}
+  .fold summary::-webkit-details-marker{display:none}
+  .fold summary::after{content:"▾"; margin-inline-start:auto; color:#8a8474;}
+  .fold[open] summary::after{content:"▴"}
   .next-card{background:#fff; border-radius:14px; padding:16px; box-shadow:var(--shadow-soft);}
   .next-card h3{font-size:18px; margin:0 0 4px; color:var(--ink);}
   .next-card .meta{font-size:16px; color:#8a8474; margin-bottom:10px;}
@@ -156,7 +161,10 @@
 <div class="wrap">
   <div class="lne-art" data-art="hero" data-h="220" data-pos="50% 55%"></div>
   <div data-mission></div>
-  <div id="todayCard"></div>
+  <details class="fold" id="todayFold">
+    <summary>Daily inspiration and ideas</summary>
+    <div id="todayCard"></div>
+  </details>
   <div class="section" id="nextClassSec">
     <div class="section-title">Next class</div>
     <div class="next-card" id="nextClass"><div class="loading">Loading…</div></div>
