@@ -1,0 +1,11 @@
+/* Lite look: larger readable text, softer cards, lighter on slow phones. */
+:root{--shadow-soft:0 1px 3px rgba(20,31,56,.07)}
+html body{font-size:17px;line-height:1.55}
+html p,html li,html label,html td,html th,html .meta,html .sub,html small,html .hint,html .desc{font-size:max(16px,1em)}
+html button,html .btn,html select,html input,html textarea{font-size:max(16px,1em)}
+html a.convo-card,html .convo-card,html .course-row,html .tool,html .view-card,html .trail-content,html .person-card{min-height:52px}
+html *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.lne-lite *{animation:none!important;transition:none!important}
+html.lne-lite .lne-art{display:none!important}
+@media (prefers-reduced-motion:reduce){html *{animation:none!important;transition:none!important}}
+html input:not([type=checkbox]):not([type=radio]),html select{min-width:0}
