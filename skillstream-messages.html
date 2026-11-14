@@ -29,9 +29,14 @@
 
   /* Inbox list */
   #inboxView .convo-card{
-    display:flex; align-items:center; gap:12px; background:#fff; border-radius:14px; padding:14px 16px;
-    margin-bottom:10px; box-shadow:var(--shadow-soft); cursor:pointer;
+    display:flex; align-items:center; gap:12px; background:#fff; padding:12px 14px; min-height:64px;
+    border-bottom:1px solid var(--line); cursor:pointer;
   }
+  #inboxView .convo-card:first-of-type{border-top-left-radius:14px; border-top-right-radius:14px;}
+  .convo-side{display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;}
+  .unread-count{min-width:22px; height:22px; padding:0 6px; border-radius:11px; background:var(--gold); color:#fff; font-size:12.5px; font-weight:700; display:flex; align-items:center; justify-content:center;}
+  .convo-card.has-unread .convo-name,.convo-card.has-unread .convo-preview{font-weight:700; color:var(--ink);}
+  .tick{font-size:12px; color:#a8a094; letter-spacing:-3px; margin-right:6px;} .tick.read{color:#2f80ed;}
   .convo-avatar{
     width:42px; height:42px; border-radius:50%; background:var(--gold-light); color:var(--ink);
     display:flex; align-items:center; justify-content:center; font-weight:700; flex:0 0 42px; font-family:'Syne',sans-serif;
@@ -70,6 +75,10 @@
   .bubble{ max-width:78%; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.5; }
   .bubble.me{ background:var(--ink); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
   .bubble.them{ background:#fff; color:var(--charcoal); align-self:flex-start; border-bottom-left-radius:4px; box-shadow:var(--shadow-soft); }
+  .vn{background:rgba(255,255,255,.18); border:1px solid currentColor; color:inherit; border-radius:18px; padding:8px 14px; font-weight:600; font-size:14px; cursor:pointer;}
+  #micBtn.rec{background:#c0392b; color:#fff;}
+  .upd{background:#fff; border-radius:14px; padding:12px 14px; margin-bottom:8px; border-left:4px solid var(--gold);} .upd b{font-size:13px; color:#8A6A1F;} .upd div{font-size:14px; margin-top:4px; overflow-wrap:anywhere;}
+  .bubble.me .tick{color:#9fb6d9; margin-right:0;} .bubble.me .tick.read{color:#6ec1ff;}
   .bubble .bubble-time{ font-size:10px; opacity:0.6; margin-top:4px; display:block; }
 
   .compose-row{ display:flex; gap:8px; position:sticky; bottom:68px; background:var(--cream); padding-top:8px; }
@@ -99,6 +108,7 @@
 
   <div id="inboxView">
     <button class="new-msg-btn" onclick="showNewMessage()">+ New Message</button>
+    <div id="classUpdates"></div>
     <div id="otherChats"></div>
     <div class="sec-title" id="privTitle" style="display:none">Private messages</div>
     <div id="convoList"><div class="loading">Loading…</div></div>
@@ -118,6 +128,7 @@
     <div id="threadMessages"></div>
     <div class="compose-row">
       <input type="text" id="composeInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
+      <button id="micBtn" type="button" aria-label="Voice note" style="padding:0 14px;" onclick="toggleRec()">🎤</button>
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
@@ -210,8 +221,16 @@ async function loadOtherChats(){
   document.getElementById('privTitle').style.display = html ? 'block' : 'none';
 }
 
+function shortTime(iso){
+  const d = new Date(iso), n = new Date();
+  if(d.toDateString() === n.toDateString()) return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  return d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+}
+function tickHtml(m){ return `<span class="tick${m.is_read ? ' read' : ''}" aria-label="${m.is_read ? 'Read' : 'Sent'}">${m.is_read ? '✓✓' : '✓'}</span>`; }
+
 async function loadInbox(){
   loadOtherChats();
+  loadUpdates();
   const el = document.getElementById('convoList');
   el.innerHTML = '<div class="loading">Loading…</div>';
 
@@ -247,14 +266,16 @@ async function loadInbox(){
   el.innerHTML = entries.map(c => {
     const initials = (c.profile.full_name || '?').trim().charAt(0).toUpperCase();
     return `
-    <div class="convo-card" onclick="openThread('${c.otherId}', '${escapeHtml(c.profile.full_name || 'Member').replace(/'/g,"\\'")}')">
+    <div class="convo-card${c.unread>0?' has-unread':''}" onclick="openThread('${c.otherId}', '${escapeHtml(c.profile.full_name || 'Member').replace(/'/g,"\\'")}')">
       <div class="convo-avatar">${c.profile.avatar_url ? `<img src="${escapeHtml(c.profile.avatar_url)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : initials}</div>
       <div class="convo-info">
         <div class="convo-name">${escapeHtml(c.profile.full_name || 'Member')}</div>
-        <div class="convo-preview">${escapeHtml(c.lastMessage.body)}</div>
+        <div class="convo-preview">${c.lastMessage.sender_id === currentUser.id ? tickHtml(c.lastMessage) : ''}${escapeHtml(c.lastMessage.body)}</div>
       </div>
-      ${c.unread > 0 ? '<span class="unread-dot"></span>' : ''}
-      <div class="convo-time">${new Date(c.lastMessage.created_at).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</div>
+      <div class="convo-side">
+        <div class="convo-time">${shortTime(c.lastMessage.created_at)}</div>
+        ${c.unread > 0 ? `<span class="unread-count">${c.unread > 99 ? '99+' : c.unread}</span>` : ''}
+      </div>
     </div>`;
   }).join('');
 }
@@ -318,8 +339,64 @@ async function loadThread(){
 
   el.innerHTML = data.map(m => {
     const mine = m.sender_id === currentUser.id;
-    return `<div class="bubble ${mine ? 'me' : 'them'}">${escapeHtml(m.body)}<span class="bubble-time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div>`;
+    return `<div class="bubble ${mine ? 'me' : 'them'}">${m.audio_path ? `<button type="button" class="vn" data-path="${escapeHtml(m.audio_path)}" onclick="playVoice(this)">▶ Voice message</button>` : escapeHtml(m.body)}<span class="bubble-time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}${mine ? ' ' + tickHtml(m) : ''}</span></div>`;
   }).join('');
+  el.lastElementChild && el.lastElementChild.scrollIntoView({block:'end'});
+}
+
+/* ---------- VOICE NOTES (tap mic to record, tap again to send; max 60s) ---------- */
+let rec = null, recChunks = [], recTimer = null;
+async function toggleRec(){
+  const btn = document.getElementById('micBtn');
+  if(rec){ clearTimeout(recTimer); rec.stop(); return; }
+  if(!navigator.mediaDevices || !window.MediaRecorder){ alert('Voice notes are not supported on this browser.'); return; }
+  let stream;
+  try{ stream = await navigator.mediaDevices.getUserMedia({audio:true}); }catch(e){ alert('Please allow the microphone to send a voice note.'); return; }
+  recChunks = [];
+  rec = new MediaRecorder(stream);
+  rec.ondataavailable = e => { if(e.data && e.data.size) recChunks.push(e.data); };
+  rec.onstop = async () => {
+    stream.getTracks().forEach(t => t.stop());
+    btn.classList.remove('rec'); btn.textContent = '🎤';
+    const type = (rec.mimeType || 'audio/webm').split(';')[0];
+    rec = null;
+    const blob = new Blob(recChunks, {type});
+    if(blob.size < 1500){ return; }
+    if(blob.size > 2000000){ alert('That voice note is too long. Keep it under one minute.'); return; }
+    await sendVoice(blob, type);
+  };
+  rec.start();
+  btn.classList.add('rec'); btn.textContent = '⏹';
+  recTimer = setTimeout(() => { if(rec) rec.stop(); }, 60000);
+}
+async function sendVoice(blob, type){
+  const ext = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : type.includes('mpeg') ? 'mp3' : 'webm';
+  const path = currentUser.id + '/' + activeThreadUserId + '/' + Date.now() + '.' + ext;
+  const up = await sb.storage.from('dm-voice').upload(path, blob, {contentType:type});
+  if(up.error){ alert('Could not send the voice note: ' + up.error.message); return; }
+  const { error } = await sb.from('direct_messages').insert({ sender_id: currentUser.id, receiver_id: activeThreadUserId, body: '🎤 Voice message', audio_path: path });
+  if(error){ await sb.storage.from('dm-voice').remove([path]); alert('Error: ' + error.message); return; }
+  loadThread();
+}
+async function playVoice(btn){
+  const { data, error } = await sb.storage.from('dm-voice').createSignedUrl(btn.dataset.path, 300);
+  if(error || !data){ alert('Could not load this voice note.'); return; }
+  const a = new Audio(data.signedUrl); btn.textContent = '⏸ Playing…';
+  a.onended = a.onerror = () => { btn.textContent = '▶ Voice message'; };
+  a.play().catch(() => { btn.textContent = '▶ Voice message'; });
+}
+
+/* ---------- CLASS UPDATES (24h, posted by teachers) ---------- */
+async function loadUpdates(){
+  const box = document.getElementById('classUpdates');
+  try{
+    const { data } = await sb.from('class_updates').select('classroom_id, body, created_at').gt('expires_at', new Date().toISOString()).order('created_at', {ascending:false}).limit(10);
+    if(!data || !data.length){ box.innerHTML = ''; return; }
+    const ids = [...new Set(data.map(u => u.classroom_id))];
+    const { data: cls } = await sb.from('classrooms').select('id, name').in('id', ids);
+    const nm = {}; (cls || []).forEach(c => nm[c.id] = c.name);
+    box.innerHTML = '<div class="sec-title">Class updates</div>' + data.map(u => `<div class="upd"><b data-no-i18n>${escapeHtml(nm[u.classroom_id] || '')} · ${shortTime(u.created_at)}</b><div data-no-i18n>${escapeHtml(u.body)}</div></div>`).join('');
+  }catch(e){ box.innerHTML = ''; }
 }
 
 async function sendMessage(){
@@ -331,16 +408,4 @@ async function sendMessage(){
     sender_id: currentUser.id,
     receiver_id: activeThreadUserId,
     body
-  });
-
-  if(error){ alert('Error: ' + error.message); return; }
-  input.value = '';
-  loadThread();
-}
-
-initAuth();
-</script>
-<script src="js/msgtabs.js" defer></script>
-<script src="js/nav.js" defer></script>
-</body>
-</html>
+  }
