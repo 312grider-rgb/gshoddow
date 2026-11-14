@@ -20,6 +20,12 @@
   // The Learning Universe look (css/universe.css) is added here so every page gets it without editing each page.
   try { if (!document.getElementById('lneUniverseCss')) { var uv = document.createElement('link'); uv.id = 'lneUniverseCss'; uv.rel = 'stylesheet'; uv.href = 'css/universe.css?v=1'; (document.head || root).appendChild(uv); } } catch (e) {}
   // The sci-fi world (css/scifi.css) sits on top of the Learning Universe look.
+  // Lite look (css/lite.css): bigger text, softer cards. Loads last so it wins.
+  try { if (!document.getElementById('lneLiteCss')) { var lt = document.createElement('link'); lt.id = 'lneLiteCss'; lt.rel = 'stylesheet'; lt.href = 'css/lite.css?v=1'; (document.head || root).appendChild(lt); } } catch (e) {}
+  // Slow connection or Data Saver on: switch off animations and big pictures.
+  try { var cn = navigator.connection; if (cn && (cn.saveData || /(^|-)2g$|3g/.test(cn.effectiveType || ''))) root.classList.add('lne-lite'); } catch (e) {}
+  // Open the connection to the database early.
+  try { [['https://vauudtedojtcveiqajlr.supabase.co', true], ['https://cdn.jsdelivr.net', false]].forEach(function (u) { var pc = document.createElement('link'); pc.rel = 'preconnect'; pc.href = u[0]; if (u[1]) pc.crossOrigin = ''; (document.head || root).appendChild(pc); }); } catch (e) {}
   // App icon, home-screen icon and install info (the logo: a gold infinity above an open book).
   try { if (!document.getElementById('lneIcon')) { var hd = document.head || root; [['icon', 'css/favicon-64.png', 'image/png', 'lneIcon'], ['apple-touch-icon', 'css/apple-touch-icon.png', '', 'lneIcon2'], ['manifest', 'manifest.json', '', 'lneManifest']].forEach(function (r) { var l = document.createElement('link'); l.id = r[3]; l.rel = r[0]; l.href = r[1]; if (r[2]) l.type = r[2]; hd.appendChild(l); }); if (!document.querySelector('meta[name="theme-color"]')) { var m = document.createElement('meta'); m.name = 'theme-color'; m.content = '#2B3399'; hd.appendChild(m); } } } catch (e) {}
   try { if (!document.getElementById('lneScifiCss')) { var sf = document.createElement('link'); sf.id = 'lneScifiCss'; sf.rel = 'stylesheet'; sf.href = 'css/scifi.css?v=13'; (document.head || root).appendChild(sf); } } catch (e) {}
