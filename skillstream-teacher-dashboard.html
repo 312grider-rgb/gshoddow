@@ -6,32 +6,30 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Dashboard — Paradise Of The Eternal Learners</title>
+<title>Teacher Dashboard — Paradise Of The Eternal Learners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="css/theme.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
 <script src="js/lne-today.js"></script>
-<script src="js/lne-universe.js"></script>
-<script src="js/lne-helpers.js"></script>
-<script src="js/ai-history.js"></script>
-<script src="js/incentives.js?v=2"></script>
 <style>
   :root{
-    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583; --cream:#FBF7EF; --sage:#6B8F71;
-    --charcoal:#2B2B2B; --line:#E9E2D2;
+    --ink:#141F38; --ink-2:#1F2E52; --gold:#C9A24E; --gold-light:#E4C583;
+    --cream:#FBF7EF; --sage:#6B8F71; --charcoal:#2B2B2B; --line:#E9E2D2;
+    --shadow-soft:0 2px 10px rgba(20,31,56,0.06);
+    --shadow-card:0 8px 24px rgba(20,31,56,0.08);
+    --ease:cubic-bezier(.22,1,.36,1);
   }
   *{box-sizing:border-box;}
-  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:50px;}
-  h1,h2,h3,.display{font-family:'Syne',sans-serif;}
-  button, a, .btn, .course-card, .chip{ transition:transform 0.18s cubic-bezier(.22,1,.36,1), box-shadow 0.18s cubic-bezier(.22,1,.36,1); }
-  button:active, a.btn:active, .btn:active, .course-card:active{ transform:scale(0.97); }
-  a{text-decoration:none;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--cream); color:var(--charcoal); padding-bottom:50px; -webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Syne',sans-serif; letter-spacing:-0.01em;}
+  button, a, .course-row{ transition:transform 0.18s var(--ease), box-shadow 0.18s var(--ease); }
+  button:active, a:active, .course-row:active{ transform:scale(0.97); }
 
-  header.top{background:linear-gradient(160deg, rgba(20,31,56,0.88) 0%, rgba(31,46,82,0.88) 100%), url('https://images.unsplash.com/photo-1758270705290-62b6294dd044?fm=jpg&q=60&w=1200&auto=format&fit=crop'); background-size:cover; background-position:center; color:var(--cream); padding:22px 18px 28px; position:relative;}
-  header.top .eyebrow{font-size:14.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; font-weight:700;}
+  header.top{background:linear-gradient(160deg, rgba(20,31,56,0.88) 0%, rgba(31,46,82,0.88) 100%), url('https://images.unsplash.com/photo-1758685848174-e061c6486651?fm=jpg&q=60&w=1200&auto=format&fit=crop'); background-size:cover; background-position:center; color:var(--cream); padding:22px 18px 28px; position:relative;}
+  header.top .eyebrow{font-size:15px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-light); margin-bottom:4px; font-weight:700;}
   header.top h1{margin:0; font-size:25px;}
-  header.top p{margin:6px 0 0; font-size:16.5px; opacity:0.85;}
+  header.top p{margin:6px 0 0; font-size:17px; opacity:0.85;}
 
   .bell-btn{
     position:absolute; top:20px; right:18px; background:rgba(255,255,255,0.12); border:none;
@@ -42,7 +40,7 @@
     background:var(--gold); border:2px solid var(--ink); display:none;
   }
   .notif-overlay{
-    position:fixed; inset:0; background:rgba(27,42,74,0.4); display:none; align-items:flex-start;
+    position:fixed; inset:0; background:rgba(20,31,56,0.4); display:none; align-items:flex-start;
     justify-content:center; z-index:60; padding-top:70px;
   }
   .notif-overlay.show{display:flex;}
@@ -50,157 +48,82 @@
     background:#fff; width:92%; max-width:400px; border-radius:16px; max-height:70vh;
     overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.2);
   }
-  .notif-head{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:14px 16px; border-bottom:1px solid var(--line);
-  }
+  .notif-head{display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line);}
   .notif-head h3{font-size:16.5px; margin:0;}
   .notif-head button{background:none; border:none; font-size:18px; color:#999;}
-  .notif-item{
-    padding:13px 16px; border-bottom:1px solid var(--line); font-size:17px;
-  }
+  .notif-item{padding:13px 16px; border-bottom:1px solid var(--line); font-size:16.5px;}
   .notif-item:last-child{border-bottom:none;}
   .notif-item.unread{background:#FBF6EC;}
   .notif-item .n-title{font-weight:600; color:var(--ink); margin-bottom:2px;}
   .notif-item .n-time{font-size:15px; color:#999; margin-top:4px;}
-  .notif-empty{padding:30px 16px; text-align:center; color:#888; font-size:17px;}
+  .notif-empty{padding:30px 16px; text-align:center; color:#888; font-size:16.5px;}
 
   .wrap{padding:18px;}
 
-  .stats-row{
-    display:flex; gap:10px; margin-bottom:24px;
-  }
-  .stat{
-    flex:1; background:#fff; border:1px solid var(--line); border-radius:14px;
-    padding:14px 10px; text-align:center; min-width:0; overflow-wrap:anywhere;
-  }
-  .stat .val{font-family:'Inter',sans-serif; font-size:28px; font-weight:700; color:var(--ink); line-height:1.1; letter-spacing:-0.5px;}
-  .stat .lbl{font-size:15.5px; color:#777; margin-top:4px;}
+  .next-card{background:#fff; border-radius:14px; padding:16px; box-shadow:var(--shadow-soft);}
+  .next-card h3{font-size:18px; margin:0 0 4px; color:var(--ink);}
+  .next-card .meta{font-size:16px; color:#8a8474; margin-bottom:10px;}
+  .next-card a.go{display:inline-block; background:var(--gold,#C9A653); color:#fff; font-weight:700; padding:10px 16px; border-radius:12px; text-decoration:none;}
+  .tool-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  .tool{display:flex; flex-direction:column; align-items:center; gap:8px; background:#fff; border-radius:14px; padding:16px 8px; text-align:center; text-decoration:none; color:var(--ink); box-shadow:var(--shadow-soft); font-size:16px; overflow-wrap:anywhere;}
+  .tool .icon{font-size:22px;}
+  .stats-row{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:24px;}
+  .stat{flex:1; min-width:0; overflow-wrap:anywhere; background:#fff; border-radius:14px; padding:14px 10px; text-align:center; box-shadow:var(--shadow-soft);}
+  .stat .val{font-family:'Inter',sans-serif; font-size:26px; font-weight:700; color:var(--ink); letter-spacing:-0.5px;}
+  .stat .lbl{font-size:15.5px; color:#8a8474; margin-top:4px;}
 
-  .streak-row{
-    display:flex; flex-wrap:wrap; align-items:center; gap:10px; background:#fff; border:1px solid var(--line);
-    border-radius:14px; padding:12px 14px; margin-bottom:16px;
-  }
-  .streak-pill{
-    display:flex; align-items:center; gap:6px; font-size:17px; font-weight:700; color:var(--ink);
-    white-space:nowrap;
-  }
-  .streak-pill .flame{font-size:18.5px;}
-  .streak-btn{
-    margin-inline-start:auto; max-width:100%; background:var(--gold); color:var(--ink); border:none; padding:8px 14px;
-    border-radius:9px; font-size:16px; font-weight:700; cursor:pointer; white-space:normal;
-  }
-  .streak-btn:disabled{background:var(--line); color:#8a8578;}
-
-  .course-row{
-    background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:12px;
-  }
-  .course-row .thumb{
-    width:100%; aspect-ratio:16/9; background:var(--ink) center/cover no-repeat; position:relative;
-  }
-  .course-row .thumb .category-tag{
-    position:absolute; top:10px; left:10px; background:rgba(20,31,56,0.85); color:var(--gold-light);
-    font-size:13.5px; font-weight:700; padding:4px 9px; border-radius:6px; text-transform:uppercase; letter-spacing:0.4px;
-  }
-  .course-row .body{padding:14px 16px;}
-  .course-row h3{font-size:17.5px; margin:0 0 8px; color:var(--ink);}
-  .progress-track{height:7px; background:var(--line); border-radius:4px; overflow:hidden;}
-  .progress-fill{height:100%; background:var(--sage);}
-  .progress-label{font-size:15.5px; color:#777; margin-top:6px; display:flex; justify-content:space-between;}
-  .resume-btn{
-    display:inline-block; margin-top:12px; background:var(--ink); color:#fff;
-    padding:10px 16px; border-radius:9px; font-size:17px; font-weight:600;
-  }
-
-  .live-now-card{
-    background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px;
-    display:flex; align-items:center; gap:12px; margin-bottom:10px;
-  }
-  .live-dot{width:9px; height:9px; border-radius:50%; background:#d0473f; flex-shrink:0;}
-  .live-now-card h3{font-size:16.5px; margin:0; color:var(--ink);}
-  .live-now-card p{font-size:15.5px; color:#777; margin:2px 0 0;}
-  .live-join-btn{
-    margin-left:auto; background:#d0473f; color:#fff; padding:8px 14px; border-radius:9px;
-    font-size:16px; font-weight:700; white-space:nowrap;
-  }
-  .join-code-card{
-    background:#fff; border:1px dashed var(--line); border-radius:14px; padding:14px 16px;
-  }
-  .join-code-card .label{font-size:16px; font-weight:700; color:var(--ink); margin-bottom:8px;}
-  .join-code-row{display:flex; gap:8px;}
-  .join-code-row input{
-    flex:1; min-width:0; padding:10px 12px; border:1.5px solid var(--line); border-radius:9px; font-size:16.5px;
-    text-transform:uppercase;
-  }
-  .join-code-row button{
-    background:var(--ink); color:#fff; border:none; padding:10px 16px; border-radius:9px;
-    font-weight:700; font-size:16.5px; flex:0 0 auto;
-  }
-
-  /* Continue with your teacher */
-  .ts-list{display:flex; flex-direction:column; gap:10px;}
-  .ts-card{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; text-decoration:none; color:inherit; box-shadow:var(--shadow-soft);}
-  .ts-avatar{flex:none; width:44px; height:44px; border-radius:50%; background:var(--ink); color:var(--cream); display:grid; place-items:center; font-family:'Syne',sans-serif; font-weight:700; font-size:18px;}
-  .ts-body{min-width:0; flex:1;}
-  .ts-name{font-weight:700; font-size:17px; color:var(--ink); overflow-wrap:anywhere;}
-  .ts-sub{font-size:14.5px; color:#8a8474; overflow-wrap:anywhere;}
-  .ts-new{display:inline-block; margin-left:8px; padding:2px 9px; border-radius:999px; background:var(--gold); color:var(--ink); font-size:12px; font-weight:700; vertical-align:middle;}
-  .ts-more{display:inline-block; margin-top:10px; font-weight:700; color:var(--ink); font-size:15px;}
-  .section-title{
-    font-size:14.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
-    font-weight:700; margin-bottom:12px;
-  }
+  .section-title{font-size:14.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:12px;}
   .section{margin-bottom:30px;}
 
-  .cert-grid{display:flex; flex-direction:column; gap:10px;}
-  .cert-card{
-    background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px;
-    display:flex; justify-content:space-between; align-items:center;
+  .course-row{
+    background:#fff; border-radius:14px; padding:16px; margin-bottom:12px; box-shadow:var(--shadow-soft);
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
   }
-  .cert-card .title{font-size:17px; font-weight:600; color:var(--ink);}
-  .cert-card .date{font-size:15.5px; color:#888; margin-top:2px;}
-  .cert-icon{font-size:20px;}
+  .course-row h3{font-size:18px; margin:0 0 4px; color:var(--ink);}
+  .course-row .meta{font-size:16px; color:#8a8474;}
+  .badge{display:inline-block; font-size:12.5px; font-weight:700; padding:5px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.4px; margin-top:6px;}
+  .badge.live{background:#E7F0E8; color:var(--sage);}
+  .badge.draft{background:#F3EEE3; color:#8a7748;}
 
-  .empty{
-    background:#fff; border:1px dashed var(--line); border-radius:14px; padding:26px 18px;
-    text-align:center; color:#777; font-size:16.5px;
+  .quick-links{display:flex; flex-direction:column; gap:10px;}
+  .quick-link{
+    display:flex; align-items:center; gap:14px; background:#fff; border-radius:14px; padding:16px;
+    box-shadow:var(--shadow-soft); text-decoration:none; color:inherit;
+  }
+  .quick-link .icon{font-size:22px; width:32px; text-align:center;}
+  .quick-link .label{font-weight:600; font-size:17.5px; color:var(--ink);}
+  .quick-link .sub{font-size:16px; color:#8a8474;}
+
+  .empty{background:#fff; border:1px dashed var(--line); border-radius:14px; padding:26px 18px; text-align:center; color:#8a8474; font-size:17px;}
+
+  .insight-select{
+    width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+    font-family:inherit; font-size:17px; background:#fff; margin-bottom:14px;
+  }
+  .hardest-card{background:#F6E3DE; border-radius:14px; padding:14px 16px; margin-bottom:14px;}
+  .hardest-card .h-label{font-size:14.5px; text-transform:uppercase; letter-spacing:1px; color:#c0523a; font-weight:700; margin-bottom:4px;}
+  .hardest-card .h-title{font-family:'Syne',sans-serif; font-weight:700; color:var(--ink); font-size:18px; margin-bottom:3px;}
+  .hardest-card .h-stat{font-size:16.5px; color:#8a5548;}
+
+  .student-row{
+    background:#fff; border-radius:12px; padding:12px 14px; margin-bottom:8px; box-shadow:var(--shadow-soft);
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .student-row .s-name{font-weight:700; color:var(--ink); font-size:17px;}
+  .student-row .s-meta{font-size:15.5px; color:#8a8474; margin-top:2px;}
+  .student-row .s-bar{width:60px; height:6px; background:var(--line); border-radius:4px; overflow:hidden; margin-top:5px;}
+  .student-row .s-fill{height:100%; background:#c0523a;}
+  .student-row.ok .s-fill{background:var(--sage);}
+  .student-row .s-action{
+    flex-shrink:0; background:var(--ink); color:#fff; font-size:15.5px; font-weight:700;
+    padding:8px 12px; border-radius:8px; text-decoration:none; white-space:nowrap;
   }
   .empty a{color:var(--ink); font-weight:700;}
+  .loading{text-align:center; padding:30px; color:#8a8474;}
 
-  .browse-cta{
-    display:block; text-align:center; background:var(--gold); color:var(--ink);
-    padding:14px; border-radius:12px; font-weight:700; font-size:16.5px; margin-top:8px;
-  }
-  .loading{position:relative; color:transparent !important; font-size:0 !important; height:64px; padding:0 !important; border-radius:12px; background:linear-gradient(90deg,#e9e4d6 25%,#f4f0e4 50%,#e9e4d6 75%); background-size:200% 100%; animation:lnesk 1.2s linear infinite;}
-  @keyframes lnesk{to{background-position:-200% 0}}
-  @media (prefers-reduced-motion:reduce){.loading{animation:none}}
-  footer.site-footer{
-    margin-top:30px; text-align:center;
-  }
-  footer.site-footer .foot-links{
-    display:flex; flex-wrap:wrap; justify-content:center; gap:10px 18px; margin-bottom:14px;
-  }
-  footer.site-footer a{color:var(--ink); font-weight:600; text-decoration:none; font-size:16px;}
-  footer.site-footer .foot-links-meta{margin-bottom:10px;}
-  footer.site-footer .foot-links-meta a{color:#948f80; font-weight:500; font-size:15.5px;}
-  footer.site-footer .foot-copyright{font-size:14.5px; color:#b3ab9b;}
-
-  .ai-rec-card{
-    background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:20px;
-  }
-  .ai-rec-card .ai-title{
-    font-size:14.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gold);
-    font-weight:700; margin-bottom:10px;
-  }
-  .ai-rec-btn{
-    background:var(--ink); color:#fff; border:none; padding:11px 16px; border-radius:9px;
-    font-size:16.5px; font-weight:600; cursor:pointer; width:100%;
-  }
-  .ai-rec-output{
-    margin-top:12px; background:#FBF7EF; border:1px solid var(--line); border-radius:12px;
-    padding:14px; font-size:16.5px; line-height:1.6; white-space:pre-wrap; display:none;
-  }
-  .ai-rec-output.loading-text{color:#999; font-style:italic;}
+  footer.site-footer{margin-top:30px; text-align:center; font-size:16px; color:#8a8474;}
+  footer.site-footer .foot-links{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:10px;}
+  footer.site-footer a{color:var(--ink); font-weight:600; text-decoration:none;}
 
   .live-clock-badge{
     display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
@@ -214,7 +137,7 @@
 <header class="top">
   <div class="eyebrow">Learning Never Ends</div>
   <h1 id="greeting">Welcome back</h1>
-  <p>Paradise Of The Eternal Learners — pick up where you left off.</p>
+  <p>Paradise Of The Eternal Learners — your teaching hub.</p>
   <button class="bell-btn" onclick="openNotifications()">🔔</button>
   <span class="bell-dot" id="bellDot"></span>
   <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
@@ -231,71 +154,112 @@
 </div>
 
 <div class="wrap">
+  <div class="lne-art" data-art="hero" data-h="220" data-pos="50% 55%"></div>
   <div data-mission></div>
   <div id="todayCard"></div>
-  <div class="section">
-    <div class="section-title">Continue Learning</div>
-    <div id="inProgressList"><div class="loading">Loading…</div></div>
-  </div>
-
-  <div id="universeCard"></div>
-  <div class="stats-row" id="statsRow">
-    <div class="stat"><div class="val">–</div><div class="lbl">Courses Started</div></div>
-    <div class="stat"><div class="val">–</div><div class="lbl">Lessons Done</div></div>
-    <div class="stat"><div class="val">–</div><div class="lbl">Certificates</div></div>
-  </div>
-
-  <div class="streak-row" id="streakRow" style="display:none;">
-    <div class="streak-pill"><span class="flame">🔥</span> <span id="streakText">0 days streak</span></div>
-    <button class="streak-btn" id="streakBtn" onclick="markTodayDone()">Mark Today Done</button>
+  <div class="section" id="nextClassSec">
+    <div class="section-title">Next class</div>
+    <div class="next-card" id="nextClass"><div class="loading">Loading…</div></div>
+    <button id="startLiveBtn" onclick="startLiveClass()" style="
+      width:100%; background:linear-gradient(135deg, #c0523a, #d96f56); color:#fff; border:none;
+      padding:16px; border-radius:14px; font-size:16.5px; font-weight:700; margin-top:12px;
+      box-shadow:0 6px 18px rgba(192,82,58,0.3); cursor:pointer;">
+      🔴 Start a Live Class
+    </button>
   </div>
 
   <div class="section">
-    <div class="section-title">My Learning Journey</div>
-    <div id="journeyCard"><div class="loading">Loading…</div></div>
-  </div>
-
-  <div class="section" id="teacherSpaceSection">
-    <div class="section-title">Continue With Your Teacher</div>
-    <div id="teacherSpaceList"><div class="loading">Loading…</div></div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Live Now</div>
-    <div id="liveNowList"><div class="loading">Loading…</div></div>
-  </div>
-
-  <div class="ai-rec-card">
-    <div class="ai-title">AI Study Recommendation</div>
-    <button class="ai-rec-btn" onclick="getRecommendation()">What Should I Study Next?</button>
-    <div class="ai-rec-output" id="recOutput"></div>
+    <div class="section-title">My classes</div>
+    <div id="myClasses"><div class="loading">Loading…</div></div>
+    <div class="next-card" id="updBox" style="display:none; margin-top:12px;">
+      <div class="meta">Post a class update (disappears after 24 hours)</div>
+      <select id="updClass" style="width:100%; padding:10px; margin-bottom:8px; border-radius:10px; border:1.5px solid var(--line,#ddd); font-size:16px;"></select>
+      <textarea id="updText" maxlength="280" rows="2" style="width:100%; padding:10px; border-radius:10px; border:1.5px solid var(--line,#ddd); font-size:16px; font-family:inherit;" placeholder="Write a short update…"></textarea>
+      <button class="go" style="border:none; margin-top:8px; cursor:pointer;" onclick="postUpdate(this)">Post</button>
+    </div>
   </div>
 
   <div class="section">
-    <div class="section-title">My Certificates</div>
-    <div id="certList"></div>
+    <div class="section-title">Teacher tools</div>
+    <div class="tool-grid">
+      <a class="tool" href="skillstream-courses.html"><span class="icon" data-ic="book" data-cc="eme"></span><b>Create course</b></a>
+      <a class="tool" href="skillstream-record.html"><span class="icon" data-ic="video" data-cc="rose"></span><b>Record a lesson</b></a>
+      <a class="tool" href="skillstream-teacher-ai.html"><span class="icon" data-ic="teach"></span><b>Teacher AI</b></a>
+      <a class="tool" href="skillstream-classrooms.html"><span class="icon" data-ic="clip" data-cc="sla"></span><b>Assignments</b></a>
+      <a class="tool" href="skillstream-messages.html"><span class="icon" data-ic="chat" data-cc="oce"></span><b>Messages</b></a>
+      <a class="tool" href="skillstream-library.html"><span class="icon" data-ic="book" data-cc="sap"></span><b>Library</b></a>
+    </div>
   </div>
 
-  <a class="browse-cta" href="skillstream-self-paced.html">Browse All Courses</a>
+  <div class="stats-row" id="statsRow"></div>
 
-  <a href="skillstream-games.html" style="display:block; margin-top:12px; text-align:center; background:#fff; border:1.5px solid var(--line); padding:12px; border-radius:12px; font-weight:700; font-size:16px; color:var(--ink); text-decoration:none;">🎮 Games</a>
+  <div class="section">
+    <div class="section-title">Your Courses</div>
+    <div id="courseList"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="section" id="insightsSection" style="display:none;">
+    <div class="section-title">Who Needs Help</div>
+    <select class="insight-select" id="insightCourseSelect" onchange="refreshInsights(this.value)"></select>
+    <div id="hardestLessonBox"></div>
+    <div id="strugglingList"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Quick Links</div>
+    <div class="quick-links">
+      <a class="quick-link" href="skillstream-courses.html">
+        <span class="icon" data-ic="book" data-cc="eme"></span>
+        <div><div class="label">Manage Courses & Lessons</div><div class="sub">Create, edit, publish</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-shared.html">
+        <span class="icon" data-ic="clip" data-cc="sla"></span>
+        <div><div class="label">Shared With Students</div><div class="sub">Documents, songs, videos & PDFs</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-messages.html">
+        <span class="icon" data-ic="chat" data-cc="oce"></span>
+        <div><div class="label">Messages</div><div class="sub">Chat with students & teachers</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-recognition.html">
+        <span class="icon" data-ic="star" data-cc="amb"></span>
+        <div><div class="label">Student Feedback & Recognition</div><div class="sub">Encourage genuine improvement</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-library.html">
+        <span class="icon" data-ic="book" data-cc="sap"></span>
+        <div><div class="label">Library</div><div class="sub">Browse or upload books</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-showcase.html">
+        <span class="icon" data-ic="img" data-cc="rose"></span>
+        <div><div class="label">Project Showcase</div><div class="sub">See and pin student work</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-profile.html">
+        <span class="icon" data-ic="user" data-cc="oce"></span>
+        <div><div class="label">Edit Profile</div><div class="sub">Name, bio, avatar</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-teachers-directory.html">
+        <span class="icon" data-ic="teach" data-cc="ame"></span>
+        <div><div class="label">Teacher Directory</div><div class="sub">See how you appear publicly</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-settings.html">
+        <span class="icon" data-ic="gear" data-cc="sla"></span>
+        <div><div class="label">Settings</div><div class="sub">Appearance, language, notifications</div></div>
+      </a>
+      <a class="quick-link" href="skillstream-home.html">
+        <span class="icon" data-ic="swap" data-cc="oce"></span>
+        <div><div class="label">Switch View</div><div class="sub">Browse as a learner too</div></div>
+      </a>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <div class="foot-links">
-      <a href="skillstream-games.html">Games &amp; Challenges</a>
-      <a href="skillstream-academic.html">Academic Studies</a>
-      <a href="skillstream-leaderboard.html">Leaderboard</a>
-      <a href="skillstream-teachers-directory.html">Our Teachers</a>
-      <a href="skillstream-home.html">Switch View</a>
-    </div>
-    <div class="foot-links foot-links-meta">
       <a href="skillstream-about.html">About</a>
       <a href="skillstream-faq.html">FAQ</a>
       <a href="skillstream-contact.html">Contact</a>
       <a href="skillstream-privacy.html">Privacy</a>
       <a href="skillstream-terms.html">Terms</a>
     </div>
-    <div class="foot-copyright">© 2026 Paradise Of The Eternal Learners</div>
+    <div>© 2026 Paradise Of The Eternal Learners</div>
   </footer>
 </div>
 
@@ -308,83 +272,8 @@ const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
-let dashProgress = [];
-let dashCerts = [];
 
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-/* ---------- CONTINUE WITH YOUR TEACHER ----------
-   Shows the teachers this student shares a classroom with, newest activity
-   first. Each card opens the private shared space (skillstream-shared.html). */
-async function loadTeacherSpaces(){
-  const box = document.getElementById('teacherSpaceList');
-  const section = document.getElementById('teacherSpaceSection');
-  try{
-    // Find the real student column (user_id, student_id, ...) and whether a role column exists.
-    let memCol = null;
-    for(const c of ['user_id','student_id','profile_id','member_id']){
-      const r = await sb.from('classroom_members').select(c).limit(1);
-      if(!r.error){ memCol = c; break; }
-    }
-    if(!memCol) memCol = 'user_id';
-    const roleTest = await sb.from('classroom_members').select('role').limit(1);
-    let memQ = sb.from('classroom_members').select('classroom_id').eq(memCol, currentUser.id);
-    if(!roleTest.error) memQ = memQ.eq('role', 'student');
-    const { data: mem, error: e1 } = await memQ;
-    if(e1) throw e1;
-    const cids = (mem || []).map(m => m.classroom_id);
-    if(!cids.length){
-      box.innerHTML = `<div class="empty">Join your teacher's classroom to share documents, songs, videos and PDFs.<br><a href="skillstream-classrooms.html">Join with a class code</a></div>`;
-      return;
-    }
-    const { data: cls, error: e2 } = await sb.from('classrooms').select('id,name,teacher_id').in('id', cids);
-    if(e2) throw e2;
-    const byTeacher = {};
-    (cls || []).forEach(c => { if(c.teacher_id){ (byTeacher[c.teacher_id] = byTeacher[c.teacher_id] || []).push(c.name || 'Class'); } });
-    const tids = Object.keys(byTeacher);
-    if(!tids.length){ section.style.display = 'none'; return; }
-
-    const { data: profs } = await sb.from('public_profiles').select('id,name,full_name').in('id', tids);
-    const names = {};
-    (profs || []).forEach(p => { names[p.id] = p.name || p.full_name || 'Your teacher'; });
-
-    // If the sharing tables are not installed yet, hide the section quietly.
-    const { data: items, error: e3 } = await sb.from('shared_items')
-      .select('teacher_id,uploader_id,title,created_at')
-      .eq('student_id', currentUser.id).eq('status', 'active')
-      .order('created_at', { ascending: false }).limit(100);
-    if(e3){ section.style.display = 'none'; return; }
-
-    const cards = tids.map(id => {
-      const mine = (items || []).filter(i => i.teacher_id === id);
-      let seen = '1970-01-01T00:00:00Z';
-      try{ seen = localStorage.getItem('lne-shared-seen:' + currentUser.id + ':' + id) || seen; }catch(e){}
-      return {
-        id, name: names[id] || 'Your teacher', classes: byTeacher[id],
-        last: mine[0] || null,
-        fresh: mine.filter(i => i.uploader_id !== currentUser.id && i.created_at > seen).length
-      };
-    }).sort((a, b) => {
-      const ta = a.last ? a.last.created_at : '', tb = b.last ? b.last.created_at : '';
-      return ta < tb ? 1 : ta > tb ? -1 : a.name.localeCompare(b.name);
-    });
-
-    const card = c => `
-      <a class="ts-card" href="skillstream-shared.html?with=${encodeURIComponent(c.id)}">
-        <span class="ts-avatar" aria-hidden="true">${escapeHtml((c.name.trim().charAt(0) || '?').toUpperCase())}</span>
-        <span class="ts-body">
-          <div class="ts-name">${escapeHtml(c.name)}${c.fresh ? `<span class="ts-new">${c.fresh} new</span>` : ''}</div>
-          <div class="ts-sub">${escapeHtml(c.classes.join(', '))}${c.last ? ' · Latest: ' + escapeHtml(c.last.title) : ' · Nothing shared yet'}</div>
-        </span>
-        <span aria-hidden="true">›</span>
-      </a>`;
-    box.innerHTML = `<div class="ts-list">${cards.slice(0, 3).map(card).join('')}</div>` +
-      (cards.length > 3 ? `<a class="ts-more" href="skillstream-shared.html">See all ${cards.length} teachers →</a>` : '');
-  }catch(err){
-    console.warn('Could not load teacher spaces:', err && err.message);
-    box.innerHTML = `<div class="empty">Could not load your teachers right now. <a href="skillstream-shared.html">Open shared files</a><br><small style="opacity:.7">${String((err && err.message) || err || 'Unknown error').replace(/</g,'&lt;')}</small></div>`;
-  }
-}
 
 function greetName(full){
   var TITLE = /^(mr|mrs|ms|miss|mx|dr|prof|eng|engr|sir|madam|mme|mlle|m|sr|sra|أستاذ|الأستاذ|الأستاذة|أ|د|م|دكتور|الدكتور|دكتورة|مهندس|المهندس|السيد|السيدة)\.?$/i;
@@ -401,4 +290,300 @@ async function initAuth(){
   { const gn = greetName(profile?.full_name); document.getElementById('greeting').textContent = 'Welcome back' + (gn ? ', ' + gn : ''); }
 
   loadDashboard();
-  try{ LNE_TODAY.mou
+  try{ LNE_TODAY.mount({el:document.getElementById('todayCard'), sb:sb, user:currentUser, role:'teacher'}); }catch(e){}
+  checkUnreadNotifications();
+
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(!session){ window.location.href = 'skillstream-login.html'; }
+  });
+}
+
+/* ---------- NOTIFICATIONS ---------- */
+async function checkUnreadNotifications(){
+  const { count } = await sb.from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', currentUser.id)
+    .eq('is_read', false);
+  document.getElementById('bellDot').style.display = (count && count > 0) ? 'block' : 'none';
+}
+
+function openNotifications(){
+  document.getElementById('notifOverlay').classList.add('show');
+  loadNotifications();
+}
+function closeNotifications(){
+  document.getElementById('notifOverlay').classList.remove('show');
+}
+
+async function loadNotifications(){
+  const el = document.getElementById('notifList');
+  const { data, error } = await sb.from('notifications')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending:false })
+    .limit(30);
+
+  if(error){ el.innerHTML = `<div class="notif-empty">Couldn't load notifications.</div>`; return; }
+  if(!data || data.length === 0){ el.innerHTML = `<div class="notif-empty">You're all caught up.</div>`; return; }
+
+  el.innerHTML = data.map(n => `
+    <div class="notif-item ${n.is_read ? '' : 'unread'}">
+      <div class="n-title">${escapeHtml(n.title)}</div>
+      <div>${escapeHtml(n.body || '')}</div>
+      <div class="n-time">${new Date(n.created_at).toLocaleString()}</div>
+    </div>
+  `).join('');
+
+  const unreadIds = data.filter(n => !n.is_read).map(n => n.id);
+  if(unreadIds.length > 0){
+    await sb.from('notifications').update({ is_read: true }).in('id', unreadIds);
+    document.getElementById('bellDot').style.display = 'none';
+  }
+}
+
+/* ---------- DASHBOARD DATA ---------- */
+async function postUpdate(btn){
+  const body = document.getElementById('updText').value.trim();
+  const cid = document.getElementById('updClass').value;
+  if(!body || !cid) return;
+  btn.disabled = true;
+  const { error } = await sb.from('class_updates').insert({ classroom_id: cid, body });
+  btn.disabled = false;
+  if(error){ alert('Could not post: ' + error.message); return; }
+  document.getElementById('updText').value = '';
+  alert('Posted. Your students will see it for 24 hours.');
+}
+
+async function loadClassesBlock(){
+  const nx=document.getElementById('nextClass'), mc=document.getElementById('myClasses');
+  try{
+    const { data: cls } = await sb.from('classrooms').select('id,name,subject').eq('teacher_id', currentUser.id);
+    const list = cls || [];
+    const counts = {};
+    if(list.length){
+      const { data: mem } = await sb.from('classroom_members').select('classroom_id').in('classroom_id', list.map(c=>c.id));
+      (mem||[]).forEach(m=>{ counts[m.classroom_id]=(counts[m.classroom_id]||0)+1; });
+    }
+    const { data: live } = await sb.from('live_sessions').select('id,title,room_name').eq('teacher_id', currentUser.id).eq('status','live').order('started_at',{ascending:false}).limit(1);
+    if(live && live.length){
+      const l=live[0];
+      nx.innerHTML = `<h3>${escapeHtml(l.title||'Live Class')}</h3><div class="meta">Live now</div><a class="go" href="skillstream-live-video.html?room=${encodeURIComponent(l.room_name)}&session=${l.id}&title=${encodeURIComponent(l.title||'Live Class')}&host=1">Open</a>`;
+    } else if(list.length){
+      const c=list[0], n=counts[c.id]||0;
+      nx.innerHTML = `<h3>${escapeHtml(c.name)}</h3><div class="meta">${n} student${n===1?'':'s'}</div><a class="go" href="skillstream-classrooms.html">Open class</a>`;
+    } else {
+      nx.innerHTML = `<div class="meta">No classes yet.</div><a class="go" href="skillstream-classrooms.html">Create a class</a>`;
+    }
+    if(list.length){ document.getElementById('updClass').innerHTML = list.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join(''); document.getElementById('updBox').style.display='block'; }
+    if(!list.length){ mc.innerHTML = `<div class="empty">You have no classes yet.<br><a href="skillstream-classrooms.html">Create a class &rarr;</a></div>`; return; }
+    mc.innerHTML = list.slice(0,3).map(c=>{ const n=counts[c.id]||0; return `<a class="course-row" href="skillstream-classrooms.html" style="text-decoration:none"><div><h3>${escapeHtml(c.name)}</h3><div class="meta">${n} student${n===1?'':'s'}${c.subject?' · '+escapeHtml(c.subject):''}</div></div></a>`; }).join('') + (list.length>3?`<a href="skillstream-classrooms.html">See all</a>`:'');
+  }catch(e){
+    nx.innerHTML = `<div class="meta">Couldn't load classes.</div>`;
+    mc.innerHTML = `<div class="empty">Couldn't load classes.</div>`;
+  }
+}
+
+async function loadDashboard(){
+  const { data: courses, error } = await sb
+    .from('courses')
+    .select('*, lessons(count)')
+    .eq('teacher_id', currentUser.id)
+    .order('created_at', { ascending:false });
+
+  if(error){
+    document.getElementById('courseList').innerHTML = `<div class="empty">Couldn't load courses.<br><small>${String(error.message).replace(/[&<>"']/g,'')}</small></div>`;
+    return;
+  }
+
+  const total = courses.length;
+  const published = courses.filter(c => c.is_published).length;
+  const totalLessons = courses.reduce((sum, c) => sum + (c.lessons?.[0]?.count || 0), 0);
+
+  // Certificates issued for this teacher's courses
+  const courseIds = courses.map(c => c.id);
+  let certsIssued = 0;
+  if(courseIds.length > 0){
+    const { count } = await sb.from('certificates').select('id', { count:'exact', head:true }).in('course_id', courseIds);
+    certsIssued = count || 0;
+  }
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat"><div class="val">${total}</div><div class="lbl">Courses</div></div>
+    <div class="stat"><div class="val">${published}</div><div class="lbl">Published</div></div>
+    <div class="stat"><div class="val">${totalLessons}</div><div class="lbl">Lessons</div></div>
+    <div class="stat"><div class="val">${certsIssued}</div><div class="lbl">Certs Issued</div></div>
+  `;
+
+  loadClassesBlock();
+  const el = document.getElementById('courseList');
+  if(total === 0){
+    el.innerHTML = `<div class="empty">You haven't created a course yet.<br><a href="skillstream-courses.html">Create your first course &rarr;</a></div>`;
+    return;
+  }
+
+  el.innerHTML = courses.slice(0, 6).map(c => {
+    const lessonCount = c.lessons?.[0]?.count || 0;
+    return `
+    <div class="course-row">
+      <div>
+        <h3>${escapeHtml(c.title)}</h3>
+        <div class="meta">${lessonCount} lesson${lessonCount===1?'':'s'}</div>
+        <span class="badge ${c.is_published ? 'live' : 'draft'}">${c.is_published ? 'Published' : 'Draft'}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  loadInsights(courses.filter(c => (c.lessons?.[0]?.count || 0) > 0));
+}
+
+/* ---------- WHO NEEDS HELP ---------- */
+function loadInsights(coursesWithLessons){
+  const section = document.getElementById('insightsSection');
+  if(!coursesWithLessons || coursesWithLessons.length === 0){ section.style.display = 'none'; return; }
+
+  section.style.display = 'block';
+  const sel = document.getElementById('insightCourseSelect');
+  sel.innerHTML = coursesWithLessons.map(c => `<option value="${c.id}">${escapeHtml(c.title)}</option>`).join('');
+  refreshInsights(coursesWithLessons[0].id);
+}
+
+async function refreshInsights(courseId){
+  const hardestBox = document.getElementById('hardestLessonBox');
+  const listBox = document.getElementById('strugglingList');
+  hardestBox.innerHTML = '';
+  listBox.innerHTML = '<div class="loading">Loading…</div>';
+
+  const [{ data: lessonStats, error: lessonErr }, { data: studentStats, error: studentErr }] = await Promise.all([
+    sb.rpc('get_course_lesson_stats', { p_course_id: courseId }),
+    sb.rpc('get_course_student_stats', { p_course_id: courseId })
+  ]);
+
+  if(lessonErr || studentErr){
+    listBox.innerHTML = `<div class="empty">Couldn't load insights for this course.</div>`;
+    return;
+  }
+
+  // Hardest lesson: lowest completion ratio among lessons at least 2
+  // students have attempted (avoids one slow learner skewing the signal).
+  const attempted = (lessonStats || []).filter(l => l.students_started >= 2);
+  if(attempted.length){
+    const hardest = attempted.reduce((worst, l) => {
+      const ratio = l.students_completed / l.students_started;
+      const worstRatio = worst.students_completed / worst.students_started;
+      return ratio < worstRatio ? l : worst;
+    });
+    const pct = Math.round((hardest.students_completed / hardest.students_started) * 100);
+    if(pct < 70){
+      hardestBox.innerHTML = `
+        <div class="hardest-card">
+          <div class="h-label">Lesson Most Students Get Stuck On</div>
+          <div class="h-title">${escapeHtml(hardest.lesson_title)}</div>
+          <div class="h-stat">Only ${pct}% of students who started it have finished (${hardest.students_completed} of ${hardest.students_started}). Might be worth reviewing in class.</div>
+        </div>
+      `;
+    }
+  }
+
+  if(!studentStats || studentStats.length === 0){
+    listBox.innerHTML = `<div class="empty">No students have started this course yet.</div>`;
+    return;
+  }
+
+  const now = Date.now();
+  const withRatio = studentStats.map(s => ({
+    ...s,
+    ratio: s.total_lessons > 0 ? s.completed_count / s.total_lessons : 0,
+    daysSinceActive: s.last_activity ? Math.floor((now - new Date(s.last_activity).getTime()) / 86400000) : null
+  }));
+
+  const needsHelp = withRatio.filter(s => s.ratio < 0.5 || s.daysSinceActive === null || s.daysSinceActive > 7)
+    .sort((a, b) => a.ratio - b.ratio);
+
+  if(needsHelp.length === 0){
+    listBox.innerHTML = `<div class="empty">Everyone in this course is progressing well. 🎉</div>`;
+    return;
+  }
+
+  listBox.innerHTML = needsHelp.map(s => {
+    const pct = Math.round(s.ratio * 100);
+    const activityLabel = s.daysSinceActive === null ? 'No completed lessons yet'
+      : s.daysSinceActive === 0 ? 'Active today'
+      : `Last active ${s.daysSinceActive} day${s.daysSinceActive === 1 ? '' : 's'} ago`;
+    return `
+      <div class="student-row ${pct >= 50 ? 'ok' : ''}">
+        <div>
+          <div class="s-name">${escapeHtml(s.full_name || 'Learner')}</div>
+          <div class="s-meta">${s.completed_count}/${s.total_lessons} lessons &middot; ${activityLabel}</div>
+          <div class="s-bar"><div class="s-fill" style="width:${pct}%;"></div></div>
+        </div>
+        <a class="s-action" href="skillstream-recognition.html">Send Feedback</a>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---------- START LIVE CLASS ----------
+   Uses Jitsi Meet (meet.jit.si) — no API key, no account, no payment
+   method required. We just generate a unique room name client-side
+   and record it in live_sessions so students can find and join it. */
+async function startLiveClass(){
+  const title = prompt('What should this live class be called?', 'Live Class');
+  if(title === null) return; // cancelled
+
+  const isPublic = confirm('Tap OK for a PUBLIC class (anyone can find and join it), or Cancel for a PRIVATE class (only people with the join code can enter).');
+
+  const gradeInput = prompt('Target a specific grade? Type one like "grade_5", "kg", or "university" — or leave blank for all grades/levels.', '');
+  const targetGrade = (gradeInput || '').trim().toLowerCase() || null;
+
+  const btn = document.getElementById('startLiveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Starting…';
+
+  try{
+    const roomName = 'paradise-eternal-learners-' + Math.random().toString(36).slice(2, 10);
+    const joinCode = isPublic ? null : Math.random().toString(36).slice(2, 8).toUpperCase();
+
+    const { data: sessionRow, error } = await sb.from('live_sessions').insert({
+      teacher_id: currentUser.id,
+      title: title || 'Live Class',
+      room_url: `https://meet.jit.si/${roomName}`,
+      room_name: roomName,
+      status: 'live',
+      is_public: isPublic,
+      join_code: joinCode,
+      target_grade_level: targetGrade
+    }).select().single();
+
+    if(error) throw error;
+
+    if(!isPublic){
+      alert(`Private class created! Share this join code with your students: ${joinCode}`);
+    }
+
+    window.location.href = `skillstream-live-video.html?room=${encodeURIComponent(roomName)}&session=${sessionRow.id}&title=${encodeURIComponent(title || 'Live Class')}&host=1`;
+  } catch(err){
+    alert('Could not start the live class: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '🔴 Start a Live Class';
+  }
+}
+
+initAuth();
+</script>
+
+<script>
+  function updateLiveClock(){
+    var el = document.getElementById('liveClockBadge');
+    if(!el) return;
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+  }
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
+</script>
+<script src="js/nav.js" defer></script>
+</body>
+</html>

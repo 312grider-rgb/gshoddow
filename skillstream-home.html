@@ -40,21 +40,16 @@
   .view-card p{margin:0; font-size:13.5px; color:#8a8474; line-height:1.5;}
   .view-card .go{margin-top:14px; font-size:13px; font-weight:700; color:var(--gold);}
   details.cat{background:#fff;border-radius:20px;margin-bottom:12px;box-shadow:var(--shadow-card)}
-  details.cat summary{list-style:none;display:flex;align-items:center;gap:14px;padding:12px 16px;cursor:pointer}
+  details.cat summary{list-style:none;display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer}
   details.cat summary::-webkit-details-marker{display:none}
   details.cat .icon{flex:0 0 auto;margin:0}
   .cat-tx{display:flex;flex-direction:column;gap:2px;min-width:0}
   .cat-tx b{font-size:18px;color:var(--ink)}
-  .cat-tx span{display:none}
-  details.cat[open] summary{padding-bottom:6px}
+  .cat-tx span{font-size:13.5px;color:#8a8474;line-height:1.4}
+  details.cat[open] summary{padding-bottom:8px}
   .cat-links{display:flex;flex-wrap:wrap;gap:8px;padding:4px 16px 16px}
   .cat-links a{padding:10px 14px;border-radius:999px;border:1.5px solid var(--line);background:#FBF7EF;color:var(--ink);font-weight:700;font-size:14px;text-decoration:none}
   .cat-plans{display:block;text-align:center;padding:12px;font-size:14px;font-weight:700;color:var(--gold);text-decoration:none}
-  .view-card.compact{display:flex;align-items:center;gap:14px;padding:12px 14px;margin-bottom:10px;min-height:64px}
-  .view-card.compact .icon{margin:0;flex:0 0 auto}
-  .view-card.compact h2{font-size:16px;line-height:1.3;margin:0;padding-inline-end:26px}
-  .view-card.compact p,.view-card.compact .go,.view-card.compact .suggested-tag{display:none}
-  .view-card.compact button{position:absolute !important;top:6px !important;right:8px !important;width:26px !important;height:26px !important;font-size:12px !important;margin:0 !important}
   .view-card.suggested{border:2px solid var(--gold-light);}
   .suggested-tag{
     display:inline-block; background:var(--gold-light); color:var(--ink); font-size:10.5px; font-weight:700;
@@ -255,7 +250,7 @@ function applyHomeLanguage(lang){
   const role = window._homeRole || 'student';
   
   document.getElementById('viewCards').innerHTML = `
-    ${role === 'teacher' ? '' : `<a class="view-card compact ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html" onclick="try{localStorage.setItem('lne_role','student')}catch(e){}">
+    ${role === 'teacher' ? '' : `<a class="view-card ${role === 'student' ? 'suggested' : ''}" href="skillstream-dashboard.html" onclick="try{localStorage.setItem('lne_role','student')}catch(e){}">
       ${role === 'student' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.studentTitle}. ${t.studentDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
       <div class="icon" data-ic="stud" data-cc="amb"></div>
@@ -264,7 +259,7 @@ function applyHomeLanguage(lang){
       <div class="go">${t.studentGo}</div>
     </a>`}
 
-    ${role === 'student' ? '' : `<a class="view-card compact ${role === 'teacher' ? 'suggested' : ''}" href="skillstream-teacher-dashboard.html" onclick="try{localStorage.setItem('lne_role','teacher')}catch(e){}">
+    ${role === 'student' ? '' : `<a class="view-card ${role === 'teacher' ? 'suggested' : ''}" href="skillstream-teacher-dashboard.html" onclick="try{localStorage.setItem('lne_role','teacher')}catch(e){}">
       ${role === 'teacher' ? `<span class="suggested-tag">${t.yourAccount}</span>` : ''}
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.teacherTitle}. ${t.teacherDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
       <div class="icon" data-ic="teach" data-cc="ame"></div>
@@ -273,7 +268,7 @@ function applyHomeLanguage(lang){
       <div class="go">${t.teacherGo}</div>
     </a>`}
 
-    <a class="view-card compact" href="skillstream-ai-hub.html">
+    <a class="view-card" href="skillstream-ai-hub.html">
       <button onclick="event.preventDefault(); event.stopPropagation(); speak('${t.aiTitle}. ${t.aiDesc}'.replace(/'/g,''));" style="position:absolute; top:16px; right:16px; background:rgba(20,31,56,0.06); border:none; width:34px; height:34px; border-radius:50%; font-size:16px;">🔊</button>
       <div class="icon" data-ic="ask" data-cc="oce"></div>
       <h2>${t.aiTitle}</h2>
