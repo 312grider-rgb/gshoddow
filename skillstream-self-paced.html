@@ -330,7 +330,7 @@
   }
 
   .learn-with{margin:14px 0 4px;} .lw-title{font-weight:700; font-size:16px; margin-bottom:8px;}
-  .lw-row{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  .lw-row{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;} .lw3 .lw-card:last-child{grid-column:1 / -1;}
   .lw-card{display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; background:#fff; border-radius:14px; padding:14px 8px; text-decoration:none; color:inherit; box-shadow:0 2px 10px rgba(0,0,0,.06); overflow-wrap:anywhere;}
   .lw-card small{color:#8a8474; font-size:14px;} .lw-note{color:#8a8474; font-size:14px; margin-top:8px;}
 </style>
@@ -346,6 +346,15 @@
 
 <div id="browseView">
   <div class="wrap">
+    <div class="learn-with" id="startChoices">
+      <div class="lw-title">How do you want to learn?</div>
+      <div class="lw-row lw3">
+        <a class="lw-card" href="skillstream-ai-hub.html?tab=teacher"><span class="icon" data-ic="teach"></span><b>AI Teacher</b><small>Ask and learn step by step</small></a>
+        <a class="lw-card" href="skillstream-ai-hub.html#classroom"><span class="icon" data-ic="room" data-cc="amb"></span><b>AI Classroom</b><small>A full lesson program</small></a>
+        <a class="lw-card" href="skillstream-teachers-directory.html"><span class="icon" data-ic="user" data-cc="oce"></span><b>A teacher</b><small>Find a real teacher</small></a>
+      </div>
+      <div class="lw-note">Or pick a course below and go at your own pace.</div>
+    </div>
     <div class="search-wrap">
       <span class="icon">🔍</span>
       <input type="text" id="searchInput" placeholder="Search courses..." oninput="onSearchInput()">
@@ -631,6 +640,7 @@ async function openCourse(courseId){
       <div class="lw-title">How do you want to learn this?</div>
       <div class="lw-row">
         <a class="lw-card" href="skillstream-ai-hub.html?tab=teacher&q=${encodeURIComponent('Teach me this course step by step: ' + (activeCourse.title || ''))}"><span class="icon" data-ic="teach"></span><b>AI Teacher</b><small>Step by step, anytime</small></a>
+        <a class="lw-card" href="skillstream-ai-hub.html#classroom"><span class="icon" data-ic="room" data-cc="amb"></span><b>AI Classroom</b><small>A full lesson program</small></a>
         <a class="lw-card" href="${activeCourse.teacher_id && activeCourse.teacher_id !== currentUser.id ? 'skillstream-messages.html?to=' + encodeURIComponent(activeCourse.teacher_id) : 'skillstream-teachers-directory.html'}"><span class="icon" data-ic="user" data-cc="oce"></span><b>A teacher</b><small>${activeCourse.teacher_id && activeCourse.teacher_id !== currentUser.id ? 'Message the course teacher' : 'Find a teacher'}</small></a>
       </div>
       <div class="lw-note">Or just start the lessons below. The AI Tutor is inside every lesson.</div>
