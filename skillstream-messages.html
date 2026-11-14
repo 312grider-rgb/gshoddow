@@ -154,6 +154,13 @@ async function initAuth(){
   if(!session){ window.location.href = 'skillstream-login.html'; return; }
   currentUser = session.user;
   loadInbox();
+  try{
+    const to = new URLSearchParams(location.search).get('to');
+    if(to && /^[0-9a-f-]{36}$/i.test(to) && to !== currentUser.id){
+      const { data: pr } = await sb.from('profiles').select('full_name').eq('id', to).maybeSingle();
+      openThread(to, (pr && pr.full_name) || 'Teacher');
+    }
+  }catch(e){}
 
   sb.auth.onAuthStateChange((event, session)=>{
     if(!session){ window.location.href = 'skillstream-login.html'; }
