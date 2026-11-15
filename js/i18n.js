@@ -21,7 +21,7 @@
   try { if (!document.getElementById('lneUniverseCss')) { var uv = document.createElement('link'); uv.id = 'lneUniverseCss'; uv.rel = 'stylesheet'; uv.href = 'css/universe.css?v=1'; (document.head || root).appendChild(uv); } } catch (e) {}
   // The sci-fi world (css/scifi.css) sits on top of the Learning Universe look.
   // Lite look (css/lite.css): bigger text, softer cards. Loads last so it wins.
-  try { if (!document.getElementById('lneLiteCss')) { var lt = document.createElement('link'); lt.id = 'lneLiteCss'; lt.rel = 'stylesheet'; lt.href = 'css/lite.css?v=1'; (document.head || root).appendChild(lt); } } catch (e) {}
+  try { if (!document.getElementById('lneLiteCss')) { var lt = document.createElement('link'); lt.id = 'lneLiteCss'; lt.rel = 'stylesheet'; lt.href = 'css/lite.css?v=6'; (document.head || root).appendChild(lt); } } catch (e) {}
   // Slow connection or Data Saver on: switch off animations and big pictures.
   try { var cn = navigator.connection; if (cn && (cn.saveData || /(^|-)2g$|3g/.test(cn.effectiveType || ''))) root.classList.add('lne-lite'); } catch (e) {}
   // Open the connection to the database early.
