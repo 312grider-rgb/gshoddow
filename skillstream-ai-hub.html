@@ -276,7 +276,7 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
   <div class="eyebrow">Learning Never Ends</div>
   <h1>AI Tools</h1>
   <p>Your study companion — beyond the lesson.</p>
-  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
+  <div class="live-clock-badge" id="liveClockBadge"><span data-ic="clock"></span><span id="liveClockT" data-no-i18n>--:--:--</span></div>
 </header>
 
 <div class="wrap">
@@ -316,7 +316,7 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
   <!-- AI Teacher (ongoing chat) -->
   <div class="tool-panel active" id="teacherPanel">
     <div class="card">
-      <div class="kicker">🧑‍🏫 AI Teacher</div>
+      <div class="kicker"><span data-ic="teach"></span>AI Teacher</div>
       <h3>Your personal AI teacher</h3>
       <p class="desc">A running conversation, not just one-off answers — ask a question, follow up, dig deeper. The AI Teacher remembers what you've asked earlier in this session.</p>
 
@@ -328,7 +328,7 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
         <button type="button" class="stl" data-m="visual">Visual</button>
         <button type="button" class="stl" data-m="exam">Exam coach</button>
       </div>
-      <button type="button" class="submit-btn" id="openVoice" style="display:none;margin:0 0 14px;">🎙️ Live voice</button>
+      <button type="button" class="submit-btn" id="openVoice" style="display:none;margin:0 0 14px;"><span data-ic="mic"></span>Live voice</button>
 
       <div id="teacherChatLog" style="margin-bottom:14px;"></div>
 
@@ -342,7 +342,7 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
   <!-- Test Your Level -->
   <div class="tool-panel" id="levelPanel">
     <div class="card">
-      <div class="kicker">🎯 Test Your Level</div>
+      <div class="kicker"><span data-ic="lvl"></span>Test Your Level</div>
       <h3>Find out where you stand</h3>
       <p class="desc">Pick a subject — the AI will generate a short assessment, then tell you your level (Beginner / Intermediate / Advanced) and what to study next.</p>
 
@@ -489,7 +489,7 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
   <!-- AI Classroom -->
   <div class="tool-panel" id="classroomPanel">
     <div class="card" id="classroomSetupCard">
-      <div class="kicker">🏫 AI Classroom</div>
+      <div class="kicker"><span data-ic="room"></span>AI Classroom</div>
       <h3>Learn step by step, at your pace</h3>
       <p class="desc">Start a program on anything you want to learn. Each lesson warms up your mind, sets clear objectives, teaches with examples, re-explains, then checks your understanding before moving on — and repeats itself if you're not there yet. A bigger review test comes every few lessons.</p>
 
@@ -534,7 +534,7 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
       <div class="classroom-eye-tip" id="classroomEyeTip" style="display:none;"></div>
 
       <div id="classroomBoard" class="classroom-board" style="display:none;">
-        <div class="classroom-board-label">📋 On the board</div>
+        <div class="classroom-board-label"><span data-ic="plan"></span>On the board</div>
         <div id="classroomBoardContent"></div>
       </div>
 
@@ -1788,13 +1788,13 @@ window.lnAuthReady = initAuth(); // exposed for js/nav.js role-aware bottom nav
 
 <script>
   function updateLiveClock(){
-    var el = document.getElementById('liveClockBadge');
+    var el = document.getElementById('liveClockT');
     if(!el) return;
     var now = new Date();
     var h = String(now.getHours()).padStart(2,'0');
     var m = String(now.getMinutes()).padStart(2,'0');
     var s = String(now.getSeconds()).padStart(2,'0');
-    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+    el.textContent = h + ':' + m + ':' + s;
   }
   updateLiveClock();
   setInterval(updateLiveClock, 1000);

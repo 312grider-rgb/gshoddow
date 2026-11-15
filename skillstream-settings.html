@@ -115,7 +115,7 @@
 <header class="top">
   <div class="eyebrow">Learning Never Ends</div>
   <h1 id="pageTitle">Settings</h1>
-  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
+  <div class="live-clock-badge" id="liveClockBadge"><span data-ic="clock"></span><span id="liveClockT" data-no-i18n>--:--:--</span></div>
 </header>
 
 <div class="wrap">
@@ -133,7 +133,7 @@
     </div>
   </div>
 
-  <div class="section-title">🔊 Accessibility</div>
+  <div class="section-title"><span data-ic="vol"></span>Accessibility</div>
   <div class="card">
     <div class="setting-row">
       <div>
@@ -334,13 +334,13 @@ initAuth();
 
 <script>
   function updateLiveClock(){
-    var el = document.getElementById('liveClockBadge');
+    var el = document.getElementById('liveClockT');
     if(!el) return;
     var now = new Date();
     var h = String(now.getHours()).padStart(2,'0');
     var m = String(now.getMinutes()).padStart(2,'0');
     var s = String(now.getSeconds()).padStart(2,'0');
-    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+    el.textContent = h + ':' + m + ':' + s;
   }
   updateLiveClock();
   setInterval(updateLiveClock, 1000);
