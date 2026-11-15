@@ -9,3 +9,9 @@ html.lne-lite *{animation:none!important;transition:none!important}
 html.lne-lite .lne-art{display:none!important}
 @media (prefers-reduced-motion:reduce){html *{animation:none!important;transition:none!important}}
 html input:not([type=checkbox]):not([type=radio]),html select{min-width:0}
+/* Calm icons: the same soft 3D shape, navy with a gold symbol, a little bigger. */
+html [data-c]{--a:#2c4a8c;--b:#14213d;--g:rgba(20,33,61,.45)}
+html .ai-ic svg,html .ln-nav-icon[data-c] svg,html .hub-card .hub-ic svg{stroke:#e2bb5a!important}
+html .ai-ic{width:40px;height:40px;border-radius:13px}
+html .ai-ic svg{width:22px;height:22px}
+html .ln-nav-item{font-size:9.5px;min-height:0;padding-left:0;padding-right:0;letter-spacing:-.3px}
