@@ -215,9 +215,9 @@
   <div class="eyebrow">Learning Never Ends</div>
   <h1 id="greeting">Welcome back</h1>
   <p>Paradise Of The Eternal Learners — pick up where you left off.</p>
-  <button class="bell-btn" onclick="openNotifications()">🔔</button>
+  <button class="bell-btn" onclick="openNotifications()" aria-label="Notifications"><span data-ic="bell"></span></button>
   <span class="bell-dot" id="bellDot"></span>
-  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
+  <div class="live-clock-badge" id="liveClockBadge"><span data-ic="clock"></span><span id="liveClockT" data-no-i18n>--:--:--</span></div>
 </header>
 
 <div class="notif-overlay" id="notifOverlay" onclick="if(event.target===this) closeNotifications()">
@@ -757,13 +757,13 @@ async function getRecommendation(){
 
 <script>
   function updateLiveClock(){
-    var el = document.getElementById('liveClockBadge');
+    var el = document.getElementById('liveClockT');
     if(!el) return;
     var now = new Date();
     var h = String(now.getHours()).padStart(2,'0');
     var m = String(now.getMinutes()).padStart(2,'0');
     var s = String(now.getSeconds()).padStart(2,'0');
-    el.textContent = '🕐 ' + h + ':' + m + ':' + s;
+    el.textContent = h + ':' + m + ':' + s;
   }
   updateLiveClock();
   setInterval(updateLiveClock, 1000);
