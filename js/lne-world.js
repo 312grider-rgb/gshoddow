@@ -107,7 +107,7 @@
       if (!sessionStorage.getItem('lne_entered')) {
         sessionStorage.setItem('lne_entered', '1');
         var ov = d.createElement('div'); ov.className = 'lne-enter'; ov.setAttribute('aria-hidden', 'true');
-        ov.innerHTML = (save ? '' : '<img src="css/logo-full.webp?v=1" alt="" width="420" height="280">') + '<div class="lne-enter-ring"></div><div class="lne-enter-t">Entering the Universe</div>';
+        ov.innerHTML = (save ? '' : '<img src="css/logo-full-s.webp?v=1" alt="" width="420" height="280">') + '<div class="lne-enter-ring"></div><div class="lne-enter-t">Entering the Universe</div>';
         d.body.appendChild(ov); setTimeout(function () { try { ov.remove(); } catch (e) { ov.style.display = 'none'; } }, 1500);
       }
     } catch (e) {}
@@ -120,8 +120,7 @@
       var h = a.getAttribute('href') || ''; if (!h || h.charAt(0) === '#' || /^(mailto:|tel:|javascript:)/i.test(h)) return;
       var u; try { u = new URL(a.href, location.href); } catch (x) { return; }
       if (u.origin !== location.origin || (u.pathname === location.pathname && u.search === location.search)) return;
-      e.preventDefault(); window.LNE_WORLD.warp(); root.classList.add('lne-warping');
-      setTimeout(function () { location.href = u.href; }, 230);
+      /* no artificial delay: the browser follows the link at once */
     }, false);
     addEventListener('pageshow', function (e) { if (e.persisted) root.classList.remove('lne-warping'); });
   });
