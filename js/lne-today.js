@@ -10,7 +10,7 @@
   var CODE=["Name variables for what they represent, not how they're used: 'userEmail' beats 'temp1'.","Write the failing test before the fix. It proves the bug existed and stays green forever after.","Comments should explain 'why,' not 'what'. The code already shows what it does.","Small, frequent commits are easier to review and revert than one giant commit.","Read the error message fully before searching for it online. The answer is often right there.","Premature optimization can cost more time than it saves. Profile before you optimize.","Consistent formatting matters more than personal preference. Follow the project's style.","A function should do one thing well. If describing it needs 'and,' split it in two.","Version control isn't just for teams. Commit often even solo, it's a free undo button.","The best debugging tool is often just printing the state at each step."];
   var BOOKS=[["Atomic Habits","James Clear","A practical framework for building better habits through small changes."],["Sapiens: A Brief History of Humankind","Yuval Noah Harari","A sweeping look at how humans came to shape the world."],["The Pragmatic Programmer","David Thomas & Andrew Hunt","Timeless practical advice for software developers."],["Man's Search for Meaning","Viktor Frankl","A profound reflection on finding purpose through hardship."],["Thinking, Fast and Slow","Daniel Kahneman","Explores the two systems that drive how we think and decide."],["Educated","Tara Westover","A memoir about the transformative power of education."],["The Elements of Style","Strunk & White","A classic, concise guide to clear writing."],["A Short History of Nearly Everything","Bill Bryson","An accessible tour through science and the universe."],["Deep Work","Cal Newport","On the value of focused, distraction-free effort in a noisy world."],["The Alchemist","Paulo Coelho","A fable about following your personal calling."]];
   var CHALL=["Complete one full lesson in any course today.","Write down one new thing you learned yesterday and why it matters.","Teach someone else something you learned this week. Teaching cements learning.","Read for at least 15 minutes on a topic outside your usual interests.","Try explaining a concept you're studying in one simple sentence.","Review your notes from a few days ago. Repetition builds memory.","Ask your AI Tutor one question you've been putting off.","Set a 25-minute focused study block with no phone distractions.","Write a one-paragraph summary of something you studied this week.","Look up the origin of one word you use often."];
-  var CATS=[['quote','📖 Quote'],['word','🧠 Word'],['history','🌍 History'],['science','🔬 Science'],['code','💻 Code Tip'],['book','📚 Book'],['challenge','🎯 Challenge']];
+  var CATS=[['quote','Quote','chat'],['word','Word','psy'],['history','History','hist'],['science','Science','sci'],['code','Code Tip','tech'],['book','Book','book'],['challenge','Challenge','lvl']];
 
   function dayNo(){ var n=new Date(); return Math.floor((n-new Date(n.getFullYear(),0,0))/86400000); }
   function pick(a){ return a[dayNo()%a.length]; }
@@ -32,20 +32,20 @@
   function steps(role,f){
     var s=[];
     if(role==='teacher'){
-      if(f.classes===0) s.push(['🏫','Create your first classroom','Students join with a code.','skillstream-classrooms.html']);
-      s.push(['🎙️','Record a short lesson','Draw, talk and add pictures. Students watch any time.','skillstream-record.html']);
-      if(f.classes>0) s.push(['📂','Share material with your students','Documents, songs, videos and PDFs.','skillstream-hub-learn.html']);
-      s.push(['💬','Check your messages','Answer students and parents.','skillstream-messages.html']);
-      s.push(['🔮','Explore Future Architect','Plan what is next for you.','skillstream-future-architect.html']);
+      if(f.classes===0) s.push(['room','Create your first classroom','Students join with a code.','skillstream-classrooms.html']);
+      s.push(['hw','Record a short lesson','Draw, talk and add pictures. Students watch any time.','skillstream-record.html']);
+      if(f.classes>0) s.push(['clip','Share material with your students','Documents, songs, videos and PDFs.','skillstream-hub-learn.html']);
+      s.push(['chat','Check your messages','Answer students and parents.','skillstream-messages.html']);
+      s.push(['fa','Explore Future Architect','Plan what is next for you.','skillstream-future-architect.html']);
       return s.slice(0,3);
     }
-    if(f.doneToday===false) s.push(['🔥','Keep your streak going','Finish today\'s challenge and mark it done.',null,'markDone']);
-    if(f.lessonsDone===0) s.push(['🚀','Start your first lesson','Pick a course and finish one lesson.','skillstream-self-paced.html']);
-    else s.push(['▶️','Continue where you stopped','Your courses are below.','#inProgressList']);
-    if(f.inClass===false) s.push(['🏫','Join your teacher\'s class','Use the code your teacher gave you.','skillstream-classrooms.html']);
-    s.push(['🧑‍🏫','Ask the AI Teacher one question','Something you have been wondering about.','skillstream-ai-hub.html']);
-    s.push(['🎯','Test your level','A short quiz shows what to learn next.','skillstream-ai-hub.html']);
-    s.push(['🔮','Explore Future Architect','See how change opens new opportunities.','skillstream-future-architect.html']);
+    if(f.doneToday===false) s.push(['star','Keep your streak going','Finish today\'s challenge and mark it done.',null,'markDone']);
+    if(f.lessonsDone===0) s.push(['learn','Start your first lesson','Pick a course and finish one lesson.','skillstream-self-paced.html']);
+    else s.push(['learn','Continue where you stopped','Your courses are below.','#inProgressList']);
+    if(f.inClass===false) s.push(['room','Join your teacher\'s class','Use the code your teacher gave you.','skillstream-classrooms.html']);
+    s.push(['teach','Ask the AI Teacher one question','Something you have been wondering about.','skillstream-ai-hub.html']);
+    s.push(['lvl','Test your level','A short quiz shows what to learn next.','skillstream-ai-hub.html']);
+    s.push(['fa','Explore Future Architect','See how change opens new opportunities.','skillstream-future-architect.html']);
     return s.slice(0,3);
   }
 
@@ -82,7 +82,7 @@
     +'.lt-next{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.14)}'
     +'.lt-step{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.08);border-radius:14px;padding:12px;margin-top:8px;color:#FBF7EF;text-decoration:none;border:0;width:100%;text-align:start;font:inherit;cursor:pointer;box-sizing:border-box}'
     +'.lt-step:active{background:rgba(255,255,255,.16)}'
-    +'.lt-ic{font-size:24px;flex:0 0 auto}.lt-st{font-weight:700;font-size:16.5px}.lt-sd{font-size:14.5px;opacity:.75;margin-top:2px}'
+    +'.lt-ic{flex:0 0 auto}.lt-chip .lt-ci{margin-inline-end:6px}.lt-st{font-weight:700;font-size:16.5px}.lt-sd{font-size:14.5px;opacity:.75;margin-top:2px}'
     +'.lt-go{margin-inline-start:auto;color:#E4C583;font-size:20px}[dir=rtl] .lt-go{transform:scaleX(-1)}';
     document.head.appendChild(s);
   }
@@ -91,9 +91,9 @@
     var root=o.el; if(!root) return; css();
     var key='quote'; try{ var k=localStorage.getItem('lne_insp_cat'); if(CATS.some(function(c){return c[0]===k})) key=k; }catch(e){}
     var card=el('div','lt-card'), chips=el('div','lt-chips'), body=el('div'), next=el('div','lt-next');
-    card.appendChild(el('div','lt-k','✨ Daily Inspiration'));
+    card.appendChild(el('div','lt-k','Daily Inspiration'));
     CATS.forEach(function(c){
-      var b=el('button','lt-chip'+(c[0]===key?' on':''),c[1]); b.type='button';
+      var b=el('button','lt-chip'+(c[0]===key?' on':'')); b.type='button'; var ci=el('span','lt-ci'); ci.setAttribute('data-ic',c[2]); b.appendChild(ci); b.appendChild(document.createTextNode(c[1]));
       b.onclick=function(){ key=c[0]; try{localStorage.setItem('lne_insp_cat',key)}catch(e){}
         Array.prototype.forEach.call(chips.children,function(x){ x.classList.toggle('on',x===b); }); draw(); };
       chips.appendChild(b);
@@ -118,7 +118,7 @@
             else if(s[3]){ var t=document.querySelector(s[3]); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); }
           }; }
         var tx=el('div'); tx.appendChild(el('div','lt-st',s[1])); tx.appendChild(el('div','lt-sd',s[2]));
-        node.appendChild(el('span','lt-ic',s[0])); node.appendChild(tx); node.appendChild(el('span','lt-go','›'));
+        var ni=el('span','lt-ic'); ni.setAttribute('data-ic',s[0]); node.appendChild(ni); node.appendChild(tx); node.appendChild(el('span','lt-go','›'));
         next.appendChild(node);
       });
     }

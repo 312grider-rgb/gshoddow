@@ -129,6 +129,8 @@
 /* ---- glossy 3D tiles for AI tools: any element with data-ic="name" gets one ---- */
 (function(){
   var P={
+   bell:['amb','<path d="M6 16v-5a6 6 0 0112 0v5l2 2H4z"/><path d="M10 21h4"/>'],
+   clock:['oce','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
    game:['sap','<rect x="3" y="8" width="18" height="10" rx="5"/><path d="M8 11v4M6 13h4M15.5 12.5v.01M18 14.5v.01"/>'],
    chess:['sla','<circle cx="12" cy="7" r="3"/><path d="M9.5 20h5M10 20c0-3 .5-5-1.5-7h7c-2 2-1.5 4-1.5 7"/>'],
    dice:['rose','<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 8.5v.01M15.5 8.5v.01M12 12v.01M8.5 15.5v.01M15.5 15.5v.01"/>'],
