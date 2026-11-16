@@ -16,3 +16,17 @@ html .ai-ic{width:40px;height:40px;border-radius:13px}
 html .ai-ic svg{width:22px;height:22px}
 html .ln-nav-item{font-size:9.5px;min-height:0;padding-left:0;padding-right:0;letter-spacing:-.3px}
 html header.top .eyebrow{padding-inline-end:56px}
+/* ===== Warm look (light mode only; dark mode untouched): cream page, warm brown bands, round soft cards ===== */
+html:not([data-theme="dark"]) body{background-color:#F8EFE0}
+html:not([data-theme="dark"]) body::before{background:radial-gradient(ellipse 75% 38% at 85% 0%,rgba(217,138,43,.10),transparent 70%),linear-gradient(180deg,#FBF3E6 0%,#F8EFE0 55%,#F4E8D4 100%)}
+html:not([data-theme="dark"]) header.top{background-image:var(--uv-star),linear-gradient(155deg,#6B3A14 0%,#A25A1C 100%);border-bottom-color:#E2BB5A;box-shadow:0 6px 18px rgba(90,50,15,.20)}
+html:not([data-theme="dark"]) .card,html:not([data-theme="dark"]) .panel,html:not([data-theme="dark"]) .view-card,html:not([data-theme="dark"]) .hub-card,html:not([data-theme="dark"]) .mode-card,html:not([data-theme="dark"]) .teacher-card,html:not([data-theme="dark"]) .convo-card{background-color:#FFFAF0;border:1px solid #EBDCC3;border-radius:22px;box-shadow:0 6px 18px rgba(120,80,30,.12)}
+html:not([data-theme="dark"]) .uv-sky,html:not([data-theme="dark"]) .lt-card,html:not([data-theme="dark"]) .inspiration-card,html:not([data-theme="dark"]) #aiTeacherFab{background:linear-gradient(135deg,#6B3A14,#A25A1C)!important;border-radius:22px}
+html:not([data-theme="dark"]) #aiTeacherPanel{background:#6B3A14!important}
+html:not([data-theme="dark"]) .ln-bottom-nav{background:rgba(107,58,20,.97);box-shadow:0 -6px 18px rgba(90,50,15,.22)}
+html:not([data-theme="dark"]) .ln-nav-item{color:#F3DFC0}
+html:not([data-theme="dark"]) [data-c]{--a:#D08A2E;--b:#8A4B12;--g:rgba(138,75,18,.40)}
+html:not([data-theme="dark"]) .ai-ic svg,html:not([data-theme="dark"]) .ln-nav-icon[data-c] svg,html:not([data-theme="dark"]) .hub-card .hub-ic svg{stroke:#FFF3D6!important}
+html:not([data-theme="dark"]) .btn,html:not([data-theme="dark"]) button.go,html:not([data-theme="dark"]) button.btn{border-radius:999px}
+html:not([data-theme="dark"]) input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),html:not([data-theme="dark"]) select,html:not([data-theme="dark"]) textarea{background-color:#FFFDF8;border-radius:14px}
+html:not([data-theme="dark"]) .hero{background:linear-gradient(160deg,#6B3A14 0%,#A25A1C 100%)}
