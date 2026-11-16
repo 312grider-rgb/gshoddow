@@ -21,7 +21,7 @@
   try { if (!document.getElementById('lneUniverseCss')) { var uv = document.createElement('link'); uv.id = 'lneUniverseCss'; uv.rel = 'stylesheet'; uv.href = 'css/universe.css?v=1'; (document.head || root).appendChild(uv); } } catch (e) {}
   // The sci-fi world (css/scifi.css) sits on top of the Learning Universe look.
   // Lite look (css/lite.css): bigger text, softer cards. Loads last so it wins.
-  try { if (!document.getElementById('lneLiteCss')) { var lt = document.createElement('link'); lt.id = 'lneLiteCss'; lt.rel = 'stylesheet'; lt.href = 'css/lite.css?v=7'; (document.head || root).appendChild(lt); } } catch (e) {}
+  try { if (!document.getElementById('lneLiteCss')) { var lt = document.createElement('link'); lt.id = 'lneLiteCss'; lt.rel = 'stylesheet'; lt.href = 'css/lite.css?v=8'; (document.head || root).appendChild(lt); } } catch (e) {}
   // Same text size everywhere (js/lite.js).
   try { var lj = document.createElement('script'); lj.src = 'js/lite.js?v=1'; lj.defer = true; (document.head || root).appendChild(lj); } catch (e) {}
   // Slow connection or Data Saver on: switch off animations and big pictures.
