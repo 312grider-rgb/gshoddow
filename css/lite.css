@@ -31,3 +31,4 @@ html:not([data-theme="dark"]) .btn,html:not([data-theme="dark"]) button.go,html:
 html:not([data-theme="dark"]) input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),html:not([data-theme="dark"]) select,html:not([data-theme="dark"]) textarea{background-color:#FFFDF8;border-radius:14px}
 html:not([data-theme="dark"]) .hero{background:linear-gradient(160deg,#6B3A14 0%,#A25A1C 100%)}
 html:not([data-theme="dark"]) .tab-btn.active,html:not([data-theme="dark"]) .stl.active,html:not([data-theme="dark"]) .submit-btn,html:not([data-theme="dark"]) .mode-btn.active,html:not([data-theme="dark"]) .chip.active,html:not([data-theme="dark"]) .pill.active{background:linear-gradient(135deg,#6B3A14,#A25A1C);border-color:#A25A1C;color:#fff}
+html[dir="rtl"]:not([data-theme="dark"]) header.top{background-image:var(--uv-star),linear-gradient(155deg,#6B3A14 0%,#A25A1C 100%)}
