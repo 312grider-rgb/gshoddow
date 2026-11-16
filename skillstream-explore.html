@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paradise Of The Eternal Learners — Learning Never Ends</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141F38;
+    --ink-2:#1F2E52;
+    --gold:#C9A24E;
+    --gold-light:#E4C583;
+    --cream:#FBF7EF;
+    --sage:#6B8F71;
+    --charcoal:#2B2B2B;
+    --line:#E9E2D2;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--cream);
+    color:var(--charcoal);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Syne',sans-serif;}
+  button, a, .btn, .course-card, .chip{ transition:transform 0.18s cubic-bezier(.22,1,.36,1), box-shadow 0.18s cubic-bezier(.22,1,.36,1); }
+  button:active, a.btn:active, .btn:active, .course-card:active{ transform:scale(0.97); }
+  a{text-decoration:none; color:inherit;}
+  img{max-width:100%; display:block;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px;
+    background:var(--cream);
+  }
+  .brand{
+    font-family:'Syne',sans-serif; font-weight:700; font-size:17.5px; color:var(--ink);
+    line-height:1.15;
+  }
+  .brand small{
+    display:block; font-family:'Inter',sans-serif; font-weight:600; font-size:10px;
+    letter-spacing:1.2px; text-transform:uppercase; color:var(--gold); margin-bottom:2px; font-size:11px;
+  }
+  .nav-link{font-size:15.5px; font-weight:600; color:var(--ink);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%);
+    color:var(--cream);
+    padding:44px 20px 60px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero .eyebrow{
+    font-size:13px; letter-spacing:2px; text-transform:uppercase; color:var(--gold);
+    font-weight:700; margin-bottom:14px;
+  }
+  .hero h1{
+    font-size:34px; line-height:1.15; font-weight:700; max-width:340px;
+  }
+  .hero h1 .accent{color:var(--gold);}
+  .hero p.mission{
+    margin-top:16px; font-size:17px; line-height:1.6; color:#D8DEEA; max-width:320px;
+  }
+  .cta-row{
+    display:flex; flex-direction:column; gap:12px; margin-top:28px; max-width:320px;
+  }
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:16px 20px; border-radius:12px; font-size:17px; font-weight:700;
+    border:none; cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .btn.primary{background:var(--gold); color:var(--ink);}
+  .btn.secondary{background:transparent; color:var(--cream); border:1.5px solid rgba(251,248,242,0.4);}
+
+  /* endless path — signature element under hero, evokes "Learning Never Ends" */
+  .path-wrap{
+    margin-top:40px; height:46px; position:relative; max-width:340px;
+  }
+  .path-wrap svg{width:100%; height:100%; display:block;}
+  .path-wrap .dot{
+    fill:var(--gold);
+  }
+
+  .section{padding:46px 20px;}
+  .section .kicker{
+    font-size:13px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
+    font-weight:700; margin-bottom:8px;
+  }
+  .section h2{font-size:26px; color:var(--ink); margin-bottom:26px; max-width:280px;}
+
+  /* ---------- SECTION: Two paths (learner / teacher) ---------- */
+  .paths{
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .path-card{
+    background:#fff; border:1px solid var(--line); border-radius:16px; padding:22px;
+  }
+  .path-card .tag{
+    display:inline-block; font-size:12px; font-weight:700; letter-spacing:0.5px;
+    text-transform:uppercase; padding:4px 10px; border-radius:20px; margin-bottom:12px;
+  }
+  .path-card.learn .tag{background:#EAF0EC; color:var(--sage);}
+  .path-card.teach .tag{background:#F5EAD6; color:var(--gold);}
+  .path-card h3{font-size:20.5px; color:var(--ink); margin-bottom:8px;}
+  .path-card p{font-size:15.5px; color:#5c5c5c; line-height:1.5; margin-bottom:16px;}
+  .path-card a.link-btn{
+    font-size:15.5px; font-weight:700; color:var(--ink); display:inline-flex; gap:6px; align-items:center;
+  }
+
+  /* ---------- SECTION: Featured Courses ---------- */
+  .course-scroll{display:flex; gap:14px; overflow-x:auto; padding-bottom:8px;}
+  .featured-card{
+    flex:0 0 auto; width:220px; background:#fff; border:1px solid var(--line); border-radius:16px;
+    overflow:hidden; text-decoration:none; color:inherit;
+  }
+  .featured-card .thumb{
+    height:100px; background:linear-gradient(135deg, var(--ink), var(--ink-2));
+    display:flex; align-items:flex-end; padding:10px;
+  }
+  .featured-card .thumb .cat{
+    background:rgba(255,255,255,0.95); color:var(--ink); font-size:11.5px; font-weight:700;
+    padding:3px 10px; border-radius:20px; text-transform:uppercase;
+  }
+  .featured-card .body{padding:14px;}
+  .featured-card h3{font-size:16.5px; margin:0 0 4px; color:var(--ink);}
+  .featured-card p{font-size:14px; color:#7a7568; line-height:1.4;}
+
+  /* ---------- SECTION: Live Classes ---------- */
+  .live-card{
+    background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px;
+    display:flex; align-items:center; gap:14px; margin-bottom:10px;
+  }
+  .live-dot{width:10px; height:10px; border-radius:50%; background:#B5533C; flex:0 0 10px; animation:live-pulse 1.6s ease-in-out infinite;}
+  @keyframes live-pulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .live-card h3{font-size:16.5px; color:var(--ink); margin-bottom:2px;}
+  .live-card p{font-size:14px; color:#7a7568;}
+  .live-empty{
+    background:#fff; border:1px dashed var(--line); border-radius:16px; padding:26px 20px;
+    text-align:center; color:#7a7568; font-size:15.5px;
+  }
+  .live-empty a{color:var(--ink); font-weight:700;}
+
+  /* ---------- SECTION: AI Tutor Promo ---------- */
+  .ai-promo{
+    background:linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius:20px; padding:26px 22px; color:#fff;
+  }
+  .ai-promo .kicker{color:rgba(255,255,255,0.85);}
+  .ai-promo h2{color:#fff; font-size:24px; max-width:280px;}
+  .ai-promo p{color:rgba(255,255,255,0.9); font-size:15.5px; line-height:1.6; margin:12px 0 18px; max-width:320px;}
+  .ai-promo .tool-list{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+  .ai-promo .tool-pill{
+    background:rgba(255,255,255,0.18); padding:7px 13px; border-radius:20px; font-size:13.5px; font-weight:600;
+  }
+  .ai-promo .btn{background:#fff; color:var(--gold); display:inline-flex; width:auto;}
+
+  /* ---------- SECTION: Success Stories ---------- */
+  .story-scroll{display:flex; gap:14px; overflow-x:auto; padding-bottom:8px;}
+  .story-card{
+    flex:0 0 auto; width:250px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px;
+  }
+  .story-card .quote{font-size:15.5px; color:#4a4638; line-height:1.55; font-style:italic; margin-bottom:14px;}
+  .story-card .person{display:flex; align-items:center; gap:10px;}
+  .story-card .avatar{
+    width:34px; height:34px; border-radius:50%; background:var(--gold-light); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex:0 0 34px;
+  }
+  .story-card .name{font-size:14.5px; font-weight:700; color:var(--ink);}
+  .story-card .role{font-size:13px; color:#8a8474;}
+  .story-note{font-size:13px; color:#a8a094; margin-top:4px;}
+
+  /* ---------- Photo Banners ---------- */
+  .photo-banner{
+    position:relative; height:220px; overflow:hidden; background-size:cover; background-position:center;
+  }
+  .photo-banner .overlay{
+    position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,31,56,0.15), rgba(20,31,56,0.75));
+    display:flex; flex-direction:column; justify-content:flex-end; padding:22px 20px;
+  }
+  .photo-banner .overlay .tag{color:var(--gold); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px;}
+  .photo-banner .overlay h2{color:#fff; font-size:23px; margin:0 0 6px; max-width:280px;}
+  .photo-banner .overlay p{color:rgba(255,255,255,0.85); font-size:15px; margin:0 0 14px; max-width:300px; line-height:1.5;}
+  .photo-banner .overlay a.btn{width:auto; display:inline-flex; padding:11px 20px;}
+
+  /* ---------- SECTION: Test Your Level ---------- */
+  .test-level-card{background:#fff; border-radius:20px; padding:22px; box-shadow:0 8px 24px rgba(20,31,56,0.08);}
+  .test-mode-row{display:flex; gap:10px; margin-bottom:16px;}
+  .test-mode-btn{
+    flex:1; width:100%; background:var(--cream); border:2px solid var(--line); padding:14px 10px; border-radius:14px;
+    text-align:center; cursor:pointer; font-family:'Inter',sans-serif; appearance:none;
+  }
+  .test-mode-btn.active{border-color:var(--gold); background:#FBF3E3;}
+  .test-mode-btn .icon{font-size:24px; margin-bottom:4px;}
+  .test-mode-btn .lbl{font-size:14px; font-weight:700; color:var(--ink);}
+
+  .subject-icon-grid-landing{display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:14px;}
+  .subj-btn{
+    display:flex; flex-direction:column; align-items:center; gap:4px; width:100%;
+    background:var(--cream); border:1.5px solid var(--line); border-radius:12px; padding:10px 4px;
+    cursor:pointer; font-family:'Inter',sans-serif; appearance:none;
+  }
+  .subj-btn .icon{font-size:20px;}
+  .subj-btn .lbl{font-size:10.5px; font-weight:600; color:var(--charcoal); text-align:center; line-height:1.15;}
+  .subj-btn.active{background:var(--gold); border-color:var(--gold);}
+
+  .grade-select-landing{width:100%; padding:13px; border:1.5px solid var(--line); border-radius:11px; font-size:16px; margin-bottom:14px;}
+  .test-level-output{
+    margin-top:14px; background:var(--cream); border:1px solid var(--line); border-radius:14px; padding:16px;
+    font-size:15.5px; line-height:1.65; white-space:pre-wrap; display:none;
+  }
+  .test-level-output.field-error{color:#B5473F; border-color:#E8B4AE; background:#FBEEEC; font-weight:600;}
+  .test-level-cta{
+    margin-top:16px; background:linear-gradient(135deg, var(--ink), var(--ink-2)); color:#fff; border-radius:14px;
+    padding:18px; text-align:center; display:none;
+  }
+  .test-level-cta a{
+    display:inline-block; background:var(--gold); color:var(--ink); padding:12px 22px; border-radius:11px;
+    font-weight:700; text-decoration:none; margin-top:10px; font-size:15.5px;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:32px 20px 40px; background:var(--ink); color:#B9C1D6;
+  }
+  footer .brand{color:#fff;}
+  footer .brand small{color:var(--gold);}
+  footer .foot-links{
+    display:flex; flex-wrap:wrap; gap:14px; margin-top:18px; font-size:14.5px;
+  }
+  footer .foot-links a{color:#B9C1D6; font-weight:500;}
+  footer .copyright{margin-top:22px; font-size:13.5px; color:#7C87A3;}
+
+  @media (min-width:600px){
+    .hero h1{font-size:42px; max-width:460px;}
+    .hero p.mission{max-width:420px;}
+    .paths{flex-direction:row;}
+    .path-card{flex:1;}
+  }
+
+  .live-clock-badge{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12);
+    color:var(--gold-light); font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;
+    margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:0.3px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand"><small id="txt-eyebrow">Learning Never Ends</small>Paradise Of The Eternal Learners</div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <select id="langSwitcher" onchange="changeLandingLanguage()" style="border:1px solid var(--line); border-radius:8px; padding:5px 8px; font-size:12px; background:#fff;">
+      <option value="en">🇬🇧 EN</option>
+      <option value="ar">🇸🇦 AR</option>
+      <option value="fr">🇫🇷 FR</option>
+      <option value="es">🇪🇸 ES</option>
+      <option value="zh">🇨🇳 中文</option>
+    </select>
+    <a class="nav-link" href="skillstream-login.html" id="txt-login">Log In</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="eyebrow" id="txt-eyebrow2">Learning Never Ends</div>
+  <h1 id="txt-headline">Learn anything.<br>Teach what you<br>know. <span class="accent">Live better.</span></h1>
+  <div class="live-clock-badge" id="liveClockBadge">🕐 --:--:--</div>
+  <p class="mission" id="txt-mission">Paradise Of The Eternal Learners is a place to grow at your own pace — live classes, self-paced courses, and an AI tutor by your side, all in one place.</p>
+
+  <button onclick="speakHero()" style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.12); border:none; color:#fff; padding:10px 18px; border-radius:24px; font-size:15.5px; font-weight:700; margin-top:14px; cursor:pointer;">
+    🔊 <span id="txt-listenBtn">Tap to Listen</span>
+  </button>
+
+  <div class="cta-row">
+    <a class="btn primary" href="skillstream-self-paced.html" id="txt-start">Start Learning</a>
+    <a class="btn secondary" href="skillstream-login.html?role=teacher" id="txt-teach">Become a Teacher</a>
+  </div>
+  <div class="path-wrap">
+    <svg viewBox="0 0 340 46" preserveAspectRatio="none">
+      <path d="M0 30 Q 40 5, 85 25 T 170 20 T 255 28 T 340 15" fill="none" stroke="rgba(201,154,68,0.4)" stroke-width="2" stroke-dasharray="1 10" stroke-linecap="round"/>
+      <circle class="dot" cx="0" cy="30" r="4"/>
+      <circle class="dot" cx="85" cy="25" r="4"/>
+      <circle class="dot" cx="170" cy="20" r="4"/>
+      <circle class="dot" cx="255" cy="28" r="4"/>
+      <circle class="dot" cx="340" cy="15" r="5"/>
+    </svg>
+  </div>
+</section>
+
+<section class="section" style="background:#fff; padding-top:36px;">
+  <div class="paths">
+    <div class="path-card learn">
+      <div class="tag">For Learners</div>
+      <h3>Learn at your own pace</h3>
+      <p>Live classes, self-paced courses, and an AI tutor that adapts to how you learn — free to start, no pressure.</p>
+      <a class="link-btn" href="skillstream-self-paced.html">Browse courses →</a>
+    </div>
+    <div class="path-card teach">
+      <div class="tag">For Teachers</div>
+      <h3>Share what you know</h3>
+      <p>Publish a course in an afternoon, reach real learners, and build a teaching income — no classroom required.</p>
+      <a class="link-btn" href="skillstream-login.html?role=teacher">Start teaching →</a>
+    </div>
+  </div>
+</section>
+
+<section id="testLevel" class="section" style="background:#fff;">
+  <div class="kicker">🎯 Test Your Level</div>
+  <h2>Find out where you stand — free, no login needed</h2>
+  <div class="test-level-card">
+    <div class="test-mode-row">
+      <button type="button" class="test-mode-btn active" id="modeAcademicBtn" aria-pressed="true" onclick="setTestMode('academic')">
+        <div class="icon">🎓</div>
+        <div class="lbl">Academic Grade</div>
+      </button>
+      <button type="button" class="test-mode-btn" id="modeSkillBtn" aria-pressed="false" onclick="setTestMode('skill')">
+        <div class="icon">✨</div>
+        <div class="lbl">General Skill</div>
+      </button>
+    </div>
+
+    <select class="grade-select-landing" id="testGradeSelect">
+      <option value="">Select your grade…</option>
+      <option value="kg">Kindergarten</option>
+      <option value="grade_1">Grade 1</option>
+      <option value="grade_2">Grade 2</option>
+      <option value="grade_3">Grade 3</option>
+      <option value="grade_4">Grade 4</option>
+      <option value="grade_5">Grade 5</option>
+      <option value="grade_6">Grade 6</option>
+      <option value="grade_7">Grade 7</option>
+      <option value="grade_8">Grade 8</option>
+      <option value="grade_9">Grade 9</option>
+      <option value="grade_10">Grade 10</option>
+      <option value="grade_11">Grade 11</option>
+      <option value="grade_12">Grade 12</option>
+      <option value="university">University</option>
+    </select>
+
+    <div class="subject-icon-grid-landing" id="testSubjectGrid"></div>
+    <input type="text" id="testSubjectOther" placeholder="Type your subject or skill..." style="display:none; width:100%; padding:12px 13px; border:1.5px solid var(--line); border-radius:9px; font-size:16px; margin-bottom:14px;">
+
+    <button type="button" class="btn primary" style="width:100%;" onclick="withLoadingButton(this, generatePublicTest)">Generate My Assessment</button>
+    <div class="test-level-output" id="testQuestionsOutput"></div>
+
+    <div id="testAnswerSection" style="display:none; margin-top:14px;">
+      <label style="display:block; font-size:14.5px; font-weight:600; color:var(--ink); margin-bottom:6px;">Your Answers</label>
+      <textarea id="testAnswers" placeholder="Write your answers here, one per line..." style="width:100%; min-height:110px; padding:12px; border:1.5px solid var(--line); border-radius:11px; font-size:16px; font-family:'Inter',sans-serif;"></textarea>
+      <button type="button" class="btn primary" style="width:100%; margin-top:10px;" onclick="withLoadingButton(this, evaluatePublicTest)">Get My Level</button>
+      <div class="test-level-output" id="testResultOutput"></div>
+      <div class="test-level-cta" id="testCta">
+        <div style="font-weight:700; font-size:15px;">🎉 Great! Log in to save this result and start learning</div>
+        <a href="skillstream-login.html?mode=signup">Sign Up Free</a>
+        &nbsp; <a href="skillstream-login.html" style="background:none; color:#fff; border:1.5px solid rgba(255,255,255,0.4);">Log In</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="ai-promo">
+    <div class="kicker" id="txt-aiKicker">AI Learning Hub</div>
+    <h2 id="txt-aiTitle">Your personal AI study companion</h2>
+    <p id="txt-aiDesc">Ask questions, summarize lessons, generate quizzes, translate content, and build a study plan — all in one place.</p>
+    <div class="tool-list">
+      <span class="tool-pill" id="txt-tool1">Ask & Explain</span>
+      <span class="tool-pill" id="txt-tool2">Quiz Generator</span>
+      <span class="tool-pill" id="txt-tool3">Summarize</span>
+      <span class="tool-pill" id="txt-tool4">Translate</span>
+      <span class="tool-pill" id="txt-tool5">Study Plan</span>
+    </div>
+    <a class="btn" href="skillstream-ai-hub.html" id="txt-aiBtn">Try the AI Learning Hub</a>
+  </div>
+</section>
+
+<section class="section" style="background:#fff;">
+  <div class="kicker" id="txt-featKicker">Featured Courses</div>
+  <h2 id="txt-featTitle">Popular right now</h2>
+  <div class="course-scroll" id="featuredCourses">
+    <div style="color:#8a8474; font-size:13px;">Loading…</div>
+  </div>
+</section>
+
+<div class="photo-banner" role="img" aria-label="For Teachers: Share what you know" style="background-image:url('https://images.unsplash.com/photo-1758685848174-e061c6486651?fm=jpg&q=80&w=1600&auto=format&fit=crop');">
+  <div class="overlay">
+    <div class="tag" id="txt-b2tag">For Teachers</div>
+    <h2 id="txt-b2title">Share what you know</h2>
+    <p id="txt-b2desc">Build a course, reach real learners, and grow your teaching income — no classroom required.</p>
+    <a class="btn" href="skillstream-login.html?role=teacher" style="background:var(--gold); color:var(--ink);" id="txt-b2btn">Become a Teacher</a>
+  </div>
+</div>
+
+<section class="section">
+  <div class="kicker" id="txt-liveKicker">Live Now</div>
+  <h2 id="txt-liveTitle">Live classes happening now</h2>
+  <div id="liveClasses">
+    <div class="loading" style="color:#8a8474; font-size:13px;">Checking for live classes…</div>
+  </div>
+</section>
+
+<div class="photo-banner" role="img" aria-label="Milestones: Every certificate is a milestone" style="background-image:url('https://images.unsplash.com/photo-1695425173758-37e9c23b962a?fm=jpg&q=80&w=1600&auto=format&fit=crop');">
+  <div class="overlay">
+    <div class="tag" id="txt-b3tag">Milestones</div>
+    <h2 id="txt-b3title">Every certificate is a milestone</h2>
+    <p id="txt-b3desc">Real learners finishing what they started — one course at a time.</p>
+  </div>
+</div>
+
+<section class="section" style="background:#fff;">
+  <div class="kicker" id="txt-storyKicker">Success 

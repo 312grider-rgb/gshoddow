@@ -126,8 +126,10 @@ let selectedRole = 'student';
 
 // If someone landed here with ?role=teacher from the homepage, jump straight to signup as teacher
 const urlParams = new URLSearchParams(window.location.search);
-if(urlParams.get('role') === 'teacher'){
-  selectedRole = 'teacher';
+const _qRole = urlParams.get('role');
+const _validRole = (_qRole === 'teacher' || _qRole === 'parent' || _qRole === 'student') ? _qRole : null;
+if(_validRole){
+  selectedRole = _validRole;
 }
 
 function setMode(newMode){
@@ -139,8 +141,8 @@ function setMode(newMode){
   document.getElementById('cardTitle').textContent = mode === 'login' ? 'Welcome Back' : 'Create Your Account';
   document.getElementById('submitBtn').textContent = mode === 'login' ? 'Log In' : 'Sign Up';
   hideMsg();
-  if(mode === 'signup' && urlParams.get('role') === 'teacher'){
-    setRole('teacher');
+  if(mode === 'signup' && _validRole){
+    setRole(_validRole);
   }
 }
 
@@ -154,7 +156,7 @@ function setRole(role){
 }
 
 // If arriving with ?role=teacher OR ?mode=signup, default straight into signup mode
-if(urlParams.get('role') === 'teacher' || urlParams.get('mode') === 'signup'){
+if(_validRole || urlParams.get('mode') === 'signup'){
   setMode('signup');
 }
 
