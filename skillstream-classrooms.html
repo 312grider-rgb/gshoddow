@@ -160,7 +160,7 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
     <div class="sub">Create a class to teach, or join one with a code.</div>
     <div class="action-row">
       <button class="btn btn-primary" onclick="openModal('createModal')">+ Create Classroom</button>
-      <button class="btn btn-ghost" onclick="openModal('joinModal')">🔑 Join with Code</button>
+      <button class="btn btn-ghost" onclick="openModal('joinModal')"><span data-ic="user"></span>Join with Code</button>
     </div>
 
     <div class="group-label">Teaching</div>
@@ -179,7 +179,7 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
       <div class="code-box hidden" id="dCodeBox">Class code: <span id="dCode"></span> <button class="btn btn-ghost" type="button" id="shareClassBtn" style="margin-inline-start:10px">Share link</button></div>
       <div class="online-strip hidden" id="dOnline"></div>
       <div id="dLive" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-        <a class="btn btn-primary" id="liveBtn" href="#" target="_blank" rel="noopener"><span aria-hidden="true">🎥</span> <span id="liveLbl">Join live class</span></a>
+        <a class="btn btn-primary" id="liveBtn" href="#" target="_blank" rel="noopener"><span data-ic="room"></span> <span id="liveLbl">Join live class</span></a>
         <button class="btn btn-ghost hidden" type="button" id="liveTell">Tell students</button>
       </div>
     </div>
@@ -464,7 +464,7 @@ async function renderDetail() {
 
   // Stream tab
   document.getElementById('announceActionRow').innerHTML = teaching
-    ? `<button class="btn btn-primary" onclick="openModal('announceModal')">📢 Post Announcement</button>` : '';
+    ? `<button class="btn btn-primary" onclick="openModal('announceModal')"><span data-ic="chat"></span>Post Announcement</button>` : '';
   document.getElementById('announceList').innerHTML = c.announcements.length ? c.announcements.map(a => `
     <div class="card">
       <div class="card-title">${escapeHtml(a.title || '(no title)')}</div>
