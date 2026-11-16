@@ -63,7 +63,17 @@ function showSuccess(){
   setTimeout(async ()=>{
     const { data: { session } } = await sb.auth.getSession();
     if(session) await savePendingLevelTest(session.user.id);
-    window.location.href = 'skillstream-home.html';
+    let dest = 'skillstream-home.html';
+    try {
+      const md = (session && session.user && session.user.user_metadata) || {};
+      if(md.account_type === 'parent'){ localStorage.setItem('lne_view', 'parent'); dest = 'skillstream-parent-home.html?as=parent'; }
+      else if(session){
+        localStorage.removeItem('lne_view');
+        if(localStorage.getItem('lne_apply_teacher') === '1'){ localStorage.removeItem('lne_apply_teacher'); dest = 'skillstream-teach-apply.html'; }
+        else dest = 'skillstream-dashboard.html';
+      }
+    } catch(e){}
+    window.location.href = dest;
   }, 1200);
 }
 

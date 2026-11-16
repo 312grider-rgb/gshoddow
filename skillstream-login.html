@@ -241,6 +241,14 @@ async function handleSubmit(){
       // The browser has no session yet, so it must not write to profiles here.
 
       if(selectedRole === 'teacher'){ try { localStorage.setItem('lne_apply_teacher', '1'); } catch(e){} }
+      if(data && data.session && data.user){
+        // No email confirmation needed: take the new account straight to its own page.
+        try { if(selectedRole === 'parent') localStorage.setItem('lne_view', 'parent'); else localStorage.removeItem('lne_view'); } catch(e){}
+        try { await savePendingLevelTest(data.user.id); } catch(e){}
+        try { localStorage.removeItem('lne_apply_teacher'); } catch(e){}
+        window.location.href = selectedRole === 'teacher' ? 'skillstream-teach-apply.html' : (selectedRole === 'parent' ? 'skillstream-parent-home.html?as=parent' : 'skillstream-dashboard.html');
+        return;
+      }
       showMsg('Account created! Check your email for a confirmation link before logging in.', 'success');
     }
   } catch(err){
