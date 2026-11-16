@@ -335,7 +335,7 @@ async function loadLiveClasses(){
     const visible = data.filter(s => !s.target_grade_level || s.target_grade_level === myGrade);
 
     if(visible.length > 0){
-      html += `<div class="section-title-home">🔴 Live Now</div>` + visible.map(s => `
+      html += `<div class="section-title-home"><span data-ic="room"></span> Live Now</div>` + visible.map(s => `
         <div class="live-class-card">
           <span class="live-class-dot"></span>
           <div style="flex:1;">
@@ -475,13 +475,13 @@ const CHALLENGES = [
 ];
 
 const INSP_CATEGORIES = [
-  { key:'quote', label:'📖 Quote' },
-  { key:'word', label:'🧠 Word' },
-  { key:'history', label:'🌍 History' },
-  { key:'science', label:'🔬 Science' },
-  { key:'code', label:'💻 Code Tip' },
-  { key:'book', label:'📚 Book' },
-  { key:'challenge', label:'🎯 Challenge' }
+  { key:'quote', label:'<span data-ic="chat"></span> Quote' },
+  { key:'word', label:'<span data-ic="psy"></span> Word' },
+  { key:'history', label:'<span data-ic="hist"></span> History' },
+  { key:'science', label:'<span data-ic="sci"></span> Science' },
+  { key:'code', label:'<span data-ic="tech"></span> Code Tip' },
+  { key:'book', label:'<span data-ic="book"></span> Book' },
+  { key:'challenge', label:'<span data-ic="lvl"></span> Challenge' }
 ];
 
 let inspCurrentTab = 'quote';
@@ -548,7 +548,7 @@ async function loadInspiration(userId){
 
   el.innerHTML = `
     <div class="inspiration-card">
-      <div class="kicker">✨ Daily Inspiration</div>
+      <div class="kicker"><span data-ic="star"></span> Daily Inspiration</div>
       <div class="insp-tabs" id="inspTabs">
         ${INSP_CATEGORIES.map(c => `<button class="insp-tab ${c.key==='quote'?'active':''}" data-key="${c.key}" onclick="switchInspTab('${c.key}')">${c.label}</button>`).join('')}
       </div>
@@ -615,7 +615,7 @@ let spotlightPeriod = 'day';
 function renderSpotlightShell(){
   const el = document.getElementById('spotlightSection');
   el.innerHTML = `
-    <div class="section-title-home">🌟 Community Spotlight</div>
+    <div class="section-title-home"><span data-ic="star"></span> Community Spotlight</div>
     <div class="spotlight-tabs">
       <button class="spotlight-tab active" data-period="day" onclick="switchSpotlight('day')">Today</button>
       <button class="spotlight-tab" data-period="week" onclick="switchSpotlight('week')">This Week</button>
@@ -653,7 +653,7 @@ async function loadSpotlight(){
     const initials = (student.full_name || '?').trim().charAt(0).toUpperCase();
     html += `
       <div class="spotlight-card">
-        <span class="role-icon">🎓</span>
+        <span class="role-icon"><span data-ic="learn"></span></span>
         <div class="spotlight-avatar">${student.avatar_url ? `<img src="${escapeHtml(student.avatar_url)}">` : initials}</div>
         <div class="spotlight-info">
           <div class="s-role">Student Spotlight</div>
@@ -667,7 +667,7 @@ async function loadSpotlight(){
     const initials = (teacher.full_name || '?').trim().charAt(0).toUpperCase();
     html += `
       <div class="spotlight-card">
-        <span class="role-icon">🧑‍🏫</span>
+        <span class="role-icon"><span data-ic="teach"></span></span>
         <div class="spotlight-avatar">${teacher.avatar_url ? `<img src="${escapeHtml(teacher.avatar_url)}">` : initials}</div>
         <div class="spotlight-info">
           <div class="s-role">Teacher Spotlight</div>
