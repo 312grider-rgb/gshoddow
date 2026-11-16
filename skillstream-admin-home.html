@@ -25,6 +25,7 @@
   <a class="t" href="skillstream-admin-schools.html">Schools<span>Manage schools</span></a>
   <a class="t" href="skillstream-admin-orders.html">Payments<span>Orders and payments</span></a>
   <a class="t" href="skillstream-admin-analytics.html">Analytics<span>How the app is used</span></a>
+  <div class="t" id="vis" style="display:block">Visitors<span id="visTxt">Loading…</span></div>
   <h2>Content</h2>
   <a class="t" href="skillstream-admin-discoveries.html">Discoveries<span>Add, edit and publish entries</span></a>
   <a class="t" href="skillstream-admin-opportunities.html">Opportunities<span>Manage opportunity entries</span></a>
@@ -39,8 +40,16 @@ const sb=window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co'
   const {data:{session}}=await sb.auth.getSession();
   if(!session){location.href='skillstream-login.html';return}
   const {data:p}=await sb.from('profiles').select('role').eq('id',session.user.id).maybeSingle();
-  if(p&&p.role==='admin')document.getElementById('box').style.display='block';else document.getElementById('locked').style.display='block';
+  if(p&&p.role==='admin'){document.getElementById('box').style.display='block';loadVis()}else document.getElementById('locked').style.display='block';
 })();
+async function loadVis(){
+  const el=document.getElementById('visTxt');
+  const {data,error}=await sb.from('visit_counts').select('day,visitor_opens').order('day',{ascending:false}).limit(7);
+  if(error){el.textContent='Not available yet';return}
+  if(!data||!data.length){el.textContent='No visitors counted yet';return}
+  const week=data.reduce((a,r)=>a+r.visitor_opens,0);
+  el.textContent='Today: '+((data[0].day===new Date().toISOString().slice(0,10))?data[0].visitor_opens:0)+' · Last 7 days: '+week+' (page opens, once per visit)';
+}
 </script>
 <script src="js/lite.js?v=1" defer></script>
 </body>

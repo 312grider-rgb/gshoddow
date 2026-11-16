@@ -53,5 +53,15 @@
     <a class="cta alt" href="skillstream-login.html">I already have an account</a>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<script>
+/* Counts one visit per browser session. Stores only a daily number, nothing about the person. */
+try{
+  if(!sessionStorage.getItem('lne_vcount')&&window.supabase){
+    var vsb=window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co','sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+    vsb.rpc('log_visitor_open').then(function(r){if(!r.error)try{sessionStorage.setItem('lne_vcount','1')}catch(e){}},function(){});
+  }
+}catch(e){}
+</script>
 </body>
 </html>
