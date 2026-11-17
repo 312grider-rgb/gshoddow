@@ -80,7 +80,7 @@ async function loadTeachers(){
   const { data: teachers, error } = await sb
     .from('public_profiles')
     .select('id, full_name, bio, avatar_url')
-    .eq('role', 'teacher');
+    .in('role', ['teacher', 'admin']);
 
   if(error){
     el.innerHTML = `<div class="empty">Couldn't load teachers.<br><small>${String(error.message).replace(/[&<>"']/g,'')}</small></div>`;
