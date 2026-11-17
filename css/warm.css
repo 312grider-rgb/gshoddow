@@ -1,3 +1,3 @@
 /* Warm look tokens (light mode only). Loaded by pages that do not load js/i18n.js (admin and a few small pages). */
-html:not([data-theme="dark"]){--ink:#5A3214;--ink-2:#8A4B1C;--accent:#8A4B1C;--accent-dark:#5A3214;--link:#8A4B1C}
+html:root:not([data-theme="dark"]){--ink:#5A3214;--ink-2:#8A4B1C;--accent:#8A4B1C;--accent-dark:#5A3214;--link:#8A4B1C}
 html:not([data-theme="dark"]) body{background-color:#F8EFE0}

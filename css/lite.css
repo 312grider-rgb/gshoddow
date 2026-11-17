@@ -32,4 +32,5 @@ html:not([data-theme="dark"]) input:not([type=checkbox]):not([type=radio]):not([
 html:not([data-theme="dark"]) .hero{background:linear-gradient(160deg,#6B3A14 0%,#A25A1C 100%)}
 html:not([data-theme="dark"]) .tab-btn.active,html:not([data-theme="dark"]) .stl.active,html:not([data-theme="dark"]) .submit-btn,html:not([data-theme="dark"]) .mode-btn.active,html:not([data-theme="dark"]) .chip.active,html:not([data-theme="dark"]) .pill.active{background:linear-gradient(135deg,#6B3A14,#A25A1C);border-color:#A25A1C;color:#fff}
 html[dir="rtl"]:not([data-theme="dark"]) header.top{background-image:var(--uv-star),linear-gradient(155deg,#6B3A14 0%,#A25A1C 100%)}
-html:not([data-theme="dark"]){--ink:#5A3214;--ink-2:#8A4B1C;--accent:#8A4B1C;--accent-dark:#5A3214;--link:#8A4B1C}
+html:root:not([data-theme="dark"]){--ink:#5A3214;--ink-2:#8A4B1C;--accent:#8A4B1C;--accent-dark:#5A3214;--link:#8A4B1C}
+html:not([data-theme="dark"]) .live-now-card,html:not([data-theme="dark"]) .join-code-card,html:not([data-theme="dark"]) .ai-rec-card,html:not([data-theme="dark"]) .ts-card,html:not([data-theme="dark"]) .cert-card,html:not([data-theme="dark"]) .empty,html:not([data-theme="dark"]) .stat,html:not([data-theme="dark"]) .course-row,html:not([data-theme="dark"]) .teacher-share{background-color:#FFFAF0;border-color:#EBDCC3}
