@@ -190,6 +190,7 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
       <div class="tab" data-tab="grades" onclick="switchTab('grades')">Grades</div>
       <div class="tab" data-tab="chat" onclick="switchTab('chat')">Chat</div>
       <div class="tab" data-tab="people" onclick="switchTab('people')">People</div>
+      <div class="tab" data-tab="recordings" onclick="switchTab('recordings')">Recordings</div>
       <div class="tab hidden" data-tab="attendance" id="tabAttBtn" onclick="switchTab('attendance')">Attendance</div>
     </div>
 
@@ -219,6 +220,16 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
         <input type="text" id="chatInput" placeholder="Message the class…" style="flex:1" onkeydown="if(event.key==='Enter'){sendChat();}"/>
         <button class="btn btn-primary" onclick="sendChat()">Send</button>
       </div>
+    </div>
+
+    <div id="tab-recordings" class="hidden">
+      <div class="action-row hidden" id="recTools">
+        <button type="button" class="btn btn-primary" id="recBtn"><span data-ic="mic"></span> <span id="recLbl">Record audio</span></button>
+        <button type="button" class="btn btn-ghost" id="recLinkBtn">Add a link</button>
+      </div>
+      <div class="card-meta hidden" id="recNote" style="margin:6px 0">Audio is recorded from this phone's microphone and deleted automatically after 30 days. Students of this class can listen. Up to 60 minutes each, 20 per class.</div>
+      <div id="recLive" class="card hidden" style="text-align:center"></div>
+      <div id="recList"></div>
     </div>
 
     <div id="tab-attendance" class="hidden">
@@ -329,6 +340,19 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('assignModal')">Cancel</button>
       <button class="btn btn-primary" onclick="submitAssignment()">Post Assignment</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="recLinkModal">
+  <div class="modal">
+    <h2>Add a recorded lesson link</h2>
+    <div class="error-msg" id="recLinkError"></div>
+    <div class="field"><label>Title</label><input type="text" id="rlTitle" maxlength="120" placeholder="e.g. Lesson 3 — Fractions"/></div>
+    <div class="field"><label>Link (https://)</label><input type="url" id="rlUrl" maxlength="500" placeholder="https://youtu.be/..."/></div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" onclick="closeModal('recLinkModal')">Cancel</button>
+      <button type="button" class="btn btn-primary" id="rlSave">Save</button>
     </div>
   </div>
 </div>
@@ -598,11 +622,133 @@ function renderAssignment(c, a, teaching) {
 
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  ['stream', 'assignments', 'quizzes', 'grades', 'chat', 'people', 'attendance'].forEach(t => document.getElementById('tab-' + t).classList.toggle('hidden', t !== name));
+  ['stream', 'assignments', 'quizzes', 'grades', 'chat', 'people', 'recordings', 'attendance'].forEach(t => document.getElementById('tab-' + t).classList.toggle('hidden', t !== name));
   if (name === 'attendance') renderAttendance();
   if (name === 'grades') renderGrades();
   if (name === 'chat') renderChat();
+  if (name === 'recordings') renderRecordings();
 }
+
+
+/* ---------- RECORDINGS (teacher records audio or adds a link; students of the class listen) ---------- */
+const REC_MAX_SEC = 3600;
+let recState = null; // { mr, chunks, stream, t0, timer, mime, classId }
+function recMime() {
+  const c = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+  for (const m of c) { try { if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; } catch (e) {} }
+  return '';
+}
+function recFmt(sec) { const m = Math.floor(sec / 60), s = sec % 60; return m + ':' + String(s).padStart(2, '0'); }
+async function renderRecordings() {
+  const c = currentClassroom; if (!c) return;
+  const teaching = isTeacherOfCurrent(c);
+  document.getElementById('recTools').classList.toggle('hidden', !teaching);
+  document.getElementById('recNote').classList.toggle('hidden', !teaching);
+  const list = document.getElementById('recList');
+  const { data, error } = await SSAuth.client.from('class_recordings')
+    .select('id,kind,title,audio_path,link_url,duration_sec,created_at,expires_at')
+    .eq('classroom_id', c.id).order('created_at', { ascending: false }).limit(60);
+  if (error) { list.innerHTML = '<div class="empty">Could not load recordings.</div>'; return; }
+  if (!data || !data.length) { list.innerHTML = '<div class="empty">No recorded lessons yet.</div>'; return; }
+  list.innerHTML = data.map(r => {
+    const when = fmtDate(r.created_at);
+    const body = r.kind === 'link'
+      ? '<a class="btn btn-ghost" href="' + escapeHtml(r.link_url) + '" target="_blank" rel="noopener noreferrer">Open the lesson</a>'
+      : '<button type="button" class="btn btn-ghost" data-play="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path) + '">Play</button><div data-slot="' + escapeHtml(r.id) + '"></div>';
+    const dur = r.duration_sec ? ' · ' + recFmt(r.duration_sec) : '';
+    const exp = (r.kind === 'audio' && r.expires_at) ? ' · until ' + fmtDate(r.expires_at) : '';
+    const del = teaching ? ' <button type="button" class="btn btn-ghost" data-del="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path || '') + '">Delete</button>' : '';
+    return '<div class="card" style="margin-bottom:10px"><div class="card-title">' + escapeHtml(r.title) + '</div><div class="card-meta">' + escapeHtml(when + dur + exp) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' + body + del + '</div></div>';
+  }).join('');
+}
+document.addEventListener('click', async ev => {
+  const pl = ev.target.closest && ev.target.closest('[data-play]');
+  if (pl) {
+    const slot = document.querySelector('[data-slot="' + pl.dataset.play + '"]');
+    if (!slot || slot.firstChild) return;
+    pl.disabled = true;
+    const { data, error } = await SSAuth.client.storage.from('class-audio').createSignedUrl(pl.dataset.path, 3600);
+    pl.disabled = false;
+    if (error || !data) { showToast('Could not load the audio', true); return; }
+    const a = document.createElement('audio'); a.controls = true; a.preload = 'none'; a.src = data.signedUrl; a.style.cssText = 'width:100%;margin-top:6px';
+    slot.appendChild(a); a.play().catch(() => {}); return;
+  }
+  const dl = ev.target.closest && ev.target.closest('[data-del]');
+  if (dl) {
+    if (!confirm('Delete this recording for everyone?')) return;
+    dl.disabled = true;
+    if (dl.dataset.path) { await SSAuth.client.storage.from('class-audio').remove([dl.dataset.path]); }
+    const { error } = await SSAuth.client.from('class_recordings').delete().eq('id', dl.dataset.del);
+    if (error) { showToast('Could not delete', true); dl.disabled = false; return; }
+    showToast('Deleted'); renderRecordings();
+  }
+});
+function recLive(html) { const el = document.getElementById('recLive'); el.classList.toggle('hidden', !html); el.innerHTML = html || ''; }
+async function recStart() {
+  const c = currentClassroom; if (!c || !isTeacherOfCurrent(c)) return;
+  if (!navigator.mediaDevices || !window.MediaRecorder) { showToast('This browser cannot record audio', true); return; }
+  const mime = recMime();
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch (e) { showToast('Microphone is not allowed. Allow it in the browser settings.', true); return; }
+  const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+  const st = { mr, chunks: [], stream, t0: Date.now(), mime: mr.mimeType || mime || 'audio/webm', classId: c.id, timer: null };
+  recState = st;
+  mr.ondataavailable = e => { if (e.data && e.data.size) st.chunks.push(e.data); };
+  mr.onstop = () => recFinish(st);
+  mr.start(5000);
+  document.getElementById('recLbl').textContent = 'Stop recording';
+  const tick = () => {
+    const sec = Math.floor((Date.now() - st.t0) / 1000);
+    recLive('<b>● Recording</b> ' + recFmt(sec) + ' / 60:00<div class="card-meta">Keep this page open. Tap "Stop recording" when finished.</div>');
+    if (sec >= REC_MAX_SEC) recStop();
+  };
+  tick(); st.timer = setInterval(tick, 1000);
+}
+function recStop() {
+  const st = recState; if (!st) return;
+  clearInterval(st.timer);
+  try { if (st.mr.state !== 'inactive') st.mr.stop(); } catch (e) {}
+  try { st.stream.getTracks().forEach(t => t.stop()); } catch (e) {}
+}
+async function recFinish(st) {
+  recState = null;
+  document.getElementById('recLbl').textContent = 'Record audio';
+  const sec = Math.max(1, Math.min(REC_MAX_SEC, Math.round((Date.now() - st.t0) / 1000)));
+  const base = (st.mime.split(';')[0] || 'audio/webm');
+  const ext = base.indexOf('mp4') >= 0 ? 'm4a' : base.indexOf('ogg') >= 0 ? 'ogg' : 'webm';
+  const blob = new Blob(st.chunks, { type: base });
+  if (blob.size < 1000) { recLive(''); showToast('Nothing was recorded', true); return; }
+  if (blob.size > 60 * 1024 * 1024) { recLive(''); showToast('Recording is too large (max 60 MB)', true); return; }
+  let title = (prompt('Name this recording:', 'Lesson ' + new Date().toLocaleDateString()) || '').trim().slice(0, 120);
+  if (!title) title = 'Lesson ' + new Date().toLocaleDateString();
+  recLive('Saving… please wait');
+  const path = st.classId + '/' + Date.now() + '.' + ext;
+  const up = await SSAuth.client.storage.from('class-audio').upload(path, blob, { contentType: base, upsert: false });
+  if (up.error) { recLive(''); showToast('Could not save the audio', true); return; }
+  const ins = await SSAuth.client.from('class_recordings').insert({ classroom_id: st.classId, kind: 'audio', title, audio_path: path, duration_sec: sec });
+  if (ins.error) {
+    await SSAuth.client.storage.from('class-audio').remove([path]);
+    recLive(''); showToast(ins.error.message && ins.error.message.indexOf('20 audio') >= 0 ? 'This class already has 20 audio recordings. Delete an old one first.' : 'Could not save', true); return;
+  }
+  recLive(''); showToast('Recording saved'); renderRecordings();
+}
+document.getElementById('recBtn').addEventListener('click', () => { recState ? recStop() : recStart(); });
+document.getElementById('recLinkBtn').addEventListener('click', () => {
+  document.getElementById('rlTitle').value = ''; document.getElementById('rlUrl').value = '';
+  document.getElementById('recLinkError').textContent = ''; openModal('recLinkModal');
+});
+document.getElementById('rlSave').addEventListener('click', async () => {
+  const c = currentClassroom; if (!c) return;
+  const title = document.getElementById('rlTitle').value.trim(), url = document.getElementById('rlUrl').value.trim();
+  const err = document.getElementById('recLinkError');
+  if (!title) { err.textContent = 'Please add a title.'; return; }
+  if (!/^https:\/\/\S+$/i.test(url) || url.length > 500) { err.textContent = 'The link must start with https://'; return; }
+  const { error } = await SSAuth.client.from('class_recordings').insert({ classroom_id: c.id, kind: 'link', title, link_url: url });
+  if (error) { err.textContent = 'Could not save the link.'; return; }
+  closeModal('recLinkModal'); showToast('Link added'); renderRecordings();
+});
+window.addEventListener('pagehide', () => { try { if (recState) recStop(); } catch (e) {} });
 
 /* ---------- ATTENDANCE (teacher only; marks are saved by a database function that checks the teacher) ---------- */
 const ATT_STATUS = [['present','Present'],['late','Late'],['absent','Absent'],['excused','Excused']];
