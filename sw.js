@@ -3,7 +3,7 @@
    ("stale while revalidate"), so a repeat open does not wait for the network.
    Never touched: /api/, Supabase (data, login, storage), uploads, and any non-GET request.
    To reset everyone: change CACHE below (old caches are deleted), or replace this file with the "kill" version. */
-const CACHE = 'lne-v1';
+const CACHE = 'lne-v2';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
@@ -26,11 +26,13 @@ function cacheable(url, req) {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (!cacheable(req.url, req)) return;
+  const cross = new URL(req.url).origin !== location.origin;
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const hit = await cache.match(req);
-    const net = fetch(req).then(res => {
-      if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone()).catch(() => {});
+    // Cross-site files are fetched in CORS mode so we can SEE the status and never save an error page.
+    const net = fetch(cross ? new Request(req.url, { mode: 'cors', credentials: 'omit' }) : req).then(res => {
+      if (res && res.ok && res.status === 200) cache.put(req, res.clone()).catch(() => {});
       return res;
     }).catch(() => null);
     if (hit) { e.waitUntil(net); return hit; }
