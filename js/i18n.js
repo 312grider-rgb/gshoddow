@@ -17,6 +17,8 @@
   root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
   try { root.setAttribute('data-page', (location.pathname.split('/').pop() || 'index').replace(/\.html$/, '') || 'index'); } catch (e) {}
   try { var th0 = localStorage.getItem('lne_theme'); if (th0) root.setAttribute('data-theme', th0); } catch (e) {}
+  // Fast repeat opens: a small service worker keeps pages, styles and scripts on the phone (see sw.js).
+  try { if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); }); } catch (e) {}
   // Google Fonts must not block the first screen: show text at once, swap the font in when it arrives.
   try { new MutationObserver(function (ms) { ms.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, function (n) {
     if (n.nodeName === 'LINK' && n.rel === 'stylesheet' && /fonts\.googleapis\.com/.test(n.href) && !n.getAttribute('data-lne-async')) {
