@@ -119,7 +119,9 @@
 const SUPABASE_URL = 'https://vauudtedojtcveiqajlr.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE';
 
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let sb = null, _initErr = '';
+try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+catch(e){ _initErr = String((e && e.message) || e); }
 
 let mode = 'login';
 let selectedRole = 'student';
@@ -187,6 +189,7 @@ async function handleSubmit(){
     return;
   }
 
+  if(!sb){ showMsg('The page could not start (' + (_initErr || 'the database script did not load') + '). Please reload the page. If it keeps happening, send this message to the admin.', 'error'); return; }
   setLoading(true);
 
   try{
@@ -303,6 +306,7 @@ async function savePendingLevelTest(userId){
 }
 
 setMode(mode);
+if(!sb){ showMsg('The page could not start (' + (_initErr || 'the database script did not load') + '). Please reload the page.', 'error'); }
 </script>
 </body>
 </html>
