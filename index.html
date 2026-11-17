@@ -39,14 +39,19 @@
 </header>
 <div class="wrap">
   <h2>Join us — it is free</h2>
-  <a class="opt main" href="skillstream-login.html?mode=signup&amp;role=student"><span class="icon" data-ic="stud"></span><span><b>I am a student</b><small>Register and start learning</small></span></a>
-  <a class="opt main" href="skillstream-login.html?mode=signup&amp;role=parent"><span class="icon" data-ic="user"></span><span><b>I am a parent</b><small>Follow your child's progress</small></span></a>
-  <a class="opt main" href="skillstream-login.html?mode=signup&amp;role=teacher"><span class="icon" data-ic="teach"></span><span><b>I am a teacher</b><small>Register and share what you know</small></span></a>
+  <a class="opt main" href="skillstream-login.html?mode=signup&amp;role=student" data-v="click-student"><span class="icon" data-ic="stud"></span><span><b>I am a student</b><small>Register and start learning</small></span></a>
+  <a class="opt main" href="skillstream-login.html?mode=signup&amp;role=parent" data-v="click-parent"><span class="icon" data-ic="user"></span><span><b>I am a parent</b><small>Follow your child's progress</small></span></a>
+  <a class="opt main" href="skillstream-login.html?mode=signup&amp;role=teacher" data-v="click-teacher"><span class="icon" data-ic="teach"></span><span><b>I am a teacher</b><small>Register and share what you know</small></span></a>
   <div class="gap"></div>
   <h2>Not ready yet?</h2>
-  <a class="opt" href="skillstream-explore.html#testLevel"><span class="icon" data-ic="lvl"></span><span><b>Test your level</b><small>Free, no account needed</small></span></a>
-  <a class="opt soft" href="skillstream-visitor.html"><span class="icon" data-ic="econ"></span><span><b>Explore as a visitor</b><small>Look around without an account</small></span></a>
+  <a class="opt" href="skillstream-explore.html#testLevel" data-v="click-test"><span class="icon" data-ic="lvl"></span><span><b>Test your level</b><small>Free, no account needed</small></span></a>
+  <a class="opt soft" href="skillstream-visitor.html" data-v="click-visitor"><span class="icon" data-ic="econ"></span><span><b>Explore as a visitor</b><small>Look around without an account</small></span></a>
   <div class="login">Already have an account? <a href="skillstream-login.html">Log in</a></div>
 </div>
+<script src="js/lne-visits.js?v=1"></script>
+<script>
+LNE_VISIT('landing');
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('[data-v]');if(a)LNE_VISIT(a.getAttribute('data-v'));});
+</script>
 </body>
 </html>

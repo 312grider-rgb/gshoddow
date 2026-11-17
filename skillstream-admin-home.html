@@ -45,11 +45,15 @@ const sb=window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co'
 })();
 async function loadVis(){
   const el=document.getElementById('visTxt');
-  const {data,error}=await sb.from('visit_counts').select('day,visitor_opens').order('day',{ascending:false}).limit(7);
+  const since=new Date(Date.now()-6*864e5).toISOString().slice(0,10), today=new Date().toISOString().slice(0,10);
+  const {data,error}=await sb.from('page_visits').select('day,page,opens').gte('day',since).limit(500);
   if(error){el.textContent='Not available yet';return}
-  if(!data||!data.length){el.textContent='No visitors counted yet';return}
-  const week=data.reduce((a,r)=>a+r.visitor_opens,0);
-  el.textContent='Today: '+((data[0].day===new Date().toISOString().slice(0,10))?data[0].visitor_opens:0)+' · Last 7 days: '+week+' (page opens, once per visit)';
+  if(!data||!data.length){el.textContent='No visits counted yet';return}
+  const L={landing:'Landing page opened','click-student':'Tapped: student','click-parent':'Tapped: parent','click-teacher':'Tapped: teacher','click-test':'Tapped: test your level','click-visitor':'Tapped: explore as visitor',visitor:'Visitor page opened',explore:'Long page opened'};
+  const t={},w={};
+  data.forEach(r=>{w[r.page]=(w[r.page]||0)+r.opens;if(r.day===today)t[r.page]=(t[r.page]||0)+r.opens});
+  el.innerHTML='<table style="width:100%;border-collapse:collapse;margin-top:6px"><tr><td></td><td><b>Today</b></td><td><b>7 days</b></td></tr>'+
+    Object.keys(L).filter(k=>w[k]).map(k=>'<tr><td>'+L[k]+'</td><td>'+(t[k]||0)+'</td><td>'+w[k]+'</td></tr>').join('')+'</table><div style="margin-top:6px;font-size:14px">Counts visits, not people. One count per browser session.</div>';
 }
 </script>
 <script src="js/lite.js?v=2" defer></script>
