@@ -17,6 +17,11 @@
   root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
   try { root.setAttribute('data-page', (location.pathname.split('/').pop() || 'index').replace(/\.html$/, '') || 'index'); } catch (e) {}
   try { var th0 = localStorage.getItem('lne_theme'); if (th0) root.setAttribute('data-theme', th0); } catch (e) {}
+  // Google Fonts must not block the first screen: show text at once, swap the font in when it arrives.
+  try { new MutationObserver(function (ms) { ms.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, function (n) {
+    if (n.nodeName === 'LINK' && n.rel === 'stylesheet' && /fonts\.googleapis\.com/.test(n.href) && !n.getAttribute('data-lne-async')) {
+      n.setAttribute('data-lne-async', '1'); n.media = 'print'; n.onload = function () { n.media = 'all'; };
+    } }); }); }).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   // The Learning Universe look (css/universe.css) is added here so every page gets it without editing each page.
   try { if (!document.getElementById('lneUniverseCss')) { var uv = document.createElement('link'); uv.id = 'lneUniverseCss'; uv.rel = 'stylesheet'; uv.href = 'css/universe.css?v=1'; (document.head || root).appendChild(uv); } } catch (e) {}
   // The sci-fi world (css/scifi.css) sits on top of the Learning Universe look.
