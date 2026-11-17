@@ -558,7 +558,7 @@ body.classroom-comfort-mode .speak-toggle-btn.muted{ background:#343747; color:#
 
   <div class="classroom-break-overlay" id="classroomBreakOverlay" style="display:none;">
     <div class="classroom-break-card">
-      <div style="font-size:38px; margin-bottom:6px;">👀</div>
+      <div style="margin-bottom:6px;"><span data-ic="learn"></span></div>
       <h3 style="margin:0 0 8px;">Quick eye break</h3>
       <p style="margin:0 0 16px; font-size:17px; color:#8a8474; line-height:1.5;">Look at something about 20 feet (6 meters) away for 20 seconds. Your lesson will be right here.</p>
       <div class="classroom-break-count" id="classroomBreakCount">20</div>
@@ -701,16 +701,16 @@ async function withLoadingButton(btn, fn){
 }
 
 const HUB_SUBJECTS = [
-  { value:'Math', icon:'🔢' },
-  { value:'Science', icon:'🔬' },
-  { value:'English & Language Arts', icon:'📖' },
-  { value:'History & Social Studies', icon:'🌍' },
-  { value:'Foreign Languages', icon:'🗣️' },
-  { value:'Computer Science', icon:'💻' },
-  { value:'Art & Design', icon:'🎨' },
-  { value:'Music', icon:'🎵' },
-  { value:'Business', icon:'💼' },
-  { value:'Other', icon:'➕' }
+  { value:'Math', icon:'<span data-ic="math"></span>' },
+  { value:'Science', icon:'<span data-ic="sci"></span>' },
+  { value:'English & Language Arts', icon:'<span data-ic="book"></span>' },
+  { value:'History & Social Studies', icon:'<span data-ic="hist"></span>' },
+  { value:'Foreign Languages', icon:'<span data-ic="chat"></span>' },
+  { value:'Computer Science', icon:'<span data-ic="tech"></span>' },
+  { value:'Art & Design', icon:'<span data-ic="arts"></span>' },
+  { value:'Music', icon:'<span data-ic="vol"></span>' },
+  { value:'Business', icon:'<span data-ic="biz"></span>' },
+  { value:'Other', icon:'<span data-ic="star"></span>' }
 ];
 
 function renderHubSubjectGrid(gridId, hiddenId, otherId){
@@ -1031,7 +1031,7 @@ async function askGeneral(question){
     if(followups.length){
       document.getElementById('askFollowupChips').innerHTML = followups.map((q, i) => `
         <button type="button" class="followup-chip" onclick="askGeneral(lastFollowups[${i}])">
-          <span class="fq-icon">🔎</span>${escapeHtml(q)}
+          <span class="fq-icon" data-ic="ask"></span>${escapeHtml(q)}
         </button>
       `).join('');
       followupWrap.style.display = 'block';
