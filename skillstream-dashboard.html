@@ -320,16 +320,8 @@ async function loadTeacherSpaces(){
   const box = document.getElementById('teacherSpaceList');
   const section = document.getElementById('teacherSpaceSection');
   try{
-    // Find the real student column (user_id, student_id, ...) and whether a role column exists.
-    let memCol = null;
-    for(const c of ['user_id','student_id','profile_id','member_id']){
-      const r = await sb.from('classroom_members').select(c).limit(1);
-      if(!r.error){ memCol = c; break; }
-    }
-    if(!memCol) memCol = 'user_id';
-    const roleTest = await sb.from('classroom_members').select('role').limit(1);
-    let memQ = sb.from('classroom_members').select('classroom_id').eq(memCol, currentUser.id);
-    if(!roleTest.error) memQ = memQ.eq('role', 'student');
+    // classroom_members columns are: classroom_id, student_id, joined_at (see migration 026).
+    const memQ = sb.from('classroom_members').select('classroom_id').eq('student_id', currentUser.id);
     const { data: mem, error: e1 } = await memQ;
     if(e1) throw e1;
     const cids = (mem || []).map(m => m.classroom_id);
@@ -397,8 +389,10 @@ async function initAuth(){
   if(!session){ window.location.href = 'skillstream-login.html'; return; }
   currentUser = session.user;
 
-  const { data: profile } = await sb.from('profiles').select('full_name').eq('id', currentUser.id).maybeSingle();
-  { const gn = greetName(profile?.full_name); document.getElementById('greeting').textContent = 'Welcome back' + (gn ? ', ' + gn : ''); }
+  // Ask for the name in the background: do not make everything else wait for it.
+  sb.from('profiles').select('full_name').eq('id', currentUser.id).maybeSingle().then(function(r){
+    var gn = greetName(r && r.data && r.data.full_name); document.getElementById('greeting').textContent = 'Welcome back' + (gn ? ', ' + gn : '');
+  }, function(){});
 
   loadDashboard();
   try{ LNE_TODAY.mount({el:document.getElementById('todayCard'), sb:sb, user:currentUser, role:'student'}); }catch(e){}
