@@ -2,6 +2,15 @@
    (The text-size buttons still scale the whole page on top of this.) */
 (function () {
   var MIN = 16, timer = 0;
+  // Pages that do not load i18n.js (admin pages) get the same page zoom as the rest of the app.
+  try {
+    if (!window.LNE_I18N && !document.documentElement.style.zoom) {
+      var Z = { n: 1, l: 1.15, xl: 1.3, max: 1.45 }, k = 'max';
+      try { k = localStorage.getItem('lne_textsize') || 'max'; } catch (e) {}
+      var z = Z[k] || 1.45;
+      if (z !== 1) document.documentElement.style.zoom = String(z);
+    }
+  } catch (e) {}
   function skip(el) {
     return !!(el.closest && el.closest('.ln-nav-item,#lneSize,.lne-enter,svg,script,style,[data-keep-size]'));
   }
