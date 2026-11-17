@@ -21,7 +21,7 @@
   try { if (!document.getElementById('lneUniverseCss')) { var uv = document.createElement('link'); uv.id = 'lneUniverseCss'; uv.rel = 'stylesheet'; uv.href = 'css/universe.css?v=1'; (document.head || root).appendChild(uv); } } catch (e) {}
   // The sci-fi world (css/scifi.css) sits on top of the Learning Universe look.
   // Lite look (css/lite.css): bigger text, softer cards. Loads last so it wins.
-  try { if (!document.getElementById('lneLiteCss')) { var lt = document.createElement('link'); lt.id = 'lneLiteCss'; lt.rel = 'stylesheet'; lt.href = 'css/lite.css?v=10'; (document.head || root).appendChild(lt); } } catch (e) {}
+  try { if (!document.getElementById('lneLiteCss')) { var lt = document.createElement('link'); lt.id = 'lneLiteCss'; lt.rel = 'stylesheet'; lt.href = 'css/lite.css?v=11'; (document.head || root).appendChild(lt); } } catch (e) {}
   // Same text size everywhere (js/lite.js).
   try { var lj = document.createElement('script'); lj.src = 'js/lite.js?v=2'; lj.defer = true; (document.head || root).appendChild(lj); } catch (e) {}
   // Slow connection or Data Saver on: switch off animations and big pictures.
@@ -29,7 +29,7 @@
   // Open the connection to the database early.
   try { [['https://vauudtedojtcveiqajlr.supabase.co', true], ['https://cdn.jsdelivr.net', false]].forEach(function (u) { var pc = document.createElement('link'); pc.rel = 'preconnect'; pc.href = u[0]; if (u[1]) pc.crossOrigin = ''; (document.head || root).appendChild(pc); }); } catch (e) {}
   // App icon, home-screen icon and install info (the logo: a gold infinity above an open book).
-  try { if (!document.getElementById('lneIcon')) { var hd = document.head || root; [['icon', 'css/favicon-64.png', 'image/png', 'lneIcon'], ['apple-touch-icon', 'css/apple-touch-icon.png', '', 'lneIcon2'], ['manifest', 'manifest.json', '', 'lneManifest']].forEach(function (r) { var l = document.createElement('link'); l.id = r[3]; l.rel = r[0]; l.href = r[1]; if (r[2]) l.type = r[2]; hd.appendChild(l); }); if (!document.querySelector('meta[name="theme-color"]')) { var m = document.createElement('meta'); m.name = 'theme-color'; m.content = '#2B3399'; hd.appendChild(m); } } } catch (e) {}
+  try { if (!document.getElementById('lneIcon')) { var hd = document.head || root; [['icon', 'css/favicon-64.png', 'image/png', 'lneIcon'], ['apple-touch-icon', 'css/apple-touch-icon.png', '', 'lneIcon2'], ['manifest', 'manifest.json', '', 'lneManifest']].forEach(function (r) { var l = document.createElement('link'); l.id = r[3]; l.rel = r[0]; l.href = r[1]; if (r[2]) l.type = r[2]; hd.appendChild(l); }); if (!document.querySelector('meta[name="theme-color"]')) { var m = document.createElement('meta'); m.name = 'theme-color'; m.content = '#6B3A14'; hd.appendChild(m); } } } catch (e) {}
   try { if (!document.getElementById('lneScifiCss')) { var sf = document.createElement('link'); sf.id = 'lneScifiCss'; sf.rel = 'stylesheet'; sf.href = 'css/scifi.css?v=13'; (document.head || root).appendChild(sf); } } catch (e) {}
   try { if (!document.getElementById('lneWorldJs')) { var wj = document.createElement('script'); wj.id = 'lneWorldJs'; wj.src = 'js/lne-world.js?v=7'; wj.async = true; (document.head || root).appendChild(wj); } } catch (e) {}
   // The page is already in the chosen language: stop the browser's own auto-translate (Chrome) from re-translating it.
@@ -265,14 +265,14 @@
       b.setAttribute('aria-label', t(s.label));
       b.setAttribute('aria-pressed', s.k === cur.k ? 'true' : 'false');
       b.style.cssText = 'font:700 ' + (12 + i * 3) + 'px/1 Inter,system-ui,sans-serif;min-width:44px;min-height:44px;border-radius:12px;cursor:pointer;border:1.5px solid ' +
-        (s.k === cur.k ? '#141F38' : '#E9E2D2') + ';background:' + (s.k === cur.k ? '#141F38' : '#fff') + ';color:' + (s.k === cur.k ? '#fff' : '#141F38') + ';';
+        (s.k === cur.k ? '#5A3214' : '#E9E2D2') + ';background:' + (s.k === cur.k ? '#5A3214' : '#fff') + ';color:' + (s.k === cur.k ? '#fff' : '#5A3214') + ';';
       b.onclick = function () {
         try { localStorage.setItem('lne_textsize', s.k); } catch (e) {}
         apply(s);
         Array.prototype.forEach.call(wrap.children, function (c, j) {
           var on = j === i;
           c.setAttribute('aria-pressed', on ? 'true' : 'false');
-          c.style.background = on ? '#141F38' : '#fff'; c.style.color = on ? '#fff' : '#141F38'; c.style.borderColor = on ? '#141F38' : '#E9E2D2';
+          c.style.background = on ? '#5A3214' : '#fff'; c.style.color = on ? '#fff' : '#5A3214'; c.style.borderColor = on ? '#5A3214' : '#E9E2D2';
         });
       };
       wrap.appendChild(b);
