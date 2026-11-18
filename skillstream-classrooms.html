@@ -232,8 +232,11 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
 
     <div id="tab-recordings" class="hidden">
       <div class="action-row hidden" id="recTools">
-        <button type="button" class="btn btn-primary" id="recBtn"><span data-ic="mic"></span> <span id="recLbl">Record audio</span></button>
-        <a class="btn btn-primary" id="recBoardBtn" href="#">Record with whiteboard</a>
+        <button type="button" class="btn btn-primary" id="recMain"><span data-ic="mic"></span> <span id="recLbl">Record a lesson</span></button>
+      </div>
+      <div class="action-row hidden" id="recChoices">
+        <button type="button" class="btn btn-ghost" id="recBtn">Voice only</button>
+        <a class="btn btn-ghost" id="recBoardBtn" href="#">With whiteboard</a>
         <button type="button" class="btn btn-ghost" id="recLinkBtn">Add a link</button>
       </div>
       <div class="card-meta hidden" id="recNote" style="margin:6px 0">Audio is recorded from this phone's microphone and deleted automatically after 30 days. Students of this class can listen. Up to 60 minutes each, 20 per class.</div>
@@ -261,8 +264,35 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
       <div class="card">
         <div class="card-title" id="teacherLine" data-uid-line="1"></div>
       </div>
+      <div class="action-row hidden" id="stuTools"><button type="button" class="btn btn-primary" id="stuAddBtn">Add a student without email</button></div>
       <div class="group-label">Students (<span id="studentCount">0</span>)</div>
       <div class="card" id="rosterCard"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT WITHOUT EMAIL MODAL -->
+<div class="modal-bg hidden" id="stuModal">
+  <div class="modal">
+    <h2>Add a student without email</h2>
+    <div id="stuStep1">
+      <label>Student's name</label>
+      <input type="text" id="stuName" maxlength="60" autocomplete="off">
+      <div class="card-meta" style="margin-top:6px">The app makes a username and a secret code. Give them to the student. The code is shown only once.</div>
+      <div class="error-msg" id="stuErr"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('stuModal')">Cancel</button>
+        <button type="button" class="btn btn-primary" id="stuCreate">Create</button>
+      </div>
+    </div>
+    <div id="stuStep2" class="hidden">
+      <div class="card" style="font-size:16px;line-height:1.9;white-space:pre-wrap" id="stuCard" data-no-i18n></div>
+      <div class="card-meta" style="margin-top:6px">Save or send it now. Later you can make a new code from the People tab.</div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="stuCopy">Copy</button>
+        <a class="btn btn-ghost" id="stuShare" target="_blank" rel="noopener noreferrer" href="#">Send by WhatsApp</a>
+        <button type="button" class="btn btn-primary" onclick="closeModal('stuModal')">Done</button>
+      </div>
     </div>
   </div>
 </div>
@@ -515,9 +545,10 @@ async function renderDetail() {
 
   // People tab
   document.getElementById('teacherLine').textContent = '👩‍🏫 ' + c.teacherName + ' (Teacher)';
+  document.getElementById('stuTools').classList.toggle('hidden', !isTeacherOfCurrent(c));
   document.getElementById('studentCount').textContent = c.students.length;
   document.getElementById('rosterCard').innerHTML = c.students.length ? c.students.map(s => `
-    <div class="roster-item" data-uid="${escapeHtml(s.email)}"><div class="roster-dot">${escapeHtml(s.name.charAt(0).toUpperCase())}</div>${escapeHtml(s.name)}<span class="online-dot hidden" title="Online now"></span></div>
+    <div class="roster-item" data-uid="${escapeHtml(s.email)}"><div class="roster-dot">${escapeHtml(s.name.charAt(0).toUpperCase())}</div>${escapeHtml(s.name)}<span class="online-dot hidden" title="Online now"></span>${isTeacherOfCurrent(c) ? '<button type="button" class="btn btn-ghost" style="margin-inline-start:auto;padding:4px 10px;font-size:12px" data-newcode="' + escapeHtml(s.email) + '" data-nm="' + escapeHtml(s.name) + '">New code</button>' : ''}</div>
   `).join('') : '<div style="color:var(--muted);font-size:13px">No students enrolled yet. Share the class code!</div>';
 }
 
@@ -647,6 +678,48 @@ function switchTab(name) {
 }
 
 
+/* ---------- STUDENTS WITHOUT EMAIL (the teacher makes the account; the server does the secure part) ---------- */
+async function stuCall(payload) {
+  const ses = await SSAuth.client.auth.getSession();
+  const tok = ses.data && ses.data.session && ses.data.session.access_token;
+  if (!tok) throw new Error('Please log in again');
+  const r = await fetch('/api/class-students', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok }, body: JSON.stringify(payload) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.error || 'Something went wrong');
+  return j;
+}
+function stuShow(name, username, code) {
+  const text = name + '\nUsername: ' + username + '\nCode: ' + code + '\n' + location.origin + '  →  Log in  →  type the username in the first box';
+  document.getElementById('stuStep1').classList.add('hidden'); document.getElementById('stuStep2').classList.remove('hidden');
+  document.getElementById('stuCard').textContent = text;
+  document.getElementById('stuShare').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+  document.getElementById('stuCopy').onclick = () => { try { navigator.clipboard.writeText(text); showToast('Copied'); } catch (e) { showToast('Could not copy', true); } };
+  openModal('stuModal');
+}
+document.getElementById('stuAddBtn').addEventListener('click', () => {
+  document.getElementById('stuName').value = ''; document.getElementById('stuErr').textContent = '';
+  document.getElementById('stuStep1').classList.remove('hidden'); document.getElementById('stuStep2').classList.add('hidden');
+  openModal('stuModal');
+});
+document.getElementById('stuCreate').addEventListener('click', async () => {
+  const c = currentClassroom, btn = document.getElementById('stuCreate'), err = document.getElementById('stuErr');
+  const name = document.getElementById('stuName').value.trim(); err.textContent = '';
+  if (!c || name.length < 2) { err.textContent = "Please type the student's name"; return; }
+  btn.disabled = true;
+  try { const j = await stuCall({ action: 'create', classroom_id: c.id, name }); stuShow(j.name || name, j.username, j.code); openClass(c.id).catch(() => {}); }
+  catch (e) { err.textContent = e.message; }
+  btn.disabled = false;
+});
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('[data-newcode]'); if (!b) return;
+  if (!confirm('Make a new code for ' + b.dataset.nm + '? The old code stops working.')) return;
+  b.disabled = true;
+  try { const j = await stuCall({ action: 'reset', classroom_id: currentClassroom.id, student_id: b.dataset.newcode }); stuShow(b.dataset.nm, j.username, j.code); }
+  catch (e) { showToast(e.message, true); }
+  b.disabled = false;
+});
+
+
 /* ---------- RECORDINGS (teacher records audio or adds a link; students of the class listen) ---------- */
 const REC_MAX_SEC = 3600;
 let recState = null; // { mr, chunks, stream, t0, timer, mime, classId }
@@ -731,7 +804,7 @@ function recStop() {
 }
 async function recFinish(st) {
   recState = null;
-  document.getElementById('recLbl').textContent = 'Record audio';
+  document.getElementById('recLbl').textContent = 'Record a lesson';
   const sec = Math.max(1, Math.min(REC_MAX_SEC, Math.round((Date.now() - st.t0) / 1000)));
   const base = (st.mime.split(';')[0] || 'audio/webm');
   const ext = base.indexOf('mp4') >= 0 ? 'm4a' : base.indexOf('ogg') >= 0 ? 'ogg' : 'webm';
@@ -751,8 +824,10 @@ async function recFinish(st) {
   }
   recLive(''); showToast('Recording saved'); renderRecordings();
 }
-document.getElementById('recBtn').addEventListener('click', () => { recState ? recStop() : recStart(); });
+document.getElementById('recMain').addEventListener('click', () => { if (recState) recStop(); else document.getElementById('recChoices').classList.toggle('hidden'); });
+document.getElementById('recBtn').addEventListener('click', () => { document.getElementById('recChoices').classList.add('hidden'); recState ? recStop() : recStart(); });
 document.getElementById('recLinkBtn').addEventListener('click', () => {
+  document.getElementById('recChoices').classList.add('hidden');
   document.getElementById('rlTitle').value = ''; document.getElementById('rlUrl').value = '';
   document.getElementById('recLinkError').textContent = ''; openModal('recLinkModal');
 });
