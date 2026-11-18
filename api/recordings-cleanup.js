@@ -1,5 +1,5 @@
 // api/recordings-cleanup.js
-// Daily job: deletes class audio recordings whose 30 days are over (the file AND its database row).
+// Daily job: deletes class audio recordings whose 30 days are over (the audio file, its whiteboard file AND its database row).
 // Only Vercel Cron can call it (GET with "Authorization: Bearer <CRON_SECRET>"). No AI, no external site.
 // Environment variables (Vercel, already set): SUPABASE_SERVICE_KEY, CRON_SECRET.
 
@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
 
   try {
     const now = new Date().toISOString();
-    const q = SUPABASE_URL + '/rest/v1/class_recordings?select=id,audio_path&kind=eq.audio&expires_at=lt.' +
+    const q = SUPABASE_URL + '/rest/v1/class_recordings?select=id,audio_path,board_path&kind=eq.audio&expires_at=lt.' +
       encodeURIComponent(now) + '&limit=' + BATCH;
     const r = await fetch(q, { headers: sh() });
     if (!r.ok) { res.status(502).json({ error: 'Could not list' }); return; }
@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
     if (!rows.length) { res.status(200).json({ deleted: 0 }); return; }
 
     // 1) delete the audio files
-    const paths = rows.map(x => x.audio_path).filter(Boolean);
+    const paths = rows.reduce((a, x) => a.concat([x.audio_path, x.board_path]), []).filter(Boolean);
     let filesOk = true;
     if (paths.length) {
       const d = await fetch(SUPABASE_URL + '/storage/v1/object/class-audio', {
