@@ -225,6 +225,7 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
     <div id="tab-recordings" class="hidden">
       <div class="action-row hidden" id="recTools">
         <button type="button" class="btn btn-primary" id="recBtn"><span data-ic="mic"></span> <span id="recLbl">Record audio</span></button>
+        <a class="btn btn-primary" id="recBoardBtn" href="#">Record with whiteboard</a>
         <button type="button" class="btn btn-ghost" id="recLinkBtn">Add a link</button>
       </div>
       <div class="card-meta hidden" id="recNote" style="margin:6px 0">Audio is recorded from this phone's microphone and deleted automatically after 30 days. Students of this class can listen. Up to 60 minutes each, 20 per class.</div>
@@ -643,10 +644,11 @@ async function renderRecordings() {
   const c = currentClassroom; if (!c) return;
   const teaching = isTeacherOfCurrent(c);
   document.getElementById('recTools').classList.toggle('hidden', !teaching);
+  document.getElementById('recBoardBtn').href = 'skillstream-whiteboard.html?class=' + encodeURIComponent(c.id);
   document.getElementById('recNote').classList.toggle('hidden', !teaching);
   const list = document.getElementById('recList');
   const { data, error } = await SSAuth.client.from('class_recordings')
-    .select('id,kind,title,audio_path,link_url,duration_sec,created_at,expires_at')
+    .select('id,kind,title,audio_path,board_path,link_url,duration_sec,created_at,expires_at')
     .eq('classroom_id', c.id).order('created_at', { ascending: false }).limit(60);
   if (error) { list.innerHTML = '<div class="empty">Could not load recordings.</div>'; return; }
   if (!data || !data.length) { list.innerHTML = '<div class="empty">No recorded lessons yet.</div>'; return; }
@@ -654,10 +656,10 @@ async function renderRecordings() {
     const when = fmtDate(r.created_at);
     const body = r.kind === 'link'
       ? '<a class="btn btn-ghost" href="' + escapeHtml(r.link_url) + '" target="_blank" rel="noopener noreferrer">Open the lesson</a>'
-      : '<button type="button" class="btn btn-ghost" data-play="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path) + '">Play</button><div data-slot="' + escapeHtml(r.id) + '"></div>';
+      : (r.board_path ? '<a class="btn btn-primary" href="skillstream-whiteboard.html?lesson=' + encodeURIComponent(r.id) + '">Watch with whiteboard</a>' : '') + '<button type="button" class="btn btn-ghost" data-play="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path) + '">Play</button><div data-slot="' + escapeHtml(r.id) + '"></div>';
     const dur = r.duration_sec ? ' · ' + recFmt(r.duration_sec) : '';
     const exp = (r.kind === 'audio' && r.expires_at) ? ' · until ' + fmtDate(r.expires_at) : '';
-    const del = teaching ? ' <button type="button" class="btn btn-ghost" data-del="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path || '') + '">Delete</button>' : '';
+    const del = teaching ? ' <button type="button" class="btn btn-ghost" data-del="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path || '') + '" data-board="' + escapeHtml(r.board_path || '') + '">Delete</button>' : '';
     return '<div class="card" style="margin-bottom:10px"><div class="card-title">' + escapeHtml(r.title) + '</div><div class="card-meta">' + escapeHtml(when + dur + exp) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' + body + del + '</div></div>';
   }).join('');
 }
@@ -677,7 +679,7 @@ document.addEventListener('click', async ev => {
   if (dl) {
     if (!confirm('Delete this recording for everyone?')) return;
     dl.disabled = true;
-    if (dl.dataset.path) { await SSAuth.client.storage.from('class-audio').remove([dl.dataset.path]); }
+    if (dl.dataset.path) { await SSAuth.client.storage.from('class-audio').remove(dl.dataset.board ? [dl.dataset.path, dl.dataset.board] : [dl.dataset.path]); }
     const { error } = await SSAuth.client.from('class_recordings').delete().eq('id', dl.dataset.del);
     if (error) { showToast('Could not delete', true); dl.disabled = false; return; }
     showToast('Deleted'); renderRecordings();

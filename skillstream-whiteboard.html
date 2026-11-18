@@ -692,5 +692,6 @@ try { const a = JSON.parse(localStorage.getItem(AUTO) || 'null'); if(a && Array.
 setMode('draw'); fit();
 (async function(){ const s = await sb.auth.getSession(); if(!(s.data && s.data.session)) window.location.href = 'skillstream-login.html'; })();
 </script>
+<script src="js/lne-lesson.js?v=1"></script>
 </body>
 </html>
