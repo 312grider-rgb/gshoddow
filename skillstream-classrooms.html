@@ -90,6 +90,9 @@ textarea{resize:vertical;min-height:70px}
 .tab{white-space:nowrap;flex-shrink:0}
 .tab{padding:10px 14px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.subtabs{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 14px}
+.pill{padding:9px 16px;min-height:40px;box-sizing:border-box;border:1.5px solid var(--border);border-radius:20px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+.pill.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px}
 .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px}
 .card-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
@@ -185,13 +188,18 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
     </div>
     <div class="tabs">
       <div class="tab active" data-tab="stream" onclick="switchTab('stream')">Stream</div>
-      <div class="tab" data-tab="assignments" onclick="switchTab('assignments')">Assignments</div>
-      <div class="tab" data-tab="quizzes" onclick="switchTab('quizzes')">Quizzes</div>
-      <div class="tab" data-tab="grades" onclick="switchTab('grades')">Grades</div>
+      <div class="tab" data-tab="work" onclick="switchTab('assignments')">Work</div>
       <div class="tab" data-tab="chat" onclick="switchTab('chat')">Chat</div>
+      <div class="tab" data-tab="lessons" onclick="switchTab('recordings')">Lessons</div>
       <div class="tab" data-tab="people" onclick="switchTab('people')">People</div>
-      <div class="tab" data-tab="recordings" onclick="switchTab('recordings')">Recordings</div>
-      <div class="tab hidden" data-tab="attendance" id="tabAttBtn" onclick="switchTab('attendance')">Attendance</div>
+    </div>
+    <div class="hidden" id="tabAttBtn"></div>
+    <div class="subtabs hidden" id="subTabs">
+      <span class="pill" data-sub="assignments" onclick="switchTab('assignments')">Assignments</span>
+      <span class="pill" data-sub="quizzes" onclick="switchTab('quizzes')">Quizzes</span>
+      <span class="pill" data-sub="grades" onclick="switchTab('grades')">Grades</span>
+      <span class="pill" data-sub="people" onclick="switchTab('people')">People</span>
+      <span class="pill" data-sub="attendance" onclick="switchTab('attendance')">Attendance</span>
     </div>
 
     <div id="tab-stream">
@@ -621,9 +629,17 @@ function renderAssignment(c, a, teaching) {
   </div>`;
 }
 
+const TAB_GROUPS = { stream: ['stream'], work: ['assignments', 'quizzes', 'grades'], chat: ['chat'], lessons: ['recordings'], people: ['people', 'attendance'] };
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  const group = Object.keys(TAB_GROUPS).find(g => TAB_GROUPS[g].indexOf(name) >= 0);
+  if (!group) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === group));
   ['stream', 'assignments', 'quizzes', 'grades', 'chat', 'people', 'recordings', 'attendance'].forEach(t => document.getElementById('tab-' + t).classList.toggle('hidden', t !== name));
+  const teaching = !document.getElementById('tabAttBtn').classList.contains('hidden');
+  const members = TAB_GROUPS[group].filter(m => m !== 'attendance' || teaching);
+  const bar = document.getElementById('subTabs');
+  bar.classList.toggle('hidden', members.length < 2);
+  bar.querySelectorAll('.pill').forEach(p => { p.classList.toggle('hidden', members.indexOf(p.dataset.sub) < 0); p.classList.toggle('active', p.dataset.sub === name); });
   if (name === 'attendance') renderAttendance();
   if (name === 'grades') renderGrades();
   if (name === 'chat') renderChat();
