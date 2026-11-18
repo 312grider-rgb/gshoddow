@@ -157,6 +157,27 @@ function setRole(role){
   document.getElementById('parentHint').style.display = role === 'parent' ? 'block' : 'none';
 }
 
+// A link from a teacher (?u=username) fills in the username.
+try { const _u = (urlParams.get('u') || '').replace(/[^a-z0-9]/gi, '').slice(0, 20); if(_u) document.getElementById('email').value = _u.toLowerCase(); } catch(e){}
+
+// A one-tap link from a teacher: login.html#u=username&c=code. The part after # never reaches any server;
+// we remove it from the address bar at once, then sign the student in.
+(async function(){
+  try {
+    const h = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+    const u = (h.get('u') || '').replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 20), c = (h.get('c') || '').replace(/[^a-z0-9]/gi, '').slice(0, 40);
+    if(!u || !c) return;
+    history.replaceState(null, '', location.pathname + location.search);
+    document.getElementById('email').value = u;
+    if(!sb){ showMsg('The page could not start. Please reload the page.', 'error'); return; }
+    showMsg('Signing you in…', 'success');
+    const r = await sb.auth.signInWithPassword({ email: u + '@students.gshoddow.vercel.app', password: c });
+    if(r.error){ showMsg('This link no longer works. Type the code your teacher gave you.', 'error'); return; }
+    try { localStorage.removeItem('lne_view'); } catch(e){}
+    window.location.href = 'skillstream-dashboard.html';
+  } catch(e){}
+})();
+
 // If arriving with ?role=teacher OR ?mode=signup, default straight into signup mode
 if(_validRole || urlParams.get('mode') === 'signup'){
   setMode('signup');

@@ -278,6 +278,8 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
     <div id="stuStep1">
       <label>Student's name</label>
       <input type="text" id="stuName" maxlength="60" autocomplete="off">
+      <label style="margin-top:10px">Student's WhatsApp number (optional)</label>
+      <input type="tel" id="stuPhone" inputmode="tel" placeholder="+249..." autocomplete="off">
       <div class="card-meta" style="margin-top:6px">The app makes a username and a secret code. Give them to the student. The code is shown only once.</div>
       <div class="error-msg" id="stuErr"></div>
       <div class="modal-actions">
@@ -287,7 +289,7 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
     </div>
     <div id="stuStep2" class="hidden">
       <div class="card" style="font-size:16px;line-height:1.9;white-space:pre-wrap" id="stuCard" data-no-i18n></div>
-      <div class="card-meta" style="margin-top:6px">Save or send it now. Later you can make a new code from the People tab.</div>
+      <div class="card-meta" style="margin-top:6px">Save or send it now. Anyone with this link can log in as the student, so send it only to the student. Later you can make a new code from the People tab.</div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" id="stuCopy">Copy</button>
         <a class="btn btn-ghost" id="stuShare" target="_blank" rel="noopener noreferrer" href="#">Send by WhatsApp</a>
@@ -689,15 +691,16 @@ async function stuCall(payload) {
   return j;
 }
 function stuShow(name, username, code) {
-  const text = name + '\nUsername: ' + username + '\nCode: ' + code + '\n' + location.origin + '  →  Log in  →  type the username in the first box';
+  const text = name + '\nUsername: ' + username + '\nCode: ' + code + '\nTap to log in: ' + location.origin + '/skillstream-login.html#u=' + encodeURIComponent(username) + '&c=' + encodeURIComponent(code);
   document.getElementById('stuStep1').classList.add('hidden'); document.getElementById('stuStep2').classList.remove('hidden');
   document.getElementById('stuCard').textContent = text;
-  document.getElementById('stuShare').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+  const ph = (document.getElementById('stuPhone').value || '').replace(/\D/g, '');
+  document.getElementById('stuShare').href = 'https://wa.me/' + (ph.length >= 8 && ph.length <= 15 ? ph : '') + '?text=' + encodeURIComponent(text);
   document.getElementById('stuCopy').onclick = () => { try { navigator.clipboard.writeText(text); showToast('Copied'); } catch (e) { showToast('Could not copy', true); } };
   openModal('stuModal');
 }
 document.getElementById('stuAddBtn').addEventListener('click', () => {
-  document.getElementById('stuName').value = ''; document.getElementById('stuErr').textContent = '';
+  document.getElementById('stuName').value = ''; document.getElementById('stuPhone').value = ''; document.getElementById('stuErr').textContent = '';
   document.getElementById('stuStep1').classList.remove('hidden'); document.getElementById('stuStep2').classList.add('hidden');
   openModal('stuModal');
 });
