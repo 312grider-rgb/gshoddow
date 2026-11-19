@@ -279,7 +279,7 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
       <label>Student's name</label>
       <input type="text" id="stuName" maxlength="60" autocomplete="off">
       <label style="margin-top:10px">Student's WhatsApp number (optional)</label>
-      <input type="tel" id="stuPhone" inputmode="tel" placeholder="+249..." autocomplete="off">
+      <input type="tel" id="stuPhone" inputmode="tel" placeholder="+249..." autocomplete="off" style="width:100%;box-sizing:border-box">
       <div class="card-meta" style="margin-top:6px">The app makes a username and a secret code. Give them to the student. The code is shown only once.</div>
       <div class="error-msg" id="stuErr"></div>
       <div class="modal-actions">
@@ -291,9 +291,10 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
       <div class="card" style="font-size:16px;line-height:1.9;white-space:pre-wrap" id="stuCard" data-no-i18n></div>
       <div class="card-meta" style="margin-top:6px">Save or send it now. Anyone with this link can log in as the student, so send it only to the student. Later you can make a new code from the People tab.</div>
       <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" id="stuCopy">Copy</button>
+        <button type="button" class="btn btn-primary" id="stuCopyLink">Copy link</button>
+        <button type="button" class="btn btn-ghost" id="stuCopy">Copy all</button>
         <a class="btn btn-ghost" id="stuShare" target="_blank" rel="noopener noreferrer" href="#">Send by WhatsApp</a>
-        <button type="button" class="btn btn-primary" onclick="closeModal('stuModal')">Done</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('stuModal')">Done</button>
       </div>
     </div>
   </div>
@@ -696,6 +697,8 @@ function stuShow(name, username, code) {
   document.getElementById('stuCard').textContent = text;
   const ph = (document.getElementById('stuPhone').value || '').replace(/\D/g, '');
   document.getElementById('stuShare').href = 'https://wa.me/' + (ph.length >= 8 && ph.length <= 15 ? ph : '') + '?text=' + encodeURIComponent(text);
+  const link = location.origin + '/skillstream-login.html#u=' + encodeURIComponent(username) + '&c=' + encodeURIComponent(code);
+  document.getElementById('stuCopyLink').onclick = () => { try { navigator.clipboard.writeText(link); showToast('Link copied'); } catch (e) { showToast('Could not copy', true); } };
   document.getElementById('stuCopy').onclick = () => { try { navigator.clipboard.writeText(text); showToast('Copied'); } catch (e) { showToast('Could not copy', true); } };
   openModal('stuModal');
 }
