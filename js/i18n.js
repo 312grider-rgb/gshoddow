@@ -29,6 +29,8 @@
   // The sci-fi world (css/scifi.css) sits on top of the Learning Universe look.
   // Lite look (css/lite.css): bigger text, softer cards. Loads last so it wins.
   try { if (!document.getElementById('lneLiteCss')) { var lt = document.createElement('link'); lt.id = 'lneLiteCss'; lt.rel = 'stylesheet'; lt.href = 'css/lite.css?v=11'; (document.head || root).appendChild(lt); } } catch (e) {}
+  // Glow: gold glow, cleaner headings (css/glow.css). Loads after the lite look.
+  try { if (!document.getElementById('lneGlowCss')) { var gl = document.createElement('link'); gl.id = 'lneGlowCss'; gl.rel = 'stylesheet'; gl.href = 'css/glow.css?v=1'; (document.head || root).appendChild(gl); } } catch (e) {}
   // Same text size everywhere (js/lite.js).
   try { var lj = document.createElement('script'); lj.src = 'js/lite.js?v=2'; lj.defer = true; (document.head || root).appendChild(lj); } catch (e) {}
   // Search button (js/lne-search.js).
