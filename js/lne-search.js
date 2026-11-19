@@ -146,13 +146,34 @@
     input.value = ''; list.textContent = '';
     setTimeout(function () { try { input.focus(); } catch (e) {} }, 50);
   }
+  function place() {
+    // Sit in the top corner of the page header. If the bell (or another button) is already there, move beside it.
+    var hd = document.querySelector('header.top');
+    btn.style.insetInlineEnd = '14px';
+    var r = btn.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, hit = false;
+    try {
+      document.elementsFromPoint(cx, cy).forEach(function (el) {
+        if (el === btn || btn.contains(el)) return;
+        var n = el.closest && el.closest('button,a,[role=button]');
+        if (n && n !== btn && (!hd || hd.contains(n))) hit = true;
+      });
+    } catch (e) {}
+    if (hit) btn.style.insetInlineEnd = '78px';
+    var ey = document.getElementById('lneSearchPad'); if (ey) ey.textContent = 'html header.top .eyebrow{padding-inline-end:' + (hit ? 124 : 70) + 'px}';
+  }
   function init() {
     if (document.getElementById('lneSearchBtn') || !document.body) return;
-    btn = mk('button', 'position:fixed;inset-inline-end:14px;bottom:86px;z-index:9000;width:52px;height:52px;border-radius:50%;border:2px solid #fff;background:#5A3214;color:#fff;box-shadow:0 4px 14px rgba(90,50,20,.35);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0');
+    var hd = document.querySelector('header.top');
+    btn = mk('button', 'position:' + (hd ? 'absolute' : 'fixed') + ';top:14px;inset-inline-end:14px;z-index:9000;width:46px;height:46px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:#5A3214;color:#fff;box-shadow:0 3px 10px rgba(90,50,20,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0');
     btn.id = 'lneSearchBtn'; btn.type = 'button'; btn.setAttribute('aria-label', L[0]);
-    btn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>';
+    btn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>';
     btn.onclick = open;
-    document.body.appendChild(btn);
+    if (hd) {
+      if (getComputedStyle(hd).position === 'static') hd.style.position = 'relative';
+      hd.appendChild(btn);
+      var st = document.createElement('style'); st.id = 'lneSearchPad'; document.head.appendChild(st);
+    } else document.body.appendChild(btn);
+    place(); setTimeout(place, 900); setTimeout(place, 2000); setTimeout(place, 4000);
   }
   window.addEventListener('popstate', close);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
