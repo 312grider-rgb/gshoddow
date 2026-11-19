@@ -31,6 +31,8 @@
   try { if (!document.getElementById('lneLiteCss')) { var lt = document.createElement('link'); lt.id = 'lneLiteCss'; lt.rel = 'stylesheet'; lt.href = 'css/lite.css?v=11'; (document.head || root).appendChild(lt); } } catch (e) {}
   // Same text size everywhere (js/lite.js).
   try { var lj = document.createElement('script'); lj.src = 'js/lite.js?v=2'; lj.defer = true; (document.head || root).appendChild(lj); } catch (e) {}
+  // Search button (js/lne-search.js).
+  try { var sj = document.createElement('script'); sj.src = 'js/lne-search.js?v=1'; sj.defer = true; (document.head || root).appendChild(sj); } catch (e) {}
   // Slow connection or Data Saver on: switch off animations and big pictures.
   try { var cn = navigator.connection; if (cn && (cn.saveData || /(^|-)2g$|3g/.test(cn.effectiveType || ''))) root.classList.add('lne-lite'); } catch (e) {}
   // Open the connection to the database early.
