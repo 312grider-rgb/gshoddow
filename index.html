@@ -2,6 +2,18 @@
 <html lang="en">
 <head>
 <script src="js/i18n.js?v=1"></script>
+<script>
+/* Already signed in? Go straight in. (The sign-in is kept on the phone until the person taps Log out.) */
+try {
+  var _t = localStorage.getItem('sb-vauudtedojtcveiqajlr-auth-token'), _ok = false;
+  if(_t){ var _j = JSON.parse(_t); _ok = !!(_j && (_j.refresh_token || (_j.currentSession && _j.currentSession.refresh_token))); }
+  var _last = +(sessionStorage.getItem('lne_land_bounce') || 0);
+  if(_ok && Date.now() - _last > 20000 && !/[?&#](stay|nogo)/.test(location.search + location.hash)){
+    sessionStorage.setItem('lne_land_bounce', String(Date.now()));
+    location.replace('skillstream-home.html');
+  }
+} catch(e){}
+</script>
 <link href="css/rtl.css?v=2" rel="stylesheet">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,8 +62,8 @@
 </div>
 <script src="js/lne-visits.js?v=1"></script>
 <script>
-LNE_VISIT('landing');
-document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('[data-v]');if(a)LNE_VISIT(a.getAttribute('data-v'));});
+window.LNE_VISIT && LNE_VISIT('landing');
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('[data-v]');if(a)window.LNE_VISIT && LNE_VISIT(a.getAttribute('data-v'));});
 </script>
 </body>
 </html>

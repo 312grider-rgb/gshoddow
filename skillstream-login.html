@@ -178,6 +178,16 @@ try { const _u = (urlParams.get('u') || '').replace(/[^a-z0-9]/gi, '').slice(0, 
   } catch(e){}
 })();
 
+// Already signed in on this phone? Skip the form and go in. (Stays signed in until the person taps Log out.)
+(async function(){
+  try {
+    if(!sb || location.hash || urlParams.get('mode') || urlParams.get('role') || urlParams.get('u') || urlParams.get('switch')) return;
+    if(localStorage.getItem('lne_after_login') || localStorage.getItem('lne_apply_teacher') === '1') return;
+    const r = await sb.auth.getSession();
+    if(r && r.data && r.data.session) window.location.replace('skillstream-home.html');
+  } catch(e){}
+})();
+
 // If arriving with ?role=teacher OR ?mode=signup, default straight into signup mode
 if(_validRole || urlParams.get('mode') === 'signup'){
   setMode('signup');

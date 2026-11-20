@@ -79,6 +79,17 @@
   }
   #uploadForm textarea{min-height:70px;}
 
+  .tag-wait{font-size:10px; color:#B8691A; font-weight:700; text-transform:uppercase; margin-left:6px;}
+  .adm-box{background:#fff; border:1.5px solid #E2BB5A; border-radius:14px; padding:12px; margin-bottom:16px;}
+  .adm-box h3{margin:0 0 8px; font-size:14px;}
+  .adm-row{display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:8px 0; border-top:1px solid var(--line); font-size:13px;}
+  .adm-row b{flex:1 1 100%;}
+  .mini{border:none; border-radius:20px; padding:8px 14px; font-weight:700; font-size:13px; cursor:pointer; background:var(--cream); color:var(--ink); border:1px solid var(--line);}
+  .mini.ok{background:#2F7D4F; color:#fff; border-color:#2F7D4F;} .mini.no{background:#fff; color:#B03030; border-color:#B03030;}
+  #pageViewer{position:fixed; inset:0; z-index:2147482000; background:#111; overflow:auto; display:none; -webkit-overflow-scrolling:touch;}
+  #pageViewer .bar{position:sticky; top:0; display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#000; color:#fff; font-weight:700; z-index:2;}
+  #pageViewer .bar button{background:#fff; color:#111; border:none; border-radius:20px; padding:8px 16px; font-weight:700; font-size:14px;}
+  #pageViewer img{display:block; width:100%; max-width:900px; margin:0 auto 6px; background:#222; min-height:200px;}
   .empty{text-align:center; padding:50px 20px; color:#8a8474; font-size:14px;}
   .loading{text-align:center; padding:30px; color:#8a8474;}
   .back-link{display:block; text-align:center; margin-top:10px; font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;}
@@ -98,6 +109,7 @@
       <button class="shelf-tab active" id="tabAcademicBtn" onclick="switchShelfType('academic')"><span data-ic="learn"></span>Academic Grades</button>
       <button class="shelf-tab" id="tabSkillBtn" onclick="switchShelfType('skill')"><span data-ic="fa"></span>General Skills</button>
     </div>
+    <div id="pendingBox"></div>
     <div class="grid-shelves" id="shelfGrid"></div>
   </div>
 
@@ -105,7 +117,7 @@
     <button class="back-shelf" onclick="showShelfList()">&larr; All Shelves</button>
     <h3 id="shelfTitle" style="margin-bottom:14px;"></h3>
 
-    <button class="upload-btn" onclick="toggleUploadForm()" id="uploadToggleBtn">+ Add a Book (Teachers)</button>
+    <button class="upload-btn" onclick="toggleUploadForm()" id="uploadToggleBtn">+ Add a Book</button>
 
     <div id="uploadForm">
       <label>Title</label>
@@ -114,14 +126,17 @@
       <input type="text" id="bookAuthor" placeholder="Author name">
       <label>Description</label>
       <textarea id="bookDesc" placeholder="What's this book about?"></textarea>
-      <label>Upload PDF (your own original material)</label>
-      <input type="file" id="bookPdfFile" accept="application/pdf">
+      <label>A PDF, or photos of the pages</label>
+      <input type="file" id="bookPdfFile" accept="application/pdf,image/*" multiple>
+      <div style="font-size:12px; color:#8a8474; margin-top:6px;">One PDF (up to 20 MB), or up to 60 photos in page order. Photos are shrunk automatically to save data. Only add material you are allowed to share. An admin checks every book before others can see it.</div>
       <div id="uploadStatus" style="font-size:12px; color:#8a8474; margin-top:6px;"></div>
       <button class="upload-btn" style="margin-top:14px;" onclick="submitBook()">Add to Library</button>
     </div>
 
     <div id="bookList"><div class="loading">Loading books…</div></div>
   </div>
+
+  <div id="pageViewer"><div class="bar"><span id="pvTitle"></span><button type="button" onclick="closeViewer()">Close</button></div><div id="pvPages"></div></div>
 
   <a class="back-link" href="skillstream-dashboard.html">&larr; Back to Dashboard</a>
 </div>
@@ -174,6 +189,7 @@ async function initAuth(){
   const { data: profile } = await sb.from('profiles').select('role').eq('id', currentUser.id).maybeSingle();
   currentProfile = profile;
   renderShelves();
+  loadPending();
 }
 
 function switchShelfType(type){
@@ -205,7 +221,7 @@ async function openShelf(value, label){
   document.getElementById('shelfListView').style.display = 'none';
   document.getElementById('bookListView').style.display = 'block';
   document.getElementById('shelfTitle').textContent = label;
-  document.getElementById('uploadToggleBtn').style.display = (currentProfile?.role === 'teacher') ? 'block' : 'none';
+  document.getElementById('uploadToggleBtn').style.display = 'block';
   document.getElementById('uploadForm').style.display = 'none';
   await loadBooks();
 }
@@ -224,68 +240,146 @@ async function loadBooks(){
 
   if(error){ el.innerHTML = `<div class="empty">Couldn't load books.</div>`; return; }
   if(!data || data.length === 0){
-    el.innerHTML = `<div class="empty">No books here yet.${currentProfile?.role === 'teacher' ? ' Tap "+ Add a Book" to be the first.' : ''}</div>`;
+    el.innerHTML = `<div class="empty">No books here yet. Tap "+ Add a Book" to be the first.</div>`;
     return;
   }
 
-  el.innerHTML = data.map(b => `
+  el.innerHTML = data.map(b => {
+    const np = (b.pages && b.pages.length) || 0;
+    const wait = b.status === 'pending' ? '<span class="tag-wait">Waiting for approval</span>' : (b.pdf_url || np ? '<span class="upload-tag">Shared book</span>' : '');
+    return `
     <div class="book-card">
-      <div class="book-cover" style="${b.cover_url ? `background-image:url('${b.cover_url}');` : ''}">${b.cover_url ? '' : '📕'}</div>
+      <div class="book-cover" style="${b.cover_url ? `background-image:url('${escapeHtml(b.cover_url)}');` : ''}">${b.cover_url ? '' : '📕'}</div>
       <div class="book-info">
         <h3>${escapeHtml(b.title)}</h3>
-        <div class="author">${escapeHtml(b.author || 'Unknown author')} ${b.pdf_url ? '<span class="upload-tag">Teacher Upload</span>' : ''}</div>
+        <div class="author">${escapeHtml(b.author || 'Unknown author')} ${wait}</div>
         <div class="desc">${escapeHtml(b.description || '')}</div>
         <div class="book-links">
-          ${b.external_url ? `<a href="${b.external_url}" target="_blank" rel="noopener">Read Online →</a>` : ''}
-          ${b.pdf_url ? `<a href="${b.pdf_url}" target="_blank" rel="noopener">Open PDF →</a>` : ''}
+          ${b.external_url ? `<a href="${escapeHtml(b.external_url)}" target="_blank" rel="noopener">Read Online →</a>` : ''}
+          ${b.pdf_url ? `<a href="${escapeHtml(b.pdf_url)}" target="_blank" rel="noopener">Open PDF →</a>` : ''}
+          ${np ? `<a href="#" data-read="${escapeHtml(b.id)}">Read ${np} pages →</a>` : ''}
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
+  window.__books = window.__books || {}; data.forEach(b => { window.__books[b.id] = b; });
 }
 
+const PHOTO_MAX = 60, PDF_MAX = 20 * 1024 * 1024;
+function shrink(file){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(bl => bl ? resolve(bl) : reject(new Error('Could not read a photo')), 'image/jpeg', 0.72);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('A photo could not be opened. Use JPG or PNG.')); };
+    img.src = url;
+  });
+}
 async function submitBook(){
   const title = document.getElementById('bookTitle').value.trim();
   const author = document.getElementById('bookAuthor').value.trim();
   const desc = document.getElementById('bookDesc').value.trim();
-  const file = document.getElementById('bookPdfFile').files[0];
+  const files = Array.from(document.getElementById('bookPdfFile').files || []);
+  const status = document.getElementById('uploadStatus');
+  const btn = document.querySelector('#uploadForm button.upload-btn');
 
   if(!title){ alert('Please enter a title.'); return; }
-  if(!file){ alert('Please upload a PDF file.'); return; }
+  if(title.length > 120 || author.length > 120 || desc.length > 600){ alert('Title and author: up to 120 letters. Description: up to 600.'); return; }
+  if(!files.length){ alert('Please choose a PDF or photos.'); return; }
+  const pdfs = files.filter(f => f.type === 'application/pdf'), imgs = files.filter(f => /^image\//.test(f.type));
+  if(pdfs.length + imgs.length !== files.length || (pdfs.length && imgs.length) || pdfs.length > 1){ alert('Choose one PDF, or photos only (not both).'); return; }
+  if(pdfs.length && pdfs[0].size > PDF_MAX){ alert('The PDF is larger than 20 MB. Please choose a smaller file.'); return; }
+  if(imgs.length > PHOTO_MAX){ alert('Up to ' + PHOTO_MAX + ' photos per book.'); return; }
 
-  const status = document.getElementById('uploadStatus');
-  status.textContent = 'Uploading…';
-
+  btn.disabled = true; status.textContent = 'Uploading…';
+  const uploaded = [];
   try{
-    const path = `library-pdfs/${currentUser.id}/${Date.now()}_${String(file.name).replace(/[^A-Za-z0-9._-]/g,'_').slice(-80)}`;
-    const { error: uploadError } = await sb.storage.from('skillstream-files').upload(path, file, { upsert:true });
-    if(uploadError) throw uploadError;
-
-    const { data: urlData } = sb.storage.from('skillstream-files').getPublicUrl(path);
-
-    const payload = {
-      title, author, description: desc,
-      pdf_url: urlData.publicUrl,
-      uploaded_by: currentUser.id,
-      is_academic: shelfType === 'academic'
-    };
-    if(shelfType === 'academic') payload.grade_level = activeShelfValue;
-    else payload.subject = activeShelfValue;
-
+    const base = `library-pdfs/${currentUser.id}/${Date.now()}`;
+    const payload = { title, author, description: desc, uploaded_by: currentUser.id, status: 'pending', is_academic: shelfType === 'academic' };
+    if(pdfs.length){
+      const path = `${base}_${String(pdfs[0].name).replace(/[^A-Za-z0-9._-]/g,'_').slice(-60)}`;
+      const up = await sb.storage.from('skillstream-files').upload(path, pdfs[0], { upsert:false });
+      if(up.error) throw up.error;
+      uploaded.push(path);
+      payload.pdf_url = sb.storage.from('skillstream-files').getPublicUrl(path).data.publicUrl;
+    } else {
+      payload.pages = [];
+      for(let i = 0; i < imgs.length; i++){
+        status.textContent = 'Photo ' + (i + 1) + ' of ' + imgs.length + '…';
+        const blob = await shrink(imgs[i]);
+        const path = `${base}_p${String(i + 1).padStart(2, '0')}.jpg`;
+        const up = await sb.storage.from('skillstream-files').upload(path, blob, { contentType:'image/jpeg', upsert:false });
+        if(up.error) throw up.error;
+        uploaded.push(path); payload.pages.push(path);
+      }
+    }
+    if(shelfType === 'academic') payload.grade_level = activeShelfValue; else payload.subject = activeShelfValue;
     const { error } = await sb.from('library_books').insert(payload);
     if(error) throw error;
 
-    status.textContent = 'Added!';
-    document.getElementById('bookTitle').value = '';
-    document.getElementById('bookAuthor').value = '';
-    document.getElementById('bookDesc').value = '';
-    document.getElementById('bookPdfFile').value = '';
+    status.textContent = 'Sent! An admin will check it, then it appears for everyone.';
+    ['bookTitle','bookAuthor','bookDesc','bookPdfFile'].forEach(id => { document.getElementById(id).value = ''; });
     toggleUploadForm();
     loadBooks();
   } catch(err){
-    status.textContent = 'Error: ' + err.message;
+    if(uploaded.length){ try{ await sb.storage.from('skillstream-files').remove(uploaded); }catch(e){} }
+    status.textContent = 'Error: ' + (err.message || 'upload failed');
   }
+  btn.disabled = false;
 }
+
+/* ---- reading a photo book ---- */
+function pageUrl(path){ return sb.storage.from('skillstream-files').getPublicUrl(path).data.publicUrl; }
+function openViewer(b){
+  document.getElementById('pvTitle').textContent = b.title;
+  const box = document.getElementById('pvPages'); box.textContent = '';
+  (b.pages || []).forEach((p, i) => { const im = document.createElement('img'); im.loading = 'lazy'; im.alt = 'Page ' + (i + 1); im.src = pageUrl(p); box.appendChild(im); });
+  document.getElementById('pageViewer').style.display = 'block'; document.body.style.overflow = 'hidden';
+}
+function closeViewer(){ document.getElementById('pageViewer').style.display = 'none'; document.body.style.overflow = ''; }
+document.addEventListener('click', ev => {
+  const a = ev.target.closest && ev.target.closest('[data-read]'); if(!a) return;
+  ev.preventDefault();
+  const b = (window.__books || {})[a.dataset.read]; if(b) openViewer(b);
+});
+
+/* ---- admin: approve or reject ---- */
+async function loadPending(){
+  const box = document.getElementById('pendingBox');
+  if(currentProfile?.role !== 'admin'){ box.innerHTML = ''; return; }
+  const { data } = await sb.from('library_books').select('*').eq('status', 'pending').order('created_at', { ascending:true });
+  window.__books = window.__books || {};
+  if(!data || !data.length){ box.innerHTML = ''; return; }
+  data.forEach(b => { window.__books[b.id] = b; });
+  box.innerHTML = '<div class="adm-box"><h3>Waiting for approval (' + data.length + ')</h3>' + data.map(b => {
+    const np = (b.pages && b.pages.length) || 0;
+    return '<div class="adm-row"><b>' + escapeHtml(b.title) + '</b><span>' + escapeHtml(b.author || '') + ' · ' + escapeHtml(b.grade_level || b.subject || '') + '</span>'
+      + (b.pdf_url ? '<a class="mini" href="' + escapeHtml(b.pdf_url) + '" target="_blank" rel="noopener">Open PDF</a>' : '')
+      + (np ? '<a class="mini" href="#" data-read="' + escapeHtml(b.id) + '">View ' + np + ' pages</a>' : '')
+      + '<button class="mini ok" data-ok="' + escapeHtml(b.id) + '">Approve</button><button class="mini no" data-no="' + escapeHtml(b.id) + '">Reject</button></div>';
+  }).join('') + '</div>';
+}
+document.addEventListener('click', async ev => {
+  const ok = ev.target.closest && ev.target.closest('[data-ok]'), no = ev.target.closest && ev.target.closest('[data-no]');
+  if(!ok && !no) return;
+  const id = (ok || no).dataset.ok || (ok || no).dataset.no, b = (window.__books || {})[id];
+  if(no && !confirm('Reject and delete this book?')) return;
+  (ok || no).disabled = true;
+  if(ok){
+    const { error } = await sb.from('library_books').update({ status:'approved' }).eq('id', id);
+    if(error){ alert(error.message); (ok || no).disabled = false; return; }
+  } else {
+    const { error } = await sb.from('library_books').delete().eq('id', id);
+    if(error){ alert(error.message); (ok || no).disabled = false; return; }
+    try{ const files = (b && b.pages || []).slice(); if(b && b.pdf_url){ const i = b.pdf_url.indexOf('/skillstream-files/'); if(i >= 0) files.push(decodeURIComponent(b.pdf_url.slice(i + 19))); } if(files.length) await sb.storage.from('skillstream-files').remove(files); }catch(e){}
+  }
+  loadPending();
+});
 
 initAuth();
 </script>
