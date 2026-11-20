@@ -11,6 +11,9 @@
       student: {
         title: 'Learn', intro: 'Everything for your studies, in one place.',
         sections: [
+          { title: 'My classes', links: [
+            L('chat', 'Classrooms', 'Your classes, lessons and work', 'skillstream-classrooms.html')
+          ] },
           { title: 'My learning', links: [
             L('compass', 'Discover', 'Explore worlds of knowledge and start learning', 'skillstream-discover.html'),
             L('compass', 'World', 'See how countries are progressing, with real data', 'skillstream-world.html'),
@@ -22,16 +25,12 @@
             L('book', 'My courses', 'The courses you are taking', 'skillstream-courses.html'),
             L('library', 'Academic studies', 'School and university subjects', 'skillstream-academic.html')
           ] },
-          { title: 'Lessons and materials', links: [
-            L('book', 'Lessons', 'Recorded lessons from your teachers', 'skillstream-lessons.html'),
-            L('library', 'Library', 'Books, PDFs and videos', 'skillstream-library.html'),
-            L('book', 'My work', 'Assignments and quizzes from your classes', 'skillstream-mywork.html'),
+          { title: 'Materials', links: [
+            L('library', 'Library', 'Books, PDFs and photos', 'skillstream-library.html'),
             L('calendar', 'Calendar', 'Schedules, deadlines and classes', 'skillstream-calendar.html')
           ] },
-          { title: 'Classes', links: [
-            L('chat', 'Classrooms', 'Join a class with a code from your teacher', 'skillstream-classrooms.html')
-          ] },
           { title: 'More', more: true, links: [
+            L('book', 'My work', 'Assignments and quizzes from all your classes', 'skillstream-mywork.html'),
             L('home', 'My school', 'Your school and its activities', 'skillstream-school.html'),
             L('teach', 'Our teachers', 'Meet the teachers', 'skillstream-teachers-directory.html'),
             L('compass', 'Focus mode', 'Study without distractions', 'skillstream-focus.html')
@@ -43,13 +42,12 @@
         sections: [
           { title: 'Your teaching', links: [
             L('book', 'Courses', 'Create and manage your courses', 'skillstream-courses.html'),
-            L('chat', 'Classrooms', 'Your classes and students', 'skillstream-classrooms.html'),
+            L('chat', 'Classrooms', 'Your classes, lessons and students', 'skillstream-classrooms.html'),
             L('ai', 'Teacher AI', 'Plan lessons, make quizzes and understand your students', 'skillstream-teacher-ai.html'),
-            L('teach', 'Record a lesson', 'Talk and write on a board for your class', 'skillstream-record.html'),
-            L('book', 'Lessons', 'The recorded lessons in your classes', 'skillstream-lessons.html')
+            L('teach', 'Record a lesson', 'Talk and write on a board for your class', 'skillstream-record.html')
           ] },
           { title: 'More', more: true, links: [
-            L('library', 'Library', 'Books, PDFs and videos', 'skillstream-library.html'),
+            L('library', 'Library', 'Books, PDFs and photos', 'skillstream-library.html'),
             L('calendar', 'Calendar', 'Schedules, deadlines and classes', 'skillstream-calendar.html'),
             L('home', 'My school', 'Your school and its activities', 'skillstream-school.html'),
             L('compass', 'Focus mode', 'Work without distractions', 'skillstream-focus.html')
@@ -85,7 +83,7 @@
         title: 'Profile', intro: 'Your identity, your growth and your settings.',
         sections: [
           { title: 'My identity', links: [
-            L('user', 'Profile', 'Your name, photo and details', 'skillstream-profile.html'),
+            L('user', 'My details', 'Your name, photo and bio', 'skillstream-profile.html'),
             L('star', 'My Passport', 'What you really did, with a link you can share', 'skillstream-passport.html')
           ] },
           { title: 'Account', links: [
