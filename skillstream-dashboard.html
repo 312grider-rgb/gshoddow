@@ -705,6 +705,7 @@ function renderCertificates(certs){
 }
 
 initAuth();
+try { if(new URLSearchParams(location.search).get('rec') === '1'){ setTimeout(function(){ const b = document.querySelector('.ai-rec-card'); if(b){ b.scrollIntoView({ block:'center' }); getRecommendation(); } }, 2500); } } catch(e){}
 
 /* ---------- AI STUDY RECOMMENDATION ----------
    Calls our own /api/ask-ai serverless function (Vercel) instead of
@@ -730,7 +731,21 @@ async function getRecommendation(){
   const { data: available } = await sb.from('courses').select('title, category, description').eq('is_published', true).limit(30);
   const catalog = (available || []).map(c => `${c.title} (${c.category || 'General'})`).join('; ');
 
-  const prompt = `A learner on "Paradise Of The Eternal Learners" has completed these courses: ${completed.join(', ') || 'none yet'}. They currently have these in progress: ${inProgress.join(', ') || 'none'}. Here is the course catalog available to them: ${catalog || 'no other courses available yet'}. Recommend 2-3 next courses or topics for them to study next, with a one-sentence reason for each. Be encouraging and concise (under 120 words total).`;
+  // Who is this learner? Their goal, level and language make the advice personal.
+  let goalLine = 'no goal set yet', levelLine = 'not given', aboutLine = '';
+  try {
+    const [{ data: pf }, { data: gl }] = await Promise.all([
+      sb.from('profiles').select('grade_level, bio').eq('id', currentUser.id).maybeSingle(),
+      sb.from('learning_goals').select('subject, target, deadline').eq('user_id', currentUser.id).eq('status', 'active').order('created_at', { ascending:false }).limit(1)
+    ]);
+    if(gl && gl[0]) goalLine = `"${gl[0].subject}"` + (gl[0].target ? ` (success looks like: ${gl[0].target})` : '') + (gl[0].deadline ? `, by ${gl[0].deadline}` : '');
+    if(pf && pf.grade_level) levelLine = String(pf.grade_level).replace(/_/g, ' ');
+    if(pf && pf.bio) aboutLine = ` About them: ${String(pf.bio).slice(0, 200)}.`;
+  } catch(e){}
+  const LANGS = { ar:'Arabic', fr:'French', es:'Spanish', zh:'Chinese' };
+  let ui = 'en'; try { ui = localStorage.getItem('language') || 'en'; } catch(e){}
+  const replyIn = LANGS[ui] ? `Write the whole answer in ${LANGS[ui]}.` : 'Write in simple English.';
+  const prompt = `You are the study guide of "Paradise Of The Eternal Learners". Learner's goal: ${goalLine}. Level: ${levelLine}.${aboutLine} Completed courses: ${completed.join(', ') || 'none yet'}. In progress: ${inProgress.join(', ') || 'none'}. Courses on the app: ${catalog || 'none yet'}. Give 3 short next steps that move them toward THEIR GOAL first. Use a course from the list only if it truly helps the goal; otherwise suggest a concrete activity or topic (the app also has an AI tutor, learning challenges, a whiteboard and a library). One sentence of reason for each. If they have no goal, suggest 3 steps from their level and say they can set a goal on their profile. Encouraging, under 120 words, no markdown symbols. ${replyIn}`;
 
   try{
     const response = await fetch('/api/ask-ai', {
@@ -741,7 +756,7 @@ async function getRecommendation(){
     const data = await response.json();
     if(data.error){ throw new Error(data.error); }
     output.className = 'ai-rec-output';
-    output.textContent = data.text || 'No recommendation received — try again.';
+    output.textContent = String(data.text || 'No recommendation received — try again.').replace(/\*\*/g, '').replace(/^#+\s*/gm, '').replace(/^\s*[-*]\s+/gm, '• ');
   } catch(err){
     output.className = 'ai-rec-output';
     output.textContent = 'AI error: ' + err.message;
