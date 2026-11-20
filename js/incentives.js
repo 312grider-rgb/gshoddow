@@ -140,7 +140,7 @@ window.Incentives = (function () {
     if (stats.goal) {
       return {
         text: `Keep working toward your goal: ${stats.goal.subject}.`,
-        ctaLabel: 'Continue Learning', ctaHref: 'skillstream-self-paced.html'
+        ctaLabel: 'What should I do next?', ctaHref: 'skillstream-dashboard.html?rec=1'
       };
     }
     const inProgress = courses.find(c => c.done > 0 && c.done < c.total);
