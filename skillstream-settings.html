@@ -200,10 +200,24 @@
     </div>
     <div class="setting-row">
       <div>
-        <div class="label" id="labelNewProfile">Create Another Profile</div>
-        <div class="desc" id="descNewProfile">Sign out and set up a new account</div>
+        <div class="label">Switch view</div>
+        <div class="desc">Choose the student or teacher view</div>
       </div>
-      <button onclick="signOutAndCreateNew()" id="btnNewProfile" style="font-size:13px; font-weight:700; color:var(--gold); background:none; border:none;">Add →</button>
+      <a href="skillstream-home.html?choose=1" style="font-size:13px; font-weight:700; color:var(--gold);">Open →</a>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="label" id="labelNewProfile">Add another account</div>
+        <div class="desc" id="descNewProfile">Keep this one and sign in to another</div>
+      </div>
+      <button onclick="addAnotherAccount()" id="btnNewProfile" style="font-size:13px; font-weight:700; color:var(--gold); background:none; border:none;">Add →</button>
+    </div>
+  </div>
+  <div class="card" id="accountsCard">
+    <div class="setting-row" style="display:block">
+      <div class="label">Your accounts</div>
+      <div class="desc"><span>Signed in as</span> <b id="meName" data-no-i18n></b></div>
+      <div id="accountList" style="margin-top:10px"></div>
     </div>
   </div>
   <div class="card">
@@ -315,7 +329,51 @@ async function initAuth(){
   });
 }
 
+/* ---------- MORE THAN ONE ACCOUNT ON THIS PHONE ----------
+   The other accounts are kept on this phone only. Log Out removes them all (safe on a shared phone). */
+const ACC_KEY = 'lne_accounts';
+function accList(){ try { const a = JSON.parse(localStorage.getItem(ACC_KEY) || '[]'); return Array.isArray(a) ? a.filter(x => x && x.id && x.rt) : []; } catch(e){ return []; } }
+function accSave(a){ try { localStorage.setItem(ACC_KEY, JSON.stringify(a.slice(0, 6))); } catch(e){} }
+function accLabel(u){ const m = (u && u.user_metadata) || {}; const e = String((u && u.email) || ''); return String(m.name || m.full_name || e.split('@')[0] || 'Account').slice(0, 40); }
+async function saveCurrentAccount(){
+  const r = await sb.auth.getSession(); const s = r.data && r.data.session; if(!s) return null;
+  const list = accList().filter(x => x.id !== s.user.id);
+  list.unshift({ id:s.user.id, name:accLabel(s.user), at:s.access_token, rt:s.refresh_token });
+  accSave(list); return s;
+}
+async function renderAccounts(){
+  const r = await sb.auth.getSession(); const s = r.data && r.data.session; if(!s) return;
+  document.getElementById('meName').textContent = accLabel(s.user);
+  const box = document.getElementById('accountList'); box.textContent = '';
+  const others = accList().filter(x => x.id !== s.user.id);
+  if(!others.length){ const d = document.createElement('div'); d.className = 'desc'; d.textContent = 'No other accounts saved on this phone.'; box.appendChild(d); return; }
+  others.forEach(a => {
+    const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #E9E2D2';
+    const n = document.createElement('b'); n.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis'; n.textContent = a.name; n.setAttribute('data-no-i18n', '');
+    const sw = document.createElement('button'); sw.type = 'button'; sw.textContent = 'Switch'; sw.style.cssText = 'font-weight:700;border:none;border-radius:20px;padding:9px 16px;background:#8A4B1C;color:#fff;cursor:pointer';
+    sw.onclick = () => switchAccount(a.id, sw);
+    const rm = document.createElement('button'); rm.type = 'button'; rm.textContent = 'Remove'; rm.style.cssText = 'font-weight:700;border:1.5px solid #B03030;border-radius:20px;padding:8px 14px;background:#fff;color:#B03030;cursor:pointer';
+    rm.onclick = () => { accSave(accList().filter(x => x.id !== a.id)); renderAccounts(); };
+    row.appendChild(n); row.appendChild(sw); row.appendChild(rm); box.appendChild(row);
+  });
+}
+async function switchAccount(id, btn){
+  btn.disabled = true; btn.textContent = 'Switching…';
+  const target = accList().find(x => x.id === id); if(!target){ renderAccounts(); return; }
+  await saveCurrentAccount();
+  accSave(accList().filter(x => x.id !== id));              // the account we switch to becomes the active one
+  const r = await sb.auth.setSession({ access_token:target.at, refresh_token:target.rt });
+  if(r.error || !r.data || !r.data.session){ toast('Please log in to this account again.'); setTimeout(() => { window.location.href = 'skillstream-login.html?switch=1'; }, 1500); return; }
+  window.location.href = 'skillstream-home.html';
+}
+async function addAnotherAccount(){
+  await saveCurrentAccount();
+  await sb.auth.signOut({ scope:'local' });                // leaves this account signed in on the server, so we can come back to it
+  window.location.href = 'skillstream-login.html?switch=1';
+}
+
 async function signOut(){
+  try { localStorage.removeItem(ACC_KEY); } catch(e){}
   await sb.auth.signOut();
   window.location.href = 'index.html';
 }
@@ -329,7 +387,7 @@ async function signOutAndCreateNew(){
 applyTheme(localStorage.getItem('theme') || 'light');
 document.getElementById('readAloudToggle').checked = localStorage.getItem('readAloud') === '1';
 applyLanguage(localStorage.getItem('language') || 'en');
-initAuth();
+initAuth().then(renderAccounts).catch(()=>{});
 </script>
 
 <script>

@@ -187,6 +187,19 @@ async function init(){
     if(window._homeRole === 'teacher') localStorage.removeItem('lne_view');
   } catch(e){}
 
+  // Land on the person's own page (student -> student dashboard, teacher -> teacher dashboard).
+  // "Switch view" (Settings) opens this page with ?choose=1 to pick a view instead.
+  try {
+    if(!new URLSearchParams(location.search).get('choose')){
+      const r = window._homeRole; let dest = '';
+      if(r === 'student') dest = 'skillstream-dashboard.html';
+      else if(r === 'teacher') dest = 'skillstream-teacher-dashboard.html';
+      else if(r === 'both') dest = (localStorage.getItem('lne_role') === 'teacher') ? 'skillstream-teacher-dashboard.html' : 'skillstream-dashboard.html';
+      const last = +(sessionStorage.getItem('lne_home_bounce') || 0);
+      if(dest && Date.now() - last > 15000){ sessionStorage.setItem('lne_home_bounce', String(Date.now())); window.location.replace(dest); return; }
+    }
+  } catch(e){}
+
   document.getElementById('viewsLoading').style.display = 'none';
   applyHomeLanguage(localStorage.getItem('language') || 'en');
 
