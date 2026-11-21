@@ -227,7 +227,8 @@
     });
 
     const messages = (messageRows || []).map(m => ({
-      authorName: nm(m.user_id), text: m.body, createdAt: m.created_at
+      authorName: nm(m.user_id), text: m.body, createdAt: m.created_at,
+      attachPath: m.attach_path || null, attachKind: m.attach_kind || null, attachName: m.attach_name || null
     }));
 
     return {
@@ -386,9 +387,17 @@
     return { ok: true };
   }
 
+  // a voice message, photo or file that is already uploaded (see js/lne-chatfiles.js)
+  async function postAttachment(classroomId, att) {
+    const user = await currentUserOrThrow();
+    const { error } = await client().from('messages').insert({ classroom_id: classroomId, user_id: user.id, body: att.label, attach_path: att.path, attach_kind: att.kind, attach_name: att.name });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  }
+
   window.SSClass = {
     myClasses, unreadCounts, markSeen, create, join, get, upcomingEvents,
     addAnnouncement, addAssignment, addSubmission, gradeSubmission,
-    addQuiz, submitQuiz, postMessage
+    addQuiz, submitQuiz, postMessage, postAttachment
   };
 })();

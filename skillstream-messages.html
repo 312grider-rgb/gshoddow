@@ -131,6 +131,7 @@
       <button id="micBtn" type="button" aria-label="Voice note" style="padding:0 14px;" onclick="toggleRec()">🎤</button>
       <button onclick="sendMessage()">Send</button>
     </div>
+    <div id="dmAttach"></div>
   </div>
 
 </div>
@@ -329,6 +330,19 @@ async function openThread(otherUserId, otherName){
     .eq('is_read', false);
 }
 
+function dmBar(){
+  try {
+    const host = document.getElementById('dmAttach');
+    if(host && !host.firstChild) LNE_CHAT.bar(host, () => (currentUser && activeThreadUserId) ? {
+      sb: sb, folder: 'd/' + currentUser.id + '/' + activeThreadUserId,
+      send: async (att) => {
+        const { error } = await sb.from('direct_messages').insert({ sender_id: currentUser.id, receiver_id: activeThreadUserId, body: att.label, attach_path: att.path, attach_kind: att.kind, attach_name: att.name });
+        if(error) throw new Error(error.message);
+        loadThread();
+      }
+    } : null, { noVoice: true });
+  } catch(e){}
+}
 async function loadThread(){
   const el = document.getElementById('threadMessages');
   const { data, error } = await sb
@@ -341,14 +355,19 @@ async function loadThread(){
 
   if(!data || data.length === 0){
     el.innerHTML = `<div class="empty">Say hello 👋</div>`;
+    dmBar();
     return;
   }
 
   el.innerHTML = data.map(m => {
     const mine = m.sender_id === currentUser.id;
-    return `<div class="bubble ${mine ? 'me' : 'them'}">${m.audio_path ? `<button type="button" class="vn" data-path="${escapeHtml(m.audio_path)}" onclick="playVoice(this)">▶ Voice message</button>` : escapeHtml(m.body)}<span class="bubble-time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}${mine ? ' ' + tickHtml(m) : ''}</span></div>`;
+    return `<div class="bubble ${mine ? 'me' : 'them'}">${m.attach_path ? LNE_CHAT.slot(m.attach_path, m.attach_kind, m.attach_name) : m.audio_path ? `<button type="button" class="vn" data-path="${escapeHtml(m.audio_path)}" onclick="playVoice(this)">▶ Voice message</button>` : escapeHtml(m.body)}<span class="bubble-time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}${mine ? ' ' + tickHtml(m) : ''}</span></div>`;
   }).join('');
   el.lastElementChild && el.lastElementChild.scrollIntoView({block:'end'});
+  dmBar();
+  try {
+    LNE_CHAT.hydrate(sb, el).then(() => { el.lastElementChild && el.lastElementChild.scrollIntoView({block:'end'}); });
+  } catch(e){}
 }
 
 /* ---------- VOICE NOTES (tap mic to record, tap again to send; max 60s) ---------- */
@@ -424,6 +443,7 @@ async function sendMessage(){
 
 initAuth();
 </script>
+<script src="js/lne-chatfiles.js?v=1"></script>
 <script src="js/msgtabs.js" defer></script>
 <script src="js/nav.js" defer></script>
 </body>

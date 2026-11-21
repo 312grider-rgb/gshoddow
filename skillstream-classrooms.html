@@ -231,6 +231,7 @@ a.btn{text-decoration:none}
         <input type="text" id="chatInput" placeholder="Message the class…" style="flex:1" onkeydown="if(event.key==='Enter'){sendChat();}"/>
         <button class="btn btn-primary" onclick="sendChat()">Send</button>
       </div>
+      <div id="chatAttach"></div>
     </div>
 
     <div id="tab-recordings" class="hidden">
@@ -409,6 +410,7 @@ a.btn{text-decoration:none}
 <script src="skillstream-auth.js"></script>
 <script src="js/learntabs.js" defer></script>
 <script src="js/nav.js" defer></script>
+<script src="js/lne-chatfiles.js?v=1"></script>
 <script src="skillstream-classrooms.js"></script>
 <script>
 let me = null;
@@ -1091,9 +1093,17 @@ function renderChat() {
   const msgs = c.messages || [];
   const log = document.getElementById('chatLog');
   log.innerHTML = msgs.length ? msgs.map(m => `
-    <div class="chat-msg"><span class="who">${escapeHtml(m.authorName)}</span>${escapeHtml(m.text)}<span class="when">${new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></div>
+    <div class="chat-msg"><span class="who">${escapeHtml(m.authorName)}</span>${m.attachPath ? '' : escapeHtml(m.text)}${m.attachPath ? LNE_CHAT.slot(m.attachPath, m.attachKind, m.attachName) : ''}<span class="when">${new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></div>
   `).join('') : '<div class="empty">No messages yet — say hi!</div>';
   log.scrollTop = log.scrollHeight;
+  try {
+    const host = document.getElementById('chatAttach');
+    if (host && !host.firstChild) LNE_CHAT.bar(host, () => (currentClassId && me) ? {
+      sb: SSAuth.client, folder: 'c/' + currentClassId + '/' + me.id,
+      send: async (att) => { await SSClass.postAttachment(currentClassId, att); currentClassroom = await SSClass.get(currentClassId); renderChat(); }
+    } : null);
+    LNE_CHAT.hydrate(SSAuth.client, log).then(() => { log.scrollTop = log.scrollHeight; });
+  } catch (e) {}
 }
 async function sendChat() {
   const input = document.getElementById('chatInput');
