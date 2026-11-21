@@ -147,6 +147,9 @@ textarea{resize:vertical;min-height:70px}
 header.top{background:linear-gradient(160deg,#141F38 0%,#1F2E52 100%);color:#FBF7EF;padding:22px 20px 26px}
 header.top .eyebrow{font-size:11.5px;letter-spacing:2.2px;text-transform:uppercase;color:#E4C583;margin-bottom:6px;font-weight:600}
 header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
+a.btn{text-decoration:none}
+#dOnline{display:none!important}
+.class-header{padding:16px}
 </style>
 </head>
 <body>
@@ -187,18 +190,18 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
       </div>
     </div>
     <div class="tabs">
-      <div class="tab active" data-tab="stream" onclick="switchTab('stream')">Stream</div>
+      <div class="tab active" data-tab="lessons" onclick="switchTab('recordings')">Lessons</div>
       <div class="tab" data-tab="work" onclick="switchTab('assignments')">Work</div>
       <div class="tab" data-tab="chat" onclick="switchTab('chat')">Chat</div>
-      <div class="tab" data-tab="lessons" onclick="switchTab('recordings')">Lessons</div>
-      <div class="tab" data-tab="people" onclick="switchTab('people')">People</div>
+      <div class="tab" data-tab="stream" onclick="switchTab('stream')">News</div>
+      <div class="tab hidden" id="tabManage" data-tab="people" onclick="switchTab('people')">Manage</div>
     </div>
     <div class="hidden" id="tabAttBtn"></div>
     <div class="subtabs hidden" id="subTabs">
       <span class="pill" data-sub="assignments" onclick="switchTab('assignments')">Assignments</span>
       <span class="pill" data-sub="quizzes" onclick="switchTab('quizzes')">Quizzes</span>
       <span class="pill" data-sub="grades" onclick="switchTab('grades')">Grades</span>
-      <span class="pill" data-sub="people" onclick="switchTab('people')">People</span>
+      <span class="pill" data-sub="people" onclick="switchTab('people')">Students</span>
       <span class="pill" data-sub="attendance" onclick="switchTab('attendance')">Attendance</span>
     </div>
 
@@ -237,9 +240,10 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
       <div class="action-row hidden" id="recChoices">
         <button type="button" class="btn btn-ghost" id="recBtn">Voice only</button>
         <a class="btn btn-ghost" id="recBoardBtn" href="#">With whiteboard</a>
+        <a class="btn btn-ghost" id="recPicBtn" href="#">With pictures</a>
         <button type="button" class="btn btn-ghost" id="recLinkBtn">Add a link</button>
       </div>
-      <div class="card-meta hidden" id="recNote" style="margin:6px 0">Audio is recorded from this phone's microphone and deleted automatically after 30 days. Students of this class can listen. Up to 60 minutes each, 20 per class.</div>
+      <div class="card-meta hidden" id="recNote" style="margin:6px 0">Lessons are kept for 30 days. Students of this class can watch and listen.</div>
       <div id="recLive" class="card hidden" style="text-align:center"></div>
       <div id="recList"></div>
     </div>
@@ -289,7 +293,7 @@ header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
     </div>
     <div id="stuStep2" class="hidden">
       <div class="card" style="font-size:16px;line-height:1.9;white-space:pre-wrap" id="stuCard" data-no-i18n></div>
-      <div class="card-meta" style="margin-top:6px">Save or send it now. Anyone with this link can log in as the student, so send it only to the student. Later you can make a new code from the People tab.</div>
+      <div class="card-meta" style="margin-top:6px">Save or send it now. Anyone with this link can log in as the student, so send it only to the student. Later you can make a new code from the Manage tab.</div>
       <div class="modal-actions">
         <button type="button" class="btn btn-primary" id="stuCopyLink">Copy link</button>
         <button type="button" class="btn btn-ghost" id="stuCopy">Copy all</button>
@@ -509,6 +513,7 @@ async function openClass(id) {
   document.getElementById('listView').classList.add('hidden');
   document.getElementById('detailView').classList.remove('hidden');
   await renderDetail();
+  switchTab('recordings');
   startPresence();
 }
 function showList() {
@@ -531,6 +536,7 @@ async function renderDetail() {
   document.getElementById('dMeta').textContent = (c.subject || 'General') + ' · ' + (teaching ? 'You are the teacher' : 'Taught by ' + c.teacherName);
   document.getElementById('dCodeBox').classList.toggle('hidden', !teaching);
   document.getElementById('tabAttBtn').classList.toggle('hidden', !teaching);
+  document.getElementById('tabManage').classList.toggle('hidden', !teaching);
   document.getElementById('dCode').textContent = c.code;
   document.getElementById('liveBtn').href = 'https://meet.jit.si/LNE-' + String(c.id).replace(/-/g, '');
   document.getElementById('liveLbl').textContent = teaching ? 'Start live class' : 'Join live class';
@@ -748,14 +754,22 @@ async function renderRecordings() {
   const teaching = isTeacherOfCurrent(c);
   document.getElementById('recTools').classList.toggle('hidden', !teaching);
   document.getElementById('recBoardBtn').href = 'skillstream-whiteboard.html?class=' + encodeURIComponent(c.id);
+  document.getElementById('recPicBtn').href = 'skillstream-record.html?class=' + encodeURIComponent(c.id);
   document.getElementById('recNote').classList.toggle('hidden', !teaching);
   const list = document.getElementById('recList');
   const { data, error } = await SSAuth.client.from('class_recordings')
     .select('id,kind,title,audio_path,board_path,link_url,duration_sec,created_at,expires_at')
     .eq('classroom_id', c.id).order('created_at', { ascending: false }).limit(60);
   if (error) { list.innerHTML = '<div class="empty">Could not load recordings.</div>'; return; }
-  if (!data || !data.length) { list.innerHTML = '<div class="empty">No recorded lessons yet.</div>'; return; }
-  list.innerHTML = data.map(r => {
+  // the older lessons (voice + pictures) live in the same tab
+  let olds = [];
+  try { const o = await SSAuth.client.rpc('list_class_lessons', { p_class: c.id }); if (!o.error && Array.isArray(o.data)) olds = o.data; } catch (e) {}
+  const oldHtml = olds.map(l => {
+    const dur = l.duration_ms ? ' · ' + recFmt(Math.round(l.duration_ms / 1000)) : '';
+    return { t: new Date(l.created_at).getTime() || 0, h: '<div class="card" style="margin-bottom:10px"><div class="card-title">' + escapeHtml(l.title) + '</div><div class="card-meta">' + escapeHtml(fmtDate(l.created_at) + dur) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><a class="btn btn-primary" href="skillstream-lessons.html?l=' + encodeURIComponent(l.id) + '">Watch</a></div></div>' };
+  });
+  if ((!data || !data.length) && !oldHtml.length) { list.innerHTML = '<div class="empty">No recorded lessons yet.</div>'; return; }
+  const newHtml = (data || []).map(r => {
     const when = fmtDate(r.created_at);
     const body = r.kind === 'link'
       ? '<a class="btn btn-ghost" href="' + escapeHtml(r.link_url) + '" target="_blank" rel="noopener noreferrer">Open the lesson</a>'
@@ -763,8 +777,10 @@ async function renderRecordings() {
     const dur = r.duration_sec ? ' · ' + recFmt(r.duration_sec) : '';
     const exp = (r.kind === 'audio' && r.expires_at) ? ' · until ' + fmtDate(r.expires_at) : '';
     const del = teaching ? ' <button type="button" class="btn btn-ghost" data-del="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path || '') + '" data-board="' + escapeHtml(r.board_path || '') + '">Delete</button>' : '';
-    return '<div class="card" style="margin-bottom:10px"><div class="card-title">' + escapeHtml(r.title) + '</div><div class="card-meta">' + escapeHtml(when + dur + exp) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' + body + del + '</div></div>';
-  }).join('');
+    const inner = '<div class="card-title">' + escapeHtml(r.title) + '</div><div class="card-meta">' + escapeHtml(when + dur + exp) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' + body + del + '</div>';
+    return { t: new Date(r.created_at).getTime() || 0, h: '<div class="card" style="margin-bottom:10px">' + inner + '</div>' };
+  });
+  list.innerHTML = newHtml.concat(oldHtml).sort((x, y) => y.t - x.t).map(x => x.h).join('');
 }
 document.addEventListener('click', async ev => {
   const pl = ev.target.closest && ev.target.closest('[data-play]');
