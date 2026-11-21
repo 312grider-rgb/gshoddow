@@ -148,6 +148,21 @@ header.top{background:linear-gradient(160deg,#141F38 0%,#1F2E52 100%);color:#FBF
 header.top .eyebrow{font-size:11.5px;letter-spacing:2.2px;text-transform:uppercase;color:#E4C583;margin-bottom:6px;font-weight:600}
 header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
 a.btn{text-decoration:none}
+/* --- calmer class page: one gold button per screen, readable fonts, warm header --- */
+html:not([data-theme="dark"]) .class-header{background:linear-gradient(160deg,#6B3A14 0%,#A25A1C 100%) !important;padding:14px 16px;margin-bottom:12px}
+.class-header .name{font-family:'Inter',sans-serif !important;font-size:19px;font-weight:700}
+.class-header .meta{font-size:12px}
+.class-header .code-box{margin-top:8px;padding:6px 8px 6px 12px;font-size:12px;gap:4px 8px;flex-wrap:wrap;letter-spacing:0 !important;font-family:'Inter',sans-serif !important;max-width:100%}
+.class-header .code-box #dCode{font-weight:800;letter-spacing:1px}
+#shareClassBtn{padding:6px 12px !important;font-size:12px !important;margin-inline-start:4px !important}
+#dLive{margin-top:10px !important;gap:6px !important}
+html:not([data-theme="dark"]) #dLive .btn{padding:7px 12px;font-size:12.5px;border-radius:12px !important;white-space:nowrap;min-height:0;box-shadow:none !important;background:rgba(255,255,255,.14) !important;color:#FBF7EF !important;border:1px solid rgba(255,255,255,.4) !important}
+#dLive [data-ic]{display:none}
+.card-title,.class-name,.group-label,.btn,.tab,.pill{font-family:'Inter',sans-serif !important}
+html:not([data-theme="dark"]) #tab-recordings .card .btn-primary{background:transparent !important;color:#8A4B1C !important;border:1.5px solid #C9A24E !important;box-shadow:none !important}
+.lesson-type{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:#F3E6CC;color:#6B3A14;margin-inline-end:6px}
+.lesson-open{cursor:pointer}
+.page{padding-bottom:130px}
 #dOnline{display:none!important}
 .class-header{padding:16px}
 </style>
@@ -244,7 +259,7 @@ a.btn{text-decoration:none}
         <a class="btn btn-ghost" id="recPicBtn" href="#">With pictures</a>
         <button type="button" class="btn btn-ghost" id="recLinkBtn">Add a link</button>
       </div>
-      <div class="card-meta hidden" id="recNote" style="margin:6px 0">Lessons are kept for 30 days. Students of this class can watch and listen.</div>
+      <div class="card-meta hidden" id="recNote" style="margin:6px 0">Lessons are kept for 30 days.</div>
       <div id="recLive" class="card hidden" style="text-align:center"></div>
       <div id="recList"></div>
     </div>
@@ -767,8 +782,8 @@ async function renderRecordings() {
   let olds = [];
   try { const o = await SSAuth.client.rpc('list_class_lessons', { p_class: c.id }); if (!o.error && Array.isArray(o.data)) olds = o.data; } catch (e) {}
   const oldHtml = olds.map(l => {
-    const dur = l.duration_ms ? ' · ' + recFmt(Math.round(l.duration_ms / 1000)) : '';
-    return { t: new Date(l.created_at).getTime() || 0, h: '<div class="card" style="margin-bottom:10px"><div class="card-title">' + escapeHtml(l.title) + '</div><div class="card-meta">' + escapeHtml(fmtDate(l.created_at) + dur) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><a class="btn btn-primary" href="skillstream-lessons.html?l=' + encodeURIComponent(l.id) + '">Watch</a></div></div>' };
+    const dur = l.duration_ms ? ' · ' + recFmt(Math.round(l.duration_ms / 1000)) + ' min' : '';
+    return { t: new Date(l.created_at).getTime() || 0, h: '<div class="card lesson-open" style="margin-bottom:10px" onclick="location.href=\'skillstream-lessons.html?l=' + encodeURIComponent(l.id) + '\'"><div class="card-title">' + escapeHtml(l.title) + '</div><div class="card-meta"><span class="lesson-type">Pictures</span>' + escapeHtml(fmtDate(l.created_at) + dur) + '</div></div>' };
   });
   if ((!data || !data.length) && !oldHtml.length) { list.innerHTML = '<div class="empty">No recorded lessons yet.</div>'; return; }
   const newHtml = (data || []).map(r => {
@@ -776,10 +791,10 @@ async function renderRecordings() {
     const body = r.kind === 'link'
       ? '<a class="btn btn-ghost" href="' + escapeHtml(r.link_url) + '" target="_blank" rel="noopener noreferrer">Open the lesson</a>'
       : (r.board_path ? '<a class="btn btn-primary" href="skillstream-whiteboard.html?lesson=' + encodeURIComponent(r.id) + '">Watch with whiteboard</a>' : '') + '<button type="button" class="btn btn-ghost" data-play="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path) + '">Play</button><div data-slot="' + escapeHtml(r.id) + '"></div>';
-    const dur = r.duration_sec ? ' · ' + recFmt(r.duration_sec) : '';
+    const dur = r.duration_sec ? ' · ' + recFmt(r.duration_sec) + ' min' : '';
     const exp = (r.kind === 'audio' && r.expires_at) ? ' · until ' + fmtDate(r.expires_at) : '';
     const del = teaching ? ' <button type="button" class="btn btn-ghost" data-del="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path || '') + '" data-board="' + escapeHtml(r.board_path || '') + '">Delete</button>' : '';
-    const inner = '<div class="card-title">' + escapeHtml(r.title) + '</div><div class="card-meta">' + escapeHtml(when + dur + exp) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' + body + del + '</div>';
+    const inner = '<div class="card-title">' + escapeHtml(r.title) + '</div><div class="card-meta"><span class="lesson-type">' + (r.kind === 'link' ? 'Link' : (r.board_path ? 'Whiteboard' : 'Voice')) + '</span>' + escapeHtml(when + dur + exp) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' + body + del + '</div>';
     return { t: new Date(r.created_at).getTime() || 0, h: '<div class="card" style="margin-bottom:10px">' + inner + '</div>' };
   });
   list.innerHTML = newHtml.concat(oldHtml).sort((x, y) => y.t - x.t).map(x => x.h).join('');
