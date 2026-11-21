@@ -13,6 +13,27 @@ function sh() {
   return h;
 }
 
+// Chat photos, voice messages and files (bucket chat-files) are kept 30 days, like lesson audio.
+// The file is deleted first; only then is the message turned into a plain "Attachment expired" line.
+async function cleanChat() {
+  let total = 0;
+  const before = new Date(Date.now() - 30 * 86400000).toISOString();
+  for (const table of ['messages', 'direct_messages']) {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?select=id,attach_path&attach_path=not.is.null&created_at=lt.' + encodeURIComponent(before) + '&limit=' + BATCH, { headers: sh() });
+    if (!r.ok) continue;
+    const rows = await r.json();
+    if (!rows.length) continue;
+    const d = await fetch(SUPABASE_URL + '/storage/v1/object/chat-files', { method: 'DELETE', headers: sh(), body: JSON.stringify({ prefixes: rows.map(x => x.attach_path) }) });
+    if (!d.ok) continue;
+    const u = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?id=in.(' + rows.map(x => x.id).join(',') + ')', {
+      method: 'PATCH', headers: Object.assign({ Prefer: 'return=minimal' }, sh()),
+      body: JSON.stringify({ attach_path: null, attach_kind: null, attach_name: null, body: 'Attachment expired' })
+    });
+    if (u.ok) total += rows.length;
+  }
+  return total;
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   const secret = process.env.CRON_SECRET || '';
@@ -21,6 +42,7 @@ module.exports = async (req, res) => {
   if (!secret || !bearer || bearer !== secret) { res.status(401).json({ error: 'Not allowed' }); return; }
   if (!SERVICE_KEY) { res.status(500).json({ error: 'Not configured' }); return; }
 
+  let chat = 0; try { chat = await cleanChat(); } catch (e) {}
   try {
     const now = new Date().toISOString();
     const q = SUPABASE_URL + '/rest/v1/class_recordings?select=id,audio_path,board_path&kind=eq.audio&expires_at=lt.' +
@@ -28,7 +50,7 @@ module.exports = async (req, res) => {
     const r = await fetch(q, { headers: sh() });
     if (!r.ok) { res.status(502).json({ error: 'Could not list' }); return; }
     const rows = await r.json();
-    if (!rows.length) { res.status(200).json({ deleted: 0 }); return; }
+    if (!rows.length) { res.status(200).json({ deleted: 0, chat }); return; }
 
     // 1) delete the audio files
     const paths = rows.reduce((a, x) => a.concat([x.audio_path, x.board_path]), []).filter(Boolean);
@@ -44,7 +66,7 @@ module.exports = async (req, res) => {
     const ids = rows.map(x => x.id).join(',');
     const dr = await fetch(SUPABASE_URL + '/rest/v1/class_recordings?id=in.(' + ids + ')', { method: 'DELETE', headers: sh() });
     if (!dr.ok) { res.status(502).json({ error: 'Row delete failed' }); return; }
-    res.status(200).json({ deleted: rows.length });
+    res.status(200).json({ deleted: rows.length, chat });
   } catch (e) {
     res.status(500).json({ error: 'Failed' });
   }
