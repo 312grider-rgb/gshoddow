@@ -44,10 +44,14 @@
 
   async function load(sb) {
     var edge = [], opp = [];
-    try { var r = await sb.from('edge_items').select('id,industry,title,what_text,why_text,source_name,created_at').eq('hidden', false).order('created_at', { ascending: false }).limit(30); if (!r.error && r.data) edge = r.data; } catch (e) {}
+    try {
+      var r = await sb.from('edge_items').select('id,industry,title,what_text,why_text,source_name,created_at,tr').eq('hidden', false).order('created_at', { ascending: false }).limit(30);
+      if (r.error) r = await sb.from('edge_items').select('id,industry,title,what_text,why_text,source_name,created_at').eq('hidden', false).order('created_at', { ascending: false }).limit(30);
+      if (!r.error && r.data) edge = r.data;
+    } catch (e) {}
     try { var o = await sb.from('opportunities').select('id,kind,title,country,deadline,description,status').eq('status', 'published').limit(60); if (!o.error && o.data) opp = o.data.filter(function (x) { var d = x.deadline ? daysLeft(x.deadline) : null; return d === null || d >= 0; }); } catch (e) {}
     var cards = [];
-    edge.forEach(function (x) { cards.push({ id: 'e' + x.id, type: 'edge', tag: 'The Edge', ic: 'star', title: x.title, text: cut(x.what_text || x.why_text, 200), meta: x.industry || '', href: 'skillstream-edge.html' }); });
+    edge.forEach(function (x) { cards.push({ id: 'e' + x.id, type: 'edge', tag: 'The Edge', ic: 'star', title: ((x.tr && x.tr[LANG] && x.tr[LANG].t) || x.title), text: cut((x.tr && x.tr[LANG] && x.tr[LANG].w) || x.what_text || x.why_text, 200), meta: x.industry || '', href: 'skillstream-edge.html' }); });
     opp.forEach(function (x) { var d = x.deadline ? daysLeft(x.deadline) : null; cards.push({ id: 'o' + x.id, type: 'opp', tag: x.kind === 'scholarship' ? 'Scholarship' : 'Opportunity', ic: 'opp', title: x.title, text: cut(x.description, 200), meta: [x.country, d === null ? '' : (d === 0 ? T('Closes today') : T('Closes in') + ' ' + d + ' ' + T('days'))].filter(Boolean).join(' · '), href: 'skillstream-opportunities.html' }); });
     var facts = FACTS.map(function (f, i) { return { id: 'f' + i, type: 'fact', tag: 'Did you know', ic: 'ask', title: f[LANG] || f.en, text: '', meta: '', href: '', q: f.en }; });
     // shuffle each source, then take turns: edge, opportunity, fact, edge, ...
