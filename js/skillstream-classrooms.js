@@ -58,30 +58,25 @@
     const user = await currentUserOrThrow();
     const db = client();
 
-    const { data: taught, error: e1 } = await db
-      .from('classrooms').select('*').eq('teacher_id', user.id);
-    if (e1) throw e1;
-
-    // Student counts for the classes I teach
+    // the two first questions do not depend on each other: ask them together
+    const [tRes, mRes] = await Promise.all([
+      db.from('classrooms').select('*').eq('teacher_id', user.id),
+      db.from('classroom_members').select('classroom_id').eq('student_id', user.id)
+    ]);
+    if (tRes.error) throw tRes.error;
+    if (mRes.error) throw mRes.error;
+    const taught = tRes.data;
     const taughtIds = (taught || []).map(c => c.id);
+    const enrolledIds = (mRes.data || []).map(r => r.classroom_id);
     const countByClass = {};
-    if (taughtIds.length) {
-      const { data: mem } = await db.from('classroom_members').select('classroom_id').in('classroom_id', taughtIds);
-      (mem || []).forEach(m => { countByClass[m.classroom_id] = (countByClass[m.classroom_id] || 0) + 1; });
-    }
-
-    // Classes I am a student in
-    const { data: memberRows, error: e2 } = await db
-      .from('classroom_members').select('classroom_id').eq('student_id', user.id);
-    if (e2) throw e2;
-    const enrolledIds = (memberRows || []).map(r => r.classroom_id);
     let enrolledClasses = [];
-    if (enrolledIds.length) {
-      const { data: cls, error: e3 } = await db
-        .from('classrooms').select('id, name, subject, teacher_id').in('id', enrolledIds);
-      if (e3) throw e3;
-      enrolledClasses = cls || [];
-    }
+    const [cntRes, clsRes] = await Promise.all([
+      taughtIds.length ? db.from('classroom_members').select('classroom_id').in('classroom_id', taughtIds) : Promise.resolve({ data: [] }),
+      enrolledIds.length ? db.from('classrooms').select('id, name, subject, teacher_id').in('id', enrolledIds) : Promise.resolve({ data: [] })
+    ]);
+    (cntRes.data || []).forEach(m => { countByClass[m.classroom_id] = (countByClass[m.classroom_id] || 0) + 1; });
+    if (clsRes.error) throw clsRes.error;
+    enrolledClasses = clsRes.data || [];
     const teacherNames = await nameMap(db, enrolledClasses.map(c => c.teacher_id));
 
     const teaching = (taught || []).map(c => ({
@@ -96,13 +91,13 @@
     return { teaching, enrolled };
   }
 
-  async function unreadCounts() {
+  async function unreadCounts(known) {
     const user = await currentUserOrThrow();
     const db = client();
-    const { teaching, enrolled } = await myClasses();
+    const { teaching, enrolled } = known || await myClasses();   // reuse the list the page already has
     const all = [...teaching, ...enrolled];
     const counts = {};
-    for (const c of all) {
+    await Promise.all(all.map(async (c) => {
       const lastSeen = localStorage.getItem(`ss_seen_${c.id}`) || '1970-01-01';
       const { count, error } = await db
         .from('messages')
@@ -111,7 +106,7 @@
         .gt('created_at', lastSeen)
         .neq('user_id', user.id);
       if (!error && count) counts[c.id] = count;
-    }
+    }));
     return counts;
   }
 
@@ -151,51 +146,37 @@
   async function get(classroomId) {
     const db = client();
 
-    const { data: classroom, error } = await db
-      .from('classrooms').select('*').eq('id', classroomId).single();
-    if (error) throw error;
-
-    const { data: members, error: mErr } = await db
-      .from('classroom_members').select('student_id').eq('classroom_id', classroomId);
-    if (mErr) throw mErr;
-    const sids = (members || []).map(m => m.student_id);
-
-    const { data: announcements, error: anErr } = await db
-      .from('announcements').select('*').eq('classroom_id', classroomId)
-      .order('created_at', { ascending: false });
-    if (anErr) throw anErr;
-
-    const { data: assignments, error: asErr } = await db
-      .from('assignments').select('*').eq('classroom_id', classroomId)
-      .order('due_date', { ascending: true });
-    if (asErr) throw asErr;
+    // six independent questions: ask them all at once
+    const [cRes, mRes, anRes, asRes, qRes, msgRes] = await Promise.all([
+      db.from('classrooms').select('*').eq('id', classroomId).single(),
+      db.from('classroom_members').select('student_id').eq('classroom_id', classroomId),
+      db.from('announcements').select('*').eq('classroom_id', classroomId).order('created_at', { ascending: false }).limit(50),
+      db.from('assignments').select('*').eq('classroom_id', classroomId).order('due_date', { ascending: true }),
+      db.from('quizzes').select('*').eq('classroom_id', classroomId),
+      // the latest 200 chat messages (not the whole history)
+      db.from('messages').select('*').eq('classroom_id', classroomId).order('created_at', { ascending: false }).limit(200)
+    ]);
+    if (cRes.error) throw cRes.error;
+    if (mRes.error) throw mRes.error;
+    if (anRes.error) throw anRes.error;
+    if (asRes.error) throw asRes.error;
+    if (qRes.error) throw qRes.error;
+    if (msgRes.error) throw msgRes.error;
+    const classroom = cRes.data;
+    const sids = (mRes.data || []).map(m => m.student_id);
+    const announcements = anRes.data, assignments = asRes.data, quizzes = qRes.data;
+    const messageRows = (msgRes.data || []).slice().reverse();
 
     const assignmentIds = (assignments || []).map(a => a.id);
-    let submissionRows = [];
-    if (assignmentIds.length) {
-      const { data, error: subErr } = await db
-        .from('submissions').select('*').in('assignment_id', assignmentIds);
-      if (subErr) throw subErr;
-      submissionRows = data || [];
-    }
-
-    const { data: quizzes, error: qErr } = await db
-      .from('quizzes').select('*').eq('classroom_id', classroomId);
-    if (qErr) throw qErr;
-
     const quizIds = (quizzes || []).map(q => q.id);
-    let quizResultRows = [];
-    if (quizIds.length) {
-      const { data, error: qrErr } = await db
-        .from('quiz_results').select('*').in('quiz_id', quizIds);
-      if (qrErr) throw qrErr;
-      quizResultRows = data || [];
-    }
-
-    const { data: messageRows, error: msgErr } = await db
-      .from('messages').select('*').eq('classroom_id', classroomId)
-      .order('created_at', { ascending: true });
-    if (msgErr) throw msgErr;
+    const [subRes, qrRes] = await Promise.all([
+      assignmentIds.length ? db.from('submissions').select('*').in('assignment_id', assignmentIds) : Promise.resolve({ data: [] }),
+      quizIds.length ? db.from('quiz_results').select('*').in('quiz_id', quizIds) : Promise.resolve({ data: [] })
+    ]);
+    if (subRes.error) throw subRes.error;
+    if (qrRes.error) throw qrRes.error;
+    const submissionRows = subRes.data || [];
+    const quizResultRows = qrRes.data || [];
 
     // One lookup for every name we need
     const names = await nameMap(db, [
@@ -227,7 +208,8 @@
     });
 
     const messages = (messageRows || []).map(m => ({
-      authorName: nm(m.user_id), text: m.body, createdAt: m.created_at
+      authorName: nm(m.user_id), text: m.body, createdAt: m.created_at,
+      attachPath: m.attach_path || null, attachKind: m.attach_kind || null, attachName: m.attach_name || null
     }));
 
     return {
@@ -386,9 +368,17 @@
     return { ok: true };
   }
 
+  // a voice message, photo or file that is already uploaded (see js/lne-chatfiles.js)
+  async function postAttachment(classroomId, att) {
+    const user = await currentUserOrThrow();
+    const { error } = await client().from('messages').insert({ classroom_id: classroomId, user_id: user.id, body: att.label, attach_path: att.path, attach_kind: att.kind, attach_name: att.name });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  }
+
   window.SSClass = {
     myClasses, unreadCounts, markSeen, create, join, get, upcomingEvents,
     addAnnouncement, addAssignment, addSubmission, gradeSubmission,
-    addQuiz, submitQuiz, postMessage
+    addQuiz, submitQuiz, postMessage, postAttachment
   };
 })();
