@@ -85,7 +85,13 @@
   var AUTO=[];
   var cur='all';
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-  var SL={proven:'Proven',early:'Early',spec:'Speculative'};
+  var LG=(function(){try{return (window.LNE_I18N&&LNE_I18N.lang)||localStorage.getItem('language')||'en'}catch(e){return 'en'}})();
+  var LB={ar:{w:'ماذا حدث:',y:'لماذا يهم:',s:'المصدر:',a:'آخر الأخبار، ملخص بالذكاء الاصطناعي. تحقّق من المصدر.',proven:'مُثبت',early:'مبكر',spec:'تخمينيّ'},
+    fr:{w:'Quoi :',y:'Pourquoi c\'est important :',s:'Source :',a:'Dernières nouvelles, résumé par IA. Vérifiez la source.',proven:'Prouvé',early:'Précoce',spec:'Spéculatif'},
+    es:{w:'Qué:',y:'Por qué importa:',s:'Fuente:',a:'Últimas noticias, resumen de IA. Comprueba la fuente.',proven:'Comprobado',early:'Temprano',spec:'Especulativo'},
+    zh:{w:'内容：',y:'为何重要：',s:'来源：',a:'最新新闻，AI 摘要。请核对来源。',proven:'已证实',early:'早期',spec:'推测性'},
+    en:{w:'What:',y:'Why it matters:',s:'Source:',a:'Latest news, AI summary. Check the source.',proven:'Proven',early:'Early',spec:'Speculative'}}[LG]||{w:'What:',y:'Why it matters:',s:'Source:',a:'Latest news, AI summary. Check the source.',proven:'Proven',early:'Early',spec:'Speculative'};
+  var SL={proven:LB.proven,early:LB.early,spec:LB.spec};
   function chips(){
     var h='<button type="button" class="chip on" data-k="all">All</button>';
     Object.keys(IND).forEach(function(k){h+='<button type="button" class="chip" data-k="'+k+'">'+IND[k].n+'</button>'});
@@ -97,14 +103,14 @@
     var h='';
     AUTO.concat(D).forEach(function(c){
       if(cur!=='all'&&c.i!==cur)return;
-      var m=IND[c.i];
+      var m=IND[c.i];var tx=(c.tr&&c.tr[LG])||null;var ct=tx&&tx.t||c.t,cw=tx&&tx.w||c.w,cy=tx&&tx.y||c.y;
       if(!m)return;
-      h+='<div class="card"><div class="ctop"><span data-ic="'+m.ic+'" data-cc="'+m.cc+'"></span><div><div class="ct" data-no-i18n>'+esc(c.t)+'</div><span class="st '+c.s+'">'+SL[c.s]+'</span></div></div>'
-        +'<div class="row" data-no-i18n><b>What:</b> '+esc(c.w)+'</div>'
+      h+='<div class="card"><div class="ctop"><span data-ic="'+m.ic+'" data-cc="'+m.cc+'"></span><div><div class="ct" data-no-i18n>'+esc(ct)+'</div><span class="st '+c.s+'">'+SL[c.s]+'</span></div></div>'
+        +'<div class="row" data-no-i18n><b>'+LB.w+'</b> '+esc(cw)+'</div>'
         +'<div class="row" data-no-i18n>'+esc(c.h)+'</div>'
-        +'<div class="row" data-no-i18n><b>Why it matters:</b> '+esc(c.y)+'</div>'
-        +(c.auto?'<div class="src" data-no-i18n><b>Latest news, AI summary. Check the source.</b></div>':'')
-        +'<div class="src" data-no-i18n>Source: <a href="'+esc(c.u)+'" target="_blank" rel="noopener">'+esc(c.sr)+'</a> · '+esc(c.d)+'</div>'
+        +'<div class="row" data-no-i18n><b>'+LB.y+'</b> '+esc(cy)+'</div>'
+        +(c.auto?'<div class="src" data-no-i18n><b>'+LB.a+'</b></div>':'')
+        +'<div class="src" data-no-i18n>'+LB.s+' <a href="'+esc(c.u)+'" target="_blank" rel="noopener">'+esc(c.sr)+'</a> · '+esc(c.d)+'</div>'
         +'<a class="ask" href="skillstream-ai-hub.html?tab=teacher&q='+encodeURIComponent(c.q)+'">Ask the AI Teacher</a></div>';
     });
     $('list').innerHTML=h;
@@ -113,10 +119,12 @@
   try{var qi=new URLSearchParams(location.search).get('i');if(qi&&IND[qi]){cur=qi;Array.prototype.forEach.call($('chips').children,function(x){x.classList.toggle('on',x.getAttribute('data-k')===qi)})}}catch(e){}
   draw();
   try{
-    fetch('https://vauudtedojtcveiqajlr.supabase.co/rest/v1/edge_items?select=industry,title,what_text,why_text,status,source_name,source_url,as_of&hidden=eq.false&order=created_at.desc&limit=24',{headers:{apikey:'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE'}})
+    var EU='https://vauudtedojtcveiqajlr.supabase.co/rest/v1/edge_items?select=industry,title,what_text,why_text,status,source_name,source_url,as_of';
+    var EQ='&hidden=eq.false&order=created_at.desc&limit=24',EH={headers:{apikey:'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE'}};
+    fetch(EU+',tr'+EQ,EH).then(function(r){return r.ok?r:fetch(EU+EQ,EH)})
     .then(function(r){return r.ok?r.json():[]}).then(function(rows){
       if(!Array.isArray(rows))return;
-      AUTO=rows.filter(function(x){return /^https:\/\//.test(x.source_url)}).map(function(x){return {auto:1,i:x.industry,t:x.title,s:x.status==='spec'?'spec':'early',w:x.what_text,h:'',y:x.why_text,d:x.as_of||'',sr:x.source_name,u:x.source_url,q:x.title}});
+      AUTO=rows.filter(function(x){return /^https:\/\//.test(x.source_url)}).map(function(x){return {auto:1,i:x.industry,t:x.title,s:x.status==='spec'?'spec':'early',w:x.what_text,h:'',y:x.why_text,d:x.as_of||'',sr:x.source_name,u:x.source_url,q:x.title,tr:x.tr}});
       draw();
     }).catch(function(){});
   }catch(e){}
