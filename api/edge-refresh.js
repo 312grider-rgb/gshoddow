@@ -102,6 +102,39 @@ module.exports = async (req, res) => {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey || !SERVICE_KEY) { res.status(500).json({ error: 'Not configured' }); return; }
 
+  // 0) translate a few older cards that have no translations yet (a few per run, errors ignored)
+  try {
+    const old = await fetch(SUPABASE_URL + '/rest/v1/edge_items?select=id,title,what_text,why_text&tr=is.null&hidden=eq.false&order=created_at.desc&limit=6', { headers: sh() });
+    const olds = old.ok ? await old.json() : [];
+    if (Array.isArray(olds) && olds.length) {
+      const bl = olds.map((o, k) => (k + 1) + '. ' + clip(o.title, 150) + ' | ' + clip(o.what_text, 400) + ' | ' + clip(o.why_text, 400)).join('\n');
+      const bp = 'Translate each numbered card (title | what | why) into Arabic, French, Spanish and Simplified Chinese. Keep names and numbers exactly. Reply with ONLY a JSON array, no other text. Each element: {"n":<number>,"tr":{"ar":{"t":"","w":"","y":""},"fr":{...},"es":{...},"zh":{...}}}.\n\n' + bl;
+      const br = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + apiKey },
+        body: JSON.stringify({ model: MODEL, messages: [{ role: 'user', content: bp }], max_completion_tokens: 7000, include_reasoning: false })
+      });
+      const bd = await br.json();
+      let bt = String((bd && bd.choices && bd.choices[0] && bd.choices[0].message && bd.choices[0].message.content) || '');
+      const arr = JSON.parse(bt.slice(bt.indexOf('['), bt.lastIndexOf(']') + 1));
+      for (const e of arr) {
+        const row = olds[(parseInt(e && e.n, 10) || 0) - 1];
+        if (!row || !e.tr) continue;
+        const tr = {};
+        for (const L of ['ar', 'fr', 'es', 'zh']) {
+          const x = e.tr[L];
+          const t = x && clip(x.t || x.title, 140), w = x && clip(x.w || x.what, 500), y = x && clip(x.y || x.why, 500);
+          if (t && w && y) tr[L] = { t, w, y };
+        }
+        if (Object.keys(tr).length) {
+          await fetch(SUPABASE_URL + '/rest/v1/edge_items?id=eq.' + encodeURIComponent(row.id), {
+            method: 'PATCH', headers: Object.assign(sh(), { Prefer: 'return=minimal' }), body: JSON.stringify({ tr })
+          });
+        }
+      }
+    }
+  } catch (e) { /* older cards stay English; try again next run */ }
+
   // 1) read feeds
   const results = await Promise.all(FEEDS.map(getFeed));
   const report = results.map((r) => ({ industry: r.f.i, source: r.f.n, ok: r.ok, items: r.items.length, err: r.err }));
