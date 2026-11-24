@@ -125,24 +125,25 @@ module.exports = async (req, res) => {
 
   // 3) one AI call
   const list = cand.map((c, k) => (k + 1) + '. [' + c.i + '] ' + c.title + ' — ' + c.desc + ' (source: ' + c.n + ')').join('\n');
-  const prompt =
+  const mkPrompt = (withTr) =>
     'You help a learning app for students. Below are news items, numbered, each with an industry tag. ' +
     'Choose at most 8 items that report a CONCRETE new development (a discovery, product, trial, policy, milestone). ' +
     'Skip opinions, adverts, politics without a development, and anything unclear. ' +
     'For each chosen item write a card using ONLY the information given for that item. Never add facts, numbers or names that are not in the item. ' +
     'Reply with ONLY a JSON array, no other text. Each element: ' +
     '{"n":<item number>,"title":"max 90 characters","what":"1-2 plain sentences saying what happened","why":"1-2 careful sentences on why it may matter, without hype","status":"early" or "spec"}. ' +
-    'Use "spec" if the item is a claim, plan or forecast; otherwise "early". Write in English.\n\n' + list;
+    'Use "spec" if the item is a claim, plan or forecast; otherwise "early". Write in English.' +
+    (withTr ? ' Also add to each element "tr":{"ar":{"t":"","w":"","y":""},"fr":{...},"es":{...},"zh":{...}} with the same title, what and why translated into Arabic, French, Spanish and Simplified Chinese (keep names and numbers exactly).' : '') +
+    '\n\n' + list;
 
-  let cards = [];
-  try {
+  async function ask(withTr) {
     const ar = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + apiKey },
       body: JSON.stringify({
         model: MODEL,
-        messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 3500,
+        messages: [{ role: 'user', content: mkPrompt(withTr) }],
+        max_completion_tokens: withTr ? 9000 : 3500,
         include_reasoning: false
       })
     });
@@ -150,9 +151,13 @@ module.exports = async (req, res) => {
     let txt = ad && ad.choices && ad.choices[0] && ad.choices[0].message && ad.choices[0].message.content;
     txt = String(txt || '');
     const a = txt.indexOf('['), b = txt.lastIndexOf(']');
-    cards = JSON.parse(txt.slice(a, b + 1));
-  } catch (e) {
-    res.status(502).json({ error: 'AI step failed', report }); return;
+    return JSON.parse(txt.slice(a, b + 1));
+  }
+  let cards = [];
+  let hasTr = true;
+  try { cards = await ask(true); } catch (e) {
+    hasTr = false;
+    try { cards = await ask(false); } catch (e2) { res.status(502).json({ error: 'AI step failed', report }); return; }
   }
   if (!Array.isArray(cards)) { res.status(502).json({ error: 'AI step failed', report }); return; }
 
@@ -165,21 +170,35 @@ module.exports = async (req, res) => {
     const title = clip(c.title, 120), what = clip(c.what, 400), why = clip(c.why, 400);
     if (!title || !what || !why) continue;
     seen.add(src.link);
+    const tr = {};
+    if (hasTr && c.tr && typeof c.tr === 'object') {
+      for (const L of ['ar', 'fr', 'es', 'zh']) {
+        const x = c.tr[L];
+        const t = x && clip(x.t || x.title, 140), w = x && clip(x.w || x.what, 500), y = x && clip(x.y || x.why, 500);
+        if (t && w && y) tr[L] = { t, w, y };
+      }
+    }
     rows.push({
       industry: src.i, title, what_text: what, why_text: why,
       status: c.status === 'spec' ? 'spec' : 'early',
       source_name: src.n, source_url: src.link,
+      ...(Object.keys(tr).length ? { tr } : {}),
       as_of: src.date ? src.date.slice(0, 16) : new Date().toISOString().slice(0, 10)
     });
     if (rows.length >= MAX_NEW_PER_RUN) break;
   }
   if (!rows.length) { res.status(200).json({ added: 0, note: 'No suitable items', report }); return; }
 
-  const ins = await fetch(SUPABASE_URL + '/rest/v1/edge_items?on_conflict=source_url', {
+  const save = (list) => fetch(SUPABASE_URL + '/rest/v1/edge_items?on_conflict=source_url', {
     method: 'POST',
     headers: Object.assign(sh(), { Prefer: 'resolution=ignore-duplicates,return=minimal' }),
-    body: JSON.stringify(rows)
+    body: JSON.stringify(list)
   });
+  let ins = await save(rows);
+  if (!ins.ok && rows.some((x) => x.tr)) {
+    // the translations column may not exist yet: save without it
+    ins = await save(rows.map((x) => { const y = Object.assign({}, x); delete y.tr; return y; }));
+  }
   if (!ins.ok) { res.status(502).json({ error: 'Save failed', report }); return; }
   res.status(200).json({ added: rows.length, report });
 };
