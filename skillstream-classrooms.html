@@ -449,7 +449,7 @@ async function renderList() {
   const enrEl = document.getElementById('enrolledList');
   try {
     const { teaching, enrolled } = await SSClass.myClasses();
-    const unread = await SSClass.unreadCounts();
+    let unread = (window._lneUnread && window._lneUnread.ready) ? window._lneUnread.map : {};
 
     var tRole = false; try { tRole = localStorage.getItem('lne_role') === 'teacher'; } catch (e) {}
     const isT = tRole || teaching.length > 0;
@@ -472,6 +472,13 @@ async function renderList() {
         <div><div class="class-name">${escapeHtml(c.name)}</div><div class="class-meta">Taught by ${escapeHtml(c.teacherName)} · ${escapeHtml(c.subject||'General')}</div></div>
         ${badge(c.id)}
       </div>`).join('') : '<div class="empty">Tap Join a class and type the code from your teacher.</div>';
+    // the "new" badges arrive a moment later and never hold the list back
+    if (!(window._lneUnread && window._lneUnread.ready)) {
+      SSClass.unreadCounts({ teaching, enrolled }).then(function (u) {
+        window._lneUnread = { ready: true, map: u };
+        if (Object.keys(u).length) renderList();
+      }).catch(function () {});
+    }
   } catch (e) {
     console.error('renderList error:', e);
     teachEl.innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error: ${String(e.message).replace(/[&<>"']/g,'')}</div>`;
@@ -527,6 +534,8 @@ async function submitJoin() {
 async function openClass(id) {
   currentClassId = id;
   await SSClass.markSeen(id);
+  window._lneUnread = null;
+  try { document.getElementById('dName').textContent = 'Loading…'; } catch (e) {}
   document.getElementById('listView').classList.add('hidden');
   document.getElementById('detailView').classList.remove('hidden');
   await renderDetail();
