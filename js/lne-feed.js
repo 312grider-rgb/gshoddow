@@ -27,7 +27,7 @@
     s.textContent = '.ff-h{display:flex;align-items:center;justify-content:space-between;margin:6px 2px 10px}.ff-h b{font-size:11.5px;letter-spacing:.9px;text-transform:uppercase;color:#6B6558}' +
       '.ff-h button{border:1.5px solid #E2C27A;background:#fff;border-radius:20px;padding:6px 12px;font-weight:700;font-size:12px;color:#8A4B1C;cursor:pointer}.ff-h button.on{background:#F7C65A}' +
       '.ff-box{height:min(70vh,560px);overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;border-radius:18px;-webkit-overflow-scrolling:touch}' +
-      '.ff-c{scroll-snap-align:start;scroll-snap-stop:always;min-height:100%;display:flex;flex-direction:column;justify-content:flex-start;gap:10px;background:#FFFBF2;border:1.5px solid #D4872A;border-radius:18px;padding:16px;margin-bottom:10px;box-shadow:0 0 0 2px #F7C65A44,0 6px 18px rgba(138,75,28,.18);color:#141F38}' +
+      '.ff-c{scroll-snap-align:start;scroll-snap-stop:always;min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:10px;background:#FFFBF2;border:1.5px solid #D4872A;border-radius:18px;padding:16px;margin-bottom:10px;box-shadow:0 0 0 2px #F7C65A44,0 6px 18px rgba(138,75,28,.18);color:#141F38}' +
       '.ff-t{font-size:11px;letter-spacing:1.5px;font-weight:800;color:#A25A1C;display:flex;align-items:center;gap:8px}.ff-t [data-ic]{transform:scale(.8);transform-origin:left center}' +
       '.ff-c h2{font-size:20px;line-height:1.3;margin:0;font-family:inherit;overflow-wrap:anywhere}.ff-c p{font-size:15px;line-height:1.55;color:#5a4a3a;margin:0;overflow-wrap:anywhere}' +
       '.ff-m{font-size:12.5px;color:#8a6a4a}.ff-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.ff-b button,.ff-b a{padding:10px 14px;border-radius:12px;border:1.5px solid #E2C27A;background:#fff;font-weight:700;font-size:13.5px;color:#5A3214;cursor:pointer;text-decoration:none;font-family:inherit}' +
@@ -37,6 +37,8 @@
     document.head.appendChild(s);
   }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  var IND = { ai: 'AI', health: 'Health', energy: 'Energy', space: 'Space', computing: 'Computing', finance: 'Finance & economy', transport: 'Transport' };
+  function indName(k) { return IND[k] ? T(IND[k]) : (k || ''); }
   function cut(s, n) { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; }
   function saved() { try { return JSON.parse(localStorage.getItem('lne_feed_saved') || '{}') || {}; } catch (e) { return {}; } }
   function setSaved(o) { try { localStorage.setItem('lne_feed_saved', JSON.stringify(o)); } catch (e) {} }
@@ -51,7 +53,7 @@
     } catch (e) {}
     try { var o = await sb.from('opportunities').select('id,kind,title,country,deadline,description,status').eq('status', 'published').limit(60); if (!o.error && o.data) opp = o.data.filter(function (x) { var d = x.deadline ? daysLeft(x.deadline) : null; return d === null || d >= 0; }); } catch (e) {}
     var cards = [];
-    edge.forEach(function (x) { cards.push({ id: 'e' + x.id, type: 'edge', tag: 'The Edge', ic: 'star', title: ((x.tr && x.tr[LANG] && x.tr[LANG].t) || x.title), text: cut((x.tr && x.tr[LANG] && x.tr[LANG].w) || x.what_text || x.why_text, 200), meta: x.industry || '', href: 'skillstream-edge.html' }); });
+    edge.forEach(function (x) { cards.push({ id: 'e' + x.id, type: 'edge', tag: 'The Edge', ic: 'star', title: ((x.tr && x.tr[LANG] && x.tr[LANG].t) || x.title), text: cut((x.tr && x.tr[LANG] && x.tr[LANG].w) || x.what_text || x.why_text, 200), meta: indName(x.industry), href: 'skillstream-edge.html' }); });
     opp.forEach(function (x) { var d = x.deadline ? daysLeft(x.deadline) : null; cards.push({ id: 'o' + x.id, type: 'opp', tag: x.kind === 'scholarship' ? 'Scholarship' : 'Opportunity', ic: 'opp', title: x.title, text: cut(x.description, 200), meta: [x.country, d === null ? '' : (d === 0 ? T('Closes today') : T('Closes in') + ' ' + d + ' ' + T('days'))].filter(Boolean).join(' · '), href: 'skillstream-opportunities.html' }); });
     var facts = FACTS.map(function (f, i) { return { id: 'f' + i, type: 'fact', tag: 'Did you know', ic: 'ask', title: f[LANG] || f.en, text: '', meta: '', href: '', q: f.en }; });
     // shuffle each source, then take turns: edge, opportunity, fact, edge, ...
