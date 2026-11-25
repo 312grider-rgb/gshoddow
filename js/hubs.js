@@ -24,6 +24,7 @@
             L('calendar', 'Build a plan', 'A plan to reach your goal', 'skillstream-ai-hub.html#plan')
           ] },
           { title: 'My learning', links: [
+            L('plan', 'Ideas & Plans', 'Capture ideas and turn them into plans', 'skillstream-ideas.html'),
             L('ai', 'My Learning', 'Your goals and a path of steps to tick off', 'skillstream-engine.html'),
             L('book', 'My courses', 'The courses you are taking', 'skillstream-courses.html'),
             L('library', 'Academic studies', 'School and university subjects', 'skillstream-academic.html')
@@ -46,6 +47,7 @@
           { title: 'Your teaching', links: [
             L('book', 'Courses', 'Create and manage your courses', 'skillstream-courses.html'),
             L('chat', 'Classrooms', 'Your classes, lessons and students', 'skillstream-classrooms.html'),
+            L('plan', 'Ideas & Plans', 'Capture ideas and turn them into plans', 'skillstream-ideas.html'),
             L('ai', 'Teacher AI', 'Plan lessons, make quizzes and understand your students', 'skillstream-teacher-ai.html'),
             L('teach', 'Record a lesson', 'Talk and write on a board for your class', 'skillstream-record.html')
           ] },
