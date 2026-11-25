@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');}catch(e){}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ideas &amp; Plans — Learning Never Ends</title>
+<meta name="theme-color" content="#6B3A14">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<script src="js/lne-helpers.js"></script>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#F8EFE0;--card:#FFFBF2;--line:#E7D3B0;--ink:#5A3214;--mut:#8a6a4a;--acc:#8A4B1C;--gold:linear-gradient(#F7C65A,#D4872A);--onGold:#4a2a0c;--ok:#5E8A3A;--bad:#B5483A;--hd:linear-gradient(135deg,#6B3A14,#A25A1C)}
+html[data-theme="dark"]{--bg:#1a120b;--card:#2a1d12;--line:#4a3420;--ink:#F3E6D3;--mut:#c9ab87;--acc:#F7C65A;--hd:linear-gradient(135deg,#2e1b0c,#5a3414)}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:150px;-webkit-font-smoothing:antialiased}
+header.top{background:var(--hd);color:#fff;padding:20px 16px 18px}
+header.top small{display:block;color:#F7C65A;letter-spacing:2px;font-size:11px;font-weight:600;text-transform:uppercase}
+header.top h1{margin:6px 0 2px;font-size:23px}
+header.top p{margin:0;font-size:13.5px;opacity:.88}
+.wrap{max-width:720px;margin:0 auto;padding:12px 14px}
+input,textarea,select,button{font:inherit;color:inherit}
+.sr{width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:11px 13px;font-size:15px}
+.chips{display:flex;gap:7px;overflow-x:auto;padding:10px 0 4px;-webkit-overflow-scrolling:touch}
+.chip{flex:0 0 auto;background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:7px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+.chip.on{background:#F7C65A;border-color:#D4872A;color:#4a2a0c;font-weight:700}
+h2{font-size:14px;margin:16px 0 8px;font-weight:700}
+.nbs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.nb{flex:0 0 auto;min-width:110px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13px;cursor:pointer}
+.nb.on{border-color:#D4872A;box-shadow:0 0 0 2px #F7C65A66}
+.nb b{display:block;font-size:14px}.nb i{font-style:normal;font-size:11.5px;color:var(--mut)}
+.li{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:8px;cursor:pointer;display:block;width:100%;text-align:start}
+.li .t{font-weight:700;font-size:15px;overflow-wrap:anywhere}
+.li .m{font-size:12px;color:var(--mut);margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill{background:#F7C65A33;border:1px solid #D4872A;border-radius:10px;padding:1px 8px;font-size:11.5px}
+.pb{height:7px;border-radius:5px;background:var(--line);margin-top:7px;overflow:hidden}.pb div{height:100%;background:var(--ok)}
+.empty{text-align:center;color:var(--mut);padding:26px 10px;font-size:14px;line-height:1.6}
+.btn{background:var(--gold);color:var(--onGold);border:0;border-radius:14px;padding:12px 16px;font-weight:700;font-size:15px;cursor:pointer}
+.btn.sec{background:var(--card);color:var(--ink);border:1.5px solid #D4872A}
+.btn.sm{padding:8px 12px;font-size:13px;border-radius:12px}
+.btn:disabled{opacity:.55}
+.fab{position:fixed;right:16px;bottom:84px;width:56px;height:56px;border-radius:28px;background:var(--gold);color:var(--onGold);font-size:30px;border:0;box-shadow:0 4px 12px #0004;cursor:pointer;z-index:50;line-height:1}
+[dir=rtl] .fab{right:auto;left:16px}
+#ed{display:none}
+.bar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.bar .sp{flex:1;font-size:12.5px;color:var(--mut)}
+.f{width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:15px}
+.tt{font-size:19px;font-weight:700}
+textarea.f{min-height:200px;line-height:1.6;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.row>*{flex:1 1 130px}
+label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
+.st{display:flex;gap:6px;flex-wrap:wrap}
+.step{display:flex;gap:8px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:6px 8px;margin-bottom:6px}
+.step input[type=checkbox]{width:22px;height:22px;flex:0 0 auto;accent-color:#5E8A3A}
+.step input[type=text]{flex:1;border:0;background:transparent;font-size:15px;min-width:0}
+.step.done input[type=text]{text-decoration:line-through;opacity:.6}
+.step button{background:none;border:0;font-size:18px;cursor:pointer;color:var(--mut)}
+.ai{background:var(--card);border:1.5px dashed #D4872A;border-radius:14px;padding:12px;margin-top:10px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14.5px;line-height:1.6}
+.note{font-size:12px;color:var(--mut);margin-top:6px}
+.tpl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.tpl button{background:var(--card);border:1.5px solid #D4872A;border-radius:14px;padding:14px 8px;font-size:14px;font-weight:600;cursor:pointer}
+@media (max-width:420px){.tpl{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><small>Learning Never Ends</small><h1>Ideas &amp; Plans</h1><p>Capture it. Shape it. Do it.</p></header>
+<div class="wrap">
+  <div id="home">
+    <input class="sr" id="q" type="search" autocomplete="off">
+    <div class="chips" id="stages"></div>
+    <div id="nbWrap"><h2>Notebooks</h2><div class="nbs" id="nbs"></div></div>
+    <div id="pinWrap"><h2>Pinned</h2><div id="pins"></div></div>
+    <h2 id="listH">All notes</h2>
+    <div id="list"></div>
+    <div id="msg" class="empty"></div>
+  </div>
+  <div id="ed">
+    <div class="bar"><button class="btn sec sm" id="back">‹ Back</button><span class="sp" id="saveSt"></span><button class="btn sec sm" id="pin">📌 Pin</button></div>
+    <input class="f tt" id="title" maxlength="200">
+    <div class="row">
+      <div><label class="l">Type</label><select class="f" id="kind"><option value="idea">Idea</option><option value="plan">Plan</option><option value="note">Note</option></select></div>
+      <div><label class="l">Notebook</label><select class="f" id="nbSel"></select></div>
+    </div>
+    <label class="l">Stage</label><div class="st" id="stSel"></div>
+    <div class="row">
+      <div><label class="l">Tags (separate with commas)</label><input class="f" id="tags"></div>
+      <div><label class="l">Due date</label><input class="f" id="due" type="date"></div>
+    </div>
+    <label class="l">Your idea or notes</label>
+    <textarea class="f" id="body"></textarea>
+    <div class="row"><button class="btn sec sm" id="mic" style="display:none">🎤 Speak</button></div>
+    <label class="l">Steps</label>
+    <div id="steps"></div>
+    <button class="btn sec sm" id="addStep">＋ Add a step</button>
+    <label class="l">AI helper (runs only when you press a button)</label>
+    <div class="row">
+      <button class="btn sm" id="aiPlan">🧭 Turn into a plan</button>
+      <button class="btn sec sm" id="aiImp">✨ Improve idea</button>
+      <button class="btn sec sm" id="aiMiss">🔎 What am I missing?</button>
+    </div>
+    <div id="aiOut"></div>
+    <div class="row" style="margin-top:18px"><button class="btn sec sm" id="del" style="color:#B5483A;border-color:#B5483A">Delete this note</button></div>
+  </div>
+  <div id="newBox" style="display:none">
+    <div class="bar"><button class="btn sec sm" id="newBack">‹ Back</button></div>
+    <h2>Start a new note</h2>
+    <div class="tpl" id="tpls"></div>
+  </div>
+</div>
+<button class="fab" id="fab" aria-label="New note">＋</button>
+<script src="js/nav.js" defer></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var T=function(s){try{return (window.LNE_I18N&&LNE_I18N.t)?LNE_I18N.t(s):s}catch(e){return s}};
+  var LANG=(window.LNE_I18N&&LNE_I18N.lang)||'en';
+  var sb=window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co','sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+  var uid=null, notes=[], nbs=[], cur=null, stageF='all', nbF='all', timer=null, busy=false;
+  var STAGES=[['raw','Raw'],['developing','Developing'],['planned','Planned'],['done','Done']];
+  var SK='lne_ip_pending';
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+  function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+  function uuid(){try{return crypto.randomUUID()}catch(e){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0;return (c=='x'?r:(r&3|8)).toString(16)})}}
+  function nbName(id){for(var i=0;i<nbs.length;i++)if(nbs[i].id===id)return nbs[i].title;return ''}
+  function stageName(k){for(var i=0;i<STAGES.length;i++)if(STAGES[i][0]===k)return T(STAGES[i][1]);return k}
+  function progress(n){var s=n.steps||[];if(!s.length)return null;var d=0;s.forEach(function(x){if(x&&x.d)d++});return [d,s.length]}
+
+  /* ---------- load ---------- */
+  async function init(){
+    $('q').placeholder=T('Search ideas, plans, notebooks');
+    $('title').placeholder=T('Title');
+    $('tags').placeholder=T('e.g. school, project');
+    $('body').placeholder=T('Write your idea here…');
+    var s=await sb.auth.getSession();
+    if(!(s.data&&s.data.session)){location.href='skillstream-login.html';return}
+    uid=s.data.session.user.id;
+    buildTemplates();
+    $('msg').textContent=T('Loading…');
+    var a=await sb.from('lne_notebooks').select('id,title,color').order('created_at',{ascending:true}).limit(100);
+    var b=await sb.from('lne_notes').select('id,notebook_id,kind,stage,title,body,steps,tags,due,pinned,updated_at').order('updated_at',{ascending:false}).limit(500);
+    if(a.error||b.error){
+      $('msg').textContent=T('Ideas & Plans is not ready yet. Please try again later.');
+      return;
+    }
+    nbs=a.data||[];notes=b.data||[];
+    await flush();
+    drawHome();openFromHash();
+  }
+
+  /* ---------- home ---------- */
+  function drawHome(){
+    var h='<button type="button" class="chip'+(stageF==='all'?' on':'')+'" data-s="all">'+esc(T('All'))+' '+notes.length+'</button>';
+    STAGES.forEach(function(st){var c=notes.filter(function(n){return n.stage===st[0]}).length;h+='<button type="button" class="chip'+(stageF===st[0]?' on':'')+'" data-s="'+st[0]+'">'+esc(T(st[1]))+' '+c+'</button>'});
+    $('stages').innerHTML=h;
+    Array.prototype.forEach.call($('stages').children,function(b){b.onclick=function(){stageF=b.getAttribute('data-s');drawHome()}});
+    var nh='<div class="nb'+(nbF==='all'?' on':'')+'" data-n="all"><b>'+esc(T('All notes'))+'</b><i>'+notes.length+'</i></div>';
+    nbs.forEach(function(n){var c=notes.filter(function(x){return x.notebook_id===n.id}).length;nh+='<div class="nb'+(nbF===n.id?' on':'')+'" data-n="'+esc(n.id)+'"><b>'+esc(n.title)+'</b><i>'+c+'</i></div>'});
+    nh+='<div class="nb" data-n="__new"><b>＋ '+esc(T('New notebook'))+'</b><i>&nbsp;</i></div>';
+    $('nbs').innerHTML=nh;
+    Array.prototype.forEach.call($('nbs').children,function(b){b.onclick=function(){var id=b.getAttribute('data-n');if(id==='__new'){newNotebook();return}nbF=id;drawHome()}});
+    var q=($('q').value||'').trim().toLowerCase();
+    var rows=notes.filter(function(n){
+      if(stageF!=='all'&&n.stage!==stageF)return false;
+      if(nbF!=='all'&&n.notebook_id!==nbF)return false;
+      if(!q)return true;
+      var hay=((n.title||'')+' '+(n.body||'')+' '+(n.tags||[]).map(function(t){return '#'+t}).join(' ')+' '+(n.steps||[]).map(function(x){return x&&x.t||''}).join(' ')).toLowerCase();
+      return hay.indexOf(q)>-1;
+    });
+    var pins=rows.filter(function(n){return n.pinned});
+    $('pinWrap').style.display=pins.length?'':'none';
+    $('pins').innerHTML='';pins.forEach(function(n){$('pins').appendChild(card(n))});
+    $('list').innerHTML='';rows.filter(function(n){return !n.pinned}).forEach(function(n){$('list').appendChild(card(n))});
+    $('listH').style.display=rows.length?'':'none';
+    $('msg').innerHTML=rows.length?'':(notes.length?esc(T('Nothing matches.')):esc(T('No notes yet. Tap + to capture your first idea.')));
+  }
+  function card(n){
+    var b=document.createElement('button');b.type='button';b.className='li';
+    var p=progress(n),m='<span class="pill">'+esc(stageName(n.stage))+'</span>';
+    if(n.notebook_id&&nbName(n.notebook_id))m+='<span>'+esc(nbName(n.notebook_id))+'</span>';
+    if(n.due)m+='<span>📅 '+esc(n.due)+'</span>';
+    (n.tags||[]).slice(0,4).forEach(function(t){m+='<span>#'+esc(t)+'</span>'});
+    var title=n.title||(n.body||'').split('\n')[0].slice(0,80)||T('Untitled');
+    b.innerHTML='<div class="t">'+esc(title)+'</div><div class="m">'+m+'</div>'+(p?'<div class="m">'+p[0]+'/'+p[1]+' '+esc(T('steps done'))+'</div><div class="pb"><div style="width:'+Math.round(p[0]/p[1]*100)+'%"></div></div>':'');
+    b.onclick=function(){openNote(n.id,true)};
+    return b;
+  }
+  $('q').addEventListener('input',drawHome);
+  async function newNotebook(){
+    var name=prompt(T('Notebook name'));
+    if(!name)return;name=name.trim().slice(0,120);if(!name)return;
+    var r=await sb.from('lne_notebooks').insert({title:name}).select('id,title,color').single();
+    if(r.error||!r.data){alert(T('Could not save. Please try again.'));return}
+    nbs.push(r.data);nbF=r.data.id;drawHome();
+  }
+
+  /* ---------- new note ---------- */
+  var TPL=[
+    ['💡','Idea','idea','raw','What is the idea?\n\nWhy does it matter?\n\nNext step:'],
+    ['🎯','Goal and steps','plan','planned','My goal:\n\nWhy:\n\nHow I will know it is done:'],
+    ['📅','Weekly plan','plan','planned','This week I want to:\n\nMonday:\nTuesday:\nWednesday:\nThursday:\nFriday:'],
+    ['🗂','Project plan','plan','developing','Project:\n\nWho is involved:\n\nWhat is needed:\n\nRisks:'],
+    ['📝','Blank note','note','raw','']
+  ];
+  function buildTemplates(){
+    var h='';TPL.forEach(function(t,i){h+='<button type="button" data-i="'+i+'">'+t[0]+' '+esc(T(t[1]))+'</button>'});
+    $('tpls').innerHTML=h;
+    Array.prototype.forEach.call($('tpls').children,function(b){b.onclick=function(){var t=TPL[+b.getAttribute('data-i')];createNote(t[2],t[3],t[4]?T(t[4]):'')}});
+  }
+  function showOnly(id){['home','ed','newBox'].forEach(function(x){$(x).style.display=(x===id)?'block':'none'});$('fab').style.display=(id==='home')?'':'none';window.scrollTo(0,0)}
+  $('fab').onclick=function(){showOnly('newBox');try{history.pushState({v:'new'},'','#new')}catch(e){}};
+  $('newBack').onclick=function(){goHome()};
+  function createNote(kind,stage,body){
+    var n={id:uuid(),notebook_id:(nbF!=='all'?nbF:null),kind:kind,stage:stage,title:'',body:body,steps:[],tags:[],due:null,pinned:false,updated_at:new Date().toISOString(),_new:true};
+    notes.unshift(n);openNote(n.id,false);try{history.replaceState({v:'n',id:n.id},'','#n='+n.id)}catch(e){}setTimeout(function(){$('title').focus()},50);
+  }
+
+  /* ---------- editor ---------- */
+  function find(id){for(var i=0;i<notes.length;i++)if(notes[i].id===id)return notes[i];return null}
+  function openNote(id,push){
+    var n=find(id);if(!n)return;cur=n;
+    $('title').value=n.title||'';$('kind').value=n.kind;$('body').value=n.body||'';
+    $('tags').value=(n.tags||[]).join(', ');$('due').value=n.due||'';
+    var o='<option value="">'+esc(T('No notebook'))+'</option>';nbs.forEach(function(b){o+='<option value="'+esc(b.id)+'">'+esc(b.title)+'</option>'});
+    $('nbSel').innerHTML=o;$('nbSel').value=n.notebook_id||'';
+    drawStages();drawSteps();drawPin();$('aiOut').innerHTML='';
+    setStatus(n._new?'':'saved');showOnly('ed');
+    if(push){try{history.pushState({v:'n',id:id},'','#n='+id)}catch(e){}}
+  }
+  function drawStages(){
+    var h='';STAGES.forEach(function(s){h+='<button type="button" class="chip'+(cur.stage===s[0]?' on':'')+'" data-s="'+s[0]+'">'+esc(T(s[1]))+'</button>'});
+    $('stSel').innerHTML=h;
+    Array.prototype.forEach.call($('stSel').children,function(b){b.onclick=function(){cur.stage=b.getAttribute('data-s');drawStages();changed()}});
+  }
+  function drawPin(){$('pin').textContent='📌 '+T(cur.pinned?'Pinned':'Pin')}
+  function drawSteps(){
+    var box=$('steps');box.innerHTML='';
+    (cur.steps||[]).forEach(function(s,i){
+      var d=document.createElement('div');d.className='step'+(s.d?' done':'');
+      var c=document.createElement('input');c.type='checkbox';c.checked=!!s.d;
+      var t=document.createElement('input');t.type='text';t.value=s.t||'';t.maxLength=200;t.placeholder=T('Step');
+      var x=document.createElement('button');x.type='button';x.textContent='✕';x.setAttribute('aria-label',T('Remove'));
+      c.onchange=function(){s.d=c.checked;d.classList.toggle('done',c.checked);changed()};
+      t.oninput=function(){s.t=t.value;changed()};
+      x.onclick=function(){cur.steps.splice(i,1);drawSteps();changed()};
+      d.appendChild(c);d.appendChild(t);d.appendChild(x);box.appendChild(d);
+    });
+  }
+  $('addStep').onclick=function(){cur.steps=cur.steps||[];if(cur.steps.length>=60)return;cur.steps.push({t:'',d:false});drawSteps();changed();var i=$('steps').querySelectorAll('input[type=text]');if(i.length)i[i.length-1].focus()};
+  $('pin').onclick=function(){cur.pinned=!cur.pinned;drawPin();changed()};
+  ['title','body','tags','due','kind','nbSel'].forEach(function(id){$(id).addEventListener('input',function(){readForm();changed()});$(id).addEventListener('change',function(){readForm();changed()})});
+  function readForm(){
+    cur.title=$('title').value.slice(0,200);cur.body=$('body').value.slice(0,20000);cur.kind=$('kind').value;
+    cur.notebook_id=$('nbSel').value||null;cur.due=$('due').value||null;
+    cur.tags=$('tags').value.split(',').map(function(x){return x.replace(/^#/,'').trim().slice(0,30)}).filter(Boolean).slice(0,12);
+  }
+  function setStatus(k){
+    var m={saved:'Saved ✓',saving:'Saving…',offline:'Saved on this phone. Will sync when online.',error:'Could not save. Kept on this phone.'};
+    $('saveSt').textContent=k?T(m[k]):'';
+  }
+  function payload(n){
+    return {id:n.id,notebook_id:n.notebook_id||null,kind:n.kind,stage:n.stage,title:n.title||'',body:n.body||'',
+      steps:(n.steps||[]).filter(function(s){return s&&String(s.t||'').trim()}).map(function(s){return {t:String(s.t).slice(0,200),d:!!s.d}}).slice(0,60),
+      tags:n.tags||[],due:n.due||null,pinned:!!n.pinned};
+  }
+  function empty(n){return !(n.title||'').trim()&&!(n.body||'').trim()&&!(n.steps||[]).length}
+  function changed(){
+    cur.updated_at=new Date().toISOString();setStatus('saving');
+    var p=lsGet(SK,{});p[cur.id]=payload(cur);if(!empty(cur))lsSet(SK,p);
+    clearTimeout(timer);timer=setTimeout(flush,900);
+  }
+  async function flush(){
+    if(busy){timer=setTimeout(flush,600);return}
+    var p=lsGet(SK,{}),ids=Object.keys(p);if(!ids.length)return;
+    busy=true;var ok=true;
+    for(var i=0;i<ids.length;i++){
+      var row=p[ids[i]];row.owner=uid;
+      var r;try{r=await sb.from('lne_notes').upsert(row,{onConflict:'id'})}catch(e){r={error:e}}
+      if(r.error){ok=false;if(cur&&cur.id===ids[i])setStatus(navigator.onLine===false?'offline':'error')}
+      else{var q=lsGet(SK,{});if(JSON.stringify(q[ids[i]]&&Object.assign({},q[ids[i]],{owner:undefined}))===JSON.stringify(Object.assign({},p[ids[i]],{owner:undefined}))){delete q[ids[i]];lsSet(SK,q)}
+        var n=find(ids[i]);if(n)delete n._new;if(cur&&cur.id===ids[i]&&ok)setStatus('saved')}
+    }
+    busy=false;
+  }
+  window.addEventListener('online',flush);
+  document.addEventListener('visibilitychange',function(){if(document.hidden){if(cur)readForm();flush()}});
+  window.addEventListener('pagehide',function(){flush()});
+  function goHome(push){
+    if(cur){readForm();if(empty(cur)){notes=notes.filter(function(n){return n.id!==cur.id});var p=lsGet(SK,{});delete p[cur.id];lsSet(SK,p)}}
+    clearTimeout(timer);flush();cur=null;showOnly('home');drawHome();
+    if(push!==false){try{if(location.hash)history.pushState({v:'h'},'',location.pathname)}catch(e){}}
+  }
+  $('back').onclick=function(){try{history.back()}catch(e){goHome()}};
+  window.addEventListener('popstate',function(){
+    if(location.hash.indexOf('#n=')===0){openNote(location.hash.slice(3),false)}
+    else if(location.hash==='#new'){showOnly('newBox')}
+    else{goHome(false)}
+  });
+  function openFromHash(){if(location.hash.indexOf('#n=')===0&&find(location.hash.slice(3)))openNote(location.hash.slice(3),false);else{showOnly('home')}}
+  $('del').onclick=async function(){
+    if(!cur||!confirm(T('Delete this note? This cannot be undone.')))return;
+    var id=cur.id,p=lsGet(SK,{});delete p[id];lsSet(SK,p);clearTimeout(timer);
+    var r=await sb.from('lne_notes').delete().eq('id',id);
+    if(r.error){alert(T('Could not delete. Please try again.'));return}
+    notes=notes.filter(function(n){return n.id!==id});cur=null;showOnly('home');drawHome();try{history.replaceState({},'',location.pathname)}catch(e){}
+  };
+
+  /* ---------- voice ---------- */
+  (function(){
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+    var b=$('mic');b.style.display='';b.textContent='🎤 '+T('Speak');var rec=null,on=false;
+    var L={ar:'ar-SA',fr:'fr-FR',es:'es-ES',zh:'zh-CN',en:'en-US'};
+    b.onclick=function(){
+      if(on&&rec){rec.stop();return}
+      try{rec=new SR();rec.lang=L[LANG]||'en-US';rec.interimResults=false;rec.continuous=true;
+        rec.onresult=function(e){var t='';for(var i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)t+=e.results[i][0].transcript+' ';
+          if(t){var ta=$('body');ta.value=(ta.value?ta.value.replace(/\s*$/,' '):'')+t.trim();readForm();changed()}};
+        rec.onend=function(){on=false;b.textContent='🎤 '+T('Speak')};rec.onerror=function(){on=false;b.textContent='🎤 '+T('Speak')};
+        rec.start();on=true;b.textContent='⏹ '+T('Stop')}catch(e){on=false}
+    };
+  })();
+
+  /* ---------- AI (only when a button is pressed) ---------- */
+  var LN={en:'English',ar:'Arabic',fr:'French',es:'Spanish',zh:'Simplified Chinese'};
+  async function ask(prompt,max){
+    var r=await fetch('/api/ask-ai',{method:'POST',headers:await aiHeaders(sb),body:JSON.stringify({prompt:prompt,maxTokens:max,feature:'ideas'})});
+    var d;try{d=await r.json()}catch(e){throw new Error(T('The AI could not be reached. Please try again.'))}
+    if(d.error)throw new Error(d.error);return String(d.text||'');
+  }
+  function ctx(){
+    readForm();
+    var s=(cur.steps||[]).map(function(x){return '- '+(x.d?'[done] ':'')+x.t}).join('\n');
+    return 'Title: '+(cur.title||'(none)')+'\nType: '+cur.kind+'\nNotes:\n'+(cur.body||'(empty)').slice(0,6000)+(s?'\nSteps so far:\n'+s:'')+(cur.due?'\nDue: '+cur.due:'');
+  }
+  function aiBusy(on){['aiPlan','aiImp','aiMiss'].forEach(function(i){$(i).disabled=on})}
+  function out(html){$('aiOut').innerHTML=html}
+  function guard(){readForm();if(empty(cur)){out('<div class="note">'+esc(T('Write something first, then ask the AI.'))+'</div>');return false}return true}
+  $('aiPlan').onclick=async function(){
+    if(!guard())return;aiBusy(true);out('<div class="note">'+esc(T('Thinking…'))+'</div>');
+    try{
+      var t=await ask('You help a person turn an idea into a practical plan. Use ONLY what they wrote; do not invent facts, names or numbers. Reply in '+LN[LANG]+'. Reply with ONLY a JSON array of 4 to 8 short step strings, in order, each under 90 characters. No other text.\n\n'+ctx(),900);
+      var a=t.indexOf('['),b=t.lastIndexOf(']');var arr=JSON.parse(t.slice(a,b+1));
+      arr=arr.map(function(x){return String(typeof x==='object'&&x?(x.t||x.step||''):x).trim().slice(0,200)}).filter(Boolean).slice(0,8);
+      if(!arr.length)throw new Error('empty');
+      cur.steps=(cur.steps||[]).concat(arr.map(function(x){return {t:x,d:false}})).slice(0,60);
+      if(cur.kind==='idea')cur.kind='plan';if(cur.stage==='raw')cur.stage='planned';
+      $('kind').value=cur.kind;drawStages();drawSteps();changed();
+      out('<div class="note">'+esc(T('Steps added below. Edit them as you like. They come from the AI, so check them.'))+'</div>');
+    }catch(e){out('<div class="note">'+esc(e&&e.message&&e.message!=='empty'&&!(e instanceof SyntaxError)?e.message:T('The AI could not make a plan. Please try again.'))+'</div>')}
+    aiBusy(false);
+  };
+  async function text(kind){
+    if(!guard())return;aiBusy(true);out('<div class="note">'+esc(T('Thinking…'))+'</div>');
+    var task=kind==='imp'
+      ?'Suggest how to improve this idea: make it clearer and stronger. Give at most 5 short bullet points. Use only what they wrote and clearly mark anything that is your own suggestion.'
+      :'List what is missing or unclear in this idea or plan: questions to answer, risks, resources needed. At most 5 short bullet points. Do not invent facts.';
+    try{var t=await ask(task+' Reply in '+LN[LANG]+'.\n\n'+ctx(),700);
+      out('<div class="ai" id="aiTxt"></div><div class="row"><button class="btn sec sm" id="aiAdd">＋ '+esc(T('Add to my note'))+'</button></div><div class="note">'+esc(T('Written by AI. Check it before you rely on it.'))+'</div>');
+      $('aiTxt').textContent=t.trim();
+      $('aiAdd').onclick=function(){var ta=$('body');ta.value=(ta.value?ta.value.replace(/\s*$/,'')+'\n\n':'')+t.trim();readForm();changed();$('aiAdd').disabled=true};
+    }catch(e){out('<div class="note">'+esc(e&&e.message?e.message:T('The AI could not be reached. Please try again.'))+'</div>')}
+    aiBusy(false);
+  }
+  $('aiImp').onclick=function(){text('imp')};$('aiMiss').onclick=function(){text('miss')};
+  init();
+})();
+</script>
+</body>
+</html>
