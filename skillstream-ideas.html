@@ -61,6 +61,9 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
 .note{font-size:12px;color:var(--mut);margin-top:6px}
 .tpl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
 .tpl button{background:var(--card);border:1.5px solid #D4872A;border-radius:14px;padding:14px 8px;font-size:14px;font-weight:600;cursor:pointer}
+.nbm{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.sw{display:flex;gap:10px;margin-top:8px}.sw button{width:32px;height:32px;border-radius:16px;border:2px solid var(--line);cursor:pointer}
+.nb,.li{border-inline-start-width:5px}
 @media (max-width:420px){.tpl{grid-template-columns:1fr}}
 </style>
 </head>
@@ -70,7 +73,7 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
   <div id="home">
     <input class="sr" id="q" type="search" autocomplete="off">
     <div class="chips" id="stages"></div>
-    <div id="nbWrap"><h2>Notebooks</h2><div class="nbs" id="nbs"></div></div>
+    <div id="nbWrap"><h2>Notebooks</h2><div class="nbs" id="nbs"></div><div class="nbm" id="nbm" style="display:none"></div><div class="sw" id="sw" style="display:none"></div></div>
     <div id="pinWrap"><h2>Pinned</h2><div id="pins"></div></div>
     <h2 id="listH">All notes</h2>
     <div id="list"></div>
@@ -91,12 +94,15 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
     <label class="l">Your idea or notes</label>
     <textarea class="f" id="body"></textarea>
     <div class="row"><button class="btn sec sm" id="mic" style="display:none">🎤 Speak</button></div>
+    <div class="note" id="micNote"></div>
     <label class="l">Steps</label>
     <div id="steps"></div>
     <button class="btn sec sm" id="addStep">＋ Add a step</button>
     <label class="l">AI helper (runs only when you press a button)</label>
     <div class="row">
       <button class="btn sm" id="aiPlan">🧭 Turn into a plan</button>
+      <button class="btn sec sm" id="aiExp">💡 Explain</button>
+      <button class="btn sec sm" id="aiSum">📝 Summarise</button>
       <button class="btn sec sm" id="aiImp">✨ Improve idea</button>
       <button class="btn sec sm" id="aiMiss">🔎 What am I missing?</button>
     </div>
@@ -120,6 +126,9 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
   var uid=null, notes=[], nbs=[], cur=null, stageF='all', nbF='all', timer=null, busy=false;
   var STAGES=[['raw','Raw'],['developing','Developing'],['planned','Planned'],['done','Done']];
   var SK='lne_ip_pending';
+  var COL={gold:'#D4872A',green:'#5E8A3A',blue:'#3A6EA5',red:'#B5483A',purple:'#7A4FA0',teal:'#2F8F8B'};
+  function nbCol(id){for(var i=0;i<nbs.length;i++)if(nbs[i].id===id)return COL[nbs[i].color]||COL.gold;return null}
+  function nbById(id){for(var i=0;i<nbs.length;i++)if(nbs[i].id===id)return nbs[i];return null}
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
   function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
@@ -157,10 +166,11 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
     $('stages').innerHTML=h;
     Array.prototype.forEach.call($('stages').children,function(b){b.onclick=function(){stageF=b.getAttribute('data-s');drawHome()}});
     var nh='<div class="nb'+(nbF==='all'?' on':'')+'" data-n="all"><b>'+esc(T('All notes'))+'</b><i>'+notes.length+'</i></div>';
-    nbs.forEach(function(n){var c=notes.filter(function(x){return x.notebook_id===n.id}).length;nh+='<div class="nb'+(nbF===n.id?' on':'')+'" data-n="'+esc(n.id)+'"><b>'+esc(n.title)+'</b><i>'+c+'</i></div>'});
+    nbs.forEach(function(n){var c=notes.filter(function(x){return x.notebook_id===n.id}).length;nh+='<div class="nb'+(nbF===n.id?' on':'')+'" style="border-inline-start-color:'+(COL[n.color]||COL.gold)+'" data-n="'+esc(n.id)+'"><b>'+esc(n.title)+'</b><i>'+c+'</i></div>'});
     nh+='<div class="nb" data-n="__new"><b>＋ '+esc(T('New notebook'))+'</b><i>&nbsp;</i></div>';
     $('nbs').innerHTML=nh;
     Array.prototype.forEach.call($('nbs').children,function(b){b.onclick=function(){var id=b.getAttribute('data-n');if(id==='__new'){newNotebook();return}nbF=id;drawHome()}});
+    drawNbMenu();
     var q=($('q').value||'').trim().toLowerCase();
     var rows=notes.filter(function(n){
       if(stageF!=='all'&&n.stage!==stageF)return false;
@@ -184,6 +194,7 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
     (n.tags||[]).slice(0,4).forEach(function(t){m+='<span>#'+esc(t)+'</span>'});
     var title=n.title||(n.body||'').split('\n')[0].slice(0,80)||T('Untitled');
     b.innerHTML='<div class="t">'+esc(title)+'</div><div class="m">'+m+'</div>'+(p?'<div class="m">'+p[0]+'/'+p[1]+' '+esc(T('steps done'))+'</div><div class="pb"><div style="width:'+Math.round(p[0]/p[1]*100)+'%"></div></div>':'');
+    var cc=n.notebook_id&&nbCol(n.notebook_id);if(cc)b.style.borderInlineStartColor=cc;
     b.onclick=function(){openNote(n.id,true)};
     return b;
   }
@@ -196,6 +207,24 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
     nbs.push(r.data);nbF=r.data.id;drawHome();
   }
 
+  function drawNbMenu(){
+    var m=$('nbm'),w=$('sw'),n=nbById(nbF);w.style.display='none';
+    if(!n){m.style.display='none';return}
+    m.style.display='flex';m.innerHTML='<button type="button" class="btn sec sm" id="nbRen">'+esc(T('✏️ Rename'))+'</button><button type="button" class="btn sec sm" id="nbCol">'+esc(T('🎨 Colour'))+'</button><button type="button" class="btn sec sm" id="nbDel" style="color:#B5483A;border-color:#B5483A">'+esc(T('🗑 Delete notebook'))+'</button>';
+    $('nbRen').onclick=async function(){
+      var name=prompt(T('Notebook name'),n.title);if(!name)return;name=name.trim().slice(0,120);if(!name)return;
+      var r=await sb.from('lne_notebooks').update({title:name}).eq('id',n.id);
+      if(r.error){alert(T('Could not save. Please try again.'));return}n.title=name;drawHome()};
+    $('nbCol').onclick=function(){
+      w.style.display='flex';w.innerHTML='';
+      Object.keys(COL).forEach(function(k){var b=document.createElement('button');b.type='button';b.style.background=COL[k];b.setAttribute('aria-label',k);if(n.color===k)b.style.borderColor='#000';
+        b.onclick=async function(){var r=await sb.from('lne_notebooks').update({color:k}).eq('id',n.id);if(r.error){alert(T('Could not save. Please try again.'));return}n.color=k;drawHome()};w.appendChild(b)})};
+    $('nbDel').onclick=async function(){
+      if(!confirm(T('Delete this notebook? Its notes are kept and moved to All notes.')))return;
+      var r=await sb.from('lne_notebooks').delete().eq('id',n.id);
+      if(r.error){alert(T('Could not delete. Please try again.'));return}
+      nbs=nbs.filter(function(x){return x.id!==n.id});notes.forEach(function(x){if(x.notebook_id===n.id)x.notebook_id=null});nbF='all';drawHome()};
+  }
   /* ---------- new note ---------- */
   var TPL=[
     ['💡','Idea','idea','raw','What is the idea?\n\nWhy does it matter?\n\nNext step:'],
@@ -310,15 +339,22 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
   /* ---------- voice ---------- */
   (function(){
     var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
-    var b=$('mic');b.style.display='';b.textContent='🎤 '+T('Speak');var rec=null,on=false;
+    var b=$('mic'),note=$('micNote');b.style.display='';b.textContent='🎤 '+T('Speak');var rec=null;
     var L={ar:'ar-SA',fr:'fr-FR',es:'es-ES',zh:'zh-CN',en:'en-US'};
+    function idle(){rec=null;b.textContent='🎤 '+T('Speak')}
     b.onclick=function(){
-      if(on&&rec){rec.stop();return}
-      try{rec=new SR();rec.lang=L[LANG]||'en-US';rec.interimResults=false;rec.continuous=true;
-        rec.onresult=function(e){var t='';for(var i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)t+=e.results[i][0].transcript+' ';
-          if(t){var ta=$('body');ta.value=(ta.value?ta.value.replace(/\s*$/,' '):'')+t.trim();readForm();changed()}};
-        rec.onend=function(){on=false;b.textContent='🎤 '+T('Speak')};rec.onerror=function(){on=false;b.textContent='🎤 '+T('Speak')};
-        rec.start();on=true;b.textContent='⏹ '+T('Stop')}catch(e){on=false}
+      if(rec){try{rec.stop()}catch(e){}return}
+      note.textContent='';
+      var r=new SR(),got='';rec=r;r.lang=L[LANG]||'en-US';r.interimResults=false;r.maxAlternatives=1;r.continuous=false;
+      r.onresult=function(e){got='';for(var k=0;k<e.results.length;k++)got+=e.results[k][0].transcript;got=got.trim()};
+      r.onerror=function(e){var c=e&&e.error;
+        note.textContent=T(c==='not-allowed'||c==='service-not-allowed'?'Microphone is blocked. Allow it in your browser settings.':(c==='no-speech'||c==='aborted'?'Could not hear you. Please try again.':'Voice typing is not available here.'));
+        if(rec===r)idle()};
+      r.onend=function(){
+        if(got){var ta=$('body');ta.value=(ta.value?ta.value.replace(/\s*$/,' '):'')+got;readForm();changed();note.textContent=''}
+        else if(!note.textContent)note.textContent=T('Could not hear you. Please try again.');
+        if(rec===r)idle()};
+      try{r.start();b.textContent='⏹ '+T('Stop')}catch(e){idle();note.textContent=T('Voice typing is not available here.')}
     };
   })();
 
@@ -334,7 +370,7 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
     var s=(cur.steps||[]).map(function(x){return '- '+(x.d?'[done] ':'')+x.t}).join('\n');
     return 'Title: '+(cur.title||'(none)')+'\nType: '+cur.kind+'\nNotes:\n'+(cur.body||'(empty)').slice(0,6000)+(s?'\nSteps so far:\n'+s:'')+(cur.due?'\nDue: '+cur.due:'');
   }
-  function aiBusy(on){['aiPlan','aiImp','aiMiss'].forEach(function(i){$(i).disabled=on})}
+  function aiBusy(on){['aiPlan','aiImp','aiMiss','aiExp','aiSum'].forEach(function(i){$(i).disabled=on})}
   function out(html){$('aiOut').innerHTML=html}
   function guard(){readForm();if(empty(cur)){out('<div class="note">'+esc(T('Write something first, then ask the AI.'))+'</div>');return false}return true}
   $('aiPlan').onclick=async function(){
@@ -353,7 +389,11 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
   };
   async function text(kind){
     if(!guard())return;aiBusy(true);out('<div class="note">'+esc(T('Thinking…'))+'</div>');
-    var task=kind==='imp'
+    var task=kind==='exp'
+      ?'Explain what these notes are about in simple words, with one short example or analogy. Keep it under 150 words. Say clearly which parts are your own addition and not in their notes.'
+      :kind==='sum'
+      ?'Summarise these notes in at most 5 short bullet points. Do not add facts that are not in the notes.'
+      :kind==='imp'
       ?'Suggest how to improve this idea: make it clearer and stronger. Give at most 5 short bullet points. Use only what they wrote and clearly mark anything that is your own suggestion.'
       :'List what is missing or unclear in this idea or plan: questions to answer, risks, resources needed. At most 5 short bullet points. Do not invent facts.';
     try{var t=await ask(task+' Reply in '+LN[LANG]+'.\n\n'+ctx(),700);
@@ -363,7 +403,7 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
     }catch(e){out('<div class="note">'+esc(e&&e.message?e.message:T('The AI could not be reached. Please try again.'))+'</div>')}
     aiBusy(false);
   }
-  $('aiImp').onclick=function(){text('imp')};$('aiMiss').onclick=function(){text('miss')};
+  $('aiImp').onclick=function(){text('imp')};$('aiExp').onclick=function(){text('exp')};$('aiSum').onclick=function(){text('sum')};$('aiMiss').onclick=function(){text('miss')};
   init();
 })();
 </script>
