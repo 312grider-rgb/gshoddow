@@ -25,6 +25,7 @@
           ] },
           { title: 'My learning', links: [
             L('plan', 'Ideas & Plans', 'Capture ideas and turn them into plans', 'skillstream-ideas.html'),
+            L('quiz', 'Revise', 'Your flashcards due today', 'skillstream-revise.html'),
             L('ai', 'My Learning', 'Your goals and a path of steps to tick off', 'skillstream-engine.html'),
             L('book', 'My courses', 'The courses you are taking', 'skillstream-courses.html'),
             L('library', 'Academic studies', 'School and university subjects', 'skillstream-academic.html')
