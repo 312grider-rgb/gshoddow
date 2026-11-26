@@ -35,6 +35,21 @@
   try { var lj = document.createElement('script'); lj.src = 'js/lite.js?v=2'; lj.defer = true; (document.head || root).appendChild(lj); } catch (e) {}
   // Search button (js/lne-search.js).
   try { var sj = document.createElement('script'); sj.src = 'js/lne-search.js?v=1'; sj.defer = true; (document.head || root).appendChild(sj); } catch (e) {}
+  // Daily header colour: one warm palette per weekday (Sunday..Friday; Saturday is the classic brown).
+  // Setting in localStorage "lne_daily": daily (default) | classic | 0..5 (a fixed palette). Only the header changes.
+  try {
+    var DP = [['Amber', '#7A4A0E', '#A8690E'], ['Olive', '#4A4A1E', '#6E7A30'], ['Terracotta', '#7A2E1A', '#B4552F'], ['Plum brown', '#5A2B3E', '#935470'], ['Teal brown', '#1F4A4A', '#357A74'], ['Dark gold', '#5C4310', '#8F6E1C']];
+    var DM = 'daily'; try { DM = localStorage.getItem('lne_daily') || 'daily'; } catch (e) {}
+    var di = DM === 'daily' ? new Date().getDay() : (DM === 'classic' ? -1 : parseInt(DM, 10));
+    window.LNE_DAILY = { P: DP, mode: DM };
+    if (di >= 0 && di < DP.length && !document.getElementById('lneDailyCss')) {
+      var dg = 'linear-gradient(155deg,' + DP[di][1] + ' 0%,' + DP[di][2] + ' 100%)';
+      var dst = document.createElement('style'); dst.id = 'lneDailyCss';
+      dst.textContent = 'html:not([data-theme="dark"]) header.top,html[dir="rtl"]:not([data-theme="dark"]) header.top{background-image:var(--uv-star),radial-gradient(120% 90% at 88% 0%,rgba(255,200,90,.28),transparent 55%),' + dg + '!important}html:not([data-theme="dark"]) .hero{background:' + dg + '!important}';
+      (document.head || root).appendChild(dst);
+    }
+  } catch (e) {}
+  try { var dj = document.createElement('script'); dj.src = 'js/lne-daily.js?v=1'; dj.defer = true; (document.head || root).appendChild(dj); } catch (e) {}
   // Slow connection or Data Saver on: switch off animations and big pictures.
   try { var cn = navigator.connection; if (cn && (cn.saveData || /(^|-)2g$|3g/.test(cn.effectiveType || ''))) root.classList.add('lne-lite'); } catch (e) {}
   // Open the connection to the database early.
