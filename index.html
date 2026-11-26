@@ -20,46 +20,58 @@ try {
 <meta name="theme-color" content="#6B3A14">
 <title>Paradise Of The Eternal Learners — Learning Never Ends</title>
 <style>
-  :root{--ink:#3b2a1d; --gold:#C9A24E; --line:#EBDCC3; --mut:#7a6650;}
+  :root{--ink:#4a2a0c; --line:#E7D3B0; --mut:#7a5a3a;}
   *{box-sizing:border-box}
-  body{margin:0; min-height:100vh; background:linear-gradient(180deg,#FBF3E6,#F4E8D4); color:var(--ink); font-family:'Inter',system-ui,-apple-system,sans-serif; font-size:17px;}
-  header{background:linear-gradient(155deg,#6B3A14,#A25A1C); color:#fff; padding:26px 18px 28px; text-align:center; border-bottom:3px solid #E2BB5A;}
-  header img{width:72px; height:72px; border-radius:18px; display:block; margin:0 auto 10px;}
-  .eyebrow{color:#EBCB86; letter-spacing:1.5px; font-size:13px; font-weight:700; text-transform:uppercase;}
-  h1{margin:6px 0 6px; font-size:26px; line-height:1.25;}
-  header p{margin:0; opacity:.92; font-size:17px;}
-  .wrap{max-width:520px; margin:0 auto; padding:18px 16px 40px;}
-  h2{font-size:14px; letter-spacing:1.5px; text-transform:uppercase; color:#8A6A1F; margin:4px 4px 10px;}
-  .opt{display:flex; align-items:center; gap:14px; background:#FFFAF0; border:1px solid var(--line); border-radius:22px; padding:12px 16px; margin-bottom:12px; text-decoration:none; color:var(--ink); box-shadow:0 6px 18px rgba(120,80,30,.12); min-height:68px;}
-  .opt b{display:block; font-size:19px;}
-  .opt small{display:block; color:var(--mut); font-size:15px; margin-top:2px;}
+  body{margin:0; min-height:100vh; background:#F5EBD8; color:var(--ink); font-family:'Inter',system-ui,-apple-system,sans-serif; font-size:17px;}
+  header{position:relative; overflow:hidden; background:linear-gradient(170deg,#0F1B33 0%,#1d2b4a 55%,#3a3f55 100%); color:#fff; padding:26px 18px 46px; text-align:center;}
+  header:before{content:""; position:absolute; inset:0; background:radial-gradient(60% 60% at 82% 18%,rgba(247,198,90,.34),transparent 60%),radial-gradient(50% 40% at 8% 92%,rgba(247,198,90,.14),transparent 70%);}
+  header>*{position:relative}
+  header img{width:92px; height:92px; border-radius:23px; display:block; margin:0 auto 10px; box-shadow:0 0 30px rgba(247,198,90,.4);}
+  .eyebrow{color:#F7C65A; letter-spacing:3px; font-size:12px; font-weight:700; text-transform:uppercase;}
+  h1{margin:8px 0 8px; font-size:27px; line-height:1.2;}
+  header p{margin:0; opacity:.92; font-size:16px;}
+  .sheet{position:relative; margin-top:-24px; background:#F5EBD8; border-radius:26px 26px 0 0; box-shadow:0 -4px 18px rgba(247,198,90,.3); padding:6px 0 0;}
+  .wrap{max-width:520px; margin:0 auto; padding:16px 16px 40px;}
+  h2{display:flex; align-items:center; gap:10px; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; color:#8A5A14; margin:6px 2px 12px; font-weight:800;}
+  h2:before,h2:after{content:""; flex:1; height:1px; background:rgba(212,135,42,.55);}
+  .opt{display:flex; align-items:center; gap:10px; background:linear-gradient(#FFFBF2,#F7EAD0); border:1.5px solid #D4872A; border-radius:20px; padding:10px 12px; margin-bottom:12px; text-decoration:none; color:var(--ink); box-shadow:0 3px 12px rgba(212,135,42,.25); min-height:70px;}
+  .opt b{display:block; font-size:17px; line-height:1.25;}
+  .opt small{display:block; color:var(--mut); font-size:14px; margin-top:2px; line-height:1.3;}
   .opt .icon{flex:none;}
-  .opt.main{background:linear-gradient(135deg,#6B3A14,#A25A1C); color:#fff; border-color:#A25A1C;}
-  .opt.main small{color:#F3DFC0;}
+  .opt>span:nth-child(2){flex:1}
+  .opt:after{content:"›"; flex:none; width:26px; height:26px; border-radius:13px; background:#C4821C; color:#fff; display:flex; align-items:center; justify-content:center; font-size:18px; line-height:1;}
+  [dir=rtl] .opt:after{content:"‹"}
   .opt.soft{box-shadow:none; background:transparent; border:1.5px dashed #CDB88E;}
+  .hub{display:flex; flex-direction:column; align-items:flex-start; gap:12px; background:linear-gradient(135deg,#0F1B33,#2a3a5e); color:#fff; border-radius:20px; padding:16px; margin:6px 0 4px; text-decoration:none;}
+  .hub b{display:block; font-size:18px; color:#F7C65A;}
+  .hub small{display:block; font-size:14px; opacity:.92; margin-top:3px;}
+  .hub u{flex:none; text-decoration:none; background:linear-gradient(#F7C65A,#D4872A); color:#4a2a0c; font-weight:700; border-radius:12px; padding:9px 14px; font-size:15px;}
   .login{text-align:center; margin-top:16px; color:var(--mut);}
   .login a{color:#8A4B12; font-weight:700; text-decoration:none;}
+  .tag{text-align:center; margin-top:18px; color:#8A5A14; font-weight:600; font-size:15px;}
   .gap{height:6px}
 </style>
 </head>
 <body>
 <header>
-  <img src="css/logo-mark.png" alt="" width="72" height="72">
+  <img src="css/logo-mark.png" alt="" width="92" height="92">
   <div class="eyebrow">Learning Never Ends</div>
   <h1>Paradise Of The Eternal Learners</h1>
   <p>Learn anything. Teach what you know.</p>
 </header>
-<div class="wrap">
+<div class="sheet"><div class="wrap">
   <h2>Join us — it is free</h2>
-  <a class="opt main" href="skillstream-login.html?mode=signup&amp;role=student" data-v="click-student"><span class="icon" data-ic="stud"></span><span><b>I am a student</b><small>Register and start learning</small></span></a>
-  <a class="opt main" href="skillstream-login.html?mode=signup&amp;role=parent" data-v="click-parent"><span class="icon" data-ic="user"></span><span><b>I am a parent</b><small>Follow your child's progress</small></span></a>
-  <a class="opt main" href="skillstream-login.html?mode=signup&amp;role=teacher" data-v="click-teacher"><span class="icon" data-ic="teach"></span><span><b>I am a teacher</b><small>Register and share what you know</small></span></a>
+  <a class="opt" href="skillstream-login.html?mode=signup&amp;role=student" data-v="click-student"><span class="icon" data-ic="stud"></span><span><b>I am a learner</b><small>Register and start learning</small></span></a>
+  <a class="opt" href="skillstream-login.html?mode=signup&amp;role=parent" data-v="click-parent"><span class="icon" data-ic="user"></span><span><b>I am a parent</b><small>Follow your child's progress</small></span></a>
+  <a class="opt" href="skillstream-login.html?mode=signup&amp;role=teacher" data-v="click-teacher"><span class="icon" data-ic="teach"></span><span><b>I am a mentor</b><small>Register and share what you know</small></span></a>
   <div class="gap"></div>
   <h2>Not ready yet?</h2>
   <a class="opt" href="skillstream-login.html?mode=signup&amp;role=student" data-v="click-test"><span class="icon" data-ic="lvl"></span><span><b>Test your level</b><small>Free after you sign up</small></span></a>
   <a class="opt soft" href="skillstream-visitor.html" data-v="click-visitor"><span class="icon" data-ic="econ"></span><span><b>Explore as a visitor</b><small>Look around without an account</small></span></a>
+  <a class="hub" href="skillstream-visitor.html" data-v="click-hub"><span><b>AI Learning Hub</b><small>Your personal AI learning companion</small></span><u>Learn more</u></a>
   <div class="login">Already have an account? <a href="skillstream-login.html">Log in</a></div>
-</div>
+  <div class="tag">A lifetime of learning awaits you</div>
+</div></div>
 <script src="js/lne-visits.js?v=1"></script>
 <script>
 window.LNE_VISIT && LNE_VISIT('landing');
