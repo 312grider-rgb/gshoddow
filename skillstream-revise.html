@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');}catch(e){}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revise — Learning Never Ends</title>
+<meta name="theme-color" content="#6B3A14">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#F8EFE0;--card:#FFFBF2;--line:#E7D3B0;--ink:#5A3214;--mut:#8a6a4a;--gold:linear-gradient(#F7C65A,#D4872A);--onGold:#4a2a0c;--ok:#5E8A3A;--bad:#B5483A;--hd:linear-gradient(135deg,#6B3A14,#A25A1C)}
+html[data-theme="dark"]{--bg:#1a120b;--card:#2a1d12;--line:#4a3420;--ink:#F3E6D3;--mut:#c9ab87;--hd:linear-gradient(135deg,#2e1b0c,#5a3414)}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:150px}
+header.top{background:var(--hd);color:#fff;padding:20px 16px 18px}
+header.top small{display:block;color:#F7C65A;letter-spacing:2px;font-size:11px;font-weight:600;text-transform:uppercase}
+header.top h1{margin:6px 0 2px;font-size:23px}header.top p{margin:0;font-size:13.5px;opacity:.88}
+.wrap{max-width:560px;margin:0 auto;padding:14px}
+button{font:inherit;color:inherit}
+.btn{background:var(--gold);color:var(--onGold);border:0;border-radius:14px;padding:13px 16px;font-weight:700;font-size:15px;cursor:pointer;width:100%}
+.btn.sec{background:var(--card);color:var(--ink);border:1.5px solid #D4872A}
+.prog{font-size:13px;color:var(--mut);margin-bottom:8px;display:flex;justify-content:space-between}
+.pb{height:7px;border-radius:5px;background:var(--line);overflow:hidden;margin-bottom:12px}.pb div{height:100%;background:var(--ok);width:0}
+.fc{background:var(--card);border:1.5px solid #D4872A;border-top-width:6px;border-radius:18px;padding:26px 18px;text-align:center;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:20px;font-weight:600;line-height:1.5;overflow-wrap:anywhere;white-space:pre-wrap}
+.fc .ans{font-size:18px;font-weight:500;color:var(--ink);border-top:1px dashed var(--line);padding-top:14px;width:100%}
+.src{font-size:12px;color:var(--mut);font-weight:400}
+.rt{display:flex;gap:8px;margin-top:12px}.rt button{flex:1;padding:14px 0;border:0;border-radius:14px;font-weight:700;font-size:15px;color:#fff;cursor:pointer}
+.h2{font-weight:700;font-size:14px;margin:16px 0 8px}
+.li{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:7px;font-size:14px;display:flex;justify-content:space-between;gap:8px;overflow-wrap:anywhere}
+.msg{text-align:center;color:var(--mut);padding:30px 10px;line-height:1.7}
+.big{font-size:34px;font-weight:800;text-align:center;margin:10px 0}
+a.back{display:block;text-align:center;margin-top:14px;color:var(--ink);font-weight:700}
+</style>
+</head>
+<body>
+<header class="top"><small>Learning Never Ends</small><h1>Revise</h1><p>Little and often. Remember more.</p></header>
+<div class="wrap" id="app"><div class="msg" id="msg">Loading…</div></div>
+<script src="js/nav.js" defer></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var T=function(s){try{return (window.LNE_I18N&&LNE_I18N.t)?LNE_I18N.t(s):s}catch(e){return s}};
+  var sb=window.supabase.createClient('https://vauudtedojtcveiqajlr.supabase.co','sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE');
+  var app=$('app'),queue=[],total=0,pos=0,stat={f:0,h:0,e:0},titles={};
+  function ymd(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(x<10?'0':'')+x}
+  function today(){return ymd(new Date())}
+  function plus(n){var d=new Date();d.setDate(d.getDate()+n);return ymd(d)}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  /* spaced repetition (simple SM-2 style, 3 answers) */
+  function schedule(c,k){
+    var ease=+c.ease||2.5,iv=+c.interval_days||0,reps=+c.reps||0,lap=+c.lapses||0;
+    if(k==='f'){lap++;reps=0;iv=1;ease=Math.max(1.3,ease-0.2)}
+    else if(k==='h'){iv=reps===0?1:Math.max(1,Math.round(iv*1.2));ease=Math.max(1.3,ease-0.15);reps++}
+    else{iv=reps===0?3:Math.max(2,Math.round(iv*ease*1.3));ease=Math.min(4,ease+0.1);reps++}
+    return {ease:Math.round(ease*100)/100,interval_days:Math.min(iv,3650),reps:reps,lapses:lap,due:plus(iv),last_reviewed:new Date().toISOString()};
+  }
+
+  async function init(){
+    var s=await sb.auth.getSession();
+    if(!(s.data&&s.data.session)){location.href='skillstream-login.html';return}
+    var r=await sb.from('lne_cards').select('id,note_id,front,back,ease,interval_days,reps,lapses,due').lte('due',today()).order('due',{ascending:true}).limit(60);
+    if(r.error){app.innerHTML='<div class="msg">'+esc(T('Revision is not ready yet. Please try again later.'))+'</div>';return}
+    queue=r.data||[];total=queue.length;
+    var ids=queue.map(function(c){return c.note_id}).filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i});
+    if(ids.length){var n=await sb.from('lne_notes').select('id,title').in('id',ids);(n.data||[]).forEach(function(x){titles[x.id]=x.title||''})}
+    if(!total){await empty();return}
+    show();
+  }
+  async function empty(){
+    var all=await sb.from('lne_cards').select('id,front,lapses,note_id').order('lapses',{ascending:false}).limit(200);
+    var rows=all.data||[];
+    if(!rows.length){app.innerHTML='<div class="msg">'+esc(T('No cards yet. Open a note in Ideas & Plans and press Make flashcards.'))+'</div><a class="back" href="skillstream-ideas.html">'+esc(T('Open Ideas & Plans'))+'</a>';return}
+    var weak=rows.filter(function(c){return c.lapses>=2}).slice(0,5);
+    var h='<div class="big">✓</div><div class="msg" style="padding-top:0">'+esc(T('Nothing due today. Come back tomorrow.'))+'<br>'+rows.length+' '+esc(T('cards in total'))+'</div>';
+    if(weak.length){h+='<div class="h2">'+esc(T('Cards you often forget'))+'</div>';weak.forEach(function(c){h+='<div class="li"><span>'+esc(c.front)+'</span><span>×'+c.lapses+'</span></div>'})}
+    app.innerHTML=h+'<a class="back" href="skillstream-ideas.html">'+esc(T('Open Ideas & Plans'))+'</a>';
+  }
+  function show(){
+    if(pos>=queue.length){done();return}
+    var c=queue[pos],shown=false;
+    app.innerHTML='<div class="prog"><span>'+esc(T('Card'))+' '+(Math.min(pos+1,total))+' / '+total+'</span><span>'+(queue.length-pos)+' '+esc(T('left'))+'</span></div><div class="pb"><div style="width:'+Math.round(pos/Math.max(total,1)*100)+'%"></div></div><div class="fc" id="fc"><div id="q"></div></div><div id="ctl"></div>';
+    $('q').textContent=c.front;
+    var src=c.note_id&&titles[c.note_id];
+    if(src){var s=document.createElement('div');s.className='src';s.textContent=src;$('fc').appendChild(s)}
+    var ctl=$('ctl');
+    ctl.innerHTML='<button class="btn sec" id="rev" style="margin-top:12px">'+esc(T('Show answer'))+'</button>';
+    $('rev').onclick=function(){
+      var a=document.createElement('div');a.className='ans';a.textContent=c.back;$('fc').insertBefore(a,$('fc').querySelector('.src'));
+      ctl.innerHTML='<div class="h2" style="text-align:center">'+esc(T('How well did you remember?'))+'</div><div class="rt"><button style="background:#B5483A" data-k="f">'+esc(T('Forgot'))+'</button><button style="background:#D4872A" data-k="h">'+esc(T('Hard'))+'</button><button style="background:#5E8A3A" data-k="e">'+esc(T('Easy'))+'</button></div>';
+      Array.prototype.forEach.call(ctl.querySelectorAll('button'),function(b){b.onclick=function(){answer(c,b.getAttribute('data-k'))}});
+    };
+  }
+  async function answer(c,k){
+    stat[k]++;var u=schedule(c,k);
+    sb.from('lne_cards').update(u).eq('id',c.id).then(function(){},function(){});
+    Object.assign(c,u);
+    if(k==='f'&&!c._again){c._again=true;queue.push(c)}
+    pos++;show();
+  }
+  function done(){
+    var n=stat.f+stat.h+stat.e,ok=n?Math.round((stat.h+stat.e)/n*100):0;
+    app.innerHTML='<div class="big">🎉</div><div class="msg" style="padding-top:0"><b>'+esc(T('Well done!'))+'</b><br>'+n+' '+esc(T('answers'))+' · '+ok+'% '+esc(T('remembered'))+'</div>'+
+      '<div class="li"><span>'+esc(T('Easy'))+'</span><b>'+stat.e+'</b></div><div class="li"><span>'+esc(T('Hard'))+'</span><b>'+stat.h+'</b></div><div class="li"><span>'+esc(T('Forgot'))+'</span><b>'+stat.f+'</b></div>'+
+      '<a class="back" href="skillstream-ideas.html">'+esc(T('Open Ideas & Plans'))+'</a>';
+  }
+  init();
+})();
+</script>
+</body>
+</html>

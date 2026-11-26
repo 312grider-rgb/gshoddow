@@ -75,6 +75,7 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
     <div class="chips" id="stages"></div>
     <div id="nbWrap"><h2>Notebooks</h2><div class="nbs" id="nbs"></div><div class="nbm" id="nbm" style="display:none"></div><div class="sw" id="sw" style="display:none"></div></div>
     <div id="pinWrap"><h2>Pinned</h2><div id="pins"></div></div>
+    <div id="revCard"></div>
     <h2 id="listH">All notes</h2>
     <div id="list"></div>
     <div id="msg" class="empty"></div>
@@ -103,6 +104,7 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
       <button class="btn sm" id="aiPlan">🧭 Turn into a plan</button>
       <button class="btn sec sm" id="aiExp">💡 Explain</button>
       <button class="btn sec sm" id="aiSum">📝 Summarise</button>
+      <button class="btn sec sm" id="aiCards">🃏 Make flashcards</button>
       <button class="btn sec sm" id="aiImp">✨ Improve idea</button>
       <button class="btn sec sm" id="aiMiss">🔎 What am I missing?</button>
     </div>
@@ -156,7 +158,17 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
     }
     nbs=a.data||[];notes=b.data||[];
     await flush();
-    drawHome();openFromHash();
+    drawHome();openFromHash();dueCards();
+  }
+
+  /* ---------- flashcards due today ---------- */
+  function ymd(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(x<10?'0':'')+x}
+  async function dueCards(){
+    try{
+      var r=await sb.from('lne_cards').select('id',{count:'exact',head:true}).lte('due',ymd(new Date()));
+      if(r.error||!r.count){$('revCard').innerHTML='';return}
+      $('revCard').innerHTML='<a class="li" href="skillstream-revise.html" style="text-decoration:none;color:inherit;border-inline-start-color:#5E8A3A"><div class="t">🃏 '+esc(T('Revise today'))+'</div><div class="m">'+r.count+' '+esc(T('cards due'))+' · '+esc(T('Revise now ›'))+'</div></a>';
+    }catch(e){}
   }
 
   /* ---------- home ---------- */
@@ -318,7 +330,7 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
   window.addEventListener('pagehide',function(){flush()});
   function goHome(push){
     if(cur){readForm();if(empty(cur)){notes=notes.filter(function(n){return n.id!==cur.id});var p=lsGet(SK,{});delete p[cur.id];lsSet(SK,p)}}
-    clearTimeout(timer);flush();cur=null;showOnly('home');drawHome();
+    clearTimeout(timer);flush();cur=null;showOnly('home');drawHome();dueCards();
     if(push!==false){try{if(location.hash)history.pushState({v:'h'},'',location.pathname)}catch(e){}}
   }
   $('back').onclick=function(){try{history.back()}catch(e){goHome()}};
@@ -370,7 +382,7 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
     var s=(cur.steps||[]).map(function(x){return '- '+(x.d?'[done] ':'')+x.t}).join('\n');
     return 'Title: '+(cur.title||'(none)')+'\nType: '+cur.kind+'\nNotes:\n'+(cur.body||'(empty)').slice(0,6000)+(s?'\nSteps so far:\n'+s:'')+(cur.due?'\nDue: '+cur.due:'');
   }
-  function aiBusy(on){['aiPlan','aiImp','aiMiss','aiExp','aiSum'].forEach(function(i){$(i).disabled=on})}
+  function aiBusy(on){['aiPlan','aiImp','aiMiss','aiExp','aiSum','aiCards'].forEach(function(i){$(i).disabled=on})}
   function out(html){$('aiOut').innerHTML=html}
   function guard(){readForm();if(empty(cur)){out('<div class="note">'+esc(T('Write something first, then ask the AI.'))+'</div>');return false}return true}
   $('aiPlan').onclick=async function(){
@@ -403,6 +415,31 @@ label.l{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
     }catch(e){out('<div class="note">'+esc(e&&e.message?e.message:T('The AI could not be reached. Please try again.'))+'</div>')}
     aiBusy(false);
   }
+  $('aiCards').onclick=async function(){
+    if(!guard())return;aiBusy(true);out('<div class="note">'+esc(T('Thinking…'))+'</div>');
+    try{
+      var t=await ask('Make 4 to 8 revision flashcards from these notes. Use ONLY facts that are in the notes; do not add outside facts. Each card is a question and a short answer, each question under 120 characters and each answer under 200 characters. Reply in '+LN[LANG]+'. Reply with ONLY a JSON array like [{"q":"...","a":"..."}]. No other text.\n\n'+ctx(),1500);
+      var a=t.indexOf('['),b=t.lastIndexOf(']');var arr=JSON.parse(t.slice(a,b+1));
+      arr=arr.map(function(x){return {q:String(x&&x.q||'').trim().slice(0,300),a:String(x&&x.a||'').trim().slice(0,600)}}).filter(function(x){return x.q&&x.a}).slice(0,8);
+      if(!arr.length)throw new Error('empty');
+      var h='<div class="note">'+esc(T('Flashcards from your note. Untick any you do not want.'))+'</div>';
+      arr.forEach(function(x,i){h+='<label class="step" style="display:block"><input type="checkbox" checked data-i="'+i+'" style="margin-inline-end:8px"><b></b><br><span></span></label>'});
+      h+='<div class="row"><button class="btn sm" id="cardSave">'+esc(T('Save selected cards'))+'</button></div><div class="note">'+esc(T('Written by AI. Check it before you rely on it.'))+'</div>';
+      out(h);
+      var labs=$('aiOut').querySelectorAll('label.step');
+      arr.forEach(function(x,i){labs[i].querySelector('b').textContent=x.q;labs[i].querySelector('span').textContent=x.a});
+      $('cardSave').onclick=async function(){
+        var pick=[];Array.prototype.forEach.call($('aiOut').querySelectorAll('input[type=checkbox]'),function(c){if(c.checked)pick.push(arr[+c.getAttribute('data-i')])});
+        if(!pick.length)return;$('cardSave').disabled=true;
+        readForm();await flush();
+        var rows=pick.map(function(x){return {note_id:cur.id,front:x.q,back:x.a,owner:uid}});
+        var r=await sb.from('lne_cards').insert(rows);
+        if(r.error){$('cardSave').disabled=false;out('<div class="note">'+esc(T('Could not save the cards. Please try again.'))+'</div>');return}
+        out('<div class="note">'+pick.length+' '+esc(T('cards saved'))+'. <a href="skillstream-revise.html">'+esc(T('Revise now ›'))+'</a></div>');
+      };
+    }catch(e){out('<div class="note">'+esc(e&&e.message&&e.message!=='empty'&&!(e instanceof SyntaxError)?e.message:T('The AI could not make flashcards. Please try again.'))+'</div>')}
+    aiBusy(false);
+  };
   $('aiImp').onclick=function(){text('imp')};$('aiExp').onclick=function(){text('exp')};$('aiSum').onclick=function(){text('sum')};$('aiMiss').onclick=function(){text('miss')};
   init();
 })();
