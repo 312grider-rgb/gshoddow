@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');}catch(e){}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Future Watch — Learning Never Ends</title>
+<meta name="theme-color" content="#6B3A14">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#F8EFE0;--card:#FFFBF2;--line:#E7D3B0;--ink:#5A3214;--mut:#8a6a4a;--acc:#8A4B1C;--hd:linear-gradient(135deg,#6B3A14,#A25A1C)}
+html[data-theme="dark"]{--bg:#1a120b;--card:#2a1d12;--line:#4a3420;--ink:#F3E6D3;--mut:#c9ab87;--acc:#F7C65A;--hd:linear-gradient(135deg,#2e1b0c,#5a3414)}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:110px}
+header.top{background:var(--hd);color:#fff;padding:22px 18px 24px}
+header.top small{display:block;color:#F7C65A;letter-spacing:2px;font-size:11px;font-weight:700;text-transform:uppercase}
+header.top h1{margin:6px 0 4px;font-size:24px}header.top p{margin:0;font-size:14px;opacity:.9;line-height:1.5}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:15px;margin:0 0 12px;box-shadow:0 6px 14px -10px rgba(90,50,20,.4)}
+.tag{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.5px;color:var(--acc);text-transform:uppercase}
+.ct{font-size:17px;font-weight:800;line-height:1.3;margin:5px 0 0}
+.row{font-size:14.5px;line-height:1.6;margin-top:9px;overflow-wrap:anywhere}
+.row b{color:var(--acc)}
+.src{font-size:12.5px;color:var(--mut);margin-top:10px;line-height:1.5}
+.src a{color:var(--acc);font-weight:700}
+.ai{font-size:12px;color:var(--mut);margin-top:8px;font-style:italic}
+.ask{display:inline-block;margin-top:10px;padding:9px 14px;border-radius:999px;border:1.5px solid #D4872A;background:var(--card);color:var(--ink);font:700 13px Inter,sans-serif;text-decoration:none}
+.msg{text-align:center;color:var(--mut);padding:36px 10px;line-height:1.7}
+.foot{font-size:12.5px;color:var(--mut);line-height:1.55;margin:16px 0}
+</style>
+</head>
+<body>
+<header class="top"><small>Learning Never Ends</small><h1>Future Watch</h1><p>Emerging technologies and scientific breakthroughs.</p></header>
+<div class="wrap">
+  <div id="list"><div class="msg">Loading…</div></div>
+  <div class="foot">These cards are short AI summaries of the sources linked on each card. Check the source for the full story.</div>
+</div>
+<script>
+(function(){
+  var SECTION='future';
+  var $=function(i){return document.getElementById(i)};
+  var LG=(function(){try{return (window.LNE_I18N&&LNE_I18N.lang)||localStorage.getItem('language')||'en'}catch(e){return 'en'}})();
+  var LB={ar:{w:'ماذا حدث:',y:'لماذا يهم:',s:'المصدر:',a:'ملخص بالذكاء الاصطناعي. تحقّق من المصدر.'},
+    fr:{w:'Quoi :',y:'Pourquoi c\'est important :',s:'Source :',a:'Résumé par IA. Vérifiez la source.'},
+    es:{w:'Qué:',y:'Por qué importa:',s:'Fuente:',a:'Resumen de IA. Comprueba la fuente.'},
+    zh:{w:'内容：',y:'为何重要：',s:'来源：',a:'AI 摘要。请核对来源。'},
+    en:{w:'What:',y:'Why it matters:',s:'Source:',a:'AI summary. Check the source.'}}[LG]||{w:'What:',y:'Why it matters:',s:'Source:',a:'AI summary. Check the source.'};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function empty(){$('list').innerHTML='<div class="msg">'+esc(window.LNE_I18N&&LNE_I18N.t?LNE_I18N.t('Nothing here yet. New items appear every day.'):'Nothing here yet. New items appear every day.')+'</div>'}
+  var U='https://vauudtedojtcveiqajlr.supabase.co/rest/v1/edge_items?select=industry,title,what_text,why_text,source_name,source_url,as_of,created_at';
+  var Q='&hidden=eq.false&section=eq.'+SECTION+'&order=created_at.desc&limit=30',H={headers:{apikey:'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE'}};
+  fetch(U+',tr'+Q,H).then(function(r){return r.ok?r:fetch(U+Q,H)}).then(function(r){return r.ok?r.json():[]}).then(function(rows){
+    rows=(Array.isArray(rows)?rows:[]).filter(function(x){return /^https:\/\//.test(x.source_url)});
+    if(!rows.length){empty();return}
+    var h='';
+    rows.forEach(function(x){
+      var tx=(x.tr&&x.tr[LG])||null,t=tx&&tx.t||x.title,w=tx&&tx.w||x.what_text,y=tx&&tx.y||x.why_text;
+      var d=String(x.as_of||x.created_at||'').slice(0,16);
+      h+='<div class="card"><span class="tag">Future Watch</span><div class="ct" data-no-i18n>'+esc(t)+'</div>'
+        +'<div class="row" data-no-i18n><b>'+LB.w+'</b> '+esc(w)+'</div>'
+        +'<div class="row" data-no-i18n><b>'+LB.y+'</b> '+esc(y)+'</div>'
+        +'<div class="ai" data-no-i18n>'+LB.a+'</div>'
+        +'<div class="src" data-no-i18n>'+LB.s+' <a href="'+esc(x.source_url)+'" target="_blank" rel="noopener">'+esc(x.source_name)+'</a> · '+esc(d)+'</div>'
+        +'<a class="ask" href="skillstream-ai-hub.html?tab=teacher&q='+encodeURIComponent(x.title)+'">Ask the AI Teacher</a></div>';
+    });
+    $('list').innerHTML=h;
+  }).catch(empty);
+})();
+</script>
+<script src="js/nav.js" defer></script>
+</body>
+</html>
