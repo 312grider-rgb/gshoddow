@@ -110,7 +110,8 @@ module.exports = async (req, res) => {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey || !SERVICE_KEY) { res.status(500).json({ error: 'Not configured' }); return; }
 
-  // 0) translate a few older cards that have no translations yet (a few per run, errors ignored)
+  // translate a few older cards that have no translations yet (a few per run, errors ignored). Runs LAST so it never uses up the AI quota needed for new cards.
+  const backfill = async () => {
   try {
     const old = await fetch(SUPABASE_URL + '/rest/v1/edge_items?select=id,title,what_text,why_text&tr=is.null&hidden=eq.false&order=created_at.desc&limit=6', { headers: sh() });
     const olds = old.ok ? await old.json() : [];
@@ -142,6 +143,8 @@ module.exports = async (req, res) => {
       }
     }
   } catch (e) { /* older cards stay English; try again next run */ }
+  };
+  const finish = async (code, obj) => { await backfill(); res.status(code).json(obj); };
 
   // 1) read feeds
   const results = await Promise.all(FEEDS.map(getFeed));
@@ -157,12 +160,14 @@ module.exports = async (req, res) => {
 
   const cand = [];
   for (const r of results) {
+    let taken = 0;
     for (const it of r.items) {
       if (known.has(it.link)) continue;
+      if (taken++ >= (r.f.s ? 3 : 2)) break; // keep the AI request small
       cand.push({ s: r.f.s || 'edge', i: r.f.i, n: r.f.n, title: clip(it.title, 200), desc: clip(it.desc, 400), link: it.link, date: clip(it.date, 40) });
     }
   }
-  if (!cand.length) { res.status(200).json({ added: 0, note: 'Nothing new', report }); return; }
+  if (!cand.length) { await finish(200, { added: 0, note: 'Nothing new', report }); return; }
 
   // 3) one AI call
   const list = cand.map((c, k) => (k + 1) + '. [' + c.s + '/' + c.i + '] ' + c.title + ' — ' + c.desc + ' (source: ' + c.n + ')').join('\n');
@@ -177,6 +182,7 @@ module.exports = async (req, res) => {
     (withTr ? ' Also add to each element "tr":{"ar":{"t":"","w":"","y":""},"fr":{...},"es":{...},"zh":{...}} with the same title, what and why translated into Arabic, French, Spanish and Simplified Chinese (keep names and numbers exactly).' : '') +
     '\n\n' + list;
 
+  let aiErr = '';
   async function ask(withTr) {
     const ar = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -189,6 +195,7 @@ module.exports = async (req, res) => {
       })
     });
     const ad = await ar.json();
+    if (!ar.ok) { aiErr = 'http ' + ar.status + ' ' + clip(ad && ad.error && ad.error.message, 120); throw new Error(aiErr); }
     let txt = ad && ad.choices && ad.choices[0] && ad.choices[0].message && ad.choices[0].message.content;
     txt = String(txt || '');
     const a = txt.indexOf('['), b = txt.lastIndexOf(']');
@@ -198,9 +205,9 @@ module.exports = async (req, res) => {
   let hasTr = true;
   try { cards = await ask(true); } catch (e) {
     hasTr = false;
-    try { cards = await ask(false); } catch (e2) { res.status(502).json({ error: 'AI step failed', report }); return; }
+    try { cards = await ask(false); } catch (e2) { await finish(502, { error: 'AI step failed' + (aiErr ? ' (' + aiErr + ')' : ''), report }); return; }
   }
-  if (!Array.isArray(cards)) { res.status(502).json({ error: 'AI step failed', report }); return; }
+  if (!Array.isArray(cards)) { await finish(502, { error: 'AI step failed' + (aiErr ? ' (' + aiErr + ')' : ''), report }); return; }
 
   // 4) validate and save (links must come from the feeds, never from the AI)
   const rows = [];
@@ -231,7 +238,7 @@ module.exports = async (req, res) => {
     });
     if (rows.length >= MAX_NEW_PER_RUN) break;
   }
-  if (!rows.length) { res.status(200).json({ added: 0, note: 'No suitable items', report }); return; }
+  if (!rows.length) { await finish(200, { added: 0, note: 'No suitable items', report }); return; }
 
   const save = (list) => fetch(SUPABASE_URL + '/rest/v1/edge_items?on_conflict=source_url', {
     method: 'POST',
@@ -253,6 +260,6 @@ module.exports = async (req, res) => {
       ins = await save(edgeOnly.map((x) => { const y = Object.assign({}, x); delete y.tr; return y; }));
     }
   }
-  if (!ins.ok) { res.status(502).json({ error: 'Save failed', report }); return; }
-  res.status(200).json({ added: saved, report });
+  if (!ins.ok) { await finish(502, { error: 'Save failed', report }); return; }
+  await finish(200, { added: saved, report });
 };
