@@ -12,7 +12,8 @@ const SUPABASE_ANON_KEY =
 const SERVICE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
 const MODEL = 'openai/gpt-oss-120b';
-const MAX_NEW_PER_RUN = 8;
+const MAX_NEW_PER_RUN = 12;
+const PER_SECTION = 5; // at most this many new cards per section per run
 const PER_FEED = 4;
 
 const FEEDS = [
@@ -22,7 +23,14 @@ const FEEDS = [
   { i: 'space', n: 'NASA', u: 'https://www.nasa.gov/feed/' },
   { i: 'computing', n: 'ScienceDaily', u: 'https://www.sciencedaily.com/rss/computers_math/quantum_computers.xml' },
   { i: 'finance', n: 'BBC News', u: 'https://feeds.bbci.co.uk/news/business/rss.xml' },
-  { i: 'transport', n: 'Electrek', u: 'https://electrek.co/feed/' }
+  { i: 'transport', n: 'Electrek', u: 'https://electrek.co/feed/' },
+  // Research: new studies and papers
+  { s: 'research', i: 'science', n: 'Nature', u: 'https://www.nature.com/nature.rss' },
+  { s: 'research', i: 'science', n: 'ScienceDaily', u: 'https://www.sciencedaily.com/rss/top/science.xml' },
+  { s: 'research', i: 'ai', n: 'arXiv (cs.AI)', u: 'https://export.arxiv.org/rss/cs.AI' },
+  // Future Watch: emerging technology and breakthroughs
+  { s: 'future', i: 'tech', n: 'IEEE Spectrum', u: 'https://spectrum.ieee.org/feeds/feed.rss' },
+  { s: 'future', i: 'tech', n: 'MIT Technology Review', u: 'https://www.technologyreview.com/feed/' }
 ];
 
 function sh() {
@@ -102,9 +110,42 @@ module.exports = async (req, res) => {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey || !SERVICE_KEY) { res.status(500).json({ error: 'Not configured' }); return; }
 
+  // 0) translate a few older cards that have no translations yet (a few per run, errors ignored)
+  try {
+    const old = await fetch(SUPABASE_URL + '/rest/v1/edge_items?select=id,title,what_text,why_text&tr=is.null&hidden=eq.false&order=created_at.desc&limit=6', { headers: sh() });
+    const olds = old.ok ? await old.json() : [];
+    if (Array.isArray(olds) && olds.length) {
+      const bl = olds.map((o, k) => (k + 1) + '. ' + clip(o.title, 150) + ' | ' + clip(o.what_text, 400) + ' | ' + clip(o.why_text, 400)).join('\n');
+      const bp = 'Translate each numbered card (title | what | why) into Arabic, French, Spanish and Simplified Chinese. Keep names and numbers exactly. Reply with ONLY a JSON array, no other text. Each element: {"n":<number>,"tr":{"ar":{"t":"","w":"","y":""},"fr":{...},"es":{...},"zh":{...}}}.\n\n' + bl;
+      const br = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + apiKey },
+        body: JSON.stringify({ model: MODEL, messages: [{ role: 'user', content: bp }], max_completion_tokens: 7000, include_reasoning: false })
+      });
+      const bd = await br.json();
+      let bt = String((bd && bd.choices && bd.choices[0] && bd.choices[0].message && bd.choices[0].message.content) || '');
+      const arr = JSON.parse(bt.slice(bt.indexOf('['), bt.lastIndexOf(']') + 1));
+      for (const e of arr) {
+        const row = olds[(parseInt(e && e.n, 10) || 0) - 1];
+        if (!row || !e.tr) continue;
+        const tr = {};
+        for (const L of ['ar', 'fr', 'es', 'zh']) {
+          const x = e.tr[L];
+          const t = x && clip(x.t || x.title, 140), w = x && clip(x.w || x.what, 500), y = x && clip(x.y || x.why, 500);
+          if (t && w && y) tr[L] = { t, w, y };
+        }
+        if (Object.keys(tr).length) {
+          await fetch(SUPABASE_URL + '/rest/v1/edge_items?id=eq.' + encodeURIComponent(row.id), {
+            method: 'PATCH', headers: Object.assign(sh(), { Prefer: 'return=minimal' }), body: JSON.stringify({ tr })
+          });
+        }
+      }
+    }
+  } catch (e) { /* older cards stay English; try again next run */ }
+
   // 1) read feeds
   const results = await Promise.all(FEEDS.map(getFeed));
-  const report = results.map((r) => ({ industry: r.f.i, source: r.f.n, ok: r.ok, items: r.items.length, err: r.err }));
+  const report = results.map((r) => ({ section: r.f.s || 'edge', industry: r.f.i, source: r.f.n, ok: r.ok, items: r.items.length, err: r.err }));
 
   // 2) drop links we already have
   let known = new Set();
@@ -118,21 +159,21 @@ module.exports = async (req, res) => {
   for (const r of results) {
     for (const it of r.items) {
       if (known.has(it.link)) continue;
-      cand.push({ i: r.f.i, n: r.f.n, title: clip(it.title, 200), desc: clip(it.desc, 400), link: it.link, date: clip(it.date, 40) });
+      cand.push({ s: r.f.s || 'edge', i: r.f.i, n: r.f.n, title: clip(it.title, 200), desc: clip(it.desc, 400), link: it.link, date: clip(it.date, 40) });
     }
   }
   if (!cand.length) { res.status(200).json({ added: 0, note: 'Nothing new', report }); return; }
 
   // 3) one AI call
-  const list = cand.map((c, k) => (k + 1) + '. [' + c.i + '] ' + c.title + ' — ' + c.desc + ' (source: ' + c.n + ')').join('\n');
+  const list = cand.map((c, k) => (k + 1) + '. [' + c.s + '/' + c.i + '] ' + c.title + ' — ' + c.desc + ' (source: ' + c.n + ')').join('\n');
   const mkPrompt = (withTr) =>
-    'You help a learning app for students. Below are news items, numbered, each with an industry tag. ' +
-    'Choose at most 8 items that report a CONCRETE new development (a discovery, product, trial, policy, milestone). ' +
+    'You help a learning app for students. Below are items, numbered, each with a [section/industry] tag (edge = industry news, research = a new study or paper, future = an emerging technology or breakthrough). ' +
+    'Choose at most 12 items, at most 5 per section, that report a CONCRETE new development (a discovery, study result, product, trial, policy, milestone). ' +
     'Skip opinions, adverts, politics without a development, and anything unclear. ' +
     'For each chosen item write a card using ONLY the information given for that item. Never add facts, numbers or names that are not in the item. ' +
     'Reply with ONLY a JSON array, no other text. Each element: ' +
     '{"n":<item number>,"title":"max 90 characters","what":"1-2 plain sentences saying what happened","why":"1-2 careful sentences on why it may matter, without hype","status":"early" or "spec"}. ' +
-    'Use "spec" if the item is a claim, plan or forecast; otherwise "early". Write in English.' +
+    'Use "spec" if the item is a claim, plan or forecast; otherwise "early". For research items say what the researchers reported, in careful words such as "found" or "suggests", never as settled fact. Write in English.' +
     (withTr ? ' Also add to each element "tr":{"ar":{"t":"","w":"","y":""},"fr":{...},"es":{...},"zh":{...}} with the same title, what and why translated into Arabic, French, Spanish and Simplified Chinese (keep names and numbers exactly).' : '') +
     '\n\n' + list;
 
@@ -143,7 +184,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         model: MODEL,
         messages: [{ role: 'user', content: mkPrompt(withTr) }],
-        max_completion_tokens: withTr ? 9000 : 3500,
+        max_completion_tokens: withTr ? 12000 : 4500,
         include_reasoning: false
       })
     });
@@ -164,11 +205,14 @@ module.exports = async (req, res) => {
   // 4) validate and save (links must come from the feeds, never from the AI)
   const rows = [];
   const seen = new Set();
+  const perSec = {};
   for (const c of cards) {
     const src = cand[(parseInt(c && c.n, 10) || 0) - 1];
     if (!src || seen.has(src.link)) continue;
     const title = clip(c.title, 120), what = clip(c.what, 400), why = clip(c.why, 400);
     if (!title || !what || !why) continue;
+    if ((perSec[src.s] || 0) >= PER_SECTION) continue;
+    perSec[src.s] = (perSec[src.s] || 0) + 1;
     seen.add(src.link);
     const tr = {};
     if (hasTr && c.tr && typeof c.tr === 'object') {
@@ -179,7 +223,7 @@ module.exports = async (req, res) => {
       }
     }
     rows.push({
-      industry: src.i, title, what_text: what, why_text: why,
+      section: src.s, industry: src.i, title, what_text: what, why_text: why,
       status: c.status === 'spec' ? 'spec' : 'early',
       source_name: src.n, source_url: src.link,
       ...(Object.keys(tr).length ? { tr } : {}),
@@ -199,6 +243,16 @@ module.exports = async (req, res) => {
     // the translations column may not exist yet: save without it
     ins = await save(rows.map((x) => { const y = Object.assign({}, x); delete y.tr; return y; }));
   }
+  let saved = rows.length;
+  if (!ins.ok && rows.some((x) => x.section)) {
+    // the sections column may not exist yet (SQL 054 not run): save only the normal Edge cards, never mix the new sections in
+    const edgeOnly = rows.filter((x) => x.section === 'edge').map((x) => { const y = Object.assign({}, x); delete y.section; return y; });
+    saved = edgeOnly.length;
+    ins = edgeOnly.length ? await save(edgeOnly) : { ok: true };
+    if (!ins.ok && edgeOnly.some((x) => x.tr)) {
+      ins = await save(edgeOnly.map((x) => { const y = Object.assign({}, x); delete y.tr; return y; }));
+    }
+  }
   if (!ins.ok) { res.status(502).json({ error: 'Save failed', report }); return; }
-  res.status(200).json({ added: rows.length, report });
+  res.status(200).json({ added: saved, report });
 };
