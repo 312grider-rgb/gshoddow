@@ -122,7 +122,7 @@
   try{
     var EU='https://vauudtedojtcveiqajlr.supabase.co/rest/v1/edge_items?select=industry,title,what_text,why_text,status,source_name,source_url,as_of';
     var EQ='&hidden=eq.false&order=created_at.desc&limit=24',EH={headers:{apikey:'sb_publishable_mKrbrP7s7BLQgb6u0IQ8xg_wn--izVE'}};
-    fetch(EU+',tr'+EQ,EH).then(function(r){return r.ok?r:fetch(EU+EQ,EH)})
+    fetch(EU+',tr'+EQ+'&section=eq.edge',EH).then(function(r){return r.ok?r:fetch(EU+',tr'+EQ,EH)}).then(function(r){return r.ok?r:fetch(EU+EQ,EH)})
     .then(function(r){return r.ok?r.json():[]}).then(function(rows){
       if(!Array.isArray(rows))return;
       AUTO=rows.filter(function(x){return /^https:\/\//.test(x.source_url)}).map(function(x){return {auto:1,i:x.industry,t:x.title,s:x.status==='spec'?'spec':'early',w:x.what_text,h:'',y:x.why_text,d:x.as_of||'',sr:x.source_name,u:x.source_url,q:x.title,tr:x.tr}});
