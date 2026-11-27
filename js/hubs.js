@@ -68,12 +68,14 @@
           { title: 'Explore', tiles: true, links: [
             L('ai', 'Future Architect', 'Understand change and design your future', 'skillstream-future-architect.html'),
             L('library', 'Discoveries', 'Things you found and records you set', 'skillstream-discoveries.html'),
-            L('compass', 'World', 'See how countries are progressing, with real data', 'skillstream-world.html'),
             L('star', 'The Edge', 'What is new at the frontier of science and technology', 'skillstream-edge.html'),
+            L('book', 'Research', 'Scientific papers and new studies', 'skillstream-research.html'),
+            L('ai', 'Future Watch', 'Emerging technologies and scientific breakthroughs', 'skillstream-futurewatch.html'),
+            L('compass', 'World', 'See how countries are progressing, with real data', 'skillstream-world.html'),
             L('people', 'Opportunities', 'Opportunities to explore and save', 'skillstream-opportunities.html'),
             L('trophy', 'Scholarships', 'Official scholarship programmes and how to prepare', 'skillstream-scholarships.html'),
             L('teach', 'Jobs', 'Real job links and jobs posted by schools and employers', 'skillstream-jobs.html'),
-            L('book', 'Careers', 'Careers and what each subject leads to', 'skillstream-careers.html'),
+            L('book', 'Explore Careers', 'Future careers and skills', 'skillstream-careers.html'),
             L('compass', 'Worlds of knowledge', 'Explore and start learning', 'skillstream-discover.html')
           ] }
         ]

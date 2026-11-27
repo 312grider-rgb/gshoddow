@@ -37,7 +37,7 @@
     document.head.appendChild(s);
   }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-  var IND = { ai: 'AI', health: 'Health', energy: 'Energy', space: 'Space', computing: 'Computing', finance: 'Finance & economy', transport: 'Transport' };
+  var IND = { science: 'Science', tech: 'Technology', ai: 'AI', health: 'Health', energy: 'Energy', space: 'Space', computing: 'Computing', finance: 'Finance & economy', transport: 'Transport' };
   function indName(k) { return IND[k] ? T(IND[k]) : (k || ''); }
   function cut(s, n) { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; }
   function saved() { try { return JSON.parse(localStorage.getItem('lne_feed_saved') || '{}') || {}; } catch (e) { return {}; } }
@@ -47,13 +47,14 @@
   async function load(sb) {
     var edge = [], opp = [];
     try {
-      var r = await sb.from('edge_items').select('id,industry,title,what_text,why_text,source_name,created_at,tr').eq('hidden', false).order('created_at', { ascending: false }).limit(30);
+      var r = await sb.from('edge_items').select('id,industry,title,what_text,why_text,source_name,created_at,tr,section').eq('hidden', false).order('created_at', { ascending: false }).limit(40);
+      if (r.error) r = await sb.from('edge_items').select('id,industry,title,what_text,why_text,source_name,created_at,tr').eq('hidden', false).order('created_at', { ascending: false }).limit(30);
       if (r.error) r = await sb.from('edge_items').select('id,industry,title,what_text,why_text,source_name,created_at').eq('hidden', false).order('created_at', { ascending: false }).limit(30);
       if (!r.error && r.data) edge = r.data;
     } catch (e) {}
     try { var o = await sb.from('opportunities').select('id,kind,title,country,deadline,description,status').eq('status', 'published').limit(60); if (!o.error && o.data) opp = o.data.filter(function (x) { var d = x.deadline ? daysLeft(x.deadline) : null; return d === null || d >= 0; }); } catch (e) {}
     var cards = [];
-    edge.forEach(function (x) { cards.push({ id: 'e' + x.id, type: 'edge', tag: 'The Edge', ic: 'star', title: ((x.tr && x.tr[LANG] && x.tr[LANG].t) || x.title), text: cut((x.tr && x.tr[LANG] && x.tr[LANG].w) || x.what_text || x.why_text, 200), meta: indName(x.industry), href: 'skillstream-edge.html' }); });
+    edge.forEach(function (x) { var sc = x.section === 'research' ? ['Research', 'book', 'skillstream-research.html'] : x.section === 'future' ? ['Future Watch', 'ai', 'skillstream-futurewatch.html'] : ['The Edge', 'star', 'skillstream-edge.html']; cards.push({ id: 'e' + x.id, type: 'edge', tag: sc[0], ic: sc[1], title: ((x.tr && x.tr[LANG] && x.tr[LANG].t) || x.title), text: cut((x.tr && x.tr[LANG] && x.tr[LANG].w) || x.what_text || x.why_text, 200), meta: indName(x.industry), href: sc[2] }); });
     opp.forEach(function (x) { var d = x.deadline ? daysLeft(x.deadline) : null; cards.push({ id: 'o' + x.id, type: 'opp', tag: x.kind === 'scholarship' ? 'Scholarship' : 'Opportunity', ic: 'opp', title: x.title, text: cut(x.description, 200), meta: [x.country, d === null ? '' : (d === 0 ? T('Closes today') : T('Closes in') + ' ' + d + ' ' + T('days'))].filter(Boolean).join(' · '), href: 'skillstream-opportunities.html' }); });
     var facts = FACTS.map(function (f, i) { return { id: 'f' + i, type: 'fact', tag: 'Did you know', ic: 'ask', title: f[LANG] || f.en, text: '', meta: '', href: '', q: f.en }; });
     // shuffle each source, then take turns: edge, opportunity, fact, edge, ...
