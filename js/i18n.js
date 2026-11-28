@@ -108,7 +108,7 @@
   })();
 
   if (lang !== 'en') {
-    document.write('<script src="js/i18n-' + lang + '.js?v=20261128"><\/script>');
+    document.write('<script src="js/i18n-' + lang + '.js?v=20261129"><\/script>');
     // The data script has run by the time this next one executes (document.write scripts load in order).
     document.write('<script>window.LNE_I18N_START&&window.LNE_I18N_START()<\/script>');
   }
