@@ -227,6 +227,7 @@ $('joinBtn').onclick = async () => {
   const r = await sb.rpc('join_school', { p_code:code });
   $('joinBtn').disabled = false;
   if(r.error){ say('joinMsg', friendly(r.error), 'err'); return; }
+  if(!r.data){ say('joinMsg', T('That code was not found.'), 'err'); return; }
   say('joinMsg', ''); loadSchool();
 };
 $('addBtn').onclick = async () => {

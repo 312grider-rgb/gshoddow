@@ -173,6 +173,7 @@ $('doClaim').onclick = async () => {
   const r = await sb.rpc('family_claim_code', { p_code:code });
   $('doClaim').disabled = false;
   if(r.error){ say('msgB', r.error.message || T('Something went wrong. Please try again.'), false); return; }
+  if(!r.data){ say('msgB', T('That code is not valid. Ask the learner for a new one.'), false); return; }
   $('claim').value = ''; say('msgB', T('Done. You can now see the progress summary.'), true);
   refresh().catch(() => {});
 };
