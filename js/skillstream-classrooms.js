@@ -136,6 +136,7 @@
     // because a student cannot read a classroom before they are a member.
     const { data: cid, error: joinErr } = await db.rpc('join_classroom', { p_code: code.trim() });
     if (joinErr) return { ok: false, error: joinErr.message };
+    if (!cid) return { ok: false, error: 'No class found with that code.' };
     const { data: classroom } = await db.from('classrooms').select('*').eq('id', cid).single();
     return { ok: true, classroom: classroom || { id: cid } };
   }
