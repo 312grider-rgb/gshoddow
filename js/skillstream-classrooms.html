@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="js/i18n.js?v=1"></script>
+<link href="css/rtl.css?v=2" rel="stylesheet">
+
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');}catch(e){}</script>
+
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Classrooms — Learning Never Ends</title>
+<meta name="theme-color" content="#6B3A14"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#FBF7EF;--surface:#FFFFFF;--card:#FFFFFF;--border:#E9E2D2;
+--accent:#1F2E52;--accent-dark:#141F38;--on-accent:#FFFFFF;--live:#C0392B;--green:#4F7D57;
+--yellow:#B8892F;--blue:#C9A24E;--text:#141F38;--muted:#7A7466;
+--pill:#F3ECDA;--shadow:0 8px 30px rgba(20,31,56,0.14);
+--accent-soft:rgba(31,46,82,.07);--accent-line:rgba(31,46,82,.25);
+--topbar:linear-gradient(160deg,#141F38 0%,#1F2E52 100%);
+--radius:14px;--radius-sm:8px;--radius-full:9999px
+}
+html[data-theme="dark"]{
+--bg:#12172A;--surface:#1B2138;--card:#1B2138;--border:#2A3350;
+--accent:#C9A24E;--accent-dark:#B8923F;--on-accent:#141F38;--live:#E5604F;--green:#7FAF88;
+--yellow:#D9B366;--blue:#E4C583;--text:#EDE9DD;--muted:#9AA0B8;
+--pill:#232A45;--shadow:0 8px 30px rgba(0,0,0,0.5);
+--accent-soft:rgba(201,162,78,.14);--accent-line:rgba(201,162,78,.4);
+--topbar:linear-gradient(160deg,#0E1324 0%,#1B2138 100%)
+}
+html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:var(--radius-full)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;background:var(--topbar);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:22px;color:var(--text);text-decoration:none}
+.logo span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-btn{background:var(--pill);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+.nav-btn:hover{border-color:var(--accent);color:var(--text)}
+.page{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+.hidden{display:none !important}
+.att-date{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.att-day{flex:1;text-align:center;font-weight:800;font-size:14px;min-width:0}
+.att-hint{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 10px}
+.att-row{padding:10px 0;border-top:1px solid var(--border)}
+.att-row:first-child{border-top:none}
+.att-name{font-weight:700;font-size:14px;overflow-wrap:anywhere}
+.att-stats{font-size:11.5px;color:var(--muted);margin:2px 0 6px}
+.att-chips{display:flex;flex-wrap:wrap;gap:6px}
+.att-chip{border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:8px 12px;font-size:12.5px;font-weight:700;cursor:pointer;min-height:40px;font-family:inherit}
+.att-chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.att-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.att-actions .btn{flex:1 1 140px}
+h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+.action-row{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+.btn{padding:11px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;border:none;transition:all .2s}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-ghost{background:var(--pill);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--accent)}
+.group-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:22px 0 10px}
+.class-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.class-card:hover{border-color:var(--accent)}
+.class-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px}
+.class-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.class-code-pill{background:var(--pill);border:1px solid var(--border);border-radius:var(--radius-full);padding:5px 12px;font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap;font-family:'Syne',sans-serif;letter-spacing:.05em}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:24px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius)}
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:500;padding:16px}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px;width:100%;max-width:420px;max-height:88vh;overflow-y:auto}
+.modal h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:16px}
+label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.field{margin-bottom:14px}
+input[type=text],input[type=number],input[type=date],textarea{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:'Inter',sans-serif}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+textarea{resize:vertical;min-height:70px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.error-msg{background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.2);color:var(--live);border-radius:var(--radius-sm);padding:9px 11px;font-size:12px;margin-bottom:12px;display:none}
+/* Classroom detail */
+.back-link{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:13px;text-decoration:none;margin-bottom:14px;cursor:pointer}
+.back-link:hover{color:var(--text)}
+.class-header{background:var(--topbar);color:#FBF7EF;border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+.class-header .name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800}
+.class-header .meta{font-size:12px;color:rgba(251,247,239,.75);margin-top:4px}
+.class-header .code-box{display:inline-flex;align-items:center;gap:8px;background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:8px 14px;margin-top:12px;font-family:'Syne',sans-serif;font-weight:800;letter-spacing:.1em;color:#E4C583}
+.class-header .code-box{background:rgba(255,255,255,.1);border-color:rgba(228,197,131,.5)}
+.tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;flex-shrink:0}
+.tab{padding:10px 14px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.subtabs{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 14px}
+.pill{padding:9px 16px;min-height:40px;box-sizing:border-box;border:1.5px solid var(--border);border-radius:20px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+.pill.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px}
+.card-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.card-body{font-size:13px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+.attach-pill{display:inline-flex;align-items:center;gap:5px;background:var(--pill);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 10px;font-size:11px;margin:8px 6px 0 0;text-decoration:none;color:var(--blue)}
+.roster-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.roster-item:last-child{border-bottom:none}
+.roster-dot{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.due{font-size:11px;font-weight:700;padding:3px 9px;border-radius:var(--radius-full);background:rgba(255,185,48,.12);color:var(--yellow)}
+.due.overdue{background:rgba(255,61,90,.12);color:var(--live)}
+.pts{font-size:11px;color:var(--muted);font-weight:700}
+.submit-box{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.file-input-btn{display:inline-block;background:var(--pill);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;cursor:pointer;color:var(--muted)}
+.grade-badge{font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:var(--green)}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#000;border-radius:var(--radius-full);padding:12px 28px;font-weight:800;font-size:14px;z-index:600;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:all .4s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:var(--live);color:#fff}
+.qz-row{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px}
+.qz-row input[type=text]{margin-bottom:8px}
+.qz-choice-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.qz-choice-row input[type=radio]{accent-color:var(--accent);flex-shrink:0}
+.qz-choice-row input[type=text]{margin-bottom:0}
+.remove-q{background:none;border:none;color:var(--live);cursor:pointer;font-size:11px;font-weight:700}
+.chat-msg{padding:7px 0;font-size:13px}
+.chat-msg .who{font-weight:700;color:var(--accent);margin-right:6px}
+.chat-msg .when{color:var(--muted);font-size:10px;margin-left:6px}
+.grade-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.grade-row:last-child{border-bottom:none}
+.grade-avg{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--accent)}
+
+/* --- Learning Never Ends look (matches the dashboards) --- */
+.topbar{background:var(--topbar) !important;border-bottom:1px solid rgba(255,255,255,.08) !important}
+.topbar .logo{color:#FBF7EF !important;font-size:17px !important;white-space:nowrap}
+.topbar{padding:0 14px !important;gap:8px}
+.topbar .nav-btn{padding:8px 11px !important;font-size:12px !important;white-space:nowrap}
+.topbar .logo span{background:linear-gradient(135deg,#E4C583,#C9A24E) !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important}
+.topbar .nav-btn{background:rgba(255,255,255,.08) !important;border-color:rgba(255,255,255,.18) !important;color:#FBF7EF !important}
+.topbar .nav-btn:hover{border-color:#C9A24E !important}
+.ln-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);border-top:1px solid var(--border);padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around}
+.ln-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:10.5px;font-weight:600;background:none;border:none;padding:4px 8px;border-radius:10px;cursor:pointer;text-decoration:none}
+.ln-nav-item .ln-nav-icon{font-size:19px;line-height:1}
+.ln-nav-item.active{color:var(--text)}
+@media (min-width:900px){.ln-bottom-nav{display:none}}
+
+.online-strip{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:12px;font-size:12px;color:rgba(251,247,239,.85)}
+.online-strip .pulse{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 0 rgba(74,222,128,.6);animation:onl 2s infinite}
+@keyframes onl{70%{box-shadow:0 0 0 7px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+.online-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:9999px;padding:3px 10px;font-weight:600;font-size:12px}
+.online-dot{width:9px;height:9px;border-radius:50%;background:#4ade80;margin-left:auto;flex-shrink:0}
+.roster-item{align-items:center}
+.online-tag{font-size:11px;color:var(--green);font-weight:700;margin-left:8px}
+header.top{background:linear-gradient(160deg,#141F38 0%,#1F2E52 100%);color:#FBF7EF;padding:22px 20px 26px}
+header.top .eyebrow{font-size:11.5px;letter-spacing:2.2px;text-transform:uppercase;color:#E4C583;margin-bottom:6px;font-weight:600}
+header.top h1{margin:0;font-size:24px;font-weight:600;color:#FBF7EF}
+a.btn{text-decoration:none}
+/* --- calmer class page: one gold button per screen, readable fonts, warm header --- */
+html:not([data-theme="dark"]) .class-header{background:linear-gradient(160deg,#6B3A14 0%,#A25A1C 100%) !important;padding:14px 16px;margin-bottom:12px}
+.class-header .name{font-family:'Inter',sans-serif !important;font-size:19px;font-weight:700}
+.class-header .meta{font-size:12px}
+.class-header .code-box{margin-top:8px;padding:6px 8px 6px 12px;font-size:12px;gap:4px 8px;flex-wrap:wrap;letter-spacing:0 !important;font-family:'Inter',sans-serif !important;max-width:100%}
+.class-header .code-box #dCode{font-weight:800;letter-spacing:1px}
+#shareClassBtn{padding:6px 12px !important;font-size:12px !important;margin-inline-start:4px !important}
+#dLive{margin-top:10px !important;gap:6px !important}
+html:not([data-theme="dark"]) #dLive .btn{padding:7px 12px;font-size:12.5px;border-radius:12px !important;white-space:nowrap;min-height:0;box-shadow:none !important;background:rgba(255,255,255,.14) !important;color:#FBF7EF !important;border:1px solid rgba(255,255,255,.4) !important}
+#dLive [data-ic]{display:none}
+.card-title,.class-name,.group-label,.btn,.tab,.pill{font-family:'Inter',sans-serif !important}
+html:not([data-theme="dark"]) #tab-recordings .card .btn-primary{background:transparent !important;color:#8A4B1C !important;border:1.5px solid #C9A24E !important;box-shadow:none !important}
+.lesson-type{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:#F3E6CC;color:#6B3A14;margin-inline-end:6px}
+.lesson-open{cursor:pointer}
+.page{padding-bottom:130px}
+#dOnline{display:none!important}
+.class-header{padding:16px}
+</style>
+<style>
+/* class page: real counts and tab tiles */
+.cstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.cstats div{background:#FFFBF2;border:1.5px solid #E7D3B0;border-radius:16px;padding:10px 2px;text-align:center}
+.cstats b{display:block;font-size:22px;font-weight:800;color:#5A3214;line-height:1.2}
+.cstats span{display:block;font-size:11px !important;line-height:1.3;font-weight:600;color:#8a6a4a;overflow-wrap:normal;word-break:normal}
+html[data-theme="dark"] .cstats div{background:#2a1d12;border-color:#4a3420}
+html[data-theme="dark"] .cstats b{color:#F3E6D3}
+.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;border-bottom:0;overflow:visible;margin-bottom:14px}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;white-space:normal;min-width:0;overflow-wrap:normal;word-break:normal;padding:10px 6px;font-size:14.5px;border:1.5px solid #E7D3B0;border-bottom-width:1.5px;border-radius:16px;background:#FFFBF2;color:#5A3214;min-height:84px}
+.tab .ai-ic{width:38px;height:38px;min-width:38px;border-radius:11px;margin:0 !important;flex:0 0 auto}
+.tab .ai-ic svg{width:20px;height:20px}
+.tab.active{border-color:#D4872A;background:#FFF3D6;color:#5A3214;box-shadow:0 4px 12px -6px rgba(138,75,28,.5)}
+.tab:last-child:nth-child(odd){grid-column:1/-1}
+html[data-theme="dark"] .tab{background:#2a1d12;border-color:#4a3420;color:#F3E6D3}
+html[data-theme="dark"] .tab.active{background:#3a2814;border-color:#D4872A}
+/* learner: my attendance */
+.myatt{background:#FFFBF2;border:1.5px solid #E7D3B0;border-radius:16px;padding:12px;margin:0 0 12px}
+.myatt h4{margin:0 0 8px;font-size:14px;color:#5A3214}
+.myatt .mrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;text-align:center}
+.myatt .mrow div{background:#F8EFE0;border-radius:12px;padding:6px 2px}
+.myatt .mrow b{display:block;font-size:18px;color:#5A3214}
+.myatt .mrow span{font-size:11px !important;color:#8a6a4a;font-weight:600}
+.myatt .mlast{margin-top:8px;font-size:12.5px;color:#8a6a4a;line-height:1.6}
+html[data-theme="dark"] .myatt{background:#2a1d12;border-color:#4a3420}
+html[data-theme="dark"] .myatt h4,html[data-theme="dark"] .myatt .mrow b{color:#F3E6D3}
+html[data-theme="dark"] .myatt .mrow div{background:#3a2814}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="eyebrow">Learning Never Ends</div>
+  <h1>Messages</h1>
+</header>
+
+<div class="page">
+
+  <!-- LIST VIEW -->
+  <div id="listView">
+    <h1>Classrooms</h1>
+    <div class="sub" id="listSub">Your classes. Tap one to see lessons, work and messages.</div>
+    <div class="action-row">
+      <button class="btn btn-primary" id="joinMainBtn" onclick="openModal('joinModal')"><span data-ic="user"></span>Join a class</button>
+      <button class="btn btn-ghost hidden" id="createMainBtn" onclick="openModal('createModal')">+ Create Classroom</button>
+    </div>
+
+    <div id="teachingBox"><div class="group-label">Teaching</div>
+    <div id="teachingList"></div></div>
+
+    <div id="enrolledBox"><div class="group-label" id="enrolledLabel">Enrolled</div>
+    <div id="enrolledList"></div></div>
+  </div>
+
+  <!-- DETAIL VIEW -->
+  <div id="detailView" class="hidden">
+    <div class="back-link" onclick="showList()">← All classrooms</div>
+    <div class="class-header">
+      <div class="name" id="dName"></div>
+      <div class="meta" id="dMeta"></div>
+      <div class="code-box hidden" id="dCodeBox">Class code: <span id="dCode"></span> <button class="btn btn-ghost" type="button" id="shareClassBtn" style="margin-inline-start:10px">Share link</button></div>
+      <div class="online-strip hidden" id="dOnline"></div>
+      <div id="dLive" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn btn-primary" id="liveBtn" href="#" target="_blank" rel="noopener"><span data-ic="room"></span> <span id="liveLbl">Join live class</span></a>
+        <button class="btn btn-ghost hidden" type="button" id="liveTell">Tell students</button>
+      </div>
+    </div>
+    <div class="cstats" id="dStats">
+      <div><b id="stStudents">0</b><span>Students</span></div>
+      <div><b id="stWork">0</b><span>Work</span></div>
+      <div><b id="stQuiz">0</b><span>Quizzes</span></div>
+    </div>
+    <div class="myatt hidden" id="myAtt"></div>
+    <div class="tabs">
+      <div class="tab active" data-tab="lessons" onclick="switchTab('recordings')"><span data-ic="book"></span>Lessons</div>
+      <div class="tab" data-tab="work" onclick="switchTab('assignments')"><span data-ic="hw"></span>Work</div>
+      <div class="tab" data-tab="chat" onclick="switchTab('chat')"><span data-ic="chat"></span>Chat</div>
+      <div class="tab" data-tab="stream" onclick="switchTab('stream')"><span data-ic="bell"></span>News</div>
+      <div class="tab hidden" id="tabManage" data-tab="people" onclick="switchTab('people')"><span data-ic="gear"></span>Manage</div>
+    </div>
+    <div class="hidden" id="tabAttBtn"></div>
+    <div class="subtabs hidden" id="subTabs">
+      <span class="pill" data-sub="assignments" onclick="switchTab('assignments')">Assignments</span>
+      <span class="pill" data-sub="quizzes" onclick="switchTab('quizzes')">Quizzes</span>
+      <span class="pill" data-sub="grades" onclick="switchTab('grades')">Grades</span>
+      <span class="pill" data-sub="people" onclick="switchTab('people')">Students</span>
+      <span class="pill" data-sub="attendance" onclick="switchTab('attendance')">Attendance</span>
+    </div>
+
+    <div id="tab-stream">
+      <div class="action-row" id="announceActionRow"></div>
+      <div id="announceList"></div>
+    </div>
+
+    <div id="tab-assignments" class="hidden">
+      <div class="action-row" id="assignActionRow"></div>
+      <div id="assignList"></div>
+    </div>
+
+    <div id="tab-quizzes" class="hidden">
+      <div class="action-row" id="quizActionRow"></div>
+      <div id="quizList"></div>
+    </div>
+
+    <div id="tab-grades" class="hidden">
+      <div id="gradesView"></div>
+    </div>
+
+    <div id="tab-chat" class="hidden">
+      <div class="card-meta" id="chatOnline" style="margin-bottom:8px"></div>
+      <div class="card" style="max-height:380px;overflow-y:auto" id="chatLog"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input type="text" id="chatInput" placeholder="Message the class…" style="flex:1" onkeydown="if(event.key==='Enter'){sendChat();}"/>
+        <button class="btn btn-primary" onclick="sendChat()">Send</button>
+      </div>
+      <div id="chatAttach"></div>
+    </div>
+
+    <div id="tab-recordings" class="hidden">
+      <div class="action-row hidden" id="recTools">
+        <button type="button" class="btn btn-primary" id="recMain"><span data-ic="mic"></span> <span id="recLbl">Record a lesson</span></button>
+      </div>
+      <div class="action-row hidden" id="recChoices">
+        <button type="button" class="btn btn-ghost" id="recBtn">Voice only</button>
+        <a class="btn btn-ghost" id="recBoardBtn" href="#">With whiteboard</a>
+        <a class="btn btn-ghost" id="recPicBtn" href="#">With pictures</a>
+        <button type="button" class="btn btn-ghost" id="recLinkBtn">Add a link</button>
+      </div>
+      <div class="card-meta hidden" id="recNote" style="margin:6px 0">Lessons are kept for 30 days.</div>
+      <div id="recLive" class="card hidden" style="text-align:center"></div>
+      <div id="recList"></div>
+    </div>
+
+    <div id="tab-attendance" class="hidden">
+      <div class="card">
+        <div class="att-date">
+          <button type="button" class="btn btn-ghost" id="attPrev" aria-label="Previous day">&#8249;</button>
+          <div class="att-day" id="attDay" data-no-i18n></div>
+          <button type="button" class="btn btn-ghost" id="attNext" aria-label="Next day">&#8250;</button>
+        </div>
+        <div class="att-hint">Tap a status for each student, then save. Only you can see the whole class. Each student sees only their own marks.</div>
+        <div id="attList"></div>
+        <div class="att-actions">
+          <button type="button" class="btn btn-ghost" id="attAll">Mark everyone present</button>
+          <button type="button" class="btn btn-primary" id="attSave">Save attendance</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-people" class="hidden">
+      <div class="card">
+        <div class="card-title" id="teacherLine" data-uid-line="1"></div>
+      </div>
+      <div class="action-row hidden" id="stuTools"><button type="button" class="btn btn-primary" id="stuAddBtn">Add a student without email</button></div>
+      <div class="group-label">Students (<span id="studentCount">0</span>)</div>
+      <div class="card" id="rosterCard"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT WITHOUT EMAIL MODAL -->
+<div class="modal-bg hidden" id="stuModal">
+  <div class="modal">
+    <h2>Add a student without email</h2>
+    <div id="stuStep1">
+      <label>Student's name</label>
+      <input type="text" id="stuName" maxlength="60" autocomplete="off">
+      <label style="margin-top:10px">Student's WhatsApp number (optional)</label>
+      <input type="tel" id="stuPhone" inputmode="tel" placeholder="+249..." autocomplete="off" style="width:100%;box-sizing:border-box">
+      <div class="card-meta" style="margin-top:6px">The app makes a username and a secret code. Give them to the student. The code is shown only once.</div>
+      <div class="error-msg" id="stuErr"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('stuModal')">Cancel</button>
+        <button type="button" class="btn btn-primary" id="stuCreate">Create</button>
+      </div>
+    </div>
+    <div id="stuStep2" class="hidden">
+      <div class="card" style="font-size:16px;line-height:1.9;white-space:pre-wrap" id="stuCard" data-no-i18n></div>
+      <div class="card-meta" style="margin-top:6px">Save or send it now. Anyone with this link can log in as the student, so send it only to the student. Later you can make a new code from the Manage tab.</div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" id="stuCopyLink">Copy link</button>
+        <button type="button" class="btn btn-ghost" id="stuCopy">Copy all</button>
+        <a class="btn btn-ghost" id="stuShare" target="_blank" rel="noopener noreferrer" href="#">Send by WhatsApp</a>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('stuModal')">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE QUIZ MODAL -->
+<div class="modal-bg hidden" id="quizModal">
+  <div class="modal">
+    <h2>New Quiz</h2>
+    <div class="field"><label>Quiz Title</label><input type="text" id="qzTitle" placeholder="e.g. Chapter 3 Check"/></div>
+    <div id="qzQuestions"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:14px" onclick="addQuestionRow()">+ Add Question</button>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('quizModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitQuizCreate()">Create Quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAKE QUIZ MODAL -->
+<div class="modal-bg hidden" id="takeQuizModal">
+  <div class="modal">
+    <h2 id="tqTitle">Quiz</h2>
+    <div id="tqQuestions"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('takeQuizModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitQuizAnswers()">Submit Quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE CLASSROOM MODAL -->
+<div class="modal-bg hidden" id="createModal">
+  <div class="modal">
+    <h2>Create a Classroom</h2>
+    <div class="error-msg" id="createError"></div>
+    <div class="field"><label>Class Name</label><input type="text" id="cName" placeholder="e.g. AP Biology, Guitar Basics"/></div>
+    <div class="field"><label>Subject</label><input type="text" id="cSubject" placeholder="e.g. Science, Music"/></div>
+    <div class="field"><label>Description</label><textarea id="cDesc" placeholder="What will students learn?"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('createModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCreate()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN MODAL -->
+<div class="modal-bg hidden" id="joinModal">
+  <div class="modal">
+    <h2>Join a Classroom</h2>
+    <div class="error-msg" id="joinError"></div>
+    <div class="field"><label>Class Code</label><input type="text" id="jCode" placeholder="e.g. 7XQP2K" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700"/></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('joinModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitJoin()">Join</button>
+    </div>
+  </div>
+</div>
+
+<!-- POST ANNOUNCEMENT MODAL -->
+<div class="modal-bg hidden" id="announceModal">
+  <div class="modal">
+    <h2>Post Announcement</h2>
+    <div class="field"><label>Title</label><input type="text" id="aTitle" placeholder="e.g. Class moved to Friday"/></div>
+    <div class="field"><label>Message</label><textarea id="aBody" placeholder="Write your announcement…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('announceModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAnnouncement()">Post</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE ASSIGNMENT MODAL -->
+<div class="modal-bg hidden" id="assignModal">
+  <div class="modal">
+    <h2>New Assignment</h2>
+    <div class="field"><label>Title</label><input type="text" id="asTitle" placeholder="e.g. Chapter 3 worksheet"/></div>
+    <div class="field"><label>Instructions</label><textarea id="asDesc" placeholder="What should students do?"></textarea></div>
+    <div class="field"><label>Due Date</label><input type="date" id="asDue"/></div>
+    <div class="field"><label>Points</label><input type="number" id="asPoints" value="100"/></div>
+    <div class="field">
+      <label>Attach File (optional)</label>
+      <input type="file" id="asFile" style="font-size:12px"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('assignModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAssignment()">Post Assignment</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="recLinkModal">
+  <div class="modal">
+    <h2>Add a recorded lesson link</h2>
+    <div class="error-msg" id="recLinkError"></div>
+    <div class="field"><label>Title</label><input type="text" id="rlTitle" maxlength="120" placeholder="e.g. Lesson 3 — Fractions"/></div>
+    <div class="field"><label>Link (https://)</label><input type="url" id="rlUrl" maxlength="500" placeholder="https://youtu.be/..."/></div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" onclick="closeModal('recLinkModal')">Cancel</button>
+      <button type="button" class="btn btn-primary" id="rlSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+<script src="skillstream-auth.js"></script>
+<script src="js/learntabs.js" defer></script>
+<script src="js/nav.js" defer></script>
+<script src="js/lne-chatfiles.js?v=1"></script>
+<script src="skillstream-classrooms.js"></script>
+<script>
+let me = null;
+let currentClassId = null;
+let currentClassroom = null; // cached hydrated classroom while detail view is open
+
+function showToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (error ? ' error' : '') + ' show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function fmtDate(ts) { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); }
+
+/* ---------- LIST VIEW ---------- */
+async function renderList() {
+  const teachEl = document.getElementById('teachingList');
+  const enrEl = document.getElementById('enrolledList');
+  try {
+    const { teaching, enrolled } = await SSClass.myClasses();
+    let unread = (window._lneUnread && window._lneUnread.ready) ? window._lneUnread.map : {};
+
+    var tRole = false; try { tRole = localStorage.getItem('lne_role') === 'teacher'; } catch (e) {}
+    const isT = tRole || teaching.length > 0;
+    const sh = (id, on) => { const e = document.getElementById(id); if (e) e.classList.toggle('hidden', !on); };
+    sh('createMainBtn', isT); sh('teachingBox', isT); sh('enrolledBox', !isT || enrolled.length > 0);
+    document.getElementById('joinMainBtn').className = isT ? 'btn btn-ghost' : 'btn btn-primary';
+    document.getElementById('createMainBtn').className = isT ? 'btn btn-primary' : 'btn btn-ghost hidden';
+    document.getElementById('enrolledLabel').textContent = isT ? 'Enrolled' : 'My classes';
+    document.getElementById('listSub').textContent = isT ? 'Your classes and students.' : 'Your classes. Tap one to see lessons, work and messages.';
+    const badge = (id) => unread[id] ? `<span class="class-code-pill" style="background:var(--live);color:#fff;border-color:var(--live)">${unread[id]} new</span>` : '';
+
+    teachEl.innerHTML = teaching.length ? teaching.map(c => `
+      <div class="class-card" onclick="openClass('${c.id}')">
+        <div><div class="class-name">${escapeHtml(c.name)}</div><div class="class-meta">${c.students.length} student${c.students.length===1?'':'s'} · ${escapeHtml(c.subject||'General')}</div></div>
+        <div style="display:flex;gap:6px;align-items:center">${badge(c.id)}<div class="class-code-pill">${c.code}</div></div>
+      </div>`).join('') : '<div class="empty">You\'re not teaching any classes yet.</div>';
+
+    enrEl.innerHTML = enrolled.length ? enrolled.map(c => `
+      <div class="class-card" onclick="openClass('${c.id}')">
+        <div><div class="class-name">${escapeHtml(c.name)}</div><div class="class-meta">Taught by ${escapeHtml(c.teacherName)} · ${escapeHtml(c.subject||'General')}</div></div>
+        ${badge(c.id)}
+      </div>`).join('') : '<div class="empty">Tap Join a class and type the code from your teacher.</div>';
+    // the "new" badges arrive a moment later and never hold the list back
+    if (!(window._lneUnread && window._lneUnread.ready)) {
+      SSClass.unreadCounts({ teaching, enrolled }).then(function (u) {
+        window._lneUnread = { ready: true, map: u };
+        if (Object.keys(u).length) renderList();
+      }).catch(function () {});
+    }
+  } catch (e) {
+    console.error('renderList error:', e);
+    teachEl.innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error: ${String(e.message).replace(/[&<>"']/g,'')}</div>`;
+    enrEl.innerHTML = '';
+  }
+}
+
+async function submitCreate() {
+  const name = document.getElementById('cName').value.trim();
+  const subject = document.getElementById('cSubject').value.trim();
+  const description = document.getElementById('cDesc').value.trim();
+  const err = document.getElementById('createError');
+  const btn = document.querySelector('#createModal .btn-primary');
+  btn.textContent = 'Creating…'; btn.disabled = true;
+  try {
+    const result = await SSClass.create({ name, subject, description });
+    btn.textContent = 'Create'; btn.disabled = false;
+    if (!result.ok) { err.textContent = result.error; err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    closeModal('createModal');
+    document.getElementById('cName').value = ''; document.getElementById('cSubject').value = ''; document.getElementById('cDesc').value = '';
+    await renderList();
+    showToast('✅ Classroom created — code: ' + result.classroom.code);
+  } catch (e) {
+    btn.textContent = 'Create'; btn.disabled = false;
+    console.error('submitCreate error:', e);
+    err.textContent = 'Error: ' + (e && e.message ? e.message : String(e));
+    err.style.display = 'block';
+  }
+}
+
+async function shareClassLink() {
+  const c = currentClassroom; if (!c) return;
+  const url = location.origin + location.pathname.replace(/[^\/]*$/, '') + 'skillstream-classrooms.html?join=' + encodeURIComponent(c.code);
+  try { if (navigator.share) { await navigator.share({ title: c.name, text: 'Join my class "' + c.name + '" on Learning Never Ends', url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(url); showToast('✅ Link copied'); } catch (e) { prompt('Copy this link:', url); }
+}
+document.addEventListener('click', e => { if (e.target && e.target.id === 'shareClassBtn') shareClassLink(); });
+
+async function submitJoin() {
+  const code = document.getElementById('jCode').value.trim();
+  const result = await SSClass.join(code);
+  const err = document.getElementById('joinError');
+  if (!result.ok) { err.textContent = result.error; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  closeModal('joinModal');
+  document.getElementById('jCode').value = '';
+  await renderList();
+  showToast('✅ Joined ' + result.classroom.name);
+}
+
+/* ---------- DETAIL VIEW ---------- */
+async function openClass(id) {
+  currentClassId = id;
+  await SSClass.markSeen(id);
+  window._lneUnread = null;
+  try { document.getElementById('dName').textContent = 'Loading…'; } catch (e) {}
+  document.getElementById('listView').classList.add('hidden');
+  document.getElementById('detailView').classList.remove('hidden');
+  await renderDetail();
+  switchTab('recordings');
+  startPresence();
+}
+function showList() {
+  stopPresence();
+  currentClassId = null;
+  currentClassroom = null;
+  document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('listView').classList.remove('hidden');
+  renderList();
+}
+function isTeacherOfCurrent(c) { return c.teacherEmail === me.id; }
+
+async function renderDetail() {
+  const c = await SSClass.get(currentClassId);
+  if (!c) { showList(); return; }
+  currentClassroom = c;
+  const teaching = isTeacherOfCurrent(c);
+
+  document.getElementById('dName').textContent = c.name;
+  document.getElementById('dMeta').innerHTML = '<span data-no-i18n>' + escapeHtml(c.subject || 'General') + '</span> · ' + (teaching ? '<span>You are the mentor</span>' : '<span>Mentored by</span> <span data-no-i18n>' + escapeHtml(c.teacherName) + '</span>');
+  document.getElementById('stStudents').textContent = (c.students || []).length;
+  document.getElementById('stWork').textContent = (c.assignments || []).length;
+  document.getElementById('stQuiz').textContent = (c.quizzes || []).length;
+  loadMyAttendance(c, teaching);
+  document.getElementById('dCodeBox').classList.toggle('hidden', !teaching);
+  document.getElementById('tabAttBtn').classList.toggle('hidden', !teaching);
+  document.getElementById('tabManage').classList.toggle('hidden', !teaching);
+  document.getElementById('dCode').textContent = c.code;
+  document.getElementById('liveBtn').href = 'https://meet.jit.si/LNE-' + String(c.id).replace(/-/g, '');
+  document.getElementById('liveLbl').textContent = teaching ? 'Start live class' : 'Join live class';
+  document.getElementById('liveTell').classList.toggle('hidden', !teaching);
+
+  // Stream tab
+  document.getElementById('announceActionRow').innerHTML = teaching
+    ? `<button class="btn btn-primary" onclick="openModal('announceModal')"><span data-ic="chat"></span>Post Announcement</button>` : '';
+  document.getElementById('announceList').innerHTML = c.announcements.length ? c.announcements.map(a => `
+    <div class="card">
+      <div class="card-title">${escapeHtml(a.title || '(no title)')}</div>
+      <div class="card-meta">${escapeHtml(a.authorName)} · ${fmtDate(a.createdAt)}</div>
+      <div class="card-body">${escapeHtml(a.body)}</div>
+    </div>`).join('') : '<div class="empty">No announcements yet.</div>';
+
+  // Assignments tab
+  document.getElementById('assignActionRow').innerHTML = teaching
+    ? `<button class="btn btn-primary" onclick="openModal('assignModal')">+ New Assignment</button>` : '';
+  document.getElementById('assignList').innerHTML = c.assignments.length ? c.assignments.map(a => renderAssignment(c, a, teaching)).join('') : '<div class="empty">No assignments posted yet.</div>';
+
+  // Quizzes tab
+  renderQuizzes();
+
+  // People tab
+  document.getElementById('teacherLine').textContent = '👩‍🏫 ' + c.teacherName + ' (Teacher)';
+  document.getElementById('stuTools').classList.toggle('hidden', !isTeacherOfCurrent(c));
+  document.getElementById('studentCount').textContent = c.students.length;
+  document.getElementById('rosterCard').innerHTML = c.students.length ? c.students.map(s => `
+    <div class="roster-item" data-uid="${escapeHtml(s.email)}"><div class="roster-dot">${escapeHtml(s.name.charAt(0).toUpperCase())}</div>${escapeHtml(s.name)}<span class="online-dot hidden" title="Online now"></span>${isTeacherOfCurrent(c) ? '<button type="button" class="btn btn-ghost" style="margin-inline-start:auto;padding:4px 10px;font-size:12px" data-newcode="' + escapeHtml(s.email) + '" data-nm="' + escapeHtml(s.name) + '">New code</button>' : ''}</div>
+  `).join('') : '<div style="color:var(--muted);font-size:13px">No students enrolled yet. Share the class code!</div>';
+}
+
+
+/* ---------- ONLINE NOW (live presence) ----------
+   Uses Supabase Realtime presence on a channel per classroom. Nothing is stored
+   in the database: people appear while they have the class open and disappear
+   when they leave or close the page. Only people who open this class join it,
+   and the channel name contains the class id. */
+let presenceChannel = null;
+let onlineIds = new Set();
+function stopPresence() {
+  try { if (presenceChannel) { SSAuth.client.removeChannel(presenceChannel); } } catch (e) {}
+  presenceChannel = null; onlineIds = new Set();
+}
+function nameForId(id) {
+  const c = currentClassroom; if (!c) return 'Someone';
+  if (id === me.id) return 'You';
+  if (id === c.teacherEmail) return c.teacherName + ' (teacher)';
+  const st = (c.students || []).find(x => x.email === id);
+  return st ? st.name : 'Someone';
+}
+function renderOnline() {
+  const strip = document.getElementById('dOnline');
+  const chat = document.getElementById('chatOnline');
+  const ids = Array.from(onlineIds);
+  if (strip) {
+    strip.classList.toggle('hidden', !ids.length);
+    strip.innerHTML = ids.length
+      ? `<span class="pulse"></span><span>${ids.length} online now</span>` + ids.slice(0, 8).map(id => `<span class="online-chip">${escapeHtml(nameForId(id))}</span>`).join('') + (ids.length > 8 ? `<span class="online-chip">+${ids.length - 8}</span>` : '')
+      : '';
+  }
+  if (chat) chat.textContent = ids.length ? `🟢 ${ids.length} online in this class` : '';
+  document.querySelectorAll('#rosterCard .roster-item').forEach(el => {
+    const dot = el.querySelector('.online-dot'); if (dot) dot.classList.toggle('hidden', !onlineIds.has(el.dataset.uid));
+  });
+  const tl = document.getElementById('teacherLine');
+  if (tl && currentClassroom) {
+    const base = '👩‍🏫 ' + currentClassroom.teacherName + ' (Teacher)';
+    tl.innerHTML = escapeHtml(base) + (onlineIds.has(currentClassroom.teacherEmail) ? '<span class="online-tag">● online</span>' : '');
+  }
+}
+function startPresence() {
+  stopPresence();
+  try {
+    const sbc = SSAuth.client;
+    if (!sbc || !sbc.channel || !currentClassId || !me) return;
+    const ch = sbc.channel('class-online-' + currentClassId, { config: { presence: { key: me.id } } });
+    ch.on('presence', { event: 'sync' }, () => {
+      onlineIds = new Set(Object.keys(ch.presenceState() || {}));
+      renderOnline();
+    });
+    ch.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') { try { await ch.track({ at: Date.now() }); } catch (e) {} }
+    });
+    presenceChannel = ch;
+  } catch (e) { console.warn('presence unavailable:', e && e.message); }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && currentClassId && !presenceChannel) startPresence();
+});
+window.addEventListener('pagehide', stopPresence);
+
+function escapeHtml(str) {
+  const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML;
+}
+
+function renderAssignment(c, a, teaching) {
+  const overdue = a.dueDate && new Date(a.dueDate) < new Date();
+  const dueChip = a.dueDate ? `<span class="due ${overdue ? 'overdue' : ''}">Due ${fmtDate(new Date(a.dueDate).getTime())}</span>` : '';
+  const attachHtml = (a.attachments || []).map(f => `<a class="attach-pill" href="${escapeHtml(f.data)}" download="${escapeHtml(f.name)}">📎 ${escapeHtml(f.name)}</a>`).join('');
+
+  let bodyExtra = '';
+  if (teaching) {
+    const subs = c.submissions[a.id] || [];
+    bodyExtra = `<div class="submit-box"><div class="card-meta">${subs.length} of ${c.students.length} submitted</div>` +
+      subs.map(s => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border);font-size:12px">
+          <span>${escapeHtml(s.studentName)}${s.grade !== null && s.grade !== undefined ? '' : ' · not graded'}</span>
+          <span>
+            ${s.grade !== null && s.grade !== undefined ? `<span class="grade-badge">${s.grade}/${a.points}</span>` : `<button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="gradePrompt('${a.id}','${s.studentEmail}',${a.points})">Grade</button>`}
+          </span>
+        </div>`).join('') || '<div style="font-size:12px;color:var(--muted);margin-top:6px">No submissions yet.</div>';
+    bodyExtra += '</div>';
+  } else {
+    const mySub = (c.submissions[a.id] || []).find(s => s.studentEmail === me.id);
+    if (mySub) {
+      bodyExtra = `<div class="submit-box"><div class="card-meta">✅ Submitted ${fmtDate(mySub.submittedAt)}${mySub.grade !== null && mySub.grade !== undefined ? ' · Grade: ' + mySub.grade + '/' + a.points : ' · Awaiting grade'}</div>
+      ${mySub.feedback ? `<div class="card-body" style="margin-top:4px">💬 ${escapeHtml(mySub.feedback)}</div>` : ''}
+      </div>`;
+    } else {
+      bodyExtra = `<div class="submit-box">
+        <textarea id="subtext_${a.id}" placeholder="Type your answer or notes…" style="margin-bottom:8px"></textarea>
+        <input type="file" id="subfile_${a.id}" style="font-size:12px;margin-bottom:8px"/><br/>
+        <button class="btn btn-primary" style="padding:8px 16px;font-size:12px" onclick="submitWork('${a.id}')">Submit</button>
+      </div>`;
+    }
+  }
+
+  return `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div class="card-title">${escapeHtml(a.title)}</div>
+      <span class="pts">${a.points} pts</span>
+    </div>
+    <div class="card-meta">${dueChip} Posted ${fmtDate(a.createdAt)}</div>
+    <div class="card-body">${escapeHtml(a.description)}</div>
+    ${attachHtml}
+    ${bodyExtra}
+  </div>`;
+}
+
+const TAB_GROUPS = { stream: ['stream'], work: ['assignments', 'quizzes', 'grades'], chat: ['chat'], lessons: ['recordings'], people: ['people', 'attendance'] };
+function switchTab(name) {
+  const group = Object.keys(TAB_GROUPS).find(g => TAB_GROUPS[g].indexOf(name) >= 0);
+  if (!group) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === group));
+  ['stream', 'assignments', 'quizzes', 'grades', 'chat', 'people', 'recordings', 'attendance'].forEach(t => document.getElementById('tab-' + t).classList.toggle('hidden', t !== name));
+  const teaching = !document.getElementById('tabAttBtn').classList.contains('hidden');
+  const members = TAB_GROUPS[group].filter(m => m !== 'attendance' || teaching);
+  const bar = document.getElementById('subTabs');
+  bar.classList.toggle('hidden', members.length < 2);
+  bar.querySelectorAll('.pill').forEach(p => { p.classList.toggle('hidden', members.indexOf(p.dataset.sub) < 0); p.classList.toggle('active', p.dataset.sub === name); });
+  if (name === 'attendance') renderAttendance();
+  if (name === 'grades') renderGrades();
+  if (name === 'chat') renderChat();
+  if (name === 'recordings') renderRecordings();
+}
+
+
+/* ---------- STUDENTS WITHOUT EMAIL (the teacher makes the account; the server does the secure part) ---------- */
+async function stuCall(payload) {
+  const ses = await SSAuth.client.auth.getSession();
+  const tok = ses.data && ses.data.session && ses.data.session.access_token;
+  if (!tok) throw new Error('Please log in again');
+  const r = await fetch('/api/class-students', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok }, body: JSON.stringify(payload) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.error || 'Something went wrong');
+  return j;
+}
+function stuShow(name, username, code) {
+  const text = name + '\nUsername: ' + username + '\nCode: ' + code + '\nTap to log in: ' + location.origin + '/skillstream-login.html#u=' + encodeURIComponent(username) + '&c=' + encodeURIComponent(code);
+  document.getElementById('stuStep1').classList.add('hidden'); document.getElementById('stuStep2').classList.remove('hidden');
+  document.getElementById('stuCard').textContent = text;
+  const ph = (document.getElementById('stuPhone').value || '').replace(/\D/g, '');
+  document.getElementById('stuShare').href = 'https://wa.me/' + (ph.length >= 8 && ph.length <= 15 ? ph : '') + '?text=' + encodeURIComponent(text);
+  const link = location.origin + '/skillstream-login.html#u=' + encodeURIComponent(username) + '&c=' + encodeURIComponent(code);
+  document.getElementById('stuCopyLink').onclick = () => { try { navigator.clipboard.writeText(link); showToast('Link copied'); } catch (e) { showToast('Could not copy', true); } };
+  document.getElementById('stuCopy').onclick = () => { try { navigator.clipboard.writeText(text); showToast('Copied'); } catch (e) { showToast('Could not copy', true); } };
+  openModal('stuModal');
+}
+document.getElementById('stuAddBtn').addEventListener('click', () => {
+  document.getElementById('stuName').value = ''; document.getElementById('stuPhone').value = ''; document.getElementById('stuErr').textContent = '';
+  document.getElementById('stuStep1').classList.remove('hidden'); document.getElementById('stuStep2').classList.add('hidden');
+  openModal('stuModal');
+});
+document.getElementById('stuCreate').addEventListener('click', async () => {
+  const c = currentClassroom, btn = document.getElementById('stuCreate'), err = document.getElementById('stuErr');
+  const name = document.getElementById('stuName').value.trim(); err.textContent = '';
+  if (!c || name.length < 2) { err.textContent = "Please type the student's name"; return; }
+  btn.disabled = true;
+  try { const j = await stuCall({ action: 'create', classroom_id: c.id, name }); stuShow(j.name || name, j.username, j.code); openClass(c.id).catch(() => {}); }
+  catch (e) { err.textContent = e.message; }
+  btn.disabled = false;
+});
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('[data-newcode]'); if (!b) return;
+  if (!confirm('Make a new code for ' + b.dataset.nm + '? The old code stops working.')) return;
+  b.disabled = true;
+  try { const j = await stuCall({ action: 'reset', classroom_id: currentClassroom.id, student_id: b.dataset.newcode }); stuShow(b.dataset.nm, j.username, j.code); }
+  catch (e) { showToast(e.message, true); }
+  b.disabled = false;
+});
+
+
+/* ---------- RECORDINGS (teacher records audio or adds a link; students of the class listen) ---------- */
+const REC_MAX_SEC = 3600;
+let recState = null; // { mr, chunks, stream, t0, timer, mime, classId }
+function recMime() {
+  const c = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+  for (const m of c) { try { if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; } catch (e) {} }
+  return '';
+}
+function recFmt(sec) { const m = Math.floor(sec / 60), s = sec % 60; return m + ':' + String(s).padStart(2, '0'); }
+async function renderRecordings() {
+  const c = currentClassroom; if (!c) return;
+  const teaching = isTeacherOfCurrent(c);
+  document.getElementById('recTools').classList.toggle('hidden', !teaching);
+  document.getElementById('recBoardBtn').href = 'skillstream-whiteboard.html?class=' + encodeURIComponent(c.id);
+  document.getElementById('recPicBtn').href = 'skillstream-record.html?class=' + encodeURIComponent(c.id);
+  document.getElementById('recNote').classList.toggle('hidden', !teaching);
+  const list = document.getElementById('recList');
+  const { data, error } = await SSAuth.client.from('class_recordings')
+    .select('id,kind,title,audio_path,board_path,link_url,duration_sec,created_at,expires_at')
+    .eq('classroom_id', c.id).order('created_at', { ascending: false }).limit(60);
+  if (error) { list.innerHTML = '<div class="empty">Could not load recordings.</div>'; return; }
+  // the older lessons (voice + pictures) live in the same tab
+  let olds = [];
+  try { const o = await SSAuth.client.rpc('list_class_lessons', { p_class: c.id }); if (!o.error && Array.isArray(o.data)) olds = o.data; } catch (e) {}
+  const oldHtml = olds.map(l => {
+    const dur = l.duration_ms ? ' · ' + recFmt(Math.round(l.duration_ms / 1000)) + ' min' : '';
+    return { t: new Date(l.created_at).getTime() || 0, h: '<div class="card lesson-open" style="margin-bottom:10px" onclick="location.href=\'skillstream-lessons.html?l=' + encodeURIComponent(l.id) + '\'"><div class="card-title">' + escapeHtml(l.title) + '</div><div class="card-meta"><span class="lesson-type">Pictures</span>' + escapeHtml(fmtDate(l.created_at) + dur) + '</div></div>' };
+  });
+  if ((!data || !data.length) && !oldHtml.length) { list.innerHTML = '<div class="empty">No recorded lessons yet.</div>'; return; }
+  const newHtml = (data || []).map(r => {
+    const when = fmtDate(r.created_at);
+    const body = r.kind === 'link'
+      ? '<a class="btn btn-ghost" href="' + escapeHtml(r.link_url) + '" target="_blank" rel="noopener noreferrer">Open the lesson</a>'
+      : (r.board_path ? '<a class="btn btn-primary" href="skillstream-whiteboard.html?lesson=' + encodeURIComponent(r.id) + '">Watch with whiteboard</a>' : '') + '<button type="button" class="btn btn-ghost" data-play="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path) + '">Play</button><div data-slot="' + escapeHtml(r.id) + '"></div>';
+    const dur = r.duration_sec ? ' · ' + recFmt(r.duration_sec) + ' min' : '';
+    const exp = (r.kind === 'audio' && r.expires_at) ? ' · until ' + fmtDate(r.expires_at) : '';
+    const del = teaching ? ' <button type="button" class="btn btn-ghost" data-del="' + escapeHtml(r.id) + '" data-path="' + escapeHtml(r.audio_path || '') + '" data-board="' + escapeHtml(r.board_path || '') + '">Delete</button>' : '';
+    const inner = '<div class="card-title">' + escapeHtml(r.title) + '</div><div class="card-meta"><span class="lesson-type">' + (r.kind === 'link' ? 'Link' : (r.board_path ? 'Whiteboard' : 'Voice')) + '</span>' + escapeHtml(when + dur + exp) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' + body + del + '</div>';
+    return { t: new Date(r.created_at).getTime() || 0, h: '<div class="card" style="margin-bottom:10px">' + inner + '</div>' };
+  });
+  list.innerHTML = newHtml.concat(oldHtml).sort((x, y) => y.t - x.t).map(x => x.h).join('');
+}
+document.addEventListener('click', async ev => {
+  const pl = ev.target.closest && ev.target.closest('[data-play]');
+  if (pl) {
+    const slot = document.querySelector('[data-slot="' + pl.dataset.play + '"]');
+    if (!slot || slot.firstChild) return;
+    pl.disabled = true;
+    const { data, error } = await SSAuth.client.storage.from('class-audio').createSignedUrl(pl.dataset.path, 3600);
+    pl.disabled = false;
+    if (error || !data) { showToast('Could not load the audio', true); return; }
+    const a = document.createElement('audio'); a.controls = true; a.preload = 'none'; a.src = data.signedUrl; a.style.cssText = 'width:100%;margin-top:6px';
+    slot.appendChild(a); a.play().catch(() => {}); return;
+  }
+  const dl = ev.target.closest && ev.target.closest('[data-del]');
+  if (dl) {
+    if (!confirm('Delete this recording for everyone?')) return;
+    dl.disabled = true;
+    if (dl.dataset.path) { await SSAuth.client.storage.from('class-audio').remove(dl.dataset.board ? [dl.dataset.path, dl.dataset.board] : [dl.dataset.path]); }
+    const { error } = await SSAuth.client.from('class_recordings').delete().eq('id', dl.dataset.del);
+    if (error) { showToast('Could not delete', true); dl.disabled = false; return; }
+    showToast('Deleted'); renderRecordings();
+  }
+});
+function recLive(html) { const el = document.getElementById('recLive'); el.classList.toggle('hidden', !html); el.innerHTML = html || ''; }
+async function recStart() {
+  const c = currentClassroom; if (!c || !isTeacherOfCurrent(c)) return;
+  if (!navigator.mediaDevices || !window.MediaRecorder) { showToast('This browser cannot record audio', true); return; }
+  const mime = recMime();
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch (e) { showToast('Microphone is not allowed. Allow it in the browser settings.', true); return; }
+  const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+  const st = { mr, chunks: [], stream, t0: Date.now(), mime: mr.mimeType || mime || 'audio/webm', classId: c.id, timer: null };
+  recState = st;
+  mr.ondataavailable = e => { if (e.data && e.data.size) st.chunks.push(e.data); };
+  mr.onstop = () => recFinish(st);
+  mr.start(5000);
+  document.getElementById('recLbl').textContent = 'Stop recording';
+  const tick = () => {
+    const sec = Math.floor((Date.now() - st.t0) / 1000);
+    recLive('<b>● Recording</b> ' + recFmt(sec) + ' / 60:00<div class="card-meta">Keep this page open. Tap "Stop recording" when finished.</div>');
+    if (sec >= REC_MAX_SEC) recStop();
+  };
+  tick(); st.timer = setInterval(tick, 1000);
+}
+function recStop() {
+  const st = recState; if (!st) return;
+  clearInterval(st.timer);
+  try { if (st.mr.state !== 'inactive') st.mr.stop(); } catch (e) {}
+  try { st.stream.getTracks().forEach(t => t.stop()); } catch (e) {}
+}
+async function recFinish(st) {
+  recState = null;
+  document.getElementById('recLbl').textContent = 'Record a lesson';
+  const sec = Math.max(1, Math.min(REC_MAX_SEC, Math.round((Date.now() - st.t0) / 1000)));
+  const base = (st.mime.split(';')[0] || 'audio/webm');
+  const ext = base.indexOf('mp4') >= 0 ? 'm4a' : base.indexOf('ogg') >= 0 ? 'ogg' : 'webm';
+  const blob = new Blob(st.chunks, { type: base });
+  if (blob.size < 1000) { recLive(''); showToast('Nothing was recorded', true); return; }
+  if (blob.size > 60 * 1024 * 1024) { recLive(''); showToast('Recording is too large (max 60 MB)', true); return; }
+  let title = (prompt('Name this recording:', 'Lesson ' + new Date().toLocaleDateString()) || '').trim().slice(0, 120);
+  if (!title) title = 'Lesson ' + new Date().toLocaleDateString();
+  recLive('Saving… please wait');
+  const path = st.classId + '/' + Date.now() + '.' + ext;
+  const up = await SSAuth.client.storage.from('class-audio').upload(path, blob, { contentType: base, upsert: false });
+  if (up.error) { recLive(''); showToast('Could not save the audio', true); return; }
+  const ins = await SSAuth.client.from('class_recordings').insert({ classroom_id: st.classId, kind: 'audio', title, audio_path: path, duration_sec: sec });
+  if (ins.error) {
+    await SSAuth.client.storage.from('class-audio').remove([path]);
+    recLive(''); showToast(ins.error.message && ins.error.message.indexOf('20 audio') >= 0 ? 'This class already has 20 audio recordings. Delete an old one first.' : 'Could not save', true); return;
+  }
+  recLive(''); showToast('Recording saved'); renderRecordings();
+}
+document.getElementById('recMain').addEventListener('click', () => { if (recState) recStop(); else document.getElementById('recChoices').classList.toggle('hidden'); });
+document.getElementById('recBtn').addEventListener('click', () => { document.getElementById('recChoices').classList.add('hidden'); recState ? recStop() : recStart(); });
+document.getElementById('recLinkBtn').addEventListener('click', () => {
+  document.getElementById('recChoices').classList.add('hidden');
+  document.getElementById('rlTitle').value = ''; document.getElementById('rlUrl').value = '';
+  document.getElementById('recLinkError').textContent = ''; openModal('recLinkModal');
+});
+document.getElementById('rlSave').addEventListener('click', async () => {
+  const c = currentClassroom; if (!c) return;
+  const title = document.getElementById('rlTitle').value.trim(), url = document.getElementById('rlUrl').value.trim();
+  const err = document.getElementById('recLinkError');
+  if (!title) { err.textContent = 'Please add a title.'; return; }
+  if (!/^https:\/\/\S+$/i.test(url) || url.length > 500) { err.textContent = 'The link must start with https://'; return; }
+  const { error } = await SSAuth.client.from('class_recordings').insert({ classroom_id: c.id, kind: 'link', title, link_url: url });
+  if (error) { err.textContent = 'Could not save the link.'; return; }
+  closeModal('recLinkModal'); showToast('Link added'); renderRecordings();
+});
+window.addEventListener('pagehide', () => { try { if (recState) recStop(); } catch (e) {} });
+
+/* ---------- ATTENDANCE (teacher only; marks are saved by a database function that checks the teacher) ---------- */
+const ATT_STATUS = [['present','Present'],['late','Late'],['absent','Absent'],['excused','Excused']];
+let attOffset = 0, attMarks = {}, attHist = {};
+function attIso(off) { const d = new Date(); d.setDate(d.getDate() + off); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function attLabel(off) {
+  const d = new Date(); d.setDate(d.getDate() + off);
+  const base = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  return off === 0 ? base : base;
+}
+async function loadMyAttendance(c, teaching) {
+  const box = document.getElementById('myAtt');
+  box.classList.add('hidden'); box.textContent = '';
+  if (teaching) return;
+  try {
+    const ses = await SSAuth.client.auth.getSession();
+    const uid = ses.data && ses.data.session && ses.data.session.user.id; if (!uid) return;
+    const r = await SSAuth.client.from('class_attendance').select('day,status').eq('classroom_id', c.id).eq('student_id', uid).gte('day', attIso(-60)).order('day', { ascending: false });
+    const rows = (r && r.data) || [];
+    if (r.error || !rows.length) return; // nothing marked yet: show nothing
+    const t = (x) => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(x) : x;
+    const cnt = { present: 0, late: 0, absent: 0, excused: 0 };
+    rows.forEach(x => { if (cnt[x.status] !== undefined) cnt[x.status]++; });
+    const h = document.createElement('h4'); h.textContent = 'My attendance'; box.appendChild(h);
+    const g = document.createElement('div'); g.className = 'mrow';
+    ATT_STATUS.forEach(a => { const d = document.createElement('div'); const b = document.createElement('b'); b.textContent = cnt[a[0]]; const sp = document.createElement('span'); sp.textContent = a[1]; d.appendChild(b); d.appendChild(sp); g.appendChild(d); });
+    box.appendChild(g);
+    const l = document.createElement('div'); l.className = 'mlast'; l.setAttribute('data-no-i18n', '');
+    const lab = {}; ATT_STATUS.forEach(a => { lab[a[0]] = t(a[1]); });
+    l.textContent = rows.slice(0, 5).map(x => new Date(x.day + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ': ' + (lab[x.status] || x.status)).join(' · ');
+    box.appendChild(l);
+    box.classList.remove('hidden');
+  } catch (e) { /* attendance is optional: hide on any problem */ }
+}
+async function renderAttendance() {
+  const c = currentClassroom; if (!c || !isTeacherOfCurrent(c)) return;
+  const db = SSAuth.client;
+  document.getElementById('attDay').textContent = attLabel(attOffset);
+  document.getElementById('attNext').disabled = attOffset >= 0;
+  document.getElementById('attPrev').disabled = attOffset <= -60;
+  const day = attIso(attOffset), since = attIso(-60);
+  const r = await db.from('class_attendance').select('student_id,day,status').eq('classroom_id', c.id).gte('day', since);
+  const rows = (r && r.data) || [];
+  attMarks = {}; attHist = {};
+  rows.forEach(x => {
+    if (x.day === day) attMarks[x.student_id] = x.status;
+    attHist[x.student_id] = attHist[x.student_id] || { present:0, late:0, absent:0, excused:0 };
+    if (attHist[x.student_id][x.status] !== undefined) attHist[x.student_id][x.status]++;
+  });
+  paintAttendance();
+}
+function paintAttendance() {
+  const c = currentClassroom, box = document.getElementById('attList'); box.textContent = '';
+  if (!c.students.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'No students enrolled yet. Share the class code!'; box.appendChild(e); return; }
+  c.students.forEach(s => {
+    const row = document.createElement('div'); row.className = 'att-row';
+    const nm = document.createElement('div'); nm.className = 'att-name'; nm.textContent = s.name; nm.setAttribute('data-no-i18n', ''); row.appendChild(nm);
+    const h = attHist[s.email] || { present:0, late:0, absent:0, excused:0 };
+    const st = document.createElement('div'); st.className = 'att-stats'; st.setAttribute('data-no-i18n', '');
+    st.textContent = ATT_STATUS.map(a => ((window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(a[1]) : a[1]) + ' ' + h[a[0]]).join(' · ');
+    row.appendChild(st);
+    const chips = document.createElement('div'); chips.className = 'att-chips'; chips.setAttribute('role', 'group');
+    ATT_STATUS.forEach(a => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'att-chip'; b.textContent = a[1];
+      b.setAttribute('aria-pressed', attMarks[s.email] === a[0] ? 'true' : 'false');
+      b.onclick = () => { attMarks[s.email] = a[0]; chips.querySelectorAll('.att-chip').forEach((x, i) => x.setAttribute('aria-pressed', ATT_STATUS[i][0] === a[0] ? 'true' : 'false')); };
+      chips.appendChild(b);
+    });
+    row.appendChild(chips); box.appendChild(row);
+  });
+}
+document.getElementById('attPrev').onclick = () => { if (attOffset > -60) { attOffset--; renderAttendance(); } };
+document.getElementById('attNext').onclick = () => { if (attOffset < 0) { attOffset++; renderAttendance(); } };
+document.getElementById('attAll').onclick = () => { const c = currentClassroom; if (!c) return; c.students.forEach(s => { attMarks[s.email] = 'present'; }); paintAttendance(); };
+document.getElementById('attSave').onclick = async () => {
+  const c = currentClassroom; if (!c) return;
+  const marks = c.students.filter(s => attMarks[s.email]).map(s => ({ student_id: s.email, status: attMarks[s.email] }));
+  if (!marks.length) { showToast('Mark at least one student first.', true); return; }
+  const btn = document.getElementById('attSave'); btn.disabled = true;
+  const r = await SSAuth.client.rpc('mark_attendance', { p_class: c.id, p_day: attIso(attOffset), p_marks: marks });
+  btn.disabled = false;
+  if (r.error) { showToast('Could not save attendance. Please try again.', true); return; }
+  showToast('Attendance saved.'); renderAttendance();
+};
+
+/* ---------- QUIZZES ---------- */
+function renderQuizzes() {
+  const c = currentClassroom;
+  const teaching = isTeacherOfCurrent(c);
+  document.getElementById('quizActionRow').innerHTML = teaching
+    ? `<button class="btn btn-primary" onclick="openQuizBuilder()">+ New Quiz</button>` : '';
+  document.getElementById('quizList').innerHTML = c.quizzes.length ? c.quizzes.map(q => {
+    const results = c.quizResults[q.id] || [];
+    const totalPts = q.questions.reduce((s, x) => s + (x.points || 1), 0);
+    if (teaching) {
+      return `<div class="card">
+        <div class="card-title">${escapeHtml(q.title)}</div>
+        <div class="card-meta">${q.questions.length} question${q.questions.length===1?'':'s'} · ${totalPts} pts · ${results.length}/${c.students.length} completed</div>
+        ${results.map(r => `<div class="grade-row"><span>${escapeHtml(r.studentName)}</span><span class="grade-badge">${r.score}/${r.total}</span></div>`).join('') || '<div style="color:var(--muted);font-size:12px">No attempts yet.</div>'}
+      </div>`;
+    } else {
+      const mine = results.find(r => r.studentEmail === me.id);
+      return `<div class="card">
+        <div class="card-title">${escapeHtml(q.title)}</div>
+        <div class="card-meta">${q.questions.length} question${q.questions.length===1?'':'s'} · ${totalPts} pts</div>
+        ${mine
+          ? `<div class="card-body">✅ Completed — score: <span class="grade-badge">${mine.score}/${mine.total}</span></div>`
+          : `<button class="btn btn-primary" style="padding:8px 16px;font-size:12px;margin-top:8px" onclick="takeQuiz('${q.id}')">Take Quiz</button>`}
+      </div>`;
+    }
+  }).join('') : '<div class="empty">No quizzes yet.</div>';
+}
+
+let qzQuestionCount = 0;
+function openQuizBuilder() {
+  document.getElementById('qzTitle').value = '';
+  document.getElementById('qzQuestions').innerHTML = '';
+  qzQuestionCount = 0;
+  addQuestionRow();
+  openModal('quizModal');
+}
+function addQuestionRow() {
+  const idx = qzQuestionCount++;
+  const wrap = document.createElement('div');
+  wrap.className = 'qz-row';
+  wrap.id = 'qzq_' + idx;
+  wrap.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <label style="margin:0">Question ${idx + 1}</label>
+      <button class="remove-q" onclick="document.getElementById('qzq_${idx}').remove()">Remove</button>
+    </div>
+    <input type="text" placeholder="Question text" id="qzq_${idx}_text"/>
+    ${[0,1,2,3].map(i => `
+      <div class="qz-choice-row">
+        <input type="radio" name="qzq_${idx}_correct" value="${i}" ${i===0?'checked':''}/>
+        <input type="text" placeholder="Choice ${i+1}" id="qzq_${idx}_choice${i}"/>
+      </div>`).join('')}
+    <input type="number" placeholder="Points (default 1)" id="qzq_${idx}_points" value="1" style="margin-top:4px"/>
+  `;
+  document.getElementById('qzQuestions').appendChild(wrap);
+}
+async function submitQuizCreate() {
+  const title = document.getElementById('qzTitle').value.trim();
+  const rows = document.querySelectorAll('#qzQuestions .qz-row');
+  const questions = [];
+  rows.forEach(row => {
+    const idx = row.id.split('_')[1];
+    const qText = document.getElementById(`qzq_${idx}_text`).value.trim();
+    const choices = [0,1,2,3].map(i => document.getElementById(`qzq_${idx}_choice${i}`).value.trim()).filter(Boolean);
+    const correctRadio = document.querySelector(`input[name="qzq_${idx}_correct"]:checked`);
+    const correctIndex = correctRadio ? parseInt(correctRadio.value) : 0;
+    const points = parseInt(document.getElementById(`qzq_${idx}_points`).value) || 1;
+    if (qText && choices.length >= 2) questions.push({ q: qText, choices, correctIndex, points });
+  });
+  if (!title || !questions.length) { showToast('Add a title and at least one complete question', true); return; }
+  const result = await SSClass.addQuiz(currentClassId, { title, questions });
+  if (!result.ok) { showToast(result.error, true); return; }
+  closeModal('quizModal');
+  await renderDetail();
+  showToast('✅ Quiz created');
+}
+
+let takingQuizId = null;
+function takeQuiz(quizId) {
+  const c = currentClassroom;
+  const quiz = c.quizzes.find(q => q.id === quizId);
+  if (!quiz) return;
+  takingQuizId = quizId;
+  document.getElementById('tqTitle').textContent = quiz.title;
+  document.getElementById('tqQuestions').innerHTML = quiz.questions.map((q, i) => `
+    <div class="qz-row">
+      <div style="font-weight:700;margin-bottom:8px">${i + 1}. ${escapeHtml(q.q)}</div>
+      ${q.choices.map((ch, ci) => `
+        <div class="qz-choice-row">
+          <input type="radio" name="tqq_${i}" value="${ci}"/>
+          <label style="font-weight:400;text-transform:none;font-size:13px;color:var(--text)">${escapeHtml(ch)}</label>
+        </div>`).join('')}
+    </div>`).join('');
+  openModal('takeQuizModal');
+}
+async function submitQuizAnswers() {
+  const c = currentClassroom;
+  const quiz = c.quizzes.find(q => q.id === takingQuizId);
+  const answers = quiz.questions.map((q, i) => {
+    const checked = document.querySelector(`input[name="tqq_${i}"]:checked`);
+    return checked ? parseInt(checked.value) : -1;
+  });
+  const result = await SSClass.submitQuiz(currentClassId, takingQuizId, answers);
+  if (!result.ok) { showToast(result.error, true); return; }
+  closeModal('takeQuizModal');
+  await renderDetail();
+  showToast(`✅ Scored ${result.score}/${result.total}`);
+}
+
+/* ---------- GRADES ---------- */
+function renderGrades() {
+  const c = currentClassroom;
+  const teaching = isTeacherOfCurrent(c);
+  const el = document.getElementById('gradesView');
+
+  if (teaching) {
+    if (!c.students.length) { el.innerHTML = '<div class="empty">No students enrolled yet.</div>'; return; }
+    el.innerHTML = c.students.map(s => {
+      const rows = [];
+      c.assignments.forEach(a => {
+        const sub = (c.submissions[a.id] || []).find(x => x.studentEmail === s.email);
+        rows.push(`<div class="grade-row"><span>${escapeHtml(a.title)}</span><span>${sub && sub.grade !== null && sub.grade !== undefined ? sub.grade + '/' + a.points : '—'}</span></div>`);
+      });
+      c.quizzes.forEach(q => {
+        const r = (c.quizResults[q.id] || []).find(x => x.studentEmail === s.email);
+        rows.push(`<div class="grade-row"><span>${escapeHtml(q.title)} (quiz)</span><span>${r ? r.score + '/' + r.total : '—'}</span></div>`);
+      });
+      return `<div class="card"><div class="card-title">${escapeHtml(s.name)}</div>${rows.join('') || '<div style="color:var(--muted);font-size:12px">No grades yet.</div>'}</div>`;
+    }).join('');
+  } else {
+    const rows = [];
+    let earned = 0, possible = 0;
+    c.assignments.forEach(a => {
+      const sub = (c.submissions[a.id] || []).find(x => x.studentEmail === me.id);
+      if (sub && sub.grade !== null && sub.grade !== undefined) { earned += sub.grade; possible += a.points; }
+      rows.push(`<div class="grade-row"><span>${escapeHtml(a.title)}</span><span>${sub && sub.grade !== null && sub.grade !== undefined ? sub.grade + '/' + a.points : (sub ? 'Awaiting grade' : 'Not submitted')}</span></div>`);
+    });
+    c.quizzes.forEach(q => {
+      const r = (c.quizResults[q.id] || []).find(x => x.studentEmail === me.id);
+      if (r) { earned += r.score; possible += r.total; }
+      rows.push(`<div class="grade-row"><span>${escapeHtml(q.title)} (quiz)</span><span>${r ? r.score + '/' + r.total : 'Not taken'}</span></div>`);
+    });
+    const pct = possible ? Math.round((earned / possible) * 100) : null;
+    el.innerHTML = `
+      <div class="card" style="text-align:center">
+        <div class="grade-avg">${pct !== null ? pct + '%' : '—'}</div>
+        <div class="card-meta">Overall grade</div>
+      </div>
+      <div class="card">${rows.join('') || '<div style="color:var(--muted);font-size:12px">No graded work yet.</div>'}</div>`;
+  }
+}
+
+/* ---------- CHAT ---------- */
+function renderChat() {
+  const c = currentClassroom;
+  const msgs = c.messages || [];
+  const log = document.getElementById('chatLog');
+  log.innerHTML = msgs.length ? msgs.map(m => `
+    <div class="chat-msg"><span class="who">${escapeHtml(m.authorName)}</span>${m.attachPath ? '' : escapeHtml(m.text)}${m.attachPath ? LNE_CHAT.slot(m.attachPath, m.attachKind, m.attachName) : ''}<span class="when">${new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></div>
+  `).join('') : '<div class="empty">No messages yet — say hi!</div>';
+  log.scrollTop = log.scrollHeight;
+  try {
+    const host = document.getElementById('chatAttach');
+    if (host && !host.firstChild) LNE_CHAT.bar(host, () => (currentClassId && me) ? {
+      sb: SSAuth.client, folder: 'c/' + currentClassId + '/' + me.id,
+      send: async (att) => { await SSClass.postAttachment(currentClassId, att); currentClassroom = await SSClass.get(currentClassId); renderChat(); }
+    } : null);
+    LNE_CHAT.hydrate(SSAuth.client, log).then(() => { log.scrollTop = log.scrollHeight; });
+  } catch (e) {}
+}
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const result = await SSClass.postMessage(currentClassId, text);
+  if (!result.ok) { showToast(result.error, true); return; }
+  input.value = '';
+  currentClassroom = await SSClass.get(currentClassId);
+  renderChat();
+}
+
+async function tellLive() {
+  const result = await SSClass.addAnnouncement(currentClassId, { title: 'Live class is starting now', body: 'Your teacher is starting a live class. Tap Join live class at the top of this class to join.' });
+  if (!result.ok) { showToast(result.error, true); return; }
+  await renderDetail();
+  showToast('✅ Students have been told');
+}
+document.addEventListener('click', e => { if (e.target && e.target.id === 'liveTell') tellLive(); });
+
+async function submitAnnouncement() {
+  const title = document.getElementById('aTitle').value.trim();
+  const body = document.getElementById('aBody').value.trim();
+  if (!body) { showToast('Write a message first', true); return; }
+  const result = await SSClass.addAnnouncement(currentClassId, { title, body });
+  if (!result.ok) { showToast(result.error, true); return; }
+  document.getElementById('aTitle').value = ''; document.getElementById('aBody').value = '';
+  closeModal('announceModal');
+  await renderDetail();
+  showToast('📢 Announcement posted');
+}
+
+function getSelectedFile(fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return null;
+  if (file.size > 8 * 1024 * 1024) { showToast('File too large (max 8MB)', true); return null; }
+  return { _file: file, name: file.name, type: file.type };
+}
+
+async function submitAssignment() {
+  const title = document.getElementById('asTitle').value.trim();
+  const description = document.getElementById('asDesc').value.trim();
+  const dueDate = document.getElementById('asDue').value;
+  const points = parseInt(document.getElementById('asPoints').value) || 100;
+  if (!title) { showToast('Give the assignment a title', true); return; }
+  const file = getSelectedFile(document.getElementById('asFile'));
+  const result = await SSClass.addAssignment(currentClassId, { title, description, dueDate, points, attachments: file ? [file] : [] });
+  if (!result.ok) { showToast(result.error, true); return; }
+  ['asTitle', 'asDesc', 'asDue'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('asPoints').value = 100;
+  closeModal('assignModal');
+  await renderDetail();
+  showToast('✅ Assignment posted');
+}
+
+async function submitWork(assignmentId) {
+  const text = document.getElementById('subtext_' + assignmentId).value.trim();
+  const fileInput = document.getElementById('subfile_' + assignmentId);
+  const file = getSelectedFile(fileInput);
+  if (!text && !file) { showToast('Add a note or attach a file', true); return; }
+  const result = await SSClass.addSubmission(currentClassId, assignmentId, { text, attachments: file ? [file] : [] });
+  if (!result.ok) { showToast(result.error, true); return; }
+  await renderDetail();
+  showToast('✅ Submitted');
+}
+
+async function gradePrompt(assignmentId, studentEmail, maxPoints) {
+  const grade = prompt(`Grade out of ${maxPoints}:`);
+  if (grade === null || grade.trim() === '') return;
+  const feedback = prompt('Feedback (optional):') || '';
+  await SSClass.gradeSubmission(currentClassId, assignmentId, studentEmail, { grade: parseInt(grade), feedback });
+  await renderDetail();
+  showToast('✅ Grade saved');
+}
+
+(async () => {
+  try {
+    const jq = new URLSearchParams(window.location.search).get('join');
+    if (jq && /^[A-Za-z0-9]{4,12}$/.test(jq)) { try { localStorage.setItem('lne_after_login', 'skillstream-classrooms.html?join=' + jq); } catch (e) {} }
+    me = await SSAuth.requireAuth();
+    if (!me) return;
+    if (me.role !== 'teacher' && me.role !== 'admin') {
+      const cb = document.querySelector("button[onclick=\"openModal('createModal')\"]");
+      if (cb) {
+        cb.style.display = 'none';
+        const hint = document.createElement('div');
+        hint.className = 'sub';
+        hint.innerHTML = 'Only approved teachers can create classrooms. <a href="skillstream-teach-apply.html">Want to teach? Apply here</a>';
+        cb.parentNode.parentNode.insertBefore(hint, cb.parentNode.nextSibling);
+      }
+    }
+    await renderList();
+    const qp = new URLSearchParams(window.location.search), openId = qp.get('open');
+    const joinCode = qp.get('join');
+    if (joinCode && /^[A-Za-z0-9]{4,12}$/.test(joinCode)) {
+      try { localStorage.removeItem('lne_after_login'); } catch (e) {}
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+      const r = await SSClass.join(joinCode);
+      if (r.ok && r.classroom && r.classroom.id) { await renderList(); await openClass(r.classroom.id); showToast('✅ Joined ' + (r.classroom.name || 'class')); }
+      else showToast(r.error || 'Could not join this class');
+    }
+    if (openId) { try { await openClass(openId); if (qp.get('tab')) switchTab(qp.get('tab')); } catch (e) { console.warn(e); } }
+  } catch (e) {
+    console.error('Page bootstrap error:', e);
+    document.getElementById('teachingList').innerHTML = `<div class="empty" style="color:var(--live);border-color:var(--live)">Error loading page: ${String(e.message).replace(/[&<>"']/g,'')}</div>`;
+  }
+})();
+</script>
+</body>
+</html>
