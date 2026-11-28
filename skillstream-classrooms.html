@@ -166,6 +166,23 @@ html:not([data-theme="dark"]) #tab-recordings .card .btn-primary{background:tran
 #dOnline{display:none!important}
 .class-header{padding:16px}
 </style>
+<style>
+/* class page: real counts and tab tiles */
+.cstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.cstats div{background:#FFFBF2;border:1.5px solid #E7D3B0;border-radius:16px;padding:10px 2px;text-align:center}
+.cstats b{display:block;font-size:22px;font-weight:800;color:#5A3214;line-height:1.2}
+.cstats span{display:block;font-size:11px !important;line-height:1.3;font-weight:600;color:#8a6a4a;overflow-wrap:normal;word-break:normal}
+html[data-theme="dark"] .cstats div{background:#2a1d12;border-color:#4a3420}
+html[data-theme="dark"] .cstats b{color:#F3E6D3}
+.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;border-bottom:0;overflow:visible;margin-bottom:14px}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;white-space:normal;min-width:0;overflow-wrap:normal;word-break:normal;padding:10px 6px;font-size:14.5px;border:1.5px solid #E7D3B0;border-bottom-width:1.5px;border-radius:16px;background:#FFFBF2;color:#5A3214;min-height:84px}
+.tab .ai-ic{width:38px;height:38px;min-width:38px;border-radius:11px;margin:0 !important;flex:0 0 auto}
+.tab .ai-ic svg{width:20px;height:20px}
+.tab.active{border-color:#D4872A;background:#FFF3D6;color:#5A3214;box-shadow:0 4px 12px -6px rgba(138,75,28,.5)}
+.tab:last-child:nth-child(odd){grid-column:1/-1}
+html[data-theme="dark"] .tab{background:#2a1d12;border-color:#4a3420;color:#F3E6D3}
+html[data-theme="dark"] .tab.active{background:#3a2814;border-color:#D4872A}
+</style>
 </head>
 <body>
 <header class="top">
@@ -204,12 +221,17 @@ html:not([data-theme="dark"]) #tab-recordings .card .btn-primary{background:tran
         <button class="btn btn-ghost hidden" type="button" id="liveTell">Tell students</button>
       </div>
     </div>
+    <div class="cstats" id="dStats">
+      <div><b id="stStudents">0</b><span>Students</span></div>
+      <div><b id="stWork">0</b><span>Work</span></div>
+      <div><b id="stQuiz">0</b><span>Quizzes</span></div>
+    </div>
     <div class="tabs">
-      <div class="tab active" data-tab="lessons" onclick="switchTab('recordings')">Lessons</div>
-      <div class="tab" data-tab="work" onclick="switchTab('assignments')">Work</div>
-      <div class="tab" data-tab="chat" onclick="switchTab('chat')">Chat</div>
-      <div class="tab" data-tab="stream" onclick="switchTab('stream')">News</div>
-      <div class="tab hidden" id="tabManage" data-tab="people" onclick="switchTab('people')">Manage</div>
+      <div class="tab active" data-tab="lessons" onclick="switchTab('recordings')"><span data-ic="book"></span>Lessons</div>
+      <div class="tab" data-tab="work" onclick="switchTab('assignments')"><span data-ic="hw"></span>Work</div>
+      <div class="tab" data-tab="chat" onclick="switchTab('chat')"><span data-ic="chat"></span>Chat</div>
+      <div class="tab" data-tab="stream" onclick="switchTab('stream')"><span data-ic="bell"></span>News</div>
+      <div class="tab hidden" id="tabManage" data-tab="people" onclick="switchTab('people')"><span data-ic="gear"></span>Manage</div>
     </div>
     <div class="hidden" id="tabAttBtn"></div>
     <div class="subtabs hidden" id="subTabs">
@@ -559,7 +581,10 @@ async function renderDetail() {
   const teaching = isTeacherOfCurrent(c);
 
   document.getElementById('dName').textContent = c.name;
-  document.getElementById('dMeta').textContent = (c.subject || 'General') + ' · ' + (teaching ? 'You are the teacher' : 'Taught by ' + c.teacherName);
+  document.getElementById('dMeta').innerHTML = '<span data-no-i18n>' + escapeHtml(c.subject || 'General') + '</span> · ' + (teaching ? '<span>You are the mentor</span>' : '<span>Mentored by</span> <span data-no-i18n>' + escapeHtml(c.teacherName) + '</span>');
+  document.getElementById('stStudents').textContent = (c.students || []).length;
+  document.getElementById('stWork').textContent = (c.assignments || []).length;
+  document.getElementById('stQuiz').textContent = (c.quizzes || []).length;
   document.getElementById('dCodeBox').classList.toggle('hidden', !teaching);
   document.getElementById('tabAttBtn').classList.toggle('hidden', !teaching);
   document.getElementById('tabManage').classList.toggle('hidden', !teaching);
