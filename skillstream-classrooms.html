@@ -182,6 +182,17 @@ html[data-theme="dark"] .cstats b{color:#F3E6D3}
 .tab:last-child:nth-child(odd){grid-column:1/-1}
 html[data-theme="dark"] .tab{background:#2a1d12;border-color:#4a3420;color:#F3E6D3}
 html[data-theme="dark"] .tab.active{background:#3a2814;border-color:#D4872A}
+/* learner: my attendance */
+.myatt{background:#FFFBF2;border:1.5px solid #E7D3B0;border-radius:16px;padding:12px;margin:0 0 12px}
+.myatt h4{margin:0 0 8px;font-size:14px;color:#5A3214}
+.myatt .mrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;text-align:center}
+.myatt .mrow div{background:#F8EFE0;border-radius:12px;padding:6px 2px}
+.myatt .mrow b{display:block;font-size:18px;color:#5A3214}
+.myatt .mrow span{font-size:11px !important;color:#8a6a4a;font-weight:600}
+.myatt .mlast{margin-top:8px;font-size:12.5px;color:#8a6a4a;line-height:1.6}
+html[data-theme="dark"] .myatt{background:#2a1d12;border-color:#4a3420}
+html[data-theme="dark"] .myatt h4,html[data-theme="dark"] .myatt .mrow b{color:#F3E6D3}
+html[data-theme="dark"] .myatt .mrow div{background:#3a2814}
 </style>
 </head>
 <body>
@@ -226,6 +237,7 @@ html[data-theme="dark"] .tab.active{background:#3a2814;border-color:#D4872A}
       <div><b id="stWork">0</b><span>Work</span></div>
       <div><b id="stQuiz">0</b><span>Quizzes</span></div>
     </div>
+    <div class="myatt hidden" id="myAtt"></div>
     <div class="tabs">
       <div class="tab active" data-tab="lessons" onclick="switchTab('recordings')"><span data-ic="book"></span>Lessons</div>
       <div class="tab" data-tab="work" onclick="switchTab('assignments')"><span data-ic="hw"></span>Work</div>
@@ -585,6 +597,7 @@ async function renderDetail() {
   document.getElementById('stStudents').textContent = (c.students || []).length;
   document.getElementById('stWork').textContent = (c.assignments || []).length;
   document.getElementById('stQuiz').textContent = (c.quizzes || []).length;
+  loadMyAttendance(c, teaching);
   document.getElementById('dCodeBox').classList.toggle('hidden', !teaching);
   document.getElementById('tabAttBtn').classList.toggle('hidden', !teaching);
   document.getElementById('tabManage').classList.toggle('hidden', !teaching);
@@ -932,6 +945,30 @@ function attLabel(off) {
   const d = new Date(); d.setDate(d.getDate() + off);
   const base = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
   return off === 0 ? base : base;
+}
+async function loadMyAttendance(c, teaching) {
+  const box = document.getElementById('myAtt');
+  box.classList.add('hidden'); box.textContent = '';
+  if (teaching) return;
+  try {
+    const ses = await SSAuth.client.auth.getSession();
+    const uid = ses.data && ses.data.session && ses.data.session.user.id; if (!uid) return;
+    const r = await SSAuth.client.from('class_attendance').select('day,status').eq('classroom_id', c.id).eq('student_id', uid).gte('day', attIso(-60)).order('day', { ascending: false });
+    const rows = (r && r.data) || [];
+    if (r.error || !rows.length) return; // nothing marked yet: show nothing
+    const t = (x) => (window.LNE_I18N && LNE_I18N.t) ? LNE_I18N.t(x) : x;
+    const cnt = { present: 0, late: 0, absent: 0, excused: 0 };
+    rows.forEach(x => { if (cnt[x.status] !== undefined) cnt[x.status]++; });
+    const h = document.createElement('h4'); h.textContent = 'My attendance'; box.appendChild(h);
+    const g = document.createElement('div'); g.className = 'mrow';
+    ATT_STATUS.forEach(a => { const d = document.createElement('div'); const b = document.createElement('b'); b.textContent = cnt[a[0]]; const sp = document.createElement('span'); sp.textContent = a[1]; d.appendChild(b); d.appendChild(sp); g.appendChild(d); });
+    box.appendChild(g);
+    const l = document.createElement('div'); l.className = 'mlast'; l.setAttribute('data-no-i18n', '');
+    const lab = {}; ATT_STATUS.forEach(a => { lab[a[0]] = t(a[1]); });
+    l.textContent = rows.slice(0, 5).map(x => new Date(x.day + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ': ' + (lab[x.status] || x.status)).join(' · ');
+    box.appendChild(l);
+    box.classList.remove('hidden');
+  } catch (e) { /* attendance is optional: hide on any problem */ }
 }
 async function renderAttendance() {
   const c = currentClassroom; if (!c || !isTeacherOfCurrent(c)) return;
